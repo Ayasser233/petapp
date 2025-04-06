@@ -18,7 +18,7 @@ class elevatedButtonTheme{
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      textStyle: AppStyles.bodyMedBlack
+      textStyle: AppStyles.lightTextTheme.bodyMedium
     ),
     );
 
@@ -35,7 +35,7 @@ class elevatedButtonTheme{
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      textStyle: AppStyles.bodyMedBlack
+      textStyle: AppStyles.darkTextTheme.bodyMedium
     ),
     );
 }

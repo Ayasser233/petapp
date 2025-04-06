@@ -1,9 +1,10 @@
 import 'Package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:petapp/core/utils/app_colors.dart';
-import 'package:petapp/core/utils/app_style.dart';
 import 'package:petapp/core/utils/constants.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-
+import 'package:petapp/core/utils/helper_functions.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
 
@@ -12,77 +13,147 @@ class OnboardingScreen extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16.0),
-                child: SvgPicture.asset(
-                  Constants.onboardingImage3,
-                  fit: BoxFit.cover,
-                  width: double.infinity, // Full width
-                  height: 300,
-                ),
-              )),
-          Positioned(
-              top: 200, // Adjust position
-              left: 0,
-              right: 0,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(30),
-                    topRight: Radius.circular(30),
-                  ),
-                ),
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min, // Prevent overflow
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      children: [
-                        Icon(
-                          Icons.pets,
-                          size: 50,
-                          color: AppColors.orange,
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Welcome to PetApp',
-                          style: AppStyles.headlineMedBlack,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 10),
-                        const Text(
-                          'Your one-stop solution for all your pet needs.',
-                          style: AppStyles.bodyMedBlack,
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(
-                            3,
-                            (index) => Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 4),
-                              width: index == 1 ? 12 : 8,
-                              height: index == 1 ? 12 : 8,
-                              decoration: BoxDecoration(
-                                color: index == 0
-                                    ? AppColors.orange
-                                    : AppColors.lightblack,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(),
-                  ],
-                ),
-              ))
+          PageView(
+            children: const [
+              OnBoardingPage(
+                  image: Constants.onboardingImage1,
+                  title: 'Find Your Pet',
+                  subtitle:
+                      'Find your perfect pet match with our advanced search and filter options.'),
+              OnBoardingPage(
+                  image: Constants.onboardingImage2,
+                  title: 'Adopt a Pet',
+                  subtitle: 'Adopt a pet and give them a loving home.'),
+              OnBoardingPage(
+                  image: Constants.onboardingImage3,
+                  title: 'Pet Care',
+                  subtitle:
+                      'Get tips and advice on how to care for your new pet.'),
+            ],
+          ),
+
+          // Skip button
+          const OnBoardingSkip(),
+
+          // Dots navigation Smooth Page Indicator
+          const OnBoardingDots(),
+
+          // Next Circular button
+          const OnBoardingBtn(),
+        ],
+      ),
+    );
+  }
+}
+
+class OnBoardingBtn extends StatelessWidget {
+  const OnBoardingBtn({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = THelperFunctions.isDarkMode(context);
+    return Positioned(
+      bottom: kBottomNavigationBarHeight,
+      right: 24,
+      child: ElevatedButton(
+        onPressed: () {
+          // Navigate to the next screen
+        },
+        style: ElevatedButton.styleFrom(
+          shape: const CircleBorder(),
+          backgroundColor: dark ? AppColors.orange : AppColors.black,
+        ),
+        child: const Icon(Iconsax.arrow_right_3), // Arrow icon
+      ),
+    );
+  }
+}
+
+class OnBoardingDots extends StatelessWidget {
+  const OnBoardingDots({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = THelperFunctions.isDarkMode(context);
+    return Positioned(
+     
+      bottom: kBottomNavigationBarHeight + 20 ,
+      left: 24,
+      child: SmoothPageIndicator(
+        controller: PageController(),
+        count: 3,
+        effect: ExpandingDotsEffect(
+          dotHeight: 6,
+          activeDotColor: dark ? AppColors.white : AppColors.black,
+        ),
+      ),
+    );
+  }
+}
+
+class OnBoardingSkip extends StatelessWidget {
+  const OnBoardingSkip({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: kTextTabBarHeight,
+      right: 24,
+      child: TextButton(
+        onPressed: () {
+          // Navigate to the next screen
+        },
+        style: TextButton.styleFrom(
+          foregroundColor: THelperFunctions.isDarkMode(context)
+              ? AppColors.white
+              : AppColors.black,
+        ),
+        child: const Text(
+          'Skip',
+        ),
+      ),
+    );
+  }
+}
+
+class OnBoardingPage extends StatelessWidget {
+  const OnBoardingPage({
+    super.key,
+    required this.image,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String image, title, subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          SvgPicture.asset(
+            image,
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.height * 0.6,
+          ),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headlineMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
