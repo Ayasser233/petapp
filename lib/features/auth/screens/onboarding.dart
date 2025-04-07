@@ -1,3 +1,5 @@
+import 'package:get/get.dart';
+import '../controllers.onboarding/controllers.onboarding.dart';
 import 'Package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:petapp/core/utils/app_colors.dart';
@@ -10,10 +12,14 @@ class OnboardingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(OnboardingController());
+
     return Scaffold(
       body: Stack(
         children: [
           PageView(
+            controller: controller.pageController,
+            onPageChanged: controller.updatePage,
             children: const [
               OnBoardingPage(
                   image: Constants.onboardingImage1,
@@ -58,9 +64,7 @@ class OnBoardingBtn extends StatelessWidget {
       bottom: kBottomNavigationBarHeight,
       right: 24,
       child: ElevatedButton(
-        onPressed: () {
-          // Navigate to the next screen
-        },
+        onPressed: () => OnboardingController.instance.nextOnboarding(),
         style: ElevatedButton.styleFrom(
           shape: const CircleBorder(),
           backgroundColor: dark ? AppColors.orange : AppColors.black,
@@ -78,14 +82,16 @@ class OnBoardingDots extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = OnboardingController.instance;
     final dark = THelperFunctions.isDarkMode(context);
     return Positioned(
      
       bottom: kBottomNavigationBarHeight + 20 ,
       left: 24,
       child: SmoothPageIndicator(
-        controller: PageController(),
         count: 3,
+        controller: controller.pageController,
+        onDotClicked: controller.doNavigationClick,
         effect: ExpandingDotsEffect(
           dotHeight: 6,
           activeDotColor: dark ? AppColors.white : AppColors.black,
@@ -106,9 +112,7 @@ class OnBoardingSkip extends StatelessWidget {
       top: kTextTabBarHeight,
       right: 24,
       child: TextButton(
-        onPressed: () {
-          // Navigate to the next screen
-        },
+        onPressed: () => OnboardingController.instance.skipOnboarding(),
         style: TextButton.styleFrom(
           foregroundColor: THelperFunctions.isDarkMode(context)
               ? AppColors.white
