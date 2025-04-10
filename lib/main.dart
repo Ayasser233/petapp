@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/themes/app_theme.dart';
-import 'package:petapp/features/auth/screens/onboarding.dart';
+import 'package:petapp/features/auth/screens/login/login.dart';
+// import 'package:petapp/features/auth/screens/onboarding/onboarding.dart';
 
 void main() {
   runApp(const MyApp());
@@ -19,7 +20,7 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      home: const OnboardingScreen(),
+      home: const LoginScreen(),
     );
   }
 }

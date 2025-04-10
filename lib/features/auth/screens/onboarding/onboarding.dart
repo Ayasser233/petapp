@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import '../controllers.onboarding/controllers.onboarding.dart';
+import '../../controllers.onboarding/controllers.onboarding.dart';
 import 'Package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:petapp/core/utils/app_colors.dart';
