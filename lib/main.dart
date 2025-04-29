@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/themes/app_theme.dart';
-import 'package:petapp/features/auth/screens/login/login.dart';
-// import 'package:petapp/features/auth/screens/onboarding/onboarding.dart';
+import 'package:petapp/core/routes/routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+  final isOnboardingCompleted = prefs.getBool('isOnboardingCompleted') ?? false;
+  runApp(MyApp(initialRoute: isOnboardingCompleted ? AppRoutes.signUp : AppRoutes.onboarding));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final String initialRoute;
+  const MyApp({required this.initialRoute, super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -20,7 +24,8 @@ class MyApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      home: const LoginScreen(),
+      initialRoute: initialRoute, // Set the initial route
+      getPages: AppRoutes.getPages, // Use the centralized routes
     );
   }
 }

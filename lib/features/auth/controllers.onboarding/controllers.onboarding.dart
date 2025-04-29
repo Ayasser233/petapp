@@ -1,36 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:petapp/core/routes/routes.dart';
 
 class OnboardingController extends GetxController {
   static OnboardingController get instance => Get.find();
 
   final pageController = PageController();
-  // Define any properties or methods needed for the onboarding process
   Rx<int> currentPage = 0.obs;
 
-  void updatePage(index) => currentPage.value = index;
+  // Update the current page index
+  void updatePage(int index) => currentPage.value = index;
 
-  void doNavigationClick(index) {
-   currentPage.value = index;
-    pageController.animateToPage(index,
-        duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
+  // Navigate to a specific page when a dot is clicked
+  void doNavigationClick(int index) {
+    currentPage.value = index;
+    pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeIn,
+    );
   }
 
+  // Skip to the last page
   void skipOnboarding() {
-    // Logic to skip onboarding
-    // For example, navigate to the home screen or set a flag in shared preferences
     currentPage.value = 2; // Assuming the last page is at index 2
-    pageController.jumpToPage(2); // Replace with your home screen route
+    pageController.jumpToPage(2);
   }
 
+  // Navigate to the next page
   void nextOnboarding() {
-    // Logic to navigate to the next page
-    if (currentPage.value == 2) {
-      // Get.to(LoginScreen());
+    if (isLastPage) {
+      // Logic to complete onboarding (e.g., navigate to the next screen)
+      Get.toNamed(AppRoutes.signUp); // Uncomment and replace with your route
     } else {
       currentPage.value++;
       pageController.nextPage(
         duration: const Duration(milliseconds: 300), curve: Curves.easeIn);
     }
   }
+  // Check if the current page is the last page
+  bool get isLastPage => currentPage.value == 2; // Assuming there are 3 pages
 }

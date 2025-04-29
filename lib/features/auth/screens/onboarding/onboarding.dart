@@ -1,14 +1,30 @@
 import 'package:get/get.dart';
+import 'package:petapp/core/routes/routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../controllers.onboarding/controllers.onboarding.dart';
-import 'Package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/constants.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
+
+  Future<void> _setOnboardingCompleted() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isOnboardingCompleted', true);
+
+    // Navigate to the signup or home screen based on login status
+    final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
+    if (isLoggedIn) {
+      Get.offAllNamed(AppRoutes.chooseLocation); // Navigate to home or location screen
+    } else {
+      Get.offAllNamed(AppRoutes.signUp); // Navigate to signup screen
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,30 +38,33 @@ class OnboardingScreen extends StatelessWidget {
             onPageChanged: controller.updatePage,
             children: const [
               OnBoardingPage(
-                  image: Constants.onboardingImage1,
-                  title: 'Find Your Pet',
-                  subtitle:
-                      'Find your perfect pet match with our advanced search and filter options.'),
+                image: Constants.onboardingImage1,
+                title: 'Find Your Pet',
+                subtitle:
+                    'Find your perfect pet match with our advanced search and filter options.',
+              ),
               OnBoardingPage(
-                  image: Constants.onboardingImage2,
-                  title: 'Adopt a Pet',
-                  subtitle: 'Adopt a pet and give them a loving home.'),
+                image: Constants.onboardingImage2,
+                title: 'Adopt a Pet',
+                subtitle: 'Adopt a pet and give them a loving home.',
+              ),
               OnBoardingPage(
-                  image: Constants.onboardingImage3,
-                  title: 'Pet Care',
-                  subtitle:
-                      'Get tips and advice on how to care for your new pet.'),
+                image: Constants.onboardingImage3,
+                title: 'Pet Care',
+                subtitle:
+                    'Get tips and advice on how to care for your new pet.',
+              ),
             ],
           ),
 
           // Skip button
-          const OnBoardingSkip(),
+          OnBoardingSkip(onComplete: _setOnboardingCompleted),
 
           // Dots navigation Smooth Page Indicator
           const OnBoardingDots(),
 
           // Next Circular button
-          const OnBoardingBtn(),
+          OnBoardingBtn(onComplete: _setOnboardingCompleted),
         ],
       ),
     );
@@ -53,8 +72,11 @@ class OnboardingScreen extends StatelessWidget {
 }
 
 class OnBoardingBtn extends StatelessWidget {
+  final VoidCallback onComplete;
+
   const OnBoardingBtn({
     super.key,
+    required this.onComplete,
   });
 
   @override
@@ -64,7 +86,13 @@ class OnBoardingBtn extends StatelessWidget {
       bottom: kBottomNavigationBarHeight,
       right: 24,
       child: ElevatedButton(
-        onPressed: () => OnboardingController.instance.nextOnboarding(),
+        onPressed: () {
+          if (OnboardingController.instance.isLastPage) {
+            onComplete(); // Complete onboarding
+          } else {
+            OnboardingController.instance.nextOnboarding();
+          }
+        },
         style: ElevatedButton.styleFrom(
           shape: const CircleBorder(),
           backgroundColor: dark ? AppColors.orange : AppColors.black,
@@ -85,8 +113,7 @@ class OnBoardingDots extends StatelessWidget {
     final controller = OnboardingController.instance;
     final dark = THelperFunctions.isDarkMode(context);
     return Positioned(
-     
-      bottom: kBottomNavigationBarHeight + 20 ,
+      bottom: kBottomNavigationBarHeight + 20,
       left: 24,
       child: SmoothPageIndicator(
         count: 3,
@@ -102,8 +129,11 @@ class OnBoardingDots extends StatelessWidget {
 }
 
 class OnBoardingSkip extends StatelessWidget {
+  final VoidCallback onComplete;
+
   const OnBoardingSkip({
     super.key,
+    required this.onComplete,
   });
 
   @override
@@ -112,7 +142,7 @@ class OnBoardingSkip extends StatelessWidget {
       top: kTextTabBarHeight,
       right: 24,
       child: TextButton(
-        onPressed: () => OnboardingController.instance.skipOnboarding(),
+        onPressed: onComplete, // Complete onboarding
         style: TextButton.styleFrom(
           foregroundColor: THelperFunctions.isDarkMode(context)
               ? AppColors.white
@@ -163,3 +193,6 @@ class OnBoardingPage extends StatelessWidget {
     );
   }
 }
+
+
+
