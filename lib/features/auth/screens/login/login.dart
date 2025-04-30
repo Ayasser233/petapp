@@ -4,6 +4,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/routes/routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -179,10 +180,76 @@ class DividerForm extends StatelessWidget {
   }
 }
 
-class LoginForm extends StatelessWidget {
-  const LoginForm({
-    super.key,
-  });
+class LoginForm extends StatefulWidget {
+  const LoginForm({super.key});
+
+  @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _rememberMe = false;
+  bool _obscurePassword = true;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  // Handle sign in logic
+  void _handleSignIn() async {
+    // Basic validation
+    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Please enter both email and password',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+      return;
+    }
+
+    // Show loading indicator
+    Get.dialog(
+      const Center(child: CircularProgressIndicator()),
+      barrierDismissible: false,
+    );
+
+    try {
+      // Simulate API call delay
+      await Future.delayed(const Duration(seconds: 2));
+      
+      // Mock successful login
+      // In a real app, you'd make an API call to your backend here
+      
+      // Save login state
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+      
+      // Close loading dialog
+      Get.back();
+      
+      // Navigate to home screen
+      Get.offAllNamed(AppRoutes.home);
+    } catch (e) {
+      // Close loading dialog
+      Get.back();
+      
+      // Show error message
+      Get.snackbar(
+        'Error',
+        'Failed to sign in: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -192,28 +259,37 @@ class LoginForm extends StatelessWidget {
         child: Column(
           children: [
             TextFormField(
+              controller: _emailController,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Iconsax.user),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
-                  onPressed: () {},
+                  onPressed: () => _emailController.clear(),
                 ),
                 hintText: 'Enter your email',
                 border: const OutlineInputBorder(),
               ),
+              keyboardType: TextInputType.emailAddress,
             ),
             const SizedBox(height: 16.0),
             TextFormField(
+              controller: _passwordController,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Iconsax.lock),
                 suffixIcon: IconButton(
-                  icon: const Icon(Iconsax.eye_slash),
-                  onPressed: () {},
+                  icon: Icon(
+                    _obscurePassword ? Iconsax.eye_slash : Iconsax.eye,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
                 ),
                 hintText: 'Enter your password',
                 border: const OutlineInputBorder(),
               ),
-              obscureText: true,
+              obscureText: _obscurePassword,
             ),
             const SizedBox(height: 8),
             Row(
@@ -223,8 +299,12 @@ class LoginForm extends StatelessWidget {
                 Row(
                   children: [
                     Checkbox(
-                      value: true,
-                      onChanged: (value) {},
+                      value: _rememberMe,
+                      onChanged: (value) {
+                        setState(() {
+                          _rememberMe = value ?? true;
+                        });
+                      },
                     ),
                     const Text('Remember me'),
                   ],
@@ -244,9 +324,7 @@ class LoginForm extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Handle Sign In Logic
-                },
+                onPressed: _handleSignIn,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   shape: RoundedRectangleBorder(
