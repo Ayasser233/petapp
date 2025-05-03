@@ -240,7 +240,7 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '${selectedCount} ${selectedCount == 1 ? 'Service' : 'Services'}',
+                      '$selectedCount ${selectedCount == 1 ? 'Service' : 'Services'}',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],

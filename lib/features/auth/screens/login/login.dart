@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:petapp/core/styles/input_styles.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/routes/routes.dart';
@@ -67,7 +68,7 @@ class SignUpText extends StatelessWidget {
             },
             child: Text(
               signUpText,
-              style: const TextStyle(
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppColors.orange,
                 fontWeight: FontWeight.bold,
               ),
@@ -107,8 +108,10 @@ class SocialBtns extends StatelessWidget {
                 Image.asset('assets/icons/google.png',
                     width: 20, height: 20),
                 const SizedBox(width: 8),
-                Text('Sign in with Google',
-                    style: Theme.of(context).textTheme.bodyLarge),
+                Text(
+                  'Sign in with Google',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ],
             ),
           ),
@@ -135,8 +138,10 @@ class SocialBtns extends StatelessWidget {
                         ? Colors.white
                         : Colors.black),
                 const SizedBox(width: 8),
-                Text('Sign in with Apple',
-                    style: Theme.of(context).textTheme.bodyLarge),
+                Text(
+                  'Sign in with Apple',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ],
             ),
           ),
@@ -167,7 +172,7 @@ class DividerForm extends StatelessWidget {
           indent: 60,
           endIndent: 5,
         )),
-        Text('Or continue with', style: Theme.of(context).textTheme.bodySmall),
+        Text(dividerText, style: Theme.of(context).textTheme.bodySmall),
         Flexible(
             child: Divider(
           color: dark ? AppColors.lightblack : Colors.grey,
@@ -216,7 +221,7 @@ class _LoginFormState extends State<LoginForm> {
 
     // Show loading indicator
     Get.dialog(
-      const Center(child: CircularProgressIndicator()),
+      const Center(child: CircularProgressIndicator(color: AppColors.orange)),
       barrierDismissible: false,
     );
 
@@ -253,6 +258,8 @@ class _LoginFormState extends State<LoginForm> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = THelperFunctions.isDarkMode(context);
+    
     return Form(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -261,24 +268,39 @@ class _LoginFormState extends State<LoginForm> {
             TextFormField(
               controller: _emailController,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Iconsax.user),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () => _emailController.clear(),
-                ),
+                prefixIcon: const Icon(Iconsax.user, color: AppColors.orange),
+                suffixIcon: _emailController.text.isNotEmpty 
+                  ? IconButton(
+                      icon: const Icon(Icons.clear, color: Colors.grey),
+                      onPressed: () => setState(() => _emailController.clear()),
+                    )
+                  : null,
                 hintText: 'Enter your email',
-                border: const OutlineInputBorder(),
+                hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[400],
+                ),
+                filled: true,
+                fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: focusedFieldStyle(),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               ),
               keyboardType: TextInputType.emailAddress,
+              style: Theme.of(context).textTheme.bodyMedium,
+              onChanged: (value) => setState(() {}),
             ),
             const SizedBox(height: 16.0),
             TextFormField(
               controller: _passwordController,
               decoration: InputDecoration(
-                prefixIcon: const Icon(Iconsax.lock),
+                prefixIcon: const Icon(Iconsax.lock, color: AppColors.orange),
                 suffixIcon: IconButton(
                   icon: Icon(
                     _obscurePassword ? Iconsax.eye_slash : Iconsax.eye,
+                    color: Colors.grey,
                   ),
                   onPressed: () {
                     setState(() {
@@ -287,9 +309,20 @@ class _LoginFormState extends State<LoginForm> {
                   },
                 ),
                 hintText: 'Enter your password',
-                border: const OutlineInputBorder(),
+                hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[400],
+                ),
+                filled: true,
+                fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: focusedFieldStyle(),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               ),
               obscureText: _obscurePassword,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 8),
             Row(
@@ -298,15 +331,41 @@ class _LoginFormState extends State<LoginForm> {
                 // remember me checkbox
                 Row(
                   children: [
-                    Checkbox(
-                      value: _rememberMe,
-                      onChanged: (value) {
-                        setState(() {
-                          _rememberMe = value ?? true;
-                        });
-                      },
+                    Theme(
+                      data: Theme.of(context).copyWith(
+                        checkboxTheme: CheckboxThemeData(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          fillColor: MaterialStateProperty.resolveWith<Color>(
+                            (Set<MaterialState> states) {
+                              if (states.contains(MaterialState.selected)) {
+                                return AppColors.orange;
+                              }
+                              return Colors.transparent;
+                            },
+                          ),
+                        ),
+                      ),
+                      child: Checkbox(
+                        value: _rememberMe,
+                        onChanged: (value) {
+                          setState(() {
+                            _rememberMe = value ?? true;
+                          });
+                        },
+                        side: BorderSide(
+                          color: isDark ? Colors.grey : Colors.grey.shade400,
+                          width: 1.5,
+                        ),
+                      ),
                     ),
-                    const Text('Remember me'),
+                    Text(
+                      'Remember me',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: isDark ? Colors.grey[300] : Colors.grey[700],
+                      ),
+                    ),
                   ],
                 ),
                 // forgot password text
@@ -315,7 +374,16 @@ class _LoginFormState extends State<LoginForm> {
                     // Navigate to Forgot Password Screen
                     Get.toNamed(AppRoutes.forgotPassword);
                   },
-                  child: const Text('Forgot Password?'),
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.orange,
+                  ),
+                  child: Text(
+                    'Forgot Password?',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.orange,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -327,11 +395,20 @@ class _LoginFormState extends State<LoginForm> {
                 onPressed: _handleSignIn,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  backgroundColor: AppColors.orange,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  'Sign In',
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                child: const Text('Sign In', style: TextStyle(fontSize: 16.0)),
               ),
             ),
           ],

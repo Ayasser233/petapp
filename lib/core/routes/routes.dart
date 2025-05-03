@@ -11,6 +11,10 @@ import 'package:petapp/features/location/screens/set_location.dart';
 import 'package:petapp/features/home/screens/home_screen.dart';
 import 'package:petapp/features/home/screens/clinic_detail_screen.dart';
 import 'package:petapp/features/home/screens/service_selection_screen.dart';
+import 'package:petapp/features/home/screens/activity_screen.dart';
+import 'package:petapp/features/home/screens/profile_screen.dart';
+import 'package:petapp/features/pets/3d_pet.dart';
+
 
 class AppRoutes {
   static const String onboarding = '/onboarding';
@@ -26,6 +30,10 @@ class AppRoutes {
   static const String clinicDetail = '/clinic-detail';
   static const String serviceSelection = '/service-selection';
   static const String checkout = '/checkout';
+  static const String activity = '/activity';
+  static const String profile = '/profile';
+  static const String pet3d = '/pet-3d-representation'; // Add this line for the 3D pet screen
+  
 
   static List<GetPage> getPages = [
     GetPage(name: onboarding, page: () => const OnboardingScreen()),
@@ -38,13 +46,11 @@ class AppRoutes {
     GetPage(name: chooseLocation, page: () => const ChooseLocationScreen()),
     GetPage(name: setLocation, page: () => const SetLocationScreen()),
     GetPage(name: home, page: () => const HomeScreen()),
-    GetPage(
-      name: clinicDetail, 
-      page: () => ClinicDetailScreen(clinic: Get.arguments),
-    ),
-    GetPage(
-      name: serviceSelection, 
-      page: () => ServiceSelectionScreen(arguments: Get.arguments),
-    ),
+    GetPage(name: clinicDetail, page: () => ClinicDetailScreen(clinic: Get.arguments)),
+    GetPage(name: serviceSelection, page: () => ServiceSelectionScreen(arguments: Get.arguments)),
+    // GetPage(name: checkout, page: () => const CheckoutScreen()),
+    GetPage(name: activity, page: () => const ActivityScreen()),
+    GetPage(name: profile, page: () => const ProfileScreen()),
+    GetPage(name: pet3d, page: () => const Pet3DRepresentationScreen()), // Add this line for the 3D pet screen
   ];
 }

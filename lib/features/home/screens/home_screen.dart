@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
+import 'package:petapp/core/screens/base_screen.dart';
+import 'package:petapp/core/utils/constants.dart';
 import 'package:petapp/features/home/models/clinic_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,7 +23,8 @@ class _HomeScreenState extends State<HomeScreen> {
       location: 'Los Angeles, CA',
       distance: '15 minutes',
       image: 'assets/images/pet_hospital.jpg',
-      description: 'Banfield Pet Hospital is a network of specialized animal hospitals that offer emergency and specialist services. They focus on the care of pets that require specialized medical attention.',
+      description:
+          'Banfield Pet Hospital is a network of specialized animal hospitals that offer emergency and specialist services. They focus on the care of pets that require specialized medical attention.',
       rating: 4.8,
       reviews: 324,
       patients: 709,
@@ -34,7 +37,8 @@ class _HomeScreenState extends State<HomeScreen> {
       location: 'Brooklyn, NY',
       distance: '20 minutes',
       image: 'assets/images/pet_hospital2.jpg',
-      description: 'VCA Animal Hospital provides a full range of general medical and surgical services as well as specialized treatments for companion animals.',
+      description:
+          'VCA Animal Hospital provides a full range of general medical and surgical services as well as specialized treatments for companion animals.',
       rating: 4.6,
       reviews: 287,
       patients: 583,
@@ -47,7 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
       location: 'Healdsburg, CA',
       distance: '11 minutes',
       image: 'assets/images/pet_hospital3.jpg',
-      description: 'BluePearl Pet Hospital is a network of specialized animal hospitals that offer emergency and specialist services. They focus on the care of pets that require specialized medical attention.',
+      description:
+          'BluePearl Pet Hospital is a network of specialized animal hospitals that offer emergency and specialist services. They focus on the care of pets that require specialized medical attention.',
       rating: 4.7,
       reviews: 127,
       patients: 709,
@@ -63,19 +68,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _navigateToServicesByCategory(String category) {
-    // You could navigate to a category-specific screen
-    // or just use the first clinic with this category
-    final clinicsInCategory = nearbyClinics.where(
-      (clinic) => clinic.category.toLowerCase().contains(category.toLowerCase())
-    ).toList();
-    
+    final clinicsInCategory = nearbyClinics
+        .where((clinic) =>
+            clinic.category.toLowerCase().contains(category.toLowerCase()))
+        .toList();
+
     if (clinicsInCategory.isNotEmpty) {
       Get.toNamed(
         AppRoutes.clinicDetail,
         arguments: clinicsInCategory.first.toMap(),
       );
     } else {
-      // If no clinics match the category, use the first one
       Get.toNamed(
         AppRoutes.clinicDetail,
         arguments: nearbyClinics.first.toMap(),
@@ -85,209 +88,271 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BaseScreen(
+      navBarIndex: 0,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Top greeting and notification section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Hi, Aaron ',
-                        style: Theme.of(context).textTheme.titleLarge,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top logo and notification section
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Light secondary logo
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: Image.asset(
+                        Constants.mainlogoLight, // Added file extension
+                        height:100,
+                        width:100,
+                        fit: BoxFit.contain,
                       ),
-                      const Text('👋'),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.notifications_outlined),
+                      onPressed: () {
+                        // Handle notification tap
+                      },
+                    ),
+                  ],
+                ),
+                // const SizedBox(height: 16), // Spacing after the logo
+                // Featured Services Row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    _buildServiceItem(context, 'Clinic Visit',
+                        Icons.medical_services_outlined,
+                        onTap: () => _navigateToServicesByCategory('Hospital')),
+                    _buildServiceItem(
+                        context, '3D Animal View', Icons.threed_rotation,
+                        onTap: () => Get.toNamed(AppRoutes.pet3d)),
+                    _buildServiceItem(
+                        context, 'Virtual Vet', Icons.videocam_outlined,
+                        onTap: () =>
+                            _navigateToServicesByCategory('Consultation')),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+
+                // Search bar
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search here',
+                      prefixIcon: Icon(Icons.search),
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Redeem & Save section (replacing Categories)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Redeem & Save',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Rewards & Points card
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 12), // Reduced vertical padding
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [AppColors.orange, Color(0xFFF5A623)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.orange.withOpacity(0.3),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
                     ],
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.notifications_outlined),
-                    onPressed: () {
-                      // Handle notification tap
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              
-              // Welcome text
-              Text(
-                'Welcome to our\nhappy pet\'s family',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 24),
-              
-              // Search bar
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search here',
-                    prefixIcon: Icon(Icons.search),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(vertical: 12),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              
-              // Categories section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Categories',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                  child: Row(
+                    children: [
+                      // Points section
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.white,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(Icons.stars_rounded,
+                                      color: AppColors.orange, size: 24),
+                                ),
+                                const SizedBox(width: 12),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '3,540',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineSmall
+                                          ?.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                    const Text(
+                                      'Points Available',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            ElevatedButton(
+                              onPressed: () {
+                                // Navigate to redeem points screen
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: AppColors.orange,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: const Text('Redeem Now'),
+                            ),
+                          ],
                         ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // Handle See All tap
-                    },
-                    child: const Text(
-                      'See All',
-                      style: TextStyle(color: AppColors.orange),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              
-              // Categories row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildCategoryItem(
-                    context, 
-                    'Grooming', 
-                    Icons.content_cut, 
-                    onTap: () => _navigateToServicesByCategory('Grooming')
-                  ),
-                  _buildCategoryItem(
-                    context, 
-                    'Pet Hotel', 
-                    Icons.home,
-                    onTap: () => _navigateToServicesByCategory('Pet Hotel')
-                  ),
-                  _buildCategoryItem(
-                    context, 
-                    'Consultation', 
-                    Icons.chat_bubble_outline,
-                    onTap: () => _navigateToServicesByCategory('Consultation')
-                  ),
-                  _buildCategoryItem(
-                    context, 
-                    'Other', 
-                    Icons.more_horiz,
-                    onTap: () => _navigateToServicesByCategory('Hospital')
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              
-              // Near You section
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Near You',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      // Handle See All tap
-                    },
-                    child: const Text(
-                      'See All',
-                      style: TextStyle(color: AppColors.orange),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              
-              // Near You cards
-              Expanded(
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: nearbyClinics.length,
-                  itemBuilder: (context, index) {
-                    final clinic = nearbyClinics[index];
-                    return Padding(
-                      padding: EdgeInsets.only(
-                        right: index == nearbyClinics.length - 1 ? 0 : 16.0,
                       ),
-                      child: _buildNearbyCard(
-                        context,
-                        clinic: clinic,
-                        onTap: () => _navigateToClinicDetail(clinic),
+                      Container(
+                        height: 100,
+                        width: 1,
+                        color: Colors.white.withOpacity(0.3),
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
                       ),
-                    );
-                  }
+                      // Vouchers section
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                                Icons.confirmation_number_outlined,
+                                color: AppColors.orange,
+                                size: 24),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            '4',
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const Text(
+                            'Vouchers',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 24),
+
+                // Near You section
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Near You',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Handle See All tap
+                      },
+                      child: const Text(
+                        'See All',
+                        style: TextStyle(color: AppColors.orange),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Near You cards - replace the Expanded with a fixed height Container
+                SizedBox(
+                  height: 200, // Fixed height instead of Expanded
+                  child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: nearbyClinics.length,
+                      itemBuilder: (context, index) {
+                        final clinic = nearbyClinics[index];
+                        return Padding(
+                          padding: EdgeInsets.only(
+                            right: index == nearbyClinics.length - 1 ? 0 : 16.0,
+                          ),
+                          child: _buildNearbyCard(
+                            context,
+                            clinic: clinic,
+                            onTap: () => _navigateToClinicDetail(clinic),
+                          ),
+                        );
+                      }),
+                ),
+                // Add some bottom padding
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        type: BottomNavigationBarType.fixed,
-        items: [
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Explore',
-          ),
-          BottomNavigationBarItem(
-            icon: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: const BoxDecoration(
-                color: AppColors.orange,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(Icons.pets, color: Colors.white),
-            ),
-            label: '',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_border),
-            activeIcon: Icon(Icons.favorite),
-            label: 'Favorite',
-          ),
-          const BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Account',
-          ),
-        ],
       ),
     );
   }
 
-  Widget _buildCategoryItem(
-    BuildContext context, 
-    String title, 
-    IconData icon,
-    {VoidCallback? onTap}
-  ) {
+  Widget _buildServiceItem(BuildContext context, String title, IconData icon,
+      {VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -295,19 +360,22 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.grey[100],
+              color: AppColors.orange.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
               color: AppColors.orange,
-              size: 20,
+              size: 24,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             title,
-            style: Theme.of(context).textTheme.bodySmall,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  fontWeight: FontWeight.w500,
+                ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -322,7 +390,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 200,
+        width: 180, // Slightly smaller width
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           color: Colors.white,
@@ -348,13 +416,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Image.asset(
                     clinic.image,
                     width: double.infinity,
-                    height: 120,
+                    height: 100, // Reduced height
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        height: 120,
+                        height: 100, // Reduced height
                         color: Colors.grey[300],
-                        child: const Center(child: Icon(Icons.image_not_supported)),
+                        child: const Center(
+                            child: Icon(Icons.image_not_supported)),
                       );
                     },
                   ),
@@ -363,7 +432,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   top: 8,
                   right: 8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.6),
                       borderRadius: BorderRadius.circular(16),
@@ -427,9 +497,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: Text(
                           clinic.location,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.grey,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey,
+                                  ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
