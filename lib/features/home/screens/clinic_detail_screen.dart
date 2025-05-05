@@ -154,13 +154,24 @@ class ClinicDetailScreen extends StatelessWidget {
           height: 56,
           child: ElevatedButton(
             onPressed: () {
-              Get.toNamed(
-                AppRoutes.serviceSelection,
-                arguments: {
-                  'clinic': clinic,
-                  'category': 'Grooming', // Default category
-                },
-              );
+              // If the category is Hospital, navigate to hospital booking
+              if (clinic['category'] == 'Hospital') {
+                Get.toNamed(
+                  AppRoutes.hospitalBooking,
+                  arguments: {
+                    'clinic': clinic,
+                  },
+                );
+              } else {
+                // For other categories, navigate to service selection
+                Get.toNamed(
+                  AppRoutes.serviceSelection,
+                  arguments: {
+                    'clinic': clinic,
+                    'category': 'Grooming', // Default category
+                  },
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.orange,

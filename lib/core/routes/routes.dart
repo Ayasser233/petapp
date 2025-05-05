@@ -14,6 +14,7 @@ import 'package:petapp/features/home/screens/service_selection_screen.dart';
 import 'package:petapp/features/home/screens/activity_screen.dart';
 import 'package:petapp/features/home/screens/profile_screen.dart';
 import 'package:petapp/features/pets/3d_pet.dart';
+import 'package:petapp/features/home/screens/hospital_booking_screen.dart';
 
 
 class AppRoutes {
@@ -33,24 +34,25 @@ class AppRoutes {
   static const String activity = '/activity';
   static const String profile = '/profile';
   static const String pet3d = '/pet-3d-representation'; // Add this line for the 3D pet screen
-  
+  static const String hospitalBooking = '/hospital-booking';  
 
-  static List<GetPage> getPages = [
-    GetPage(name: onboarding, page: () => const OnboardingScreen()),
-    GetPage(name: signUp, page: () => const SignUpScreen()),
-    GetPage(name: login, page: () => const LoginScreen()),
-    GetPage(name: verifyEmail, page: () => const VerifyEmailScreen(email: '')),
-    GetPage(name: forgotPassword, page: () => const ForgotPasswordScreen()),
-    GetPage(name: enterVerificationCode, page: () => const EnterVerificationCodeScreen()),
-    GetPage(name: createNewPassword, page: () => const CreateNewPasswordScreen()),
-    GetPage(name: chooseLocation, page: () => const ChooseLocationScreen()),
-    GetPage(name: setLocation, page: () => const SetLocationScreen()),
-    GetPage(name: home, page: () => const HomeScreen()),
-    GetPage(name: clinicDetail, page: () => ClinicDetailScreen(clinic: Get.arguments)),
-    GetPage(name: serviceSelection, page: () => ServiceSelectionScreen(arguments: Get.arguments)),
-    // GetPage(name: checkout, page: () => const CheckoutScreen()),
-    GetPage(name: activity, page: () => const ActivityScreen()),
-    GetPage(name: profile, page: () => const ProfileScreen()),
-    GetPage(name: pet3d, page: () => const Pet3DRepresentationScreen()), // Add this line for the 3D pet screen
-  ];
+  static List<GetPage> get getPages => [
+        GetPage(name: onboarding, page: () => const OnboardingScreen()),
+        GetPage(name: signUp, page: () => const SignUpScreen()),
+        GetPage(name: login, page: () => const LoginScreen()),
+        GetPage(name: verifyEmail, page: () => const VerifyEmailScreen(email: '')),
+        GetPage(name: forgotPassword, page: () => const ForgotPasswordScreen()),
+        GetPage(name: enterVerificationCode, page: () => const EnterVerificationCodeScreen()),
+        GetPage(name: createNewPassword, page: () => const CreateNewPasswordScreen()),
+        GetPage(name: chooseLocation, page: () => const ChooseLocationScreen()),
+        GetPage(name: setLocation, page: () => const SetLocationScreen()),
+        GetPage(name: home, page: () => const HomeScreen()),
+        GetPage(name: clinicDetail, page: () => ClinicDetailScreen(clinic: Get.arguments)),
+        GetPage(name: serviceSelection, page: () => ServiceSelectionScreen(arguments: Get.arguments)),
+        // GetPage(name: checkout, page: () => const CheckoutScreen()),
+        GetPage(name: activity, page: () => const ActivityScreen()),
+        GetPage(name: profile, page: () => const ProfileScreen()),
+        GetPage(name: pet3d, page: () => const Pet3DRepresentationScreen()), // Add this line for the 3D pet screen
+        GetPage(name: hospitalBooking, page: () => const HospitalBookingScreen()),
+      ];
 }
