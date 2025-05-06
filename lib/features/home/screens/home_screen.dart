@@ -126,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     _buildServiceItem(context, 'Clinic Visit',
                         Icons.medical_services_outlined,
-                        onTap: () => _navigateToServicesByCategory('Hospital')),
+                        onTap: () => Get.toNamed(AppRoutes.clinicExplorer)),
                     _buildServiceItem(
                         context, '3D Animal View', Icons.threed_rotation,
                         onTap: () => Get.toNamed(AppRoutes.pet3d)),

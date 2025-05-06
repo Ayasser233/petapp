@@ -10,7 +10,8 @@ class ClinicModel {
   final int reviews;
   final int patients;
   final int yearsExperience;
-  
+  final List<String>? services;
+
   ClinicModel({
     required this.id,
     required this.name,
@@ -23,8 +24,9 @@ class ClinicModel {
     required this.reviews,
     required this.patients,
     required this.yearsExperience,
+    this.services,
   });
-  
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -38,6 +40,7 @@ class ClinicModel {
       'reviews': reviews,
       'patients': patients,
       'yearsExperience': yearsExperience,
+      'services': services,
     };
   }
   

@@ -15,6 +15,7 @@ import 'package:petapp/features/home/screens/activity_screen.dart';
 import 'package:petapp/features/home/screens/profile_screen.dart';
 import 'package:petapp/features/pets/3d_pet.dart';
 import 'package:petapp/features/home/screens/hospital_booking_screen.dart';
+import 'package:petapp/features/clinic/screens/clinic_explorer_screen.dart';
 
 
 class AppRoutes {
@@ -36,6 +37,8 @@ class AppRoutes {
   static const String pet3d = '/pet-3d-representation'; // Add this line for the 3D pet screen
   static const String hospitalBooking = '/hospital-booking';  
 
+  static const String clinicExplorer = '/clinic-explorer';
+
   static List<GetPage> get getPages => [
         GetPage(name: onboarding, page: () => const OnboardingScreen()),
         GetPage(name: signUp, page: () => const SignUpScreen()),
@@ -54,5 +57,6 @@ class AppRoutes {
         GetPage(name: profile, page: () => const ProfileScreen()),
         GetPage(name: pet3d, page: () => const Pet3DRepresentationScreen()), // Add this line for the 3D pet screen
         GetPage(name: hospitalBooking, page: () => const HospitalBookingScreen()),
+        GetPage(name: clinicExplorer, page: () => const ClinicExplorerScreen()),
       ];
 }
