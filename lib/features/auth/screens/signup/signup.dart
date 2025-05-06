@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:petapp/core/styles/input_styles.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/app_fonts.dart';
 import 'package:petapp/core/routes/routes.dart';
+import 'package:petapp/core/utils/helper_functions.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -25,7 +25,7 @@ class SignUpScreen extends StatelessWidget {
                 subtitle:
                     'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
               ),
-              SizedBox(height: 24.0),
+              SizedBox(height: 32.0),
               // Add your sign-up form here
               SignUpForm(),
 
@@ -57,10 +57,6 @@ class SignUpForm extends StatefulWidget {
 class _SignUpFormState extends State<SignUpForm> {
   bool _obscurePassword = true;
   bool _isFormValid = false;
-  final FocusNode _nameFocus = FocusNode();
-  final FocusNode _emailFocus = FocusNode();
-  final FocusNode _phoneFocus = FocusNode();
-  final FocusNode _passwordFocus = FocusNode();
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -87,143 +83,185 @@ class _SignUpFormState extends State<SignUpForm> {
     });
   }
 
+  OutlineInputBorder focusedFieldStyle() {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(16.0),
+      borderSide: const BorderSide(color: AppColors.orange, width: 1.5),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = THelperFunctions.isDarkMode(context);
+
     return Form(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Full Name Field
-          Text('Full Name', style: Theme.of(context).textTheme.bodyLarge),
-          const SizedBox(height: 8.0),
-          TextFormField(
-            focusNode: _nameFocus,
-            controller: _nameController,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Iconsax.user),
-              hintText: 'Enter your name',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16.0),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Full Name Field
+            TextFormField(
+              controller: _nameController,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Iconsax.user, color: AppColors.orange),
+                hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[400],
+                ),
+                hintText: 'Enter your full name',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                focusedBorder: focusedFieldStyle(),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
               ),
-              focusedBorder: focusedFieldStyle(),
-              filled: true,
-              fillColor:
-                  _nameFocus.hasFocus ? AppColors.lightorange : Colors.white,
+              keyboardType: TextInputType.name,
+              textInputAction: TextInputAction.next,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isDark ? Colors.white : Colors.black,
+              ),
             ),
-          ),
-          const SizedBox(height: 16.0),
-
-          // Phone Number Field
-          Text('Phone Number', style: Theme.of(context).textTheme.bodyLarge),
-          const SizedBox(height: 8.0),
-          TextFormField(
-            focusNode: _phoneFocus,
-            controller: _phoneController,
-            keyboardType: TextInputType.phone,
-            decoration: InputDecoration(
-              prefixIcon: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const SizedBox(width: 12.0),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: const Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('+1', style: TextStyle(fontSize: 14)),
-                        Icon(Icons.arrow_drop_down, size: 16),
-                      ],
+            const SizedBox(height: 16.0),
+            // Phone Number Field
+            TextFormField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                prefixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const SizedBox(width: 12.0),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text('+1', 
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: isDark ? Colors.white : Colors.black,
+                            )
+                          ),
+                          const Icon(Icons.arrow_drop_down, size: 16, color: AppColors.orange),
+                        ],
+                      ),
                     ),
+                  ],
+                ),
+                hintText: 'Enter your number',
+                hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[400],
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: focusedFieldStyle(),
+                filled: true,
+                fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isDark ? Colors.white : Colors.black,
+              ),
+            ),
+            const SizedBox(height: 16.0),
+        
+            // Email Field
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Iconsax.sms, color: AppColors.orange),
+                hintText: 'Enter your email',
+                hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[400],
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: focusedFieldStyle(),
+                filled: true,
+                fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isDark ? Colors.white : Colors.black,
+              ),
+            ),
+            const SizedBox(height: 16.0),
+        
+            // Password Field
+            TextFormField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Iconsax.lock, color: AppColors.orange),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Iconsax.eye_slash : Iconsax.eye,
+                    color: Colors.grey,
                   ),
-                ],
-              ),
-              hintText: 'Enter your number',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              focusedBorder: focusedFieldStyle(),
-              filled: true,
-              fillColor:
-                  _phoneFocus.hasFocus ? AppColors.lightorange : Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16.0),
-
-          // Email Field
-          Text('Email', style: Theme.of(context).textTheme.bodyLarge),
-          const SizedBox(height: 8.0),
-          TextFormField(
-            focusNode: _emailFocus,
-            controller: _emailController,
-            keyboardType: TextInputType.emailAddress,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Iconsax.sms),
-              hintText: 'Enter your email',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              focusedBorder: focusedFieldStyle(),
-              filled: true,
-              fillColor:
-                  _emailFocus.hasFocus ? AppColors.lightorange : Colors.white,
-            ),
-          ),
-          const SizedBox(height: 16.0),
-
-          // Password Field
-          Text('Password', style: Theme.of(context).textTheme.bodyLarge),
-          const SizedBox(height: 8.0),
-          TextFormField(
-            focusNode: _passwordFocus,
-            controller: _passwordController,
-            obscureText: _obscurePassword,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Iconsax.lock),
-              suffixIcon: IconButton(
-                icon: Icon(
-                  _obscurePassword ? Iconsax.eye_slash : Iconsax.eye,
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
                 ),
-                onPressed: () {
-                  setState(() {
-                    _obscurePassword = !_obscurePassword;
-                  });
-                },
-              ),
-              hintText: 'Enter your password',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16.0),
-              ),
-              focusedBorder: focusedFieldStyle(),
-              filled: true,
-              fillColor:
-                  _passwordFocus.hasFocus ? AppColors.lightorange : Colors.white,
-            ),
-          ),
-          const SizedBox(height: 32.0),
-
-          // Sign Up Button
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: _isFormValid
-                  ? () {
-                      // Navigate to Verify Email Screen
-                      Get.toNamed(AppRoutes.verifyEmail,
-                          arguments: _emailController.text);
-                    }
-                  : null,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                hintText: 'Enter your password',
+                hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Colors.grey[400],
                 ),
-                disabledBackgroundColor: AppColors.lightorange,
-                disabledForegroundColor: AppColors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide.none,
+                ),
+                focusedBorder: focusedFieldStyle(),
+                filled: true,
+                fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
               ),
-              child: const Text('Sign Up', style: TextStyle(fontSize: 16.0)),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isDark ? Colors.white : Colors.black,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 32.0),
+        
+            // Sign Up Button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _isFormValid
+                    ? () {
+                        // Navigate to Verify Email Screen
+                        Get.toNamed(AppRoutes.verifyEmail,
+                            arguments: _emailController.text);
+                      }
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  backgroundColor: AppColors.orange,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0), // Make this consistent with fields
+                  ),
+                  disabledBackgroundColor: AppColors.orange.withOpacity(0.5),
+                  disabledForegroundColor: Colors.white,
+                ),
+                child: Text(
+                  'Sign Up', 
+                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: Colors.white, 
+                    fontWeight: FontWeight.w600
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

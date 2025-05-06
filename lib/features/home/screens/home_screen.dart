@@ -104,6 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Light secondary logo
                     Container(
                       alignment: Alignment.centerLeft,
+                      color: Colors.transparent,
                       child: Image.asset(
                         Constants.mainlogoLight, // Added file extension
                         height:100,
