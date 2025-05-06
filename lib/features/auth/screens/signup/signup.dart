@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:petapp/core/styles/input_styles.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/app_fonts.dart';
 import 'package:petapp/core/routes/routes.dart';
@@ -56,8 +57,9 @@ class SignUpForm extends StatefulWidget {
 
 class _SignUpFormState extends State<SignUpForm> {
   bool _obscurePassword = true;
-  bool _isFormValid = false;
+  bool _isLoading = false;
 
+  final _formKey = GlobalKey<FormState>(); // Add a form key for validation
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
@@ -68,26 +70,125 @@ class _SignUpFormState extends State<SignUpForm> {
     super.initState();
 
     // Add listeners to text fields
-    _nameController.addListener(_validateForm);
-    _phoneController.addListener(_validateForm);
-    _emailController.addListener(_validateForm);
-    _passwordController.addListener(_validateForm);
+    _nameController.addListener(_checkFormValidity);
+    _phoneController.addListener(_checkFormValidity);
+    _emailController.addListener(_checkFormValidity);
+    _passwordController.addListener(_checkFormValidity);
   }
 
-  void _validateForm() {
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  // Check form validity
+  void _checkFormValidity() {
     setState(() {
-      _isFormValid = _nameController.text.isNotEmpty ||
-          _phoneController.text.isNotEmpty ||
-          _emailController.text.isNotEmpty ||
-          _passwordController.text.isNotEmpty;
+      _nameController.text.isNotEmpty &&
+          _phoneController.text.isNotEmpty &&
+          _emailController.text.isNotEmpty &&
+          _emailController.text.contains('@') &&
+          _passwordController.text.isNotEmpty &&
+          _passwordController.text.length >= 6;
     });
   }
 
-  OutlineInputBorder focusedFieldStyle() {
-    return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(16.0),
-      borderSide: const BorderSide(color: AppColors.orange, width: 1.5),
-    );
+  // Validate form fields
+  String? _validateName(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your name';
+    }
+    if (value.length < 4) {
+      return 'Name is too short';
+    }
+    return null;
+  }
+
+  String? _validatePhone(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your phone number';
+    }
+    // Simple phone validation - improve based on your requirements
+    if (value.length < 10) {
+      return 'Phone number is too short';
+    }
+    return null;
+  }
+
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your email';
+    }
+    // Simple email validation
+    if (!value.contains('@') || !value.contains('.')) {
+      return 'Please enter a valid email';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter a password';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  // Handle sign up
+  Future<void> _handleSignUp() async {
+    // First validate the form
+    if (_formKey.currentState?.validate() != true) {
+      return;
+    }
+
+    // Set loading state
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Simulate API call with delay
+      await Future.delayed(const Duration(seconds: 2));
+
+      // TODO: Replace this with your actual API call
+      // For example:
+      // final response = await AuthService.signUp(
+      //   name: _nameController.text,
+      //   phone: _phoneController.text,
+      //   email: _emailController.text,
+      //   password: _passwordController.text
+      // );
+
+      // Hide loading indicator
+      setState(() {
+        _isLoading = false;
+      });
+
+      // Navigate to verification screen
+      Get.toNamed(AppRoutes.verifyEmail, arguments: _emailController.text);
+    } catch (e) {
+      // Hide loading indicator
+      setState(() {
+        _isLoading = false;
+      });
+
+      // Show error message
+      Get.snackbar(
+        'Sign Up Failed',
+        e.toString(),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.1),
+        colorText: Colors.red,
+        borderRadius: 8,
+        margin: const EdgeInsets.all(16),
+      );
+    }
   }
 
   @override
@@ -95,40 +196,59 @@ class _SignUpFormState extends State<SignUpForm> {
     final isDark = THelperFunctions.isDarkMode(context);
 
     return Form(
+      key: _formKey,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Full Name Field
             TextFormField(
               controller: _nameController,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Iconsax.user, color: AppColors.orange),
                 hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[400],
-                ),
-                hintText: 'Enter your full name',
+                      color: Colors.grey[400],
+                    ),
+                hintText: 'Full Name',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16.0),
                   borderSide: BorderSide.none,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  // No border in normal state
+                  borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide.none,
+                ),
+                errorBorder: OutlineInputBorder(
+                  // Keep consistent with no border
+                  borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide.none,
+                ),
+                focusedErrorBorder: focusedFieldStyle(),
+                focusedBorder: focusedFieldStyle(),
                 filled: true,
                 fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
-                focusedBorder: focusedFieldStyle(),
-                contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16.0, horizontal: 16.0),
+                // Smaller error text with less padding
+                errorStyle: const TextStyle(height: 0.8),
               ),
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: _validateName,
+              onChanged: (value) => _checkFormValidity(),
               keyboardType: TextInputType.name,
               textInputAction: TextInputAction.next,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isDark ? Colors.white : Colors.black,
-              ),
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
             ),
             const SizedBox(height: 16.0),
-            // Phone Number Field
+
+            // Phone Number Field (label removed)
             TextFormField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               decoration: InputDecoration(
                 prefixIcon: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -139,65 +259,94 @@ class _SignUpFormState extends State<SignUpForm> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text('+1', 
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: isDark ? Colors.white : Colors.black,
-                            )
-                          ),
-                          const Icon(Icons.arrow_drop_down, size: 16, color: AppColors.orange),
+                          Text('+1',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: isDark ? Colors.white : Colors.black,
+                                  )),
+                          const Icon(Icons.arrow_drop_down,
+                              size: 16, color: AppColors.orange),
                         ],
                       ),
                     ),
                   ],
                 ),
-                hintText: 'Enter your number',
+                hintText: 'Phone Number',
                 hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[400],
-                ),
+                      color: Colors.grey[400],
+                    ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16.0),
                   borderSide: BorderSide.none,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide.none,
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide.none,
+                ),
+                focusedErrorBorder: focusedFieldStyle(),
                 focusedBorder: focusedFieldStyle(),
                 filled: true,
                 fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
-                contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16.0, horizontal: 16.0),
+                errorStyle: const TextStyle(height: 0.8),
               ),
+              validator: _validatePhone,
+              onChanged: (value) => _checkFormValidity(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isDark ? Colors.white : Colors.black,
-              ),
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
             ),
             const SizedBox(height: 16.0),
-        
-            // Email Field
+
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Iconsax.sms, color: AppColors.orange),
-                hintText: 'Enter your email',
+                hintText: 'Email',
                 hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[400],
-                ),
+                      color: Colors.grey[400],
+                    ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16.0),
                   borderSide: BorderSide.none,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide.none,
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide.none,
+                ),
+                focusedErrorBorder: focusedFieldStyle(),
                 focusedBorder: focusedFieldStyle(),
                 filled: true,
                 fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
-                contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16.0, horizontal: 16.0),
+                errorStyle: const TextStyle(height: 0.8),
               ),
+              validator: _validateEmail,
+              onChanged: (value) => _checkFormValidity(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isDark ? Colors.white : Colors.black,
-              ),
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
             ),
             const SizedBox(height: 16.0),
         
-            // Password Field
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Iconsax.lock, color: AppColors.orange),
                 suffixIcon: IconButton(
@@ -211,53 +360,66 @@ class _SignUpFormState extends State<SignUpForm> {
                     });
                   },
                 ),
-                hintText: 'Enter your password',
+                hintText: 'Password',
                 hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[400],
-                ),
+                      color: Colors.grey[400],
+                    ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16.0),
                   borderSide: BorderSide.none,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide.none,
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16.0),
+                  borderSide: BorderSide.none,
+                ),
+                focusedErrorBorder: focusedFieldStyle(),
                 focusedBorder: focusedFieldStyle(),
                 filled: true,
                 fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
-                contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+                contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16.0, horizontal: 16.0),
+                errorStyle: const TextStyle(height: 0.8),
               ),
+              validator: _validatePassword,
+              onChanged: (value) => _checkFormValidity(), // Simplified
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isDark ? Colors.white : Colors.black,
-              ),
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
             ),
             const SizedBox(height: 32.0),
-        
+
             // Sign Up Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isFormValid
-                    ? () {
-                        // Navigate to Verify Email Screen
-                        Get.toNamed(AppRoutes.verifyEmail,
-                            arguments: _emailController.text);
-                      }
-                    : null,
+                onPressed: _isLoading ? null : _handleSignUp,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   backgroundColor: AppColors.orange,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0), // Make this consistent with fields
+                    borderRadius: BorderRadius.circular(16.0),
                   ),
                   disabledBackgroundColor: AppColors.orange.withOpacity(0.5),
-                  disabledForegroundColor: Colors.white,
                 ),
-                child: Text(
-                  'Sign Up', 
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: Colors.white, 
-                    fontWeight: FontWeight.w600
-                  ),
-                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2.0,
+                        ),
+                      )
+                    : Text(
+                        'Sign Up',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: Colors.white, fontWeight: FontWeight.w600),
+                      ),
               ),
             ),
           ],

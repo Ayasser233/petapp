@@ -325,7 +325,7 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                   ),
                   Text(
                     '${_filteredClinics.length} founds',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.orange,
                       fontWeight: FontWeight.bold,
                     ),
@@ -705,7 +705,7 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                             }
                           });
                         });
-                      }).toList(),
+                      }),
                     ],
                   ),
                   

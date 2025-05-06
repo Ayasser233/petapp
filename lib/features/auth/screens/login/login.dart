@@ -193,10 +193,12 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
+  final _formKey = GlobalKey<FormState>(); // Add form key
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
   bool _obscurePassword = true;
+  bool _isLoading = false; // Add loading state
 
   @override
   void dispose() {
@@ -205,25 +207,39 @@ class _LoginFormState extends State<LoginForm> {
     super.dispose();
   }
 
+  // Validate email
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your email';
+    }
+    if (!value.contains('@') || !value.contains('.')) {
+      return 'Please enter a valid email';
+    }
+    return null;
+  }
+
+  // Validate password
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please enter your password';
+    }
+    if (value.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
   // Handle sign in logic
   void _handleSignIn() async {
-    // Basic validation
-    if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter both email and password',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.1),
-        colorText: Colors.red,
-      );
+    // First validate form
+    if (!_formKey.currentState!.validate()) {
       return;
     }
-
-    // Show loading indicator
-    Get.dialog(
-      const Center(child: CircularProgressIndicator(color: AppColors.orange)),
-      barrierDismissible: false,
-    );
+    
+    // Set loading state
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
       // Simulate API call delay
@@ -236,15 +252,9 @@ class _LoginFormState extends State<LoginForm> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('isLoggedIn', true);
       
-      // Close loading dialog
-      Get.back();
-      
       // Navigate to home screen
       Get.offAllNamed(AppRoutes.home);
     } catch (e) {
-      // Close loading dialog
-      Get.back();
-      
       // Show error message
       Get.snackbar(
         'Error',
@@ -253,6 +263,11 @@ class _LoginFormState extends State<LoginForm> {
         backgroundColor: Colors.red.withOpacity(0.1),
         colorText: Colors.red,
       );
+    } finally {
+      // Always reset loading state
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -261,10 +276,12 @@ class _LoginFormState extends State<LoginForm> {
     final isDark = THelperFunctions.isDarkMode(context);
     
     return Form(
+      key: _formKey, // Add form key
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: Column(
           children: [
+            // Email field
             TextFormField(
               controller: _emailController,
               decoration: InputDecoration(
@@ -275,7 +292,7 @@ class _LoginFormState extends State<LoginForm> {
                       onPressed: () => setState(() => _emailController.clear()),
                     )
                   : null,
-                hintText: 'Enter your email',
+                hintText: 'Email',
                 hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.grey[400],
                 ),
@@ -285,14 +302,28 @@ class _LoginFormState extends State<LoginForm> {
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide.none,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                focusedErrorBorder: focusedFieldStyle(),
                 focusedBorder: focusedFieldStyle(),
                 contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                errorStyle: const TextStyle(height: 0.8),
               ),
+              validator: _validateEmail,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               keyboardType: TextInputType.emailAddress,
               style: Theme.of(context).textTheme.bodyMedium,
               onChanged: (value) => setState(() {}),
             ),
             const SizedBox(height: 16.0),
+            
+            // Password field
             TextFormField(
               controller: _passwordController,
               decoration: InputDecoration(
@@ -308,7 +339,7 @@ class _LoginFormState extends State<LoginForm> {
                     });
                   },
                 ),
-                hintText: 'Enter your password',
+                hintText: 'Password',
                 hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.grey[400],
                 ),
@@ -318,13 +349,27 @@ class _LoginFormState extends State<LoginForm> {
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide.none,
                 ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                focusedErrorBorder: focusedFieldStyle(),
                 focusedBorder: focusedFieldStyle(),
                 contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                errorStyle: const TextStyle(height: 0.8),
               ),
+              validator: _validatePassword,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               obscureText: _obscurePassword,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 8),
+            
+            // Remember me & forgot password row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -368,7 +413,8 @@ class _LoginFormState extends State<LoginForm> {
                     ),
                   ],
                 ),
-                // forgot password text
+                
+                // forgot password button
                 TextButton(
                   onPressed: () {
                     // Navigate to Forgot Password Screen
@@ -388,11 +434,12 @@ class _LoginFormState extends State<LoginForm> {
               ],
             ),
             const SizedBox(height: 32.0),
-            // Sign In button
+            
+            // Sign In button with loading state
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _handleSignIn,
+                onPressed: _isLoading ? null : _handleSignIn,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   backgroundColor: AppColors.orange,
@@ -401,14 +448,24 @@ class _LoginFormState extends State<LoginForm> {
                     borderRadius: BorderRadius.circular(12.0),
                   ),
                   elevation: 0,
+                  disabledBackgroundColor: AppColors.orange.withOpacity(0.5),
                 ),
-                child: Text(
-                  'Sign In',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+                child: _isLoading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.0,
+                      ),
+                    )
+                  : Text(
+                      'Sign In',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
               ),
             ),
           ],

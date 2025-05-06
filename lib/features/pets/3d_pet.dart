@@ -394,10 +394,10 @@ class _Pet3DRepresentationScreenState extends State<Pet3DRepresentationScreen> w
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('How to Use 3D View'),
-          content: Column(
+          content: const Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
+            children: [
               ListTile(
                 leading: Icon(Icons.swipe, color: AppColors.orange),
                 title: Text('Swipe horizontally to rotate the model'),

@@ -4,6 +4,7 @@ import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/constants.dart';
+import 'package:petapp/core/utils/helper_functions.dart'; // Added for isDarkMode check
 import 'package:petapp/features/home/models/clinic_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -88,6 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = THelperFunctions.isDarkMode(context);
+    
     return BaseScreen(
       navBarIndex: 0,
       body: SafeArea(
@@ -101,38 +104,46 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Light secondary logo
+                    // Logo with transparent background
                     Container(
                       alignment: Alignment.centerLeft,
-                      color: Colors.transparent,
                       child: Image.asset(
-                        Constants.mainlogoLight, // Added file extension
-                        height:100,
-                        width:100,
+                        isDark ? Constants.mainlogoDark : Constants.mainlogoLight,
+                        height: 80, // Slightly smaller
+                        width: 80,
                         fit: BoxFit.contain,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.notifications_outlined),
-                      onPressed: () {
-                        // Handle notification tap
-                      },
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? AppColors.lightblack : Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.notifications_outlined,
+                          color: isDark ? AppColors.orange : Colors.grey[700],
+                        ),
+                        onPressed: () {
+                          // Handle notification tap
+                        },
+                      ),
                     ),
                   ],
                 ),
-                // const SizedBox(height: 16), // Spacing after the logo
+                const SizedBox(height: 24),
                 // Featured Services Row
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _buildServiceItem(context, 'Clinic Visit',
-                        Icons.medical_services_outlined,
+                        Icons.medical_services_outlined, isDark,
                         onTap: () => Get.toNamed(AppRoutes.clinicExplorer)),
                     _buildServiceItem(
-                        context, '3D Animal View', Icons.threed_rotation,
+                        context, '3D Animal View', Icons.threed_rotation, isDark,
                         onTap: () => Get.toNamed(AppRoutes.pet3d)),
                     _buildServiceItem(
-                        context, 'Virtual Vet', Icons.videocam_outlined,
+                        context, 'Virtual Vet', Icons.videocam_outlined, isDark,
                         onTap: () =>
                             _navigateToServicesByCategory('Consultation')),
                   ],
@@ -143,21 +154,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 // Search bar
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: isDark ? AppColors.lightblack : Colors.grey[200],
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const TextField(
+                  child: TextField(
                     decoration: InputDecoration(
-                      hintText: 'Search here',
-                      prefixIcon: Icon(Icons.search),
+                      hintText: 'Search clinics, services...',
+                      hintStyle: TextStyle(
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                      prefixIcon: Icon(
+                        Icons.search,
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      ),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
 
-                // Redeem & Save section (replacing Categories)
+                // Redeem & Save section
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -165,16 +186,26 @@ class _HomeScreenState extends State<HomeScreen> {
                       'Redeem & Save',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Handle See All tap for rewards
+                      },
+                      child: const Text(
+                        'View History',
+                        style: TextStyle(color: AppColors.orange),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
 
-                // Rewards & Points card
+                // Rewards & Points card - enhanced with better shadows and effects
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12), // Reduced vertical padding
+                      horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [AppColors.orange, Color(0xFFF5A623)],
@@ -201,9 +232,16 @@ class _HomeScreenState extends State<HomeScreen> {
                               children: [
                                 Container(
                                   padding: const EdgeInsets.all(8),
-                                  decoration: const BoxDecoration(
+                                  decoration: BoxDecoration(
                                     color: Colors.white,
                                     shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
                                   child: const Icon(Icons.stars_rounded,
                                       color: AppColors.orange, size: 24),
@@ -246,8 +284,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
+                                elevation: 2,
                               ),
-                              child: const Text('Redeem Now'),
+                              child: const Text(
+                                'Redeem Now',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                             ),
                           ],
                         ),
@@ -264,9 +306,16 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Container(
                             padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: Colors.white,
                               shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
                             child: const Icon(
                                 Icons.confirmation_number_outlined,
@@ -307,11 +356,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       'Near You',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
                     ),
                     TextButton(
                       onPressed: () {
                         // Handle See All tap
+                        Get.toNamed(AppRoutes.clinicExplorer);
                       },
                       child: const Text(
                         'See All',
@@ -322,9 +373,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Near You cards - replace the Expanded with a fixed height Container
+                // Near You cards with improved design
                 SizedBox(
-                  height: 200, // Fixed height instead of Expanded
+                  height: 220, // Slightly taller for better visuals
                   child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: nearbyClinics.length,
@@ -337,6 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: _buildNearbyCard(
                             context,
                             clinic: clinic,
+                            isDark: isDark,
                             onTap: () => _navigateToClinicDetail(clinic),
                           ),
                         );
@@ -352,29 +404,44 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildServiceItem(BuildContext context, String title, IconData icon,
-      {VoidCallback? onTap}) {
+  Widget _buildServiceItem(
+    BuildContext context, 
+    String title, 
+    IconData icon,
+    bool isDark,
+    {VoidCallback? onTap}
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.orange.withOpacity(0.1),
+              color: isDark 
+                ? AppColors.orange.withOpacity(0.15) 
+                : AppColors.orange.withOpacity(0.1),
               shape: BoxShape.circle,
+              boxShadow: [
+                if (!isDark) BoxShadow(
+                  color: AppColors.orange.withOpacity(0.15),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: Icon(
               icon,
               color: AppColors.orange,
-              size: 24,
+              size: 28, // Slightly larger
             ),
           ),
           const SizedBox(height: 8),
           Text(
             title,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w500,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
                 ),
             textAlign: TextAlign.center,
           ),
@@ -386,20 +453,23 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNearbyCard(
     BuildContext context, {
     required ClinicModel clinic,
+    required bool isDark,
     required VoidCallback onTap,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 180, // Slightly smaller width
+        width: 200, // Slightly wider for better content display
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
-          color: Colors.white,
+          color: isDark ? AppColors.lightblack : Colors.white,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: isDark 
+                ? Colors.black.withOpacity(0.2) 
+                : Colors.grey.withOpacity(0.15),
               spreadRadius: 1,
-              blurRadius: 5,
+              blurRadius: 8,
               offset: const Offset(0, 3),
             ),
           ],
@@ -417,14 +487,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Image.asset(
                     clinic.image,
                     width: double.infinity,
-                    height: 100, // Reduced height
+                    height: 110, // Slightly taller
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        height: 100, // Reduced height
-                        color: Colors.grey[300],
-                        child: const Center(
-                            child: Icon(Icons.image_not_supported)),
+                        height: 110,
+                        color: isDark ? Colors.grey[800] : Colors.grey[300],
+                        child: Center(
+                          child: Icon(
+                            Icons.image_not_supported,
+                            color: isDark ? Colors.grey[600] : Colors.grey[500],
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -448,10 +522,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '${clinic.rating} (${clinic.reviews})',
+                          '${clinic.rating}',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 12,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],
@@ -460,11 +535,31 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Positioned(
                   top: 8,
-                  right: 40,
+                  left: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.orange.withOpacity(0.9),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      clinic.category,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 8,
+                  right: 8,
                   child: IconButton(
                     icon: const Icon(
                       Icons.favorite_border,
                       color: Colors.white,
+                      size: 20,
                     ),
                     onPressed: () {
                       // Handle favorite tap
@@ -482,6 +577,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     clinic.name,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : Colors.black87,
                         ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -500,17 +596,29 @@ class _HomeScreenState extends State<HomeScreen> {
                           clinic.location,
                           style:
                               Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey,
+                                    color: isDark ? Colors.grey[400] : Colors.grey[600],
                                   ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(width: 4),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
                       Text(
-                        '• ${clinic.distance}',
+                        clinic.distance,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey,
+                              color: AppColors.orange,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                      Text(
+                        '${clinic.reviews} reviews',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: isDark ? Colors.grey[400] : Colors.grey[600],
                             ),
                       ),
                     ],

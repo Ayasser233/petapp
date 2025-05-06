@@ -13,7 +13,6 @@ class elevatedButtonTheme{
       backgroundColor: AppColors.orange,
       disabledBackgroundColor: AppColors.lightorange,
       disabledForegroundColor: Colors.grey,
-      side: const BorderSide(color: Colors.orange, width: 1),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -30,7 +29,6 @@ class elevatedButtonTheme{
       backgroundColor: AppColors.orange,
       disabledBackgroundColor: AppColors.lightorange,
       disabledForegroundColor: Colors.grey,
-      side: const BorderSide(color: Colors.orange, width: 1),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
