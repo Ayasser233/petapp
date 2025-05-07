@@ -16,6 +16,10 @@ import 'package:petapp/features/home/screens/profile_screen.dart';
 import 'package:petapp/features/pets/3d_pet.dart';
 import 'package:petapp/features/home/screens/hospital_booking_screen.dart';
 import 'package:petapp/features/clinic/screens/clinic_explorer_screen.dart';
+// Add these imports for the pet-related screens
+import 'package:petapp/features/pet/screens/my_pets_screen.dart';
+import 'package:petapp/features/pet/screens/add_pet_screen.dart';
+import 'package:petapp/features/pet/screens/pet_profile_screen.dart';
 
 
 class AppRoutes {
@@ -34,10 +38,13 @@ class AppRoutes {
   static const String checkout = '/checkout';
   static const String activity = '/activity';
   static const String profile = '/profile';
-  static const String pet3d = '/pet-3d-representation'; // Add this line for the 3D pet screen
+  static const String pet3d = '/pet-3d-representation';
   static const String hospitalBooking = '/hospital-booking';  
-
   static const String clinicExplorer = '/clinic-explorer';
+  // Add these route constants here instead of inside the getPages list
+  static const String myPets = '/my-pets';
+  static const String addPet = '/add-pet';
+  static const String petProfile = '/pet-profile';
 
   static List<GetPage> get getPages => [
         GetPage(name: onboarding, page: () => const OnboardingScreen()),
@@ -55,8 +62,23 @@ class AppRoutes {
         // GetPage(name: checkout, page: () => const CheckoutScreen()),
         GetPage(name: activity, page: () => const ActivityScreen()),
         GetPage(name: profile, page: () => const ProfileScreen()),
-        GetPage(name: pet3d, page: () => const Pet3DRepresentationScreen()), // Add this line for the 3D pet screen
+        GetPage(name: pet3d, page: () => const Pet3DRepresentationScreen()),
         GetPage(name: hospitalBooking, page: () => const HospitalBookingScreen()),
         GetPage(name: clinicExplorer, page: () => const ClinicExplorerScreen()),
+        // Add these GetPage entries properly to the list
+        GetPage(
+          name: myPets,
+          page: () => const MyPetsScreen(),
+        ),
+        GetPage(
+          name: addPet,
+          page: () => const AddPetScreen(),
+        ),
+        GetPage(
+          name: petProfile,
+          page: () => PetProfileScreen(
+            pet: Get.arguments,
+          ),
+        ),
       ];
 }

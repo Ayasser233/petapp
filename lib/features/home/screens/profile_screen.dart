@@ -60,7 +60,7 @@ class ProfileScreen extends StatelessWidget {
                 'My Pets', 
                 Icons.pets, 
                 () {
-                  // Navigate to my pets screen
+                  Get.toNamed(AppRoutes.myPets);
                 }
               ),
               

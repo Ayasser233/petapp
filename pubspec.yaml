@@ -48,6 +48,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   table_calendar: ^3.0.9
   qr_flutter: ^4.1.0
+  image_picker: ^0.8.7+5
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +76,7 @@ flutter:
   assets:
   #  - assets/fonts/
     - assets/images/onboardingImages/
+    - assets/images/
     - assets/animations/
     - assets/icons/
     - assets/logos/
