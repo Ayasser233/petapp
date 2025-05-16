@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
+import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/pet/screens/add_pet_screen.dart';
 import 'package:petapp/features/pet/screens/pet_profile_screen.dart';
@@ -14,7 +15,7 @@ class MyPetsScreen extends StatefulWidget {
 
 class _MyPetsScreenState extends State<MyPetsScreen> {
   // Sample data for pets (in a real app, this would come from a database)
-  List<PetModel> _pets = [
+  final List<PetModel> _pets = [
     PetModel(
       id: '1',
       name: 'Max',
@@ -35,19 +36,28 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = THelperFunctions.isDarkMode(context);
+    final backgroundColor = isDark ? Colors.grey[900] : Colors.grey[50];
+    final cardColor = isDark ? Colors.grey[850] : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final subTextColor = isDark ? Colors.grey[400] : Colors.grey[700];
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'My Pets',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: textColor,
+          ),
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: cardColor,
       ),
       body: _pets.isEmpty
-          ? _buildEmptyState()
+          ? _buildEmptyState(isDark, textColor, subTextColor!)
           : Column(
               children: [
                 // Header with count
@@ -55,10 +65,12 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: cardColor,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
+                        color: isDark 
+                            ? Colors.black.withOpacity(0.2) 
+                            : Colors.grey.withOpacity(0.1),
                         spreadRadius: 1,
                         blurRadius: 3,
                         offset: const Offset(0, 2),
@@ -70,7 +82,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: Colors.grey[700],
+                      color: subTextColor,
                     ),
                   ),
                 ),
@@ -82,7 +94,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                     itemCount: _pets.length,
                     itemBuilder: (context, index) {
                       final pet = _pets[index];
-                      return _buildPetCard(pet);
+                      return _buildPetCard(pet, isDark, cardColor!, textColor, subTextColor!);
                     },
                   ),
                 ),
@@ -98,13 +110,14 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
           }
         },
         backgroundColor: AppColors.orange,
+        foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
         label: const Text('Add Pet'),
       ),
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(bool isDark, Color textColor, Color subTextColor) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -113,21 +126,22 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
             width: 150,
             height: 150,
             decoration: BoxDecoration(
-              color: AppColors.orange.withOpacity(0.1),
+              color: AppColors.orange.withOpacity(isDark ? 0.2 : 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Icons.pets,
               size: 80,
-              color: AppColors.orange.withOpacity(0.7),
+              color: AppColors.orange.withOpacity(isDark ? 0.8 : 0.7),
             ),
           ),
           const SizedBox(height: 24),
-          const Text(
+          Text(
             'No pets added yet',
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
+              color: textColor,
             ),
           ),
           const SizedBox(height: 12),
@@ -137,7 +151,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
               'Add your furry friends to keep track of their health and appointments',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.grey[600],
+                color: subTextColor,
                 fontSize: 16,
               ),
             ),
@@ -161,7 +175,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(30),
               ),
-              elevation: 2,
+              elevation: isDark ? 4 : 2,
             ),
           ),
         ],
@@ -169,18 +183,33 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
     );
   }
 
-  Widget _buildPetCard(PetModel pet) {
+  Widget _buildPetCard(PetModel pet, bool isDark, Color cardColor, Color textColor, Color subTextColor) {
     // Get pet age
     final age = _calculateAge(pet.birthdate);
+    
+    // Pet type color
+    Color petTypeColor = pet.type == 'Dog' 
+        ? Colors.blue 
+        : pet.type == 'Cat' 
+            ? Colors.purple 
+            : AppColors.orange;
+            
+    // Shadow color adjusted for theme
+    Color shadowColor = isDark 
+        ? Colors.black.withOpacity(0.3) 
+        : Colors.grey.withOpacity(0.1);
+        
+    // Background for arrow icon
+    Color arrowBgColor = isDark ? Colors.grey[800]! : Colors.grey[100]!;
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
+            color: shadowColor,
             spreadRadius: 1,
             blurRadius: 5,
             offset: const Offset(0, 2),
@@ -210,11 +239,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: pet.type == 'Dog' 
-                        ? Colors.blue 
-                        : pet.type == 'Cat' 
-                            ? Colors.purple 
-                            : AppColors.orange,
+                    color: petTypeColor,
                     width: 3,
                   ),
                 ),
@@ -238,31 +263,24 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                       children: [
                         Text(
                           pet.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
+                            color: textColor,
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // Pet type icon
+                        // Pet type tag
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: pet.type == 'Dog' 
-                                ? Colors.blue.withOpacity(0.1) 
-                                : pet.type == 'Cat' 
-                                    ? Colors.purple.withOpacity(0.1) 
-                                    : AppColors.orange.withOpacity(0.1),
+                            color: petTypeColor.withOpacity(isDark ? 0.2 : 0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             pet.type,
                             style: TextStyle(
-                              color: pet.type == 'Dog' 
-                                  ? Colors.blue 
-                                  : pet.type == 'Cat' 
-                                      ? Colors.purple 
-                                      : AppColors.orange,
+                              color: petTypeColor,
                               fontSize: 12,
                               fontWeight: FontWeight.bold,
                             ),
@@ -276,13 +294,13 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                         Icon(
                           Icons.cake_outlined,
                           size: 16,
-                          color: Colors.grey[600],
+                          color: subTextColor,
                         ),
                         const SizedBox(width: 4),
                         Text(
                           age,
                           style: TextStyle(
-                            color: Colors.grey[600],
+                            color: subTextColor,
                             fontSize: 14,
                           ),
                         ),
@@ -295,7 +313,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           Icon(
                             Icons.info_outline,
                             size: 16,
-                            color: Colors.grey[600],
+                            color: subTextColor,
                           ),
                           const SizedBox(width: 4),
                           Expanded(
@@ -304,7 +322,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                color: Colors.grey[600],
+                                color: subTextColor,
                                 fontSize: 14,
                                 fontStyle: FontStyle.italic,
                               ),
@@ -321,13 +339,13 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: arrowBgColor,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.arrow_forward_ios,
                   size: 14,
-                  color: Colors.grey,
+                  color: isDark ? Colors.grey[400] : Colors.grey,
                 ),
               ),
             ],

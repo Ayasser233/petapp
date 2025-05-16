@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
+import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'dart:io';
 
@@ -14,13 +15,26 @@ class PetProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine if dark theme is active
+    final isDark = THelperFunctions.isDarkMode(context);
+    
     // Get pet age
     final age = _calculateAge(pet.birthdate);
     
     // Use app theme color instead of pet type-based colors
-    final Color themeColor = AppColors.orange;
+    const Color themeColor = AppColors.orange;
+    
+    // Define theme-dependent colors
+    final Color backgroundColor = isDark ? Colors.grey[900]! : Colors.white;
+    final Color textColor = isDark ? Colors.white : Colors.grey[800]!;
+    final Color subTextColor = isDark ? Colors.grey[400]! : Colors.grey[600]!;
+    final Color cardColor = isDark ? Colors.grey[850]! : Colors.white;
+    final Color cardBorderColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final Color notesBgColor = isDark ? Colors.grey[800]! : Colors.grey[100]!;
+    final Color emptyStateBgColor = isDark ? Colors.grey[800]! : Colors.grey[100]!;
     
     return Scaffold(
+      backgroundColor: backgroundColor,
       body: CustomScrollView(
         slivers: [
           // App bar with pet image
@@ -36,7 +50,7 @@ class PetProfileScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.delete_outline, color: Colors.white),
                 onPressed: () {
-                  _showDeleteConfirmation(context);
+                  _showDeleteConfirmation(context, isDark);
                 },
               ),
             ],
@@ -141,6 +155,7 @@ class PetProfileScreen extends StatelessWidget {
                         _formatDate(pet.birthdate),
                         Icons.cake,
                         themeColor,
+                        isDark,
                       ),
                       const SizedBox(width: 16),
                       _buildInfoCard(
@@ -149,6 +164,7 @@ class PetProfileScreen extends StatelessWidget {
                         pet.type == 'Other' ? pet.specificType! : pet.type,
                         pet.type == 'Dog' ? Icons.pets : Icons.emoji_nature,
                         themeColor,
+                        isDark,
                       ),
                     ],
                   ),
@@ -157,20 +173,20 @@ class PetProfileScreen extends StatelessWidget {
                   
                   // Notes section
                   if (pet.notes != null && pet.notes!.isNotEmpty) ...[
-                    _buildSectionHeader('Notes', Icons.note_alt, themeColor),
+                    _buildSectionHeader('Notes', Icons.note_alt, themeColor, textColor),
                     const SizedBox(height: 8),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.grey[100],
+                        color: notesBgColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade300),
+                        border: Border.all(color: cardBorderColor),
                       ),
                       child: Text(
                         pet.notes!,
                         style: TextStyle(
-                          color: Colors.grey[800],
+                          color: textColor,
                           height: 1.5,
                         ),
                       ),
@@ -179,18 +195,25 @@ class PetProfileScreen extends StatelessWidget {
                   ],
                   
                   // Clinic visits section
-                  _buildSectionHeader('Clinic Visits', Icons.medical_services, themeColor),
+                  _buildSectionHeader('Clinic Visits', Icons.medical_services, themeColor, textColor),
                   const SizedBox(height: 8),
                   
                   if (pet.clinicVisits == null || pet.clinicVisits!.isEmpty)
-                    _buildEmptyVisitsCard()
+                    _buildEmptyVisitsCard(emptyStateBgColor, subTextColor, cardBorderColor)
                   else
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: pet.clinicVisits!.length,
                       itemBuilder: (context, index) {
-                        return _buildVisitCard(pet.clinicVisits![index], themeColor);
+                        return _buildVisitCard(
+                          pet.clinicVisits![index], 
+                          themeColor, 
+                          cardColor, 
+                          textColor, 
+                          subTextColor,
+                          isDark,
+                        );
                       },
                     ),
                     
@@ -203,14 +226,14 @@ class PetProfileScreen extends StatelessWidget {
                       onPressed: () {
                         // TODO: Implement add visit functionality
                       },
-                      icon: Icon(Icons.add, color: themeColor),
-                      label: Text(
+                      icon: const Icon(Icons.add, color: themeColor),
+                      label: const Text(
                         'Add Clinic Visit',
                         style: TextStyle(color: themeColor),
                       ),
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: BorderSide(color: themeColor),
+                        side: const BorderSide(color: themeColor),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -226,7 +249,7 @@ class PetProfileScreen extends StatelessWidget {
     );
   }
   
-  Widget _buildSectionHeader(String title, IconData icon, Color color) {
+  Widget _buildSectionHeader(String title, IconData icon, Color color, Color textColor) {
     return Row(
       children: [
         Icon(icon, color: color, size: 20),
@@ -236,19 +259,29 @@ class PetProfileScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Colors.grey[800],
+            color: textColor,
           ),
         ),
       ],
     );
   }
   
-  Widget _buildInfoCard(BuildContext context, String title, String value, IconData icon, Color color) {
+  Widget _buildInfoCard(
+    BuildContext context, 
+    String title, 
+    String value, 
+    IconData icon, 
+    Color color,
+    bool isDark,
+  ) {
+    final textColor = isDark ? Colors.white : Colors.grey[800];
+    final subTextColor = isDark ? Colors.grey[400] : Colors.grey[600];
+    
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withOpacity(isDark ? 0.15 : 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -261,7 +294,7 @@ class PetProfileScreen extends StatelessWidget {
                 Text(
                   title,
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: subTextColor,
                     fontSize: 14,
                   ),
                 ),
@@ -270,9 +303,10 @@ class PetProfileScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
+                color: textColor,
               ),
             ),
           ],
@@ -281,27 +315,27 @@ class PetProfileScreen extends StatelessWidget {
     );
   }
   
-  Widget _buildEmptyVisitsCard() {
+  Widget _buildEmptyVisitsCard(Color backgroundColor, Color textColor, Color borderColor) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         children: [
           Icon(
             Icons.medical_services_outlined,
             size: 48,
-            color: Colors.grey[400],
+            color: textColor,
           ),
           const SizedBox(height: 16),
           Text(
             'No clinic visits yet',
             style: TextStyle(
-              color: Colors.grey[600],
+              color: textColor,
               fontSize: 16,
             ),
           ),
@@ -309,7 +343,7 @@ class PetProfileScreen extends StatelessWidget {
           Text(
             'Add your pet\'s first clinic visit',
             style: TextStyle(
-              color: Colors.grey[500],
+              color: textColor.withOpacity(0.8),
               fontSize: 14,
             ),
           ),
@@ -318,10 +352,21 @@ class PetProfileScreen extends StatelessWidget {
     );
   }
   
-  Widget _buildVisitCard(ClinicVisit visit, Color color) {
+  Widget _buildVisitCard(
+    ClinicVisit visit, 
+    Color themeColor, 
+    Color cardColor, 
+    Color textColor, 
+    Color subTextColor,
+    bool isDark,
+  ) {
+    // Tag background color
+    final tagBgColor = isDark ? Colors.grey[800]! : Colors.grey[200]!;
+    
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: 1,
+      elevation: isDark ? 2 : 1,
+      color: cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -338,21 +383,22 @@ class PetProfileScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: color.withOpacity(0.1),
+                        color: themeColor.withOpacity(isDark ? 0.2 : 0.1),
                         shape: BoxShape.circle,
                       ),
                       child: Icon(
                         Icons.local_hospital,
-                        color: color,
+                        color: themeColor,
                         size: 16,
                       ),
                     ),
                     const SizedBox(width: 8),
                     Text(
                       visit.clinicName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
+                        color: textColor,
                       ),
                     ),
                   ],
@@ -360,13 +406,13 @@ class PetProfileScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.grey[200],
+                    color: tagBgColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
                     _formatDate(visit.date),
                     style: TextStyle(
-                      color: Colors.grey[700],
+                      color: subTextColor,
                       fontSize: 12,
                     ),
                   ),
@@ -374,18 +420,18 @@ class PetProfileScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            _buildVisitDetail('Reason', visit.reason),
+            _buildVisitDetail('Reason', visit.reason, textColor, subTextColor),
             if (visit.diagnosis != null)
-              _buildVisitDetail('Diagnosis', visit.diagnosis!),
+              _buildVisitDetail('Diagnosis', visit.diagnosis!, textColor, subTextColor),
             if (visit.treatment != null)
-              _buildVisitDetail('Treatment', visit.treatment!),
+              _buildVisitDetail('Treatment', visit.treatment!, textColor, subTextColor),
           ],
         ),
       ),
     );
   }
   
-  Widget _buildVisitDetail(String label, String value) {
+  Widget _buildVisitDetail(String label, String value, Color textColor, Color subTextColor) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -394,7 +440,7 @@ class PetProfileScreen extends StatelessWidget {
           Text(
             '$label: ',
             style: TextStyle(
-              color: Colors.grey[700],
+              color: subTextColor,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -402,7 +448,7 @@ class PetProfileScreen extends StatelessWidget {
             child: Text(
               value,
               style: TextStyle(
-                color: Colors.grey[800],
+                color: textColor,
               ),
             ),
           ),
@@ -439,32 +485,41 @@ class PetProfileScreen extends StatelessWidget {
     }
   }
 
-  void _showDeleteConfirmation(BuildContext context) {
+  void _showDeleteConfirmation(BuildContext context, bool isDark) {
+    final dialogBgColor = isDark ? Colors.grey[850] : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final subTextColor = isDark ? Colors.grey[400] : Colors.grey[600];
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: dialogBgColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        title: const Text('Delete Pet'),
+        title: Text(
+          'Delete Pet',
+          style: TextStyle(color: textColor),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.warning_amber_rounded,
-              color: Colors.red[400],
+              color: Colors.red[isDark ? 300 : 400],
               size: 48,
             ),
             const SizedBox(height: 16),
             Text(
               'Are you sure you want to delete ${pet.name}?',
               textAlign: TextAlign.center,
+              style: TextStyle(color: textColor),
             ),
             const SizedBox(height: 8),
             Text(
               'This action cannot be undone.',
               style: TextStyle(
-                color: Colors.grey[600],
+                color: subTextColor,
                 fontSize: 12,
               ),
               textAlign: TextAlign.center,
@@ -474,7 +529,12 @@ class PetProfileScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: isDark ? Colors.grey[300] : Colors.grey[700],
+              ),
+            ),
           ),
           ElevatedButton.icon(
             onPressed: () {

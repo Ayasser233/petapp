@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
-import 'package:petapp/core/utils/constants.dart';
 import 'package:petapp/core/utils/helper_functions.dart'; // Added for isDarkMode check
+import 'package:petapp/core/widgets/custom_app_bar.dart';
 import 'package:petapp/features/home/models/clinic_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -90,57 +90,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
-    
+
     return BaseScreen(
       navBarIndex: 0,
+      appBar: CustomAppBar(
+        showLogo: true, // Show the logo in the AppBar
+        isDark: isDark,
+      ),
       body: SafeArea(
         child: Column(
           children: [
-            // Fixed header with logo and notification
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0), // Reduced vertical padding from 16 to 8
-              decoration: BoxDecoration(
-                color: isDark ? Colors.black : Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Logo with transparent background
-                  Container(
-                    alignment: Alignment.centerLeft,
-                    child: Image.asset(
-                      isDark ? Constants.mainlogoDark : Constants.mainlogoLight,
-                      height: 90, // Slightly smaller for fixed header
-                      width: 90,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: isDark ? AppColors.lightblack : Colors.grey[100],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.notifications_outlined,
-                        color: isDark ? AppColors.orange : Colors.grey[700],
-                      ),
-                      onPressed: () {
-                        // Handle notification tap
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
             // Scrollable content
             Expanded(
               child: SingleChildScrollView(
@@ -228,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Rewards & Points card - enhanced with better shadows and effects
+                      // Rewards & Points card
                       Container(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 20, vertical: 16),

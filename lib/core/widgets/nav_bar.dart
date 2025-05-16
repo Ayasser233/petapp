@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/app_colors.dart';
+import 'package:petapp/core/utils/helper_functions.dart';
 
 class CommonBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -13,7 +14,10 @@ class CommonBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = THelperFunctions.isDarkMode(context);
+
     return BottomNavigationBar(
+      backgroundColor: isDark? AppColors.black: AppColors.white,
       currentIndex: currentIndex,
       type: BottomNavigationBarType.fixed,
       selectedItemColor: AppColors.orange,

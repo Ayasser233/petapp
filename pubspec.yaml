@@ -43,12 +43,17 @@ dependencies:
   geolocator: ^9.0.2
   shared_preferences: ^2.3.3
   model_viewer_plus: ^1.5.0
+  # flutter_gl: ^0.0.21
+  vector_math: ^2.1.4
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
   table_calendar: ^3.0.9
   qr_flutter: ^4.1.0
-  image_picker: ^0.8.7+5
+  image_picker: ^1.1.2
+  # path_provider: ^2.1.1
+  flutter_cube: ^0.1.1
+  dio: ^5.8.0+1
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +85,7 @@ flutter:
     - assets/animations/
     - assets/icons/
     - assets/logos/
+    - assets/models/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

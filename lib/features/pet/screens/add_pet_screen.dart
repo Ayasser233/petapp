@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
+import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -42,17 +43,19 @@ class _AddPetScreenState extends State<AddPetScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      backgroundColor: Theme.of(context).cardColor,
       builder: (context) {
         return Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              Text(
                 'Choose Photo',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.titleLarge?.color,
                 ),
               ),
               const SizedBox(height: 20),
@@ -121,9 +124,10 @@ class _AddPetScreenState extends State<AddPetScreen> {
           const SizedBox(height: 8),
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
         ],
@@ -138,13 +142,17 @@ class _AddPetScreenState extends State<AddPetScreen> {
       firstDate: DateTime(2010),
       lastDate: DateTime.now(),
       builder: (context, child) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
               primary: AppColors.orange,
               onPrimary: Colors.white,
-              onSurface: Colors.black,
+              onSurface: isDark ? Colors.white : Colors.black,
+              surface: isDark ? Colors.grey[850]! : Colors.white,
             ),
+            dialogBackgroundColor: isDark ? Colors.grey[900] : Colors.white,
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.orange,
@@ -187,16 +195,27 @@ class _AddPetScreenState extends State<AddPetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = THelperFunctions.isDarkMode(context);
+    final backgroundColor = isDark ? Colors.grey[900] : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final inputFillColor = isDark ? Colors.grey[800] : Colors.grey[100];
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Add New Pet',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
         ),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
+        iconTheme: IconThemeData(
+          color: isDark ? Colors.white : Colors.black87,
+        ),
       ),
       body: SingleChildScrollView(
         child: Form(
@@ -211,8 +230,8 @@ class _AddPetScreenState extends State<AddPetScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.orange.withOpacity(0.1),
-                      Colors.white,
+                      AppColors.orange.withOpacity(isDark ? 0.2 : 0.1),
+                      backgroundColor!,
                     ],
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -229,12 +248,12 @@ class _AddPetScreenState extends State<AddPetScreen> {
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             border: Border.all(
-                              color: Colors.white,
+                              color: isDark ? Colors.grey[800]! : Colors.white,
                               width: 4,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
                                 spreadRadius: 1,
                                 blurRadius: 5,
                                 offset: const Offset(0, 2),
@@ -263,7 +282,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                               color: AppColors.orange,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: Colors.white,
+                                color: isDark ? Colors.grey[800]! : Colors.white,
                                 width: 2,
                               ),
                             ),
@@ -287,21 +306,25 @@ class _AddPetScreenState extends State<AddPetScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Pet name
-                    const Text(
+                    Text(
                       'Pet Name',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: textColor,
                       ),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _nameController,
+                      style: TextStyle(color: textColor),
                       decoration: InputDecoration(
                         hintText: 'Enter your pet\'s name',
+                        hintStyle: TextStyle(
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        ),
                         filled: true,
-                        fillColor: Colors.grey[100],
+                        fillColor: inputFillColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -319,14 +342,13 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       },
                     ),
                     const SizedBox(height: 20),
-                    
                     // Pet type
-                    const Text(
+                    Text(
                       'Pet Type',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: textColor,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -335,30 +357,33 @@ class _AddPetScreenState extends State<AddPetScreen> {
                         return Expanded(
                           child: Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: _buildTypeOption(type),
+                            child: _buildTypeOption(type, isDark),
                           ),
                         );
                       }).toList(),
                     ),
                     const SizedBox(height: 20),
-                    
                     // Specific type (if Other is selected)
                     if (_selectedType == 'Other') ...[
-                      const Text(
+                      Text(
                         'Specify Pet Type',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: textColor,
                         ),
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _specificTypeController,
+                        style: TextStyle(color: textColor),
                         decoration: InputDecoration(
                           hintText: 'e.g., Rabbit, Bird, etc.',
+                          hintStyle: TextStyle(
+                            color: isDark ? Colors.grey[400] : Colors.grey[600],
+                          ),
                           filled: true,
-                          fillColor: Colors.grey[100],
+                          fillColor: inputFillColor,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
@@ -375,12 +400,12 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     ],
                     
                     // Birthdate
-                    const Text(
+                    Text(
                       'Birthdate',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: textColor,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -389,7 +414,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                         decoration: BoxDecoration(
-                          color: Colors.grey[100],
+                          color: inputFillColor,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -401,14 +426,15 @@ class _AddPetScreenState extends State<AddPetScreen> {
                             const SizedBox(width: 12),
                             Text(
                               '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
+                                color: textColor,
                               ),
                             ),
                             const Spacer(),
-                            const Icon(
+                            Icon(
                               Icons.arrow_drop_down,
-                              color: Colors.grey,
+                              color: isDark ? Colors.grey[400] : Colors.grey,
                             ),
                           ],
                         ),
@@ -417,21 +443,25 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     const SizedBox(height: 20),
                     
                     // Notes
-                    const Text(
+                    Text(
                       'Special Needs or Notes',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        color: textColor,
                       ),
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
                       controller: _notesController,
+                      style: TextStyle(color: textColor),
                       decoration: InputDecoration(
                         hintText: 'Any special needs, allergies, or notes about your pet',
+                        hintStyle: TextStyle(
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        ),
                         filled: true,
-                        fillColor: Colors.grey[100],
+                        fillColor: inputFillColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -476,7 +506,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
     );
   }
   
-  Widget _buildTypeOption(String type) {
+  Widget _buildTypeOption(String type, bool isDark) {
     final bool isSelected = _selectedType == type;
     
     IconData iconData;
@@ -496,6 +526,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
         color = AppColors.orange;
     }
     
+    final backgroundColor = isDark 
+        ? (isSelected ? color.withOpacity(0.2) : Colors.grey[800])
+        : (isSelected ? color.withOpacity(0.1) : Colors.grey[100]);
+        
+    final textColor = isDark
+        ? (isSelected ? color : Colors.grey[400])
+        : (isSelected ? color : Colors.grey[700]);
+    
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -505,7 +543,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? color.withOpacity(0.1) : Colors.grey[100],
+          color: backgroundColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isSelected ? color : Colors.transparent,
@@ -516,14 +554,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
           children: [
             Icon(
               iconData,
-              color: isSelected ? color : Colors.grey,
+              color: isSelected ? color : (isDark ? Colors.grey[400] : Colors.grey),
               size: 28,
             ),
             const SizedBox(height: 8),
             Text(
               type,
               style: TextStyle(
-                color: isSelected ? color : Colors.grey[700],
+                color: textColor,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
               ),
             ),

@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:dio/dio.dart'; // Import Dio package
 import 'package:petapp/core/styles/input_styles.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/app_fonts.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
+import 'package:petapp/core/widgets/phone_input_field.dart';
+import 'package:petapp/core/utils/validation_utils.dart';
+import 'package:petapp/core/models/country_code.dart';
+import 'package:petapp/core/services/api_client.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -65,6 +70,11 @@ class _SignUpFormState extends State<SignUpForm> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  CountryCode _selectedCountry = CountryCodes.commonCodes.first; // Add this line
+
+  // Add ApiClient instance
+  final ApiClient _apiClient = ApiClient();
+
   @override
   void initState() {
     super.initState();
@@ -97,49 +107,6 @@ class _SignUpFormState extends State<SignUpForm> {
     });
   }
 
-  // Validate form fields
-  String? _validateName(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your name';
-    }
-    if (value.length < 4) {
-      return 'Name is too short';
-    }
-    return null;
-  }
-
-  String? _validatePhone(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your phone number';
-    }
-    // Simple phone validation - improve based on your requirements
-    if (value.length < 10) {
-      return 'Phone number is too short';
-    }
-    return null;
-  }
-
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your email';
-    }
-    // Simple email validation
-    if (!value.contains('@') || !value.contains('.')) {
-      return 'Please enter a valid email';
-    }
-    return null;
-  }
-
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a password';
-    }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
-    return null;
-  }
-
   // Handle sign up
   Future<void> _handleSignUp() async {
     // First validate the form
@@ -153,22 +120,32 @@ class _SignUpFormState extends State<SignUpForm> {
     });
 
     try {
-      // Simulate API call with delay
-      await Future.delayed(const Duration(seconds: 2));
+      // Prepare data for API with the country code
+      final Map<String, dynamic> userData = {
+        'name': _nameController.text,
+        'phone': '${_selectedCountry.dialCode}${_phoneController.text}',
+        'email': _emailController.text,
+        'password': _passwordController.text,
+      };
 
-      // TODO: Replace this with your actual API call
-      // For example:
-      // final response = await AuthService.signUp(
-      //   name: _nameController.text,
-      //   phone: _phoneController.text,
-      //   email: _emailController.text,
-      //   password: _passwordController.text
-      // );
-
+      // Call register method from API client
+      await _apiClient.register(userData);
+      
       // Hide loading indicator
       setState(() {
         _isLoading = false;
       });
+
+      // Show success message
+      Get.snackbar(
+        'Registration Successful',
+        'Please verify your email to continue',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.withOpacity(0.1),
+        colorText: Colors.green,
+        borderRadius: 8,
+        margin: const EdgeInsets.all(16),
+      );
 
       // Navigate to verification screen
       Get.toNamed(AppRoutes.verifyEmail, arguments: _emailController.text);
@@ -178,10 +155,21 @@ class _SignUpFormState extends State<SignUpForm> {
         _isLoading = false;
       });
 
-      // Show error message
+      // Show error message with more details if available
+      String errorMessage = 'Registration failed. Please try again.';
+      
+      if (e is DioException && e.response != null) {
+        // Try to extract error message from API response
+        try {
+          errorMessage = e.response?.data['message'] ?? errorMessage;
+        } catch (_) {
+          // Use default error message if can't extract from response
+        }
+      }
+
       Get.snackbar(
-        'Sign Up Failed',
-        e.toString(),
+        'Registration Failed',
+        errorMessage,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.withOpacity(0.1),
         colorText: Colors.red,
@@ -234,7 +222,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 errorStyle: const TextStyle(height: 0.8),
               ),
               autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: _validateName,
+              validator: ValidationUtils.validateName,
               onChanged: (value) => _checkFormValidity(),
               keyboardType: TextInputType.name,
               textInputAction: TextInputAction.next,
@@ -244,64 +232,17 @@ class _SignUpFormState extends State<SignUpForm> {
             ),
             const SizedBox(height: 16.0),
 
-            // Phone Number Field (label removed)
-            TextFormField(
+            // NEW Phone Number Field with country code
+            PhoneInputField(
               controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              decoration: InputDecoration(
-                prefixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(width: 12.0),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('+1',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                    color: isDark ? Colors.white : Colors.black,
-                                  )),
-                          const Icon(Icons.arrow_drop_down,
-                              size: 16, color: AppColors.orange),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                hintText: 'Phone Number',
-                hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[400],
-                    ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16.0),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16.0),
-                  borderSide: BorderSide.none,
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16.0),
-                  borderSide: BorderSide.none,
-                ),
-                focusedErrorBorder: focusedFieldStyle(),
-                focusedBorder: focusedFieldStyle(),
-                filled: true,
-                fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
-                contentPadding: const EdgeInsets.symmetric(
-                    vertical: 16.0, horizontal: 16.0),
-                errorStyle: const TextStyle(height: 0.8),
-              ),
-              validator: _validatePhone,
-              onChanged: (value) => _checkFormValidity(),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: isDark ? Colors.white : Colors.black,
-                  ),
+              isDark: isDark,
+              hintText: 'Phone Number',
+              onChanged: (phone, country) {
+                setState(() {
+                  _selectedCountry = country;
+                });
+                _checkFormValidity();
+              },
             ),
             const SizedBox(height: 16.0),
 
@@ -335,7 +276,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     vertical: 16.0, horizontal: 16.0),
                 errorStyle: const TextStyle(height: 0.8),
               ),
-              validator: _validateEmail,
+              validator: ValidationUtils.validateEmail,
               onChanged: (value) => _checkFormValidity(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: isDark ? Colors.white : Colors.black,
@@ -384,7 +325,7 @@ class _SignUpFormState extends State<SignUpForm> {
                     vertical: 16.0, horizontal: 16.0),
                 errorStyle: const TextStyle(height: 0.8),
               ),
-              validator: _validatePassword,
+              validator: ValidationUtils.validatePassword,
               onChanged: (value) => _checkFormValidity(), // Simplified
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: isDark ? Colors.white : Colors.black,

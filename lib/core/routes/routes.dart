@@ -13,7 +13,7 @@ import 'package:petapp/features/home/screens/clinic_detail_screen.dart';
 import 'package:petapp/features/home/screens/service_selection_screen.dart';
 import 'package:petapp/features/home/screens/activity_screen.dart';
 import 'package:petapp/features/home/screens/profile_screen.dart';
-import 'package:petapp/features/pets/3d_pet.dart';
+import 'package:petapp/features/pet/screens/3d_pet.dart';
 import 'package:petapp/features/home/screens/hospital_booking_screen.dart';
 import 'package:petapp/features/clinic/screens/clinic_explorer_screen.dart';
 // Add these imports for the pet-related screens

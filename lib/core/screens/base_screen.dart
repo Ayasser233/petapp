@@ -4,7 +4,7 @@ import 'package:petapp/core/widgets/nav_bar.dart';
 class BaseScreen extends StatelessWidget {
   final int navBarIndex;
   final Widget body;
-  final AppBar? appBar;
+  final PreferredSizeWidget? appBar;
   final FloatingActionButton? floatingActionButton;
   
   const BaseScreen({
