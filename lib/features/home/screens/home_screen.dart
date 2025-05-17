@@ -117,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               onTap: () => Get.toNamed(AppRoutes.clinicExplorer)),
                           _buildServiceItem(
                               context, '3D Animal View', Icons.threed_rotation, isDark,
-                              onTap: () => Get.toNamed(AppRoutes.pet3d)),
+                              onTap: () => Get.toNamed(AppRoutes.pet3DModelSelector)),
                           _buildServiceItem(
                               context, 'Virtual Vet', Icons.videocam_outlined, isDark,
                               onTap: () =>

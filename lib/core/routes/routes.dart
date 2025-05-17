@@ -12,14 +12,14 @@ import 'package:petapp/features/home/screens/home_screen.dart';
 import 'package:petapp/features/clinic/screens/clinic_detail_screen.dart';
 import 'package:petapp/features/home/screens/activity_screen.dart';
 import 'package:petapp/features/home/screens/profile_screen.dart';
-import 'package:petapp/features/pet/screens/3d_pet.dart';
+import 'package:petapp/features/pet/screens/pet_3d_viewer/pet_3d_viewer_screen.dart';
+import 'package:petapp/features/pet/screens/pet_3d_viewer/pet_3d_model_selector.dart';
 import 'package:petapp/features/clinic/screens/hospital_booking_screen.dart';
 import 'package:petapp/features/clinic/screens/clinic_explorer_screen.dart';
 // Add these imports for the pet-related screens
 import 'package:petapp/features/pet/screens/my_pets.dart';
 import 'package:petapp/features/pet/screens/add_pet.dart';
 import 'package:petapp/features/pet/screens/pet_profile.dart';
-
 
 class AppRoutes {
   static const String onboarding = '/onboarding';
@@ -37,8 +37,9 @@ class AppRoutes {
   static const String checkout = '/checkout';
   static const String activity = '/activity';
   static const String profile = '/profile';
-  static const String pet3d = '/pet-3d-representation';
-  static const String hospitalBooking = '/hospital-booking';  
+  static const String pet3DViewer = '/pet-3d-viewer-screen';
+  static const String pet3DModelSelector = '/pet-3d-model-selector';
+  static const String hospitalBooking = '/hospital-booking';
   static const String clinicExplorer = '/clinic-explorer';
   // Add these route constants here instead of inside the getPages list
   static const String myPets = '/my-pets';
@@ -49,19 +50,41 @@ class AppRoutes {
         GetPage(name: onboarding, page: () => const OnboardingScreen()),
         GetPage(name: signUp, page: () => const SignUpScreen()),
         GetPage(name: login, page: () => const LoginScreen()),
-        GetPage(name: verifyEmail, page: () => const VerifyEmailScreen(email: '')),
+        GetPage(
+            name: verifyEmail, page: () => const VerifyEmailScreen(email: '')),
         GetPage(name: forgotPassword, page: () => const ForgotPasswordScreen()),
-        GetPage(name: enterVerificationCode, page: () => const EnterVerificationCodeScreen()),
-        GetPage(name: createNewPassword, page: () => const CreateNewPasswordScreen()),
+        GetPage(
+            name: enterVerificationCode,
+            page: () => const EnterVerificationCodeScreen()),
+        GetPage(
+            name: createNewPassword,
+            page: () => const CreateNewPasswordScreen()),
         GetPage(name: chooseLocation, page: () => const ChooseLocationScreen()),
         GetPage(name: setLocation, page: () => const SetLocationScreen()),
         GetPage(name: home, page: () => const HomeScreen()),
-        GetPage(name: clinicDetail, page: () => ClinicDetailScreen(clinic: Get.arguments)),
+        GetPage(
+            name: clinicDetail,
+            page: () => ClinicDetailScreen(clinic: Get.arguments)),
         // GetPage(name: checkout, page: () => const CheckoutScreen()),
         GetPage(name: activity, page: () => const ActivityScreen()),
         GetPage(name: profile, page: () => const ProfileScreen()),
-        GetPage(name: pet3d, page: () => const Pet3DRepresentationScreen()),
-        GetPage(name: hospitalBooking, page: () => const HospitalBookingScreen()),
+        GetPage(
+          name: pet3DViewer,
+          page: () {
+            final args = Get.arguments as Map<String, dynamic>;
+            return Pet3DViewerScreen(
+              petType: args['petType'],
+              petName: args['petName'],
+              modelPath: args['modelPath'],
+            );
+          },
+        ),
+        GetPage(
+          name: pet3DModelSelector,
+          page: () => const Pet3DModelSelector(),
+        ),
+        GetPage(
+            name: hospitalBooking, page: () => const HospitalBookingScreen()),
         GetPage(name: clinicExplorer, page: () => const ClinicExplorerScreen()),
         // Add these GetPage entries properly to the list
         GetPage(

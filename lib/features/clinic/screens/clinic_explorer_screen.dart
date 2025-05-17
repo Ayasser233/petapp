@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
+import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/features/clinic/models/clinic_model.dart';
 
 class ClinicExplorerScreen extends StatefulWidget {
@@ -237,7 +238,7 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
   @override
   Widget build(BuildContext context) {
     // Check if dark mode is active
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = THelperFunctions.isDarkMode(context);
     
     // Theme-based colors
     final backgroundColor = isDark ? Colors.black : Colors.white;

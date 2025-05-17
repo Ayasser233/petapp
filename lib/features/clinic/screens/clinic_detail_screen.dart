@@ -48,8 +48,9 @@ class ClinicDetailScreen extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          clinic['category'] ?? 'Hospital',
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+          'Clinic Details',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
             color: textColor,
           ),
         ),
