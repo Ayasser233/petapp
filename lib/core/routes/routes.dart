@@ -10,7 +10,6 @@ import 'package:petapp/features/location/screens/choose_location.dart';
 import 'package:petapp/features/location/screens/set_location.dart';
 import 'package:petapp/features/home/screens/home_screen.dart';
 import 'package:petapp/features/clinic/screens/clinic_detail_screen.dart';
-import 'package:petapp/features/clinic/screens/service_selection_screen.dart';
 import 'package:petapp/features/home/screens/activity_screen.dart';
 import 'package:petapp/features/home/screens/profile_screen.dart';
 import 'package:petapp/features/pet/screens/3d_pet.dart';
@@ -58,7 +57,6 @@ class AppRoutes {
         GetPage(name: setLocation, page: () => const SetLocationScreen()),
         GetPage(name: home, page: () => const HomeScreen()),
         GetPage(name: clinicDetail, page: () => ClinicDetailScreen(clinic: Get.arguments)),
-        GetPage(name: serviceSelection, page: () => ServiceSelectionScreen(arguments: Get.arguments)),
         // GetPage(name: checkout, page: () => const CheckoutScreen()),
         GetPage(name: activity, page: () => const ActivityScreen()),
         GetPage(name: profile, page: () => const ProfileScreen()),

@@ -166,6 +166,7 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
   
@@ -235,7 +236,19 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
   
   @override
   Widget build(BuildContext context) {
+    // Check if dark mode is active
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // Theme-based colors
+    final backgroundColor = isDark ? Colors.black : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black;
+    final subTextColor = isDark ? Colors.grey[400] : Colors.grey[700];
+    final cardColor = isDark ? Colors.grey[850] : Colors.white;
+    final searchBgColor = isDark ? AppColors.lightblack : Colors.grey[100];
+    final chipBgColor = isDark ? Colors.grey[800] : Colors.grey[200];
+    
     return Scaffold(
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -247,22 +260,23 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
               // Search bar
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: searchBgColor,
                   borderRadius: BorderRadius.circular(30),
                 ),
                 child: Row(
                   children: [
                     const SizedBox(width: 16),
-                    const Icon(Icons.search, color: Colors.grey),
+                    Icon(Icons.search, color: subTextColor),
                     const SizedBox(width: 8),
                     Expanded(
                       child: TextField(
                         controller: _searchController,
                         focusNode: _searchFocusNode,
-                        decoration: const InputDecoration(
+                        style: TextStyle(color: textColor),
+                        decoration: InputDecoration(
                           hintText: 'Hospital',
                           border: InputBorder.none,
-                          hintStyle: TextStyle(color: Colors.grey),
+                          hintStyle: TextStyle(color: subTextColor),
                         ),
                         onChanged: (value) {
                           _applyFilters();
@@ -270,7 +284,7 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.tune, color: Colors.grey),
+                      icon: Icon(Icons.tune, color: subTextColor),
                       onPressed: () {
                         _showFilterModal();
                       },
@@ -302,7 +316,9 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                         margin: const EdgeInsets.only(right: 16),
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.orange.withOpacity(0.1) : Colors.transparent,
+                          color: isSelected 
+                              ? AppColors.orange.withOpacity(isDark ? 0.2 : 0.1) 
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(20),
                           border: Border.all(
                             color: isSelected ? AppColors.orange : Colors.transparent,
@@ -311,7 +327,7 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                         child: Text(
                           category,
                           style: TextStyle(
-                            color: isSelected ? AppColors.orange : Colors.black,
+                            color: isSelected ? AppColors.orange : textColor,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           ),
                         ),
@@ -331,10 +347,11 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                     'Search Result',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: textColor,
                     ),
                   ),
                   Text(
-                    '${_filteredClinics.length} founds',
+                    '${_filteredClinics.length} found',
                     style: const TextStyle(
                       color: AppColors.orange,
                       fontWeight: FontWeight.bold,
@@ -348,15 +365,18 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
               // Clinic list
               Expanded(
                 child: _filteredClinics.isEmpty
-                    ? const Center(
-                        child: Text('No clinics found matching your filters'),
+                    ? Center(
+                        child: Text(
+                          'No clinics found matching your filters',
+                          style: TextStyle(color: subTextColor),
+                        ),
                       )
                     : ListView.builder(
                         padding: EdgeInsets.zero,
                         itemCount: _filteredClinics.length,
                         itemBuilder: (context, index) {
                           final clinic = _filteredClinics[index];
-                          return _buildClinicCard(clinic);
+                          return _buildClinicCard(clinic, isDark, cardColor, textColor, subTextColor, chipBgColor);
                         },
                       ),
               ),
@@ -367,13 +387,22 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
     );
   }
   
-  Widget _buildClinicCard(ClinicModel clinic) {
+  Widget _buildClinicCard(
+    ClinicModel clinic,
+    bool isDark,
+    Color? cardColor,
+    Color textColor,
+    Color? subTextColor,
+    Color? chipBgColor,
+  ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      elevation: 4,
+      color: cardColor,
+      shadowColor: isDark ? Colors.black : Colors.grey.withOpacity(0.3),
+      elevation: isDark ? 8 : 4,
       child: InkWell(
         onTap: () {
           Get.toNamed(
@@ -455,8 +484,10 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                   // Clinic name
                   Text(
                     clinic.name,
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    style: TextStyle(
+                      fontSize: 18,
                       fontWeight: FontWeight.bold,
+                      color: textColor,
                     ),
                   ),
                   
@@ -473,15 +504,17 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                       const SizedBox(width: 4),
                       Text(
                         clinic.location,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey,
+                        style: TextStyle(
+                          color: subTextColor,
+                          fontSize: 14,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         '• ${clinic.distance}',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey,
+                        style: TextStyle(
+                          color: subTextColor,
+                          fontSize: 14,
                         ),
                       ),
                     ],
@@ -498,13 +531,14 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade200,
+                            color: chipBgColor,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Text(
                             service,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
+                              color: textColor,
                             ),
                           ),
                         );
@@ -530,6 +564,7 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
+                        elevation: isDark ? 8 : 2,
                       ),
                       child: const Text(
                         'Book Now',
@@ -565,10 +600,17 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
+        // Get theme colors
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final textColor = isDark ? Colors.white : Colors.black;
+        final subTextColor = isDark ? Colors.grey[400] : Colors.grey[700];
+        final borderColor = isDark ? Colors.grey[700] : Colors.grey[300];
+        
         return StatefulBuilder(
           builder: (context, setState) {
             return Container(
@@ -583,7 +625,7 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
+                        color: borderColor,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -591,22 +633,24 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                   
                   const SizedBox(height: 20),
                   
-                  const Text(
+                  Text(
                     'Filter',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: textColor,
                     ),
                   ),
                   
                   const SizedBox(height: 24),
                   
                   // Location filter
-                  const Text(
+                  Text(
                     'Location',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      color: textColor,
                     ),
                   ),
                   
@@ -615,29 +659,47 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                   // Location options
                   Row(
                     children: [
-                      _buildFilterChip('All Clinics', tempLocationOption == 'All Clinics', () {
-                        setState(() {
-                          tempLocationOption = 'All Clinics';
-                          tempRegion = 'All Regions';
-                        });
-                      }),
+                      _buildFilterChip(
+                        'All Clinics',
+                        tempLocationOption == 'All Clinics',
+                        () {
+                          setState(() {
+                            tempLocationOption = 'All Clinics';
+                            tempRegion = 'All Regions';
+                          });
+                        },
+                        isDark,
+                        borderColor,
+                      ),
                       const SizedBox(width: 8),
-                      _buildFilterChip('Nearby', tempLocationOption == 'Nearby', () {
-                        setState(() {
-                          tempLocationOption = 'Nearby';
-                          tempRegion = 'All Regions';
-                        });
-                      }),
+                      _buildFilterChip(
+                        'Nearby', 
+                        tempLocationOption == 'Nearby',
+                        () {
+                          setState(() {
+                            tempLocationOption = 'Nearby';
+                            tempRegion = 'All Regions';
+                          });
+                        },
+                        isDark,
+                        borderColor,
+                      ),
                       const SizedBox(width: 8),
-                      _buildFilterChip('Region', tempLocationOption == 'Region', () {
-                        setState(() {
-                          tempLocationOption = 'Region';
-                          // If no region was previously selected, select the first one
-                          if (tempRegion == 'All Regions' && _regions.length > 1) {
-                            tempRegion = _regions[1]; // First non-All region
-                          }
-                        });
-                      }),
+                      _buildFilterChip(
+                        'Region',
+                        tempLocationOption == 'Region',
+                        () {
+                          setState(() {
+                            tempLocationOption = 'Region';
+                            // If no region was previously selected, select the first one
+                            if (tempRegion == 'All Regions' && _regions.length > 1) {
+                              tempRegion = _regions[1]; // First non-All region
+                            }
+                          });
+                        },
+                        isDark,
+                        borderColor,
+                      ),
                     ],
                   ),
                   
@@ -648,14 +710,17 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
+                          border: Border.all(color: borderColor!),
                           borderRadius: BorderRadius.circular(8),
+                          color: isDark ? AppColors.lightblack : Colors.grey[50],
                         ),
                         child: DropdownButton<String>(
                           value: tempRegion,
                           isExpanded: true,
                           underline: const SizedBox(),
-                          hint: const Text('Select Region'),
+                          dropdownColor: isDark ? Colors.grey[850] : Colors.white,
+                          style: TextStyle(color: textColor),
+                          hint: Text('Select Region', style: TextStyle(color: subTextColor)),
                           items: _regions.where((region) => region != 'All Regions').map((String region) {
                             return DropdownMenuItem<String>(
                               value: region,
@@ -674,11 +739,12 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                   const SizedBox(height: 24),
                   
                   // Services filter
-                  const Text(
+                  Text(
                     'Services',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
+                      color: textColor,
                     ),
                   ),
                   
@@ -689,32 +755,44 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: [
-                      _buildMultiSelectChip('All', tempSelectedServices.contains('All Services'), () {
-                        setState(() {
-                          // If All is selected, clear other selections
-                          tempSelectedServices = ['All Services'];
-                        });
-                      }),
-                      ...['Grooming', 'Pet Hotel', 'Consultation', 'Vaccination', 'Surgery'].map((service) {
-                        return _buildMultiSelectChip(service, tempSelectedServices.contains(service), () {
+                      _buildMultiSelectChip(
+                        'All',
+                        tempSelectedServices.contains('All Services'),
+                        () {
                           setState(() {
-                            // If a specific service is selected, remove 'All Services'
-                            if (tempSelectedServices.contains('All Services')) {
-                              tempSelectedServices.remove('All Services');
-                            }
-                            
-                            // Toggle selection
-                            if (tempSelectedServices.contains(service)) {
-                              tempSelectedServices.remove(service);
-                              // If no services selected, default to 'All Services'
-                              if (tempSelectedServices.isEmpty) {
-                                tempSelectedServices = ['All Services'];
-                              }
-                            } else {
-                              tempSelectedServices.add(service);
-                            }
+                            // If All is selected, clear other selections
+                            tempSelectedServices = ['All Services'];
                           });
-                        });
+                        },
+                        isDark,
+                        borderColor,
+                      ),
+                      ...['Grooming', 'Pet Hotel', 'Consultation', 'Vaccination', 'Surgery'].map((service) {
+                        return _buildMultiSelectChip(
+                          service,
+                          tempSelectedServices.contains(service),
+                          () {
+                            setState(() {
+                              // If a specific service is selected, remove 'All Services'
+                              if (tempSelectedServices.contains('All Services')) {
+                                tempSelectedServices.remove('All Services');
+                              }
+                              
+                              // Toggle selection
+                              if (tempSelectedServices.contains(service)) {
+                                tempSelectedServices.remove(service);
+                                // If no services selected, default to 'All Services'
+                                if (tempSelectedServices.isEmpty) {
+                                  tempSelectedServices = ['All Services'];
+                                }
+                              } else {
+                                tempSelectedServices.add(service);
+                              }
+                            });
+                          },
+                          isDark,
+                          borderColor,
+                        );
                       }),
                     ],
                   ),
@@ -739,7 +817,8 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
-                            side: BorderSide(color: Colors.grey.shade300),
+                            side: BorderSide(color: borderColor!),
+                            foregroundColor: textColor,
                           ),
                           child: const Text('Reset'),
                         ),
@@ -780,6 +859,7 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
+                            elevation: isDark ? 8 : 2,
                           ),
                           child: const Text('Apply'),
                         ),
@@ -795,45 +875,66 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
     );
   }
   
-  // Multi-select filter chip for services
-  Widget _buildMultiSelectChip(String label, bool isSelected, VoidCallback onTap) {
+  // Updated filter chips with dark mode support
+  Widget _buildMultiSelectChip(
+    String label, 
+    bool isSelected, 
+    VoidCallback onTap,
+    bool isDark,
+    Color? borderColor,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.orange.withOpacity(0.1) : Colors.transparent,
+          color: isSelected 
+              ? AppColors.orange.withOpacity(isDark ? 0.2 : 0.1) 
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.orange : Colors.grey.shade300,
+            color: isSelected ? AppColors.orange : borderColor!,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? AppColors.orange : Colors.grey.shade700,
+            color: isSelected 
+                ? AppColors.orange 
+                : (isDark ? Colors.grey[400] : Colors.grey[700]),
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
       ),
     );
   }
-  Widget _buildFilterChip(String label, bool isSelected, VoidCallback onTap) {
+
+  Widget _buildFilterChip(
+    String label, 
+    bool isSelected, 
+    VoidCallback onTap,
+    bool isDark,
+    Color? borderColor,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.orange.withOpacity(0.1) : Colors.transparent,
+          color: isSelected 
+              ? AppColors.orange.withOpacity(isDark ? 0.2 : 0.1) 
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? AppColors.orange : Colors.grey.shade300,
+            color: isSelected ? AppColors.orange : borderColor!,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? AppColors.orange : Colors.grey.shade700,
+            color: isSelected 
+                ? AppColors.orange 
+                : (isDark ? Colors.grey[400] : Colors.grey[700]),
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
           ),
         ),
