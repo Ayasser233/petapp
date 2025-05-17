@@ -66,15 +66,6 @@ class ProfileScreen extends StatelessWidget {
               
               _buildProfileOption(
                 context, 
-                'Payment Methods', 
-                Icons.payment, 
-                () {
-                  // Navigate to payment methods
-                }
-              ),
-              
-              _buildProfileOption(
-                context, 
                 'Settings', 
                 Icons.settings, 
                 () {
@@ -90,19 +81,13 @@ class ProfileScreen extends StatelessWidget {
                   // Navigate to help and support
                 }
               ),
-              
               _buildProfileOption(
                 context, 
-                'Reset App', 
-                Icons.refresh, 
-                () async {
-                  // Reset app state
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setBool('isLoggedIn', false);
-                  await prefs.setBool('isOnboardingCompleted', false);
-                  Get.offAllNamed(AppRoutes.onboarding);
-                },
-                isDestructive: true,
+                'Privacy Policy', 
+                Icons.privacy_tip, 
+                () {
+                  // Navigate to privacy policy
+                }
               ),
               
               _buildProfileOption(

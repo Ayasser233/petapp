@@ -5,7 +5,7 @@ import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/helper_functions.dart'; // Added for isDarkMode check
 import 'package:petapp/core/widgets/custom_app_bar.dart';
-import 'package:petapp/features/home/models/clinic_model.dart';
+import 'package:petapp/features/clinic/models/clinic_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -127,37 +127,36 @@ class _HomeScreenState extends State<HomeScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Search bar
-                      Container(
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColors.lightblack : Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Row(
-                          children: [
-                            const SizedBox(width: 16),
-                            Icon(
-                              Icons.search,
-                              color: isDark ? Colors.grey[400] : Colors.grey,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                decoration: InputDecoration(
-                                  hintText: 'Search clinics, services...',
-                                  border: InputBorder.none,
-                                  hintStyle: TextStyle(
+                      // Search bar - now acts as a button
+                      GestureDetector(
+                        onTap: () {
+                          // Navigate to clinics search screen when tapped
+                          Get.toNamed(AppRoutes.clinicExplorer, arguments: {'openSearch': true});
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isDark ? AppColors.lightblack : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.search,
+                                color: isDark ? Colors.grey[400] : Colors.grey,
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Search clinics, services...',
+                                  style: TextStyle(
                                     color: isDark ? Colors.grey[400] : Colors.grey,
+                                    fontSize: 16,
                                   ),
-                                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                                ),
-                                style: TextStyle(
-                                  color: isDark ? Colors.white : Colors.black87,
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 16),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                       

@@ -3,8 +3,8 @@ import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
-import 'package:petapp/features/pet/screens/add_pet_screen.dart';
-import 'package:petapp/features/pet/screens/pet_profile_screen.dart';
+import 'package:petapp/features/pet/screens/add_pet.dart';
+import 'package:petapp/features/pet/screens/pet_profile.dart';
 
 class MyPetsScreen extends StatefulWidget {
   const MyPetsScreen({super.key});

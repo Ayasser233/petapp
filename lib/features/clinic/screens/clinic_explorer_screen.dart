@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
-import 'package:petapp/features/home/models/clinic_model.dart';
+import 'package:petapp/features/clinic/models/clinic_model.dart';
 
 class ClinicExplorerScreen extends StatefulWidget {
   const ClinicExplorerScreen({super.key});
@@ -14,6 +14,7 @@ class ClinicExplorerScreen extends StatefulWidget {
 class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
   // Search and filter options
   final TextEditingController _searchController = TextEditingController();
+  final FocusNode _searchFocusNode = FocusNode();
   String _selectedCategory = 'All Category';
   String _selectedRegion = 'All Regions';
   String _selectedService = 'All Services';
@@ -152,6 +153,14 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
     super.initState();
     // Initialize filtered clinics with all clinics
     _filteredClinics = List.from(_allClinics);
+    
+    // Check if we should open search immediately
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (Get.arguments != null && Get.arguments['openSearch'] == true) {
+        // Focus the search field automatically
+        _focusSearch();
+      }
+    });
   }
   
   @override
@@ -249,6 +258,7 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
                     Expanded(
                       child: TextField(
                         controller: _searchController,
+                        focusNode: _searchFocusNode,
                         decoration: const InputDecoration(
                           hintText: 'Hospital',
                           border: InputBorder.none,
@@ -829,5 +839,9 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
         ),
       ),
     );
+  }
+  
+  void _focusSearch() {
+    _searchFocusNode.requestFocus();
   }
 }

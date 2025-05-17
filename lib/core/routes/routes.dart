@@ -9,17 +9,17 @@ import 'package:petapp/features/auth/screens/signup/verifyemail.dart';
 import 'package:petapp/features/location/screens/choose_location.dart';
 import 'package:petapp/features/location/screens/set_location.dart';
 import 'package:petapp/features/home/screens/home_screen.dart';
-import 'package:petapp/features/home/screens/clinic_detail_screen.dart';
-import 'package:petapp/features/home/screens/service_selection_screen.dart';
+import 'package:petapp/features/clinic/screens/clinic_detail_screen.dart';
+import 'package:petapp/features/clinic/screens/service_selection_screen.dart';
 import 'package:petapp/features/home/screens/activity_screen.dart';
 import 'package:petapp/features/home/screens/profile_screen.dart';
 import 'package:petapp/features/pet/screens/3d_pet.dart';
-import 'package:petapp/features/home/screens/hospital_booking_screen.dart';
+import 'package:petapp/features/clinic/screens/hospital_booking_screen.dart';
 import 'package:petapp/features/clinic/screens/clinic_explorer_screen.dart';
 // Add these imports for the pet-related screens
-import 'package:petapp/features/pet/screens/my_pets_screen.dart';
-import 'package:petapp/features/pet/screens/add_pet_screen.dart';
-import 'package:petapp/features/pet/screens/pet_profile_screen.dart';
+import 'package:petapp/features/pet/screens/my_pets.dart';
+import 'package:petapp/features/pet/screens/add_pet.dart';
+import 'package:petapp/features/pet/screens/pet_profile.dart';
 
 
 class AppRoutes {
