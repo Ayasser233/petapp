@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/themes/app_theme.dart';
 import 'package:petapp/core/routes/routes.dart';
+import 'package:provider/provider.dart';
+import 'package:petapp/core/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 // Add this function to reset app state
 Future<void> resetAppState() async {
@@ -15,7 +18,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   // Uncomment the next line to reset the app state when you need to test from beginning
-  await resetAppState();
+  // await resetAppState();
   
   final prefs = await SharedPreferences.getInstance();
   final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
@@ -30,7 +33,16 @@ void main() async {
     initialRoute = AppRoutes.signUp;
   }
   
-  runApp(MyApp(initialRoute: initialRoute));
+  // Initialize settings provider
+  final settingsProvider = SettingsProvider();
+  await settingsProvider.initPrefs();
+  
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider.value(value: settingsProvider),
+    ],
+    child: MyApp(initialRoute: initialRoute),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -39,14 +51,26 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = Provider.of<SettingsProvider>(context);
+    
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Pet App',
-      themeMode: ThemeMode.system,
+      themeMode: settingsProvider.getThemeMode(),
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      initialRoute: initialRoute, // Set the initial route
-      getPages: AppRoutes.getPages, // Use the centralized routes
+      locale: settingsProvider.getLocale(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en', ''), // English
+        Locale('ar', ''), // Arabic
+      ],
+      initialRoute: initialRoute,
+      getPages: AppRoutes.getPages,
     );
   }
 }

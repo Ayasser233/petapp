@@ -4,12 +4,19 @@ import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:petapp/features/home/screens/settings_screen.dart'; // Add this import
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+    final cardColor = isDark ? const Color(0xFF2A2A2A) : Colors.white;
+    final backgroundColor = isDark ? Colors.black : const Color(0xFFF5F5F5);
+    
     return BaseScreen(
       navBarIndex: 2, // This is the profile screen (index 2)
       appBar: AppBar(
@@ -18,125 +25,373 @@ class ProfileScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              // Profile image
-              const CircleAvatar(
-                radius: 60,
-                backgroundImage: AssetImage('assets/images/profile.jpg'),
-                child: DecoratedBox(
+        child: Container(
+          color: backgroundColor,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Welcome section with user info
+                Container(
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.transparent,
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // User profile image
+                      CircleAvatar(
+                        radius: 40,
+                        backgroundColor: AppColors.lightorange,
+                        backgroundImage: const AssetImage('assets/images/profile.jpg'),
+                      ),
+                      const SizedBox(height: 16),
+                      // User name and phone
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Welcome Aaron Smith',
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '+1 234 567 8910',
+                            style: TextStyle(
+                              color: subTextColor,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              
-              // User name
-              Text(
-                'Aaron Smith',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                
+                const SizedBox(height: 20),
+                
+                // Profile options list - now with rounded containers
+                _buildProfileOption(
+                  context,
+                  'My Account',
+                  Icons.person_outline,
+                  () {
+                    // Navigate to account settings
+                  },
+                  isDark: isDark,
+                  cardColor: cardColor,
                 ),
-              ),
-              const SizedBox(height: 8),
-              
-              // Email
-              Text(
-                'aaron.smith@example.com',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Colors.grey,
+                
+                const SizedBox(height: 12),
+                
+                _buildProfileOption(
+                  context,
+                  'Insurance',
+                  Icons.health_and_safety_outlined,
+                  () {
+                    // Navigate to insurance
+                  },
+                  isDark: isDark,
+                  cardColor: cardColor,
                 ),
-              ),
-              const SizedBox(height: 32),
-              
-              // Profile options
-              _buildProfileOption(
-                context, 
-                'My Pets', 
-                Icons.pets, 
-                () {
-                  Get.toNamed(AppRoutes.myPets);
-                }
-              ),
-              
-              _buildProfileOption(
-                context, 
-                'Settings', 
-                Icons.settings, 
-                () {
-                  // Navigate to settings
-                }
-              ),
-              
-              _buildProfileOption(
-                context, 
-                'Help & Support', 
-                Icons.help_outline, 
-                () {
-                  // Navigate to help and support
-                }
-              ),
-              _buildProfileOption(
-                context, 
-                'Privacy Policy', 
-                Icons.privacy_tip, 
-                () {
-                  // Navigate to privacy policy
-                }
-              ),
-              
-              _buildProfileOption(
-                context, 
-                'Log Out', 
-                Icons.logout, 
-                () async {
-                  // Log out
-                  final prefs = await SharedPreferences.getInstance();
-                  await prefs.setBool('isLoggedIn', false);
-                  Get.offAllNamed(AppRoutes.login);
-                },
-                isDestructive: true,
-              ),
-            ],
+                
+                const SizedBox(height: 12),
+                
+                _buildProfileOption(
+                  context,
+                  'Manage Cards',
+                  Icons.credit_card_outlined,
+                  () {
+                    // Navigate to payment methods
+                  },
+                  isDark: isDark,
+                  cardColor: cardColor,
+                ),
+                
+                const SizedBox(height: 12),
+                
+                _buildProfileOption(
+                  context,
+                  'My Questions',
+                  Icons.help_outline,
+                  () {
+                    // Navigate to questions
+                  },
+                  isDark: isDark,
+                  cardColor: cardColor,
+                ),
+                
+                const SizedBox(height: 12),
+                
+                _buildProfileOption(
+                  context,
+                  'Favorites',
+                  Icons.favorite_border,
+                  () {
+                    // Navigate to favorites
+                  },
+                  isDark: isDark,
+                  cardColor: cardColor,
+                ),
+                
+                const SizedBox(height: 12),
+                
+                _buildProfileOption(
+                  context,
+                  'PetApp Points',
+                  Icons.star_border,
+                  () {
+                    // Navigate to points
+                  },
+                  isDark: isDark,
+                  cardColor: cardColor,
+                ),
+                
+                const SizedBox(height: 12),
+                
+                _buildProfileOption(
+                  context,
+                  'Support',
+                  Icons.headset_mic_outlined,
+                  () {
+                    // Navigate to support
+                  },
+                  isDark: isDark,
+                  cardColor: cardColor,
+                ),
+                
+                const SizedBox(height: 12),
+                
+                _buildProfileOption(
+                  context,
+                  'Settings',
+                  Icons.settings_outlined,
+                  () {
+                    // Navigate to settings
+                    // Replace the Navigator.push code with:
+                    Get.toNamed(AppRoutes.settings);
+                  },
+                  isDark: isDark,
+                  cardColor: cardColor,
+                ),
+                
+                const SizedBox(height: 12),
+                
+                _buildProfileOption(
+                  context,
+                  'Rate the app',
+                  Icons.star_border,
+                  () {
+                    // Open app rating
+                  },
+                  isDark: isDark,
+                  cardColor: cardColor,
+                ),
+                
+                const SizedBox(height: 12),
+                
+                _buildProfileOption(
+                  context,
+                  'Log out',
+                  Icons.logout,
+                  () async {
+                    // Log out
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool('isLoggedIn', false);
+                    Get.offAllNamed(AppRoutes.login);
+                  },
+                  isDark: isDark,
+                  cardColor: cardColor,
+                  textColor: Colors.red,
+                ),
+                
+                // Social media links and footer
+                const SizedBox(height: 24),
+                
+                // Social media section with rounded container
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: cardColor,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Follow Us',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: textColor,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildSocialIcon(Icons.facebook, context),
+                          const SizedBox(width: 24),
+                          _buildSocialIcon(Icons.camera_alt_outlined, context),
+                          const SizedBox(width: 24),
+                          _buildSocialIcon(Icons.link, context),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Terms and Privacy Policy
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        // Navigate to terms
+                      },
+                      child: Text(
+                        'Terms and Conditions',
+                        style: TextStyle(
+                          color: subTextColor,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      ' · ',
+                      style: TextStyle(color: subTextColor),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        // Navigate to privacy policy
+                      },
+                      child: Text(
+                        'Privacy Policy',
+                        style: TextStyle(
+                          color: subTextColor,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 8),
+                Text(
+                  'PetApp v1.0.0',
+                  style: TextStyle(
+                    color: subTextColor,
+                    fontSize: 14,
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
   
+  // Updated method to create rounded profile options
   Widget _buildProfileOption(
     BuildContext context, 
     String title, 
     IconData icon, 
     VoidCallback onTap,
-    {bool isDestructive = false}
+    {bool isDark = false, Color cardColor = Colors.white, Color? textColor}
   ) {
-    return ListTile(
-      leading: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: isDestructive ? Colors.red.withOpacity(0.1) : AppColors.orange.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Icon(
-          icon,
-          color: isDestructive ? Colors.red : AppColors.orange,
-        ),
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontWeight: FontWeight.w500,
-          color: isDestructive ? Colors.red : null,
-        ),
-      ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+    final defaultTextColor = isDark ? Colors.white : Colors.black87;
+    
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.lightorange.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: AppColors.orange,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: textColor ?? defaultTextColor,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.grey,
+            ),
+          ],
+        ),
+      ),
     );
   }
+  
+  // Updated social icon widget with improved styling
+  Widget _buildSocialIcon(IconData icon, BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.lightorange.withOpacity(0.2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Icon(
+        icon,
+        color: AppColors.orange,
+        size: 22,
+      ),
+    );
+  }
+  
+  // Remove the _buildDivider method as we no longer need it
 }

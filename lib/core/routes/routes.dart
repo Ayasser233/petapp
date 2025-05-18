@@ -19,6 +19,8 @@ import 'package:petapp/features/clinic/screens/clinic_explorer_screen.dart';
 import 'package:petapp/features/pet/screens/my_pets.dart';
 import 'package:petapp/features/pet/screens/add_pet.dart';
 import 'package:petapp/features/pet/screens/pet_profile.dart';
+// Add import for settings screen
+import 'package:petapp/features/home/screens/settings_screen.dart';
 
 
 class AppRoutes {
@@ -44,6 +46,8 @@ class AppRoutes {
   static const String myPets = '/my-pets';
   static const String addPet = '/add-pet';
   static const String petProfile = '/pet-profile';
+  // Add settings route constant here
+  static const String settings = '/settings';
 
   static List<GetPage> get getPages => [
         GetPage(name: onboarding, page: () => const OnboardingScreen()),
@@ -78,5 +82,7 @@ class AppRoutes {
             pet: Get.arguments,
           ),
         ),
+        // Add settings page to the list
+        GetPage(name: settings, page: () => const SettingsScreen()),
       ];
 }

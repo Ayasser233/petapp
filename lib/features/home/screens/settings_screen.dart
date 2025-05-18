@@ -1,0 +1,627 @@
+import 'package:flutter/material.dart';
+import 'package:petapp/core/providers/settings_provider.dart';
+import 'package:petapp/core/screens/base_screen.dart';
+import 'package:petapp/core/utils/app_colors.dart';
+import 'package:provider/provider.dart';
+
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+    final cardColor = isDark ? const Color(0xFF2A2A2A) : Colors.white;
+    final backgroundColor = isDark ? Colors.black : const Color(0xFFF5F5F5);
+    
+    return BaseScreen(
+      navBarIndex: 2, // This is accessed from the profile screen
+      appBar: AppBar(
+        title: const Text('Settings'),
+        centerTitle: true,
+        elevation: 0,
+      ),
+      body: Container(
+        color: backgroundColor,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Theme Section
+              _buildSectionHeader(context, 'Appearance', Icons.palette_outlined),
+              const SizedBox(height: 8),
+              _buildThemeSettings(context, cardColor),
+              
+              const SizedBox(height: 24),
+              
+              // Language Section
+              _buildSectionHeader(context, 'Language', Icons.language),
+              const SizedBox(height: 8),
+              _buildLanguageSettings(context, cardColor),
+              
+              const SizedBox(height: 24),
+              
+              // Notifications Section
+              _buildSectionHeader(context, 'Notifications', Icons.notifications_outlined),
+              const SizedBox(height: 8),
+              _buildNotificationSettings(context, cardColor),
+              
+              const SizedBox(height: 24),
+              
+              // Privacy Section
+              _buildSectionHeader(context, 'Privacy & Security', Icons.security_outlined),
+              const SizedBox(height: 8),
+              _buildPrivacySettings(context, cardColor),
+              
+              const SizedBox(height: 24),
+              
+              // About Section
+              _buildSectionHeader(context, 'About', Icons.info_outline),
+              const SizedBox(height: 8),
+              _buildAboutSettings(context, cardColor),
+              
+              const SizedBox(height: 16),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12.0, top: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [AppColors.orange.withOpacity(0.1), Colors.transparent],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.orange, size: 22),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Theme.of(context).brightness == Brightness.dark 
+                  ? Colors.white 
+                  : Colors.black87,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildThemeSettings(BuildContext context, Color cardColor) {
+    final settingsProvider = Provider.of<SettingsProvider>(context);
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildRadioTile(
+            context: context,
+            title: 'Light Mode',
+            subtitle: 'Use light theme',
+            value: ThemePreference.light,
+            groupValue: settingsProvider.themeMode,
+            onChanged: (value) {
+              if (value != null) {
+                settingsProvider.setThemeMode(value);
+              }
+            },
+            icon: Icons.light_mode_outlined,
+          ),
+          _buildDivider(),
+          _buildRadioTile(
+            context: context,
+            title: 'Dark Mode',
+            subtitle: 'Use dark theme',
+            value: ThemePreference.dark,
+            groupValue: settingsProvider.themeMode,
+            onChanged: (value) {
+              if (value != null) {
+                settingsProvider.setThemeMode(value);
+              }
+            },
+            icon: Icons.dark_mode_outlined,
+          ),
+          _buildDivider(),
+          _buildRadioTile(
+            context: context,
+            title: 'System Default',
+            subtitle: 'Follow system theme',
+            value: ThemePreference.system,
+            groupValue: settingsProvider.themeMode,
+            onChanged: (value) {
+              if (value != null) {
+                settingsProvider.setThemeMode(value);
+              }
+            },
+            icon: Icons.settings_suggest_outlined,
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildLanguageSettings(BuildContext context, Color cardColor) {
+    final settingsProvider = Provider.of<SettingsProvider>(context);
+    
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildRadioTile(
+            context: context,
+            title: 'English',
+            subtitle: 'Use English language',
+            value: LanguagePreference.english,
+            groupValue: settingsProvider.language,
+            onChanged: (value) {
+              if (value != null) {
+                settingsProvider.setLanguage(value);
+              }
+            },
+            icon: Icons.language,
+          ),
+          _buildDivider(),
+          _buildRadioTile(
+            context: context,
+            title: 'العربية',
+            subtitle: 'استخدم اللغة العربية',
+            value: LanguagePreference.arabic,
+            groupValue: settingsProvider.language,
+            onChanged: (value) {
+              if (value != null) {
+                settingsProvider.setLanguage(value);
+              }
+            },
+            icon: Icons.language,
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildNotificationSettings(BuildContext context, Color cardColor) {
+    final settingsProvider = Provider.of<SettingsProvider>(context);
+    
+    return Container(
+      // Replace your current container decoration with this enhanced version
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+        border: Border.all(
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.grey.shade800
+              : Colors.grey.shade200,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        children: [
+          _buildSwitchTile(
+            context: context,
+            title: 'Push Notifications',
+            subtitle: 'Receive push notifications',
+            value: settingsProvider.notificationsEnabled,
+            onChanged: (value) {
+              settingsProvider.setNotificationsEnabled(value);
+            },
+            icon: Icons.notifications,
+          ),
+          _buildDivider(),
+          _buildSwitchTile(
+            context: context,
+            title: 'Email Notifications',
+            subtitle: 'Receive email updates',
+            value: settingsProvider.emailNotificationsEnabled,
+            onChanged: (value) {
+              settingsProvider.setEmailNotificationsEnabled(value);
+            },
+            icon: Icons.email_outlined,
+          ),
+          _buildDivider(),
+          _buildSwitchTile(
+            context: context,
+            title: 'Sound',
+            subtitle: 'Play sound for notifications',
+            value: settingsProvider.soundEnabled,
+            onChanged: (value) {
+              settingsProvider.setSoundEnabled(value);
+            },
+            icon: Icons.volume_up_outlined,
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildPrivacySettings(BuildContext context, Color cardColor) {
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildActionTile(
+            context: context,
+            title: 'Privacy Policy',
+            subtitle: 'Read our privacy policy',
+            onTap: () {
+              // Navigate to privacy policy
+            },
+            icon: Icons.privacy_tip_outlined,
+          ),
+          _buildDivider(),
+          _buildActionTile(
+            context: context,
+            title: 'Terms of Service',
+            subtitle: 'Read our terms of service',
+            onTap: () {
+              // Navigate to terms of service
+            },
+            icon: Icons.description_outlined,
+          ),
+          _buildDivider(),
+          _buildActionTile(
+            context: context,
+            title: 'Delete Account',
+            subtitle: 'Permanently delete your account',
+            onTap: () {
+              // Show delete account confirmation
+              _showDeleteAccountDialog(context);
+            },
+            icon: Icons.delete_outline,
+            isDestructive: true,
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildAboutSettings(BuildContext context, Color cardColor) {
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _buildActionTile(
+            context: context,
+            title: 'App Version',
+            subtitle: 'v1.0.0',
+            onTap: () {},
+            icon: Icons.info_outline,
+            showArrow: false,
+          ),
+          _buildDivider(),
+          _buildActionTile(
+            context: context,
+            title: 'Contact Support',
+            subtitle: 'Get help with the app',
+            onTap: () {
+              // Navigate to support
+            },
+            icon: Icons.support_agent_outlined,
+          ),
+          _buildDivider(),
+          _buildActionTile(
+            context: context,
+            title: 'Rate the App',
+            subtitle: 'Leave a review on the store',
+            onTap: () {
+              // Open app store rating
+            },
+            icon: Icons.star_border,
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildRadioTile<T>({required BuildContext context, required String title, required String subtitle, required T value, required T groupValue, required void Function(T?)? onChanged, required IconData icon}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+    
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          if (onChanged != null) {
+            onChanged(value);
+          }
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.lightorange.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: AppColors.orange,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: textColor,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: subTextColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Replace the standard Radio with a custom styled one
+              Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: value == groupValue ? AppColors.orange : Colors.transparent,
+                  border: Border.all(
+                    color: value == groupValue ? AppColors.orange : Colors.grey.shade400,
+                    width: 2,
+                  ),
+                ),
+                child: value == groupValue
+                    ? const Center(
+                        child: Icon(
+                          Icons.check,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      )
+                    : null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildSwitchTile({required BuildContext context, required String title, required String subtitle, required bool value, required void Function(bool) onChanged, required IconData icon}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.lightorange.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: AppColors.orange,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: textColor,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: subTextColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Replace the standard Switch with a more customized one
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeColor: Colors.white,
+            activeTrackColor: AppColors.orange,
+            inactiveThumbColor: Colors.white,
+            inactiveTrackColor: Colors.grey.shade300,
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildActionTile({required BuildContext context, required String title, required String subtitle, required VoidCallback onTap, required IconData icon, bool showArrow = true, bool isDestructive = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDestructive ? Colors.red : (isDark ? Colors.white : Colors.black87);
+    final subTextColor = isDestructive ? Colors.red.withOpacity(0.7) : (isDark ? Colors.white70 : Colors.black54);
+    
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isDestructive 
+                      ? Colors.red.withOpacity(0.2) 
+                      : AppColors.lightorange.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: isDestructive ? Colors.red : AppColors.orange,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: textColor,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: subTextColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (showArrow)
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 16,
+                  color: Colors.grey,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildDivider() {
+    return Container(
+      height: 1,
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.transparent,
+            Colors.grey.withOpacity(0.3),
+            Colors.grey.withOpacity(0.3),
+            Colors.transparent,
+          ],
+          stops: const [0.0, 0.2, 0.8, 1.0],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+      ),
+    );
+  }
+  
+  void _showDeleteAccountDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Account'),
+        content: const Text(
+          'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              // Implement account deletion logic
+              Navigator.of(context).pop();
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
