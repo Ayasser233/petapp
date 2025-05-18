@@ -49,10 +49,10 @@ class ProfileScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       // User profile image
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 40,
                         backgroundColor: AppColors.lightorange,
-                        backgroundImage: const AssetImage('assets/images/profile.jpg'),
+                        backgroundImage: AssetImage('assets/images/profile.jpg'),
                       ),
                       const SizedBox(height: 16),
                       // User name and phone
@@ -377,7 +377,6 @@ class ProfileScreen extends StatelessWidget {
   
   // Updated social icon widget with improved styling
   Widget _buildSocialIcon(IconData icon, BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
       padding: const EdgeInsets.all(12),

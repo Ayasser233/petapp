@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:petapp/core/providers/settings_provider.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/app_colors.dart';
+import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:provider/provider.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -9,9 +10,9 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : Colors.black87;
-    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+    final isDark = THelperFunctions.isDarkMode(context);
+    // final textColor = isDark ? Colors.white : Colors.black87;
+    // final subTextColor = isDark ? Colors.white70 : Colors.black54;
     final cardColor = isDark ? const Color(0xFF2A2A2A) : Colors.white;
     final backgroundColor = isDark ? Colors.black : const Color(0xFFF5F5F5);
     
