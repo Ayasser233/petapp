@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get/get.dart'; // Add this import
 
 enum ThemePreference { light, dark, system }
 enum LanguagePreference { english, arabic }
@@ -58,6 +59,11 @@ class SettingsProvider extends ChangeNotifier {
   Future<void> setLanguage(LanguagePreference lang) async {
     _language = lang;
     await _prefs.setString('language', lang.toString().split('.').last);
+    
+    // Update Get locale immediately
+    final newLocale = getLocale();
+    Get.updateLocale(newLocale);
+    
     notifyListeners();
   }
   

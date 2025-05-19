@@ -4,22 +4,58 @@ import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:provider/provider.dart';
+import 'package:petapp/core/localization/app_localizations.dart'; // Add this import
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
+  // Add the missing _buildSectionHeader method
+  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
+    final isDark = THelperFunctions.isDarkMode(context);
+    final textColor = isDark ? Colors.white : Colors.black87;
+    
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.lightorange.withOpacity(0.3),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color: AppColors.orange,
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // Update the build method in the SettingsScreen class
   @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
-    // final textColor = isDark ? Colors.white : Colors.black87;
-    // final subTextColor = isDark ? Colors.white70 : Colors.black54;
     final cardColor = isDark ? const Color(0xFF2A2A2A) : Colors.white;
     final backgroundColor = isDark ? Colors.black : const Color(0xFFF5F5F5);
+    final localizations = AppLocalizations.of(context); // Get localizations
     
     return BaseScreen(
       navBarIndex: 2, // This is accessed from the profile screen
       appBar: AppBar(
-        title: const Text('Settings'),
+        title: Text(localizations.settings), // Use localized string
         centerTitle: true,
         elevation: 0,
       ),
@@ -31,35 +67,35 @@ class SettingsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Theme Section
-              _buildSectionHeader(context, 'Appearance', Icons.palette_outlined),
+              _buildSectionHeader(context, localizations.appearance, Icons.palette_outlined),
               const SizedBox(height: 8),
               _buildThemeSettings(context, cardColor),
               
               const SizedBox(height: 24),
               
               // Language Section
-              _buildSectionHeader(context, 'Language', Icons.language),
+              _buildSectionHeader(context, localizations.language, Icons.language),
               const SizedBox(height: 8),
               _buildLanguageSettings(context, cardColor),
               
               const SizedBox(height: 24),
               
               // Notifications Section
-              _buildSectionHeader(context, 'Notifications', Icons.notifications_outlined),
+              _buildSectionHeader(context, localizations.notifications, Icons.notifications_outlined),
               const SizedBox(height: 8),
               _buildNotificationSettings(context, cardColor),
               
               const SizedBox(height: 24),
               
               // Privacy Section
-              _buildSectionHeader(context, 'Privacy & Security', Icons.security_outlined),
+              _buildSectionHeader(context, localizations.privacySecurity, Icons.security_outlined),
               const SizedBox(height: 8),
               _buildPrivacySettings(context, cardColor),
               
               const SizedBox(height: 24),
               
               // About Section
-              _buildSectionHeader(context, 'About', Icons.info_outline),
+              _buildSectionHeader(context, localizations.about, Icons.info_outline),
               const SizedBox(height: 8),
               _buildAboutSettings(context, cardColor),
               
@@ -70,40 +106,11 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12.0, top: 8.0),
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [AppColors.orange.withOpacity(0.1), Colors.transparent],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: AppColors.orange, size: 22),
-          const SizedBox(width: 10),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).brightness == Brightness.dark 
-                  ? Colors.white 
-                  : Colors.black87,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
+
+  // Update the _buildThemeSettings method
   Widget _buildThemeSettings(BuildContext context, Color cardColor) {
     final settingsProvider = Provider.of<SettingsProvider>(context);
+    final localizations = AppLocalizations.of(context); // Get localizations
     
     return Container(
       decoration: BoxDecoration(
@@ -121,8 +128,8 @@ class SettingsScreen extends StatelessWidget {
         children: [
           _buildRadioTile(
             context: context,
-            title: 'Light Mode',
-            subtitle: 'Use light theme',
+            title: localizations.lightMode,
+            subtitle: localizations.useLightTheme,
             value: ThemePreference.light,
             groupValue: settingsProvider.themeMode,
             onChanged: (value) {
@@ -135,8 +142,8 @@ class SettingsScreen extends StatelessWidget {
           _buildDivider(),
           _buildRadioTile(
             context: context,
-            title: 'Dark Mode',
-            subtitle: 'Use dark theme',
+            title: localizations.darkMode,
+            subtitle: localizations.useDarkTheme,
             value: ThemePreference.dark,
             groupValue: settingsProvider.themeMode,
             onChanged: (value) {
@@ -149,8 +156,8 @@ class SettingsScreen extends StatelessWidget {
           _buildDivider(),
           _buildRadioTile(
             context: context,
-            title: 'System Default',
-            subtitle: 'Follow system theme',
+            title: localizations.systemDefault,
+            subtitle: localizations.useSystemTheme,
             value: ThemePreference.system,
             groupValue: settingsProvider.themeMode,
             onChanged: (value) {
@@ -164,9 +171,11 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-  
+
+  // Update the _buildLanguageSettings method
   Widget _buildLanguageSettings(BuildContext context, Color cardColor) {
     final settingsProvider = Provider.of<SettingsProvider>(context);
+    final localizations = AppLocalizations.of(context); // Get localizations
     
     return Container(
       decoration: BoxDecoration(
@@ -184,8 +193,8 @@ class SettingsScreen extends StatelessWidget {
         children: [
           _buildRadioTile(
             context: context,
-            title: 'English',
-            subtitle: 'Use English language',
+            title: localizations.english,
+            subtitle: localizations.useEnglish,
             value: LanguagePreference.english,
             groupValue: settingsProvider.language,
             onChanged: (value) {
@@ -198,8 +207,8 @@ class SettingsScreen extends StatelessWidget {
           _buildDivider(),
           _buildRadioTile(
             context: context,
-            title: 'العربية',
-            subtitle: 'استخدم اللغة العربية',
+            title: localizations.arabic,
+            subtitle: localizations.useArabic,
             value: LanguagePreference.arabic,
             groupValue: settingsProvider.language,
             onChanged: (value) {

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
+import 'package:petapp/core/localization/app_localizations.dart'; // Add this import
 
 class CommonBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -17,6 +18,7 @@ class CommonBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
     final backgroundColor = isDark ? AppColors.black : AppColors.white;
+    final localizations = AppLocalizations.of(context); // Get localizations
     
     return Container(
       decoration: BoxDecoration(

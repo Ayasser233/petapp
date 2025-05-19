@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:petapp/core/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 
 // Add this function to reset app state
 Future<void> resetAppState() async {
@@ -45,31 +46,58 @@ void main() async {
   ));
 }
 
-class MyApp extends StatelessWidget {
+// Convert to StatefulWidget
+class MyApp extends StatefulWidget {
   final String initialRoute;
+  
   const MyApp({required this.initialRoute, super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final settingsProvider = Provider.of<SettingsProvider>(context);
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late SettingsProvider _settingsProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    // Get the settings provider
+    _settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
     
+    // Add listener to update the UI when settings change
+    _settingsProvider.addListener(_onSettingsChanged);
+  }
+
+  @override
+  void dispose() {
+    // Remove listener when widget is disposed
+    _settingsProvider.removeListener(_onSettingsChanged);
+    super.dispose();
+  }
+
+  // This will force the app to rebuild when settings change
+  void _onSettingsChanged() {
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Pet App',
-      themeMode: settingsProvider.getThemeMode(),
+      themeMode: _settingsProvider.getThemeMode(),
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      locale: settingsProvider.getLocale(),
+      locale: _settingsProvider.getLocale(),
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('en', ''), // English
-        Locale('ar', ''), // Arabic
-      ],
-      initialRoute: initialRoute,
+      supportedLocales: AppLocalizations.supportedLocales,
+      initialRoute: widget.initialRoute,
       getPages: AppRoutes.getPages,
     );
   }
