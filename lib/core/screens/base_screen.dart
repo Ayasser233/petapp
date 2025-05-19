@@ -20,6 +20,7 @@ class BaseScreen extends StatelessWidget {
     return Scaffold(
       appBar: appBar,
       body: body,
+      extendBody: true, // Add this to allow content to flow under the nav bar
       bottomNavigationBar: CommonBottomNavBar(currentIndex: navBarIndex),
       floatingActionButton: floatingActionButton,
     );
