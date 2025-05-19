@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/app_colors.dart';
-import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:petapp/features/home/screens/settings_screen.dart'; // Add this import
+import 'package:petapp/features/home/screens/settings_screen.dart';
+import 'package:petapp/core/localization/app_localizations.dart'; // Add this import
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
   
   @override
   Widget build(BuildContext context) {
-    final isDark = THelperFunctions.isDarkMode(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
     final subTextColor = isDark ? Colors.white70 : Colors.black54;
     final cardColor = isDark ? const Color(0xFF2A2A2A) : Colors.white;
@@ -63,7 +62,7 @@ class ProfileScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            'Welcome Aaron Smith',
+                            '${localizations.welcome} Aaron Smith',
                             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               fontWeight: FontWeight.bold,
                               color: textColor,
@@ -88,7 +87,7 @@ class ProfileScreen extends StatelessWidget {
                 // Profile options list - now with rounded containers
                 _buildProfileOption(
                   context,
-                  'My Account',
+                  localizations.myAccount,
                   Icons.person_outline,
                   () {
                     // Navigate to account settings
@@ -96,15 +95,16 @@ class ProfileScreen extends StatelessWidget {
                   isDark: isDark,
                   cardColor: cardColor,
                 ),
-                
+
                 const SizedBox(height: 12),
                 
+                // Add My Pets button right after the welcome section
                 _buildProfileOption(
                   context,
-                  'Insurance',
-                  Icons.health_and_safety_outlined,
+                  localizations.myPets,
+                  Icons.pets,
                   () {
-                    // Navigate to insurance
+                    Get.toNamed(AppRoutes.myPets);
                   },
                   isDark: isDark,
                   cardColor: cardColor,
@@ -114,33 +114,7 @@ class ProfileScreen extends StatelessWidget {
                 
                 _buildProfileOption(
                   context,
-                  'Manage Cards',
-                  Icons.credit_card_outlined,
-                  () {
-                    // Navigate to payment methods
-                  },
-                  isDark: isDark,
-                  cardColor: cardColor,
-                ),
-                
-                const SizedBox(height: 12),
-                
-                _buildProfileOption(
-                  context,
-                  'My Questions',
-                  Icons.help_outline,
-                  () {
-                    // Navigate to questions
-                  },
-                  isDark: isDark,
-                  cardColor: cardColor,
-                ),
-                
-                const SizedBox(height: 12),
-                
-                _buildProfileOption(
-                  context,
-                  'Favorites',
+                  localizations.favorites,
                   Icons.favorite_border,
                   () {
                     // Navigate to favorites
@@ -153,20 +127,7 @@ class ProfileScreen extends StatelessWidget {
                 
                 _buildProfileOption(
                   context,
-                  'PetApp Points',
-                  Icons.star_border,
-                  () {
-                    // Navigate to points
-                  },
-                  isDark: isDark,
-                  cardColor: cardColor,
-                ),
-                
-                const SizedBox(height: 12),
-                
-                _buildProfileOption(
-                  context,
-                  'Support',
+                  localizations.support,
                   Icons.headset_mic_outlined,
                   () {
                     // Navigate to support
@@ -179,7 +140,7 @@ class ProfileScreen extends StatelessWidget {
                 
                 _buildProfileOption(
                   context,
-                  'Settings',
+                  localizations.settings,
                   Icons.settings_outlined,
                   () {
                     // Navigate to settings
@@ -194,7 +155,7 @@ class ProfileScreen extends StatelessWidget {
                 
                 _buildProfileOption(
                   context,
-                  'Rate the app',
+                  localizations.rateApp,
                   Icons.star_border,
                   () {
                     // Open app rating
@@ -207,7 +168,7 @@ class ProfileScreen extends StatelessWidget {
                 
                 _buildProfileOption(
                   context,
-                  'Log out',
+                  localizations.logout,
                   Icons.logout,
                   () async {
                     // Log out
@@ -240,7 +201,7 @@ class ProfileScreen extends StatelessWidget {
                   child: Column(
                     children: [
                       Text(
-                        'Follow Us',
+                        localizations.followUs,
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,

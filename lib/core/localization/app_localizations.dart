@@ -78,6 +78,13 @@ class AppLocalizations {
   String get nearYou => _localizedValues[locale.languageCode]?['nearYou'] ?? 'Near You';
   String get seeAll => _localizedValues[locale.languageCode]?['seeAll'] ?? 'See All';
 
+  // Add new getters for profile screen
+  String get myAccount => _localizedValues[locale.languageCode]?['myAccount']?? 'My Account';
+  String get followUs => _localizedValues[locale.languageCode]?['followUs']?? 'Follow Us';
+  String get welcome => _localizedValues[locale.languageCode]?['welcome']?? 'Welcome';
+  String get signIn => _localizedValues[locale.languageCode]?['signIn']?? 'Sign In';
+  String get signUp => _localizedValues[locale.languageCode]?['signUp']?? 'Sign Up';
+
   // Define all localized values
   static const Map<String, Map<String, String>> _localizedValues = {
     'en': {
@@ -133,6 +140,11 @@ class AppLocalizations {
       'vouchers': 'Vouchers',
       'nearYou': 'Near You',
       'seeAll': 'See All',
+      'myAccount': 'My Account',
+      'followUs': 'Follow Us',
+      'welcome': 'Welcome',
+      'signIn': 'Sign In',
+      'signUp': 'Sign Up',
     },
     'ar': {
       'appTitle': 'تطبيق الحيوانات الأليفة',
@@ -187,6 +199,11 @@ class AppLocalizations {
       'vouchers': 'القسائم',
       'nearYou': 'بالقرب منك',
       'seeAll': 'عرض الكل',
+     'myAccount': 'حسابي',
+     'followUs': 'تابعنا',
+      'welcome': 'مرحبًا',
+     'signIn': 'تسجيل الدخول',
+     'signUp': 'اشتراك',
     },
   };
 }

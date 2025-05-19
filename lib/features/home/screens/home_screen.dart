@@ -246,8 +246,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                                   fontWeight: FontWeight.bold,
                                                 ),
                                           ),
-                                          const Text(
-                                            'Points Available',
+                                          Text(
+                                            localizations.pointsAvailable,
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontSize: 12,
@@ -272,8 +272,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                       ),
                                       elevation: 2,
                                     ),
-                                    child: const Text(
-                                      'Redeem Now',
+                                    child: Text(
+                                      localizations.redeemNow,
                                       style: TextStyle(fontWeight: FontWeight.bold),
                                     ),
                                   ),
@@ -319,8 +319,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         fontWeight: FontWeight.bold,
                                       ),
                                 ),
-                                const Text(
-                                  'Vouchers',
+                                Text(
+                                  localizations.vouchers,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
@@ -339,7 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Near You',
+                            localizations.nearYou,
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: isDark ? Colors.white : Colors.black87,
@@ -350,8 +350,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               // Handle See All tap
                               Get.toNamed(AppRoutes.clinicExplorer);
                             },
-                            child: const Text(
-                              'See All',
+                            child: Text(
+                              localizations.seeAll,
                               style: TextStyle(color: AppColors.orange),
                             ),
                           ),
