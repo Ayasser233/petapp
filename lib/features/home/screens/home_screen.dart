@@ -3,9 +3,10 @@ import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
-import 'package:petapp/core/utils/helper_functions.dart'; // Added for isDarkMode check
+import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/widgets/custom_app_bar.dart';
 import 'package:petapp/features/clinic/models/clinic_model.dart';
+import 'package:petapp/core/localization/app_localizations.dart'; // Add this import
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -90,6 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
+    final localizations = AppLocalizations.of(context); // Get localizations
 
     return BaseScreen(
       navBarIndex: 0,
@@ -112,14 +114,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _buildServiceItem(context, 'Clinic Visit',
+                          _buildServiceItem(context, localizations.clinicVisit,
                               Icons.medical_services_outlined, isDark,
                               onTap: () => Get.toNamed(AppRoutes.clinicExplorer)),
                           _buildServiceItem(
-                              context, '3D Animal View', Icons.threed_rotation, isDark,
+                              context, localizations.animalView3D, Icons.threed_rotation, isDark,
                               onTap: () => Get.toNamed(AppRoutes.pet3DModelSelector)),
                           _buildServiceItem(
-                              context, 'Virtual Vet', Icons.videocam_outlined, isDark,
+                              context, localizations.virtualVet, Icons.videocam_outlined, isDark,
                               onTap: () =>
                                   _navigateToServicesByCategory('Consultation')),
                         ],
@@ -148,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  'Search clinics, services...',
+                                  localizations.searchPlaceholder,
                                   style: TextStyle(
                                     color: isDark ? Colors.grey[400] : Colors.grey,
                                     fontSize: 16,
@@ -167,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Redeem & Save',
+                            localizations.redeemAndSave,
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: isDark ? Colors.white : Colors.black87,
@@ -177,9 +179,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             onPressed: () {
                               // Handle See All tap for rewards
                             },
-                            child: const Text(
-                              'View History',
-                              style: TextStyle(color: AppColors.orange),
+                            child: Text(
+                              localizations.viewHistory,
+                              style: const TextStyle(color: AppColors.orange),
                             ),
                           ),
                         ],
