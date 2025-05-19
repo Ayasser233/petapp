@@ -84,6 +84,12 @@ class AppLocalizations {
   String get welcome => _localizedValues[locale.languageCode]?['welcome']?? 'Welcome';
   String get signIn => _localizedValues[locale.languageCode]?['signIn']?? 'Sign In';
   String get signUp => _localizedValues[locale.languageCode]?['signUp']?? 'Sign Up';
+  String get receivePushNotifications => _localizedValues[locale.languageCode]?['receivePushNotifications']?? 'Receive Push Notifications';
+  String get receiveEmailUpdates => _localizedValues[locale.languageCode]?['receiveEmailUpdates']?? 'Receive Email Updates';
+  String get playSoundForNotifications => _localizedValues[locale.languageCode]?['playSoundForNotifications']?? 'Play Sound for Notifications';
+  String get readOurPrivacyPolicy => _localizedValues[locale.languageCode]?['readOurPrivacyPolicy']?? 'Read Our Privacy Policy';
+  String get readOurTermsOfService => _localizedValues[locale.languageCode]?['readOurTermsOfService']?? 'Read Our Terms of Service';
+  String get deleteYourAccountPermanently => _localizedValues[locale.languageCode]?['deleteYourAccountPermanently']?? 'Delete Your Account Permanently';
 
   // Define all localized values
   static const Map<String, Map<String, String>> _localizedValues = {
@@ -145,6 +151,12 @@ class AppLocalizations {
       'welcome': 'Welcome',
       'signIn': 'Sign In',
       'signUp': 'Sign Up',
+      'receivePushNotifications': 'Receive Push Notifications',
+      'receiveEmailUpdates': 'Receive Email Updates',
+      'playSoundForNotifications' : 'Play Sound for Notifications',
+      'readOurPrivacyPolicy' : 'Read Our Privacy Policy',
+      'readOurTermsOfService' : 'Read Our Terms of Service',
+      'deleteYourAccountPermanently' : 'Delete Your Account Permanently',
     },
     'ar': {
       'appTitle': 'تطبيق الحيوانات الأليفة',
@@ -199,11 +211,17 @@ class AppLocalizations {
       'vouchers': 'القسائم',
       'nearYou': 'بالقرب منك',
       'seeAll': 'عرض الكل',
-     'myAccount': 'حسابي',
-     'followUs': 'تابعنا',
+      'myAccount': 'حسابي',
+      'followUs': 'تابعنا',
       'welcome': 'مرحبًا',
-     'signIn': 'تسجيل الدخول',
-     'signUp': 'اشتراك',
+      'signIn': 'تسجيل الدخول',
+      'signUp': 'اشتراك',
+      'receivePushNotifications': 'استقبال إشعارات فورية',
+      'receiveEmailUpdates': 'استقبال إشعارات البريد الإلكتروني',
+      'playSoundForNotifications' : 'تشغيل صوت الإشعار',
+      'readOurPrivacyPolicy' : 'اقرأ سياسة الخصوصية',
+     'readOurTermsOfService' : 'اقرأ شروط الخدمة',
+      'deleteYourAccountPermanently' : 'حذف حسابك نهائيا',
     },
   };
 }

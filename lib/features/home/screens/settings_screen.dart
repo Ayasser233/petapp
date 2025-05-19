@@ -99,7 +99,7 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 8),
               _buildAboutSettings(context, cardColor),
               
-              const SizedBox(height: 16),
+              const SizedBox(height: 110),
             ],
           ),
         ),
@@ -225,6 +225,7 @@ class SettingsScreen extends StatelessWidget {
   
   Widget _buildNotificationSettings(BuildContext context, Color cardColor) {
     final settingsProvider = Provider.of<SettingsProvider>(context);
+    final localizations = AppLocalizations.of(context); // Get localizations
     
     return Container(
       // Replace your current container decoration with this enhanced version
@@ -249,8 +250,8 @@ class SettingsScreen extends StatelessWidget {
         children: [
           _buildSwitchTile(
             context: context,
-            title: 'Push Notifications',
-            subtitle: 'Receive push notifications',
+            title: localizations.pushNotifications,
+            subtitle: localizations.receivePushNotifications,
             value: settingsProvider.notificationsEnabled,
             onChanged: (value) {
               settingsProvider.setNotificationsEnabled(value);
@@ -260,8 +261,8 @@ class SettingsScreen extends StatelessWidget {
           _buildDivider(),
           _buildSwitchTile(
             context: context,
-            title: 'Email Notifications',
-            subtitle: 'Receive email updates',
+            title: localizations.emailNotifications,
+            subtitle: localizations.receiveEmailUpdates,
             value: settingsProvider.emailNotificationsEnabled,
             onChanged: (value) {
               settingsProvider.setEmailNotificationsEnabled(value);
@@ -271,8 +272,8 @@ class SettingsScreen extends StatelessWidget {
           _buildDivider(),
           _buildSwitchTile(
             context: context,
-            title: 'Sound',
-            subtitle: 'Play sound for notifications',
+            title: localizations.sound,
+            subtitle: localizations.playSoundForNotifications,
             value: settingsProvider.soundEnabled,
             onChanged: (value) {
               settingsProvider.setSoundEnabled(value);
@@ -285,6 +286,8 @@ class SettingsScreen extends StatelessWidget {
   }
   
   Widget _buildPrivacySettings(BuildContext context, Color cardColor) {
+    final localizations = AppLocalizations.of(context); // Get localizations
+
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
@@ -301,8 +304,8 @@ class SettingsScreen extends StatelessWidget {
         children: [
           _buildActionTile(
             context: context,
-            title: 'Privacy Policy',
-            subtitle: 'Read our privacy policy',
+            title: localizations.privacyPolicy,
+            subtitle: localizations.readOurPrivacyPolicy,
             onTap: () {
               // Navigate to privacy policy
             },
@@ -311,8 +314,8 @@ class SettingsScreen extends StatelessWidget {
           _buildDivider(),
           _buildActionTile(
             context: context,
-            title: 'Terms of Service',
-            subtitle: 'Read our terms of service',
+            title: localizations.termsOfService,
+            subtitle: localizations.readOurTermsOfService,
             onTap: () {
               // Navigate to terms of service
             },
@@ -321,8 +324,8 @@ class SettingsScreen extends StatelessWidget {
           _buildDivider(),
           _buildActionTile(
             context: context,
-            title: 'Delete Account',
-            subtitle: 'Permanently delete your account',
+            title: localizations.deleteAccount,
+            subtitle: localizations.deleteYourAccountPermanently,
             onTap: () {
               // Show delete account confirmation
               _showDeleteAccountDialog(context);
@@ -336,6 +339,8 @@ class SettingsScreen extends StatelessWidget {
   }
   
   Widget _buildAboutSettings(BuildContext context, Color cardColor) {
+    final localizations = AppLocalizations.of(context); // Get localizations
+
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
