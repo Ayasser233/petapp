@@ -29,9 +29,12 @@ class Pet3DViewer extends StatefulWidget {
   State<Pet3DViewer> createState() => _Pet3DViewerState();
 }
 
-class _Pet3DViewerState extends State<Pet3DViewer> {
+class _Pet3DViewerState extends State<Pet3DViewer> with SingleTickerProviderStateMixin {
   bool _isLoading = true;
+  bool _isMenuOpen = false;
   late WebViewController _controller;
+  late AnimationController _animController;
+  
   final Map<String, List<String>> _bodyPartSymptoms = {
     'head': ['Ear infection', 'Eye irritation', 'Nasal discharge', 'Dental issues'],
     'chest': ['Coughing', 'Breathing difficulty', 'Chest pain', 'Heart issues'],
@@ -43,7 +46,19 @@ class _Pet3DViewerState extends State<Pet3DViewer> {
   @override
   void initState() {
     super.initState();
-    // Don't access context here
+    
+    // Set up menu animation
+    _animController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    
+  }
+
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
   }
 
   @override
@@ -92,6 +107,18 @@ class _Pet3DViewerState extends State<Pet3DViewer> {
       );
       
     _loadHtmlContent();
+  }
+
+  // Toggle side menu
+  void _toggleMenu() {
+    setState(() {
+      _isMenuOpen = !_isMenuOpen;
+      if (_isMenuOpen) {
+        _animController.forward();
+      } else {
+        _animController.reverse();
+      }
+    });
   }
 
   // Add this method to load and encode models
@@ -157,43 +184,37 @@ class _Pet3DViewerState extends State<Pet3DViewer> {
             width: 100%;
             height: 100%;
             background-color: $bgColor;
+            --poster-color: transparent;
           }
           
-          .hotspot {
-            background-color: #FF6E00;
-            border-radius: 32px;
-            border: none;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-            box-sizing: border-box;
-            cursor: pointer;
-            height: 24px;
-            padding: 8px;
-            position: relative;
-            width: 24px;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 12px;
-            font-weight: bold;
-          }
+          /* Hide hotspots by default - we'll use the side menu instead */
+          // .hotspot {
+          //   display: none;
+          // }
         </style>
       </head>
       <body>
         <model-viewer
           src="$modelSrc"
           alt="3D Model of ${widget.petType}"
-          camera-controls="${widget.allowRotation ? 'true' : 'false'}"
-          disable-zoom="${!widget.allowZoom ? 'true' : 'false'}"
+          camera-controls="false"
+          disable-zoom="true"
           auto-rotate="false"
-          rotation-per-second="30deg"
+          rotation-per-second="0deg"
+          camera-orbit="0deg 75deg 2.5m"
+          min-camera-orbit="auto auto auto"
+          max-camera-orbit="auto auto auto"
+          environment-image="neutral"
+          exposure="1"
+          shadow-intensity="0"
           id="petModel"
           >
-          <button class="hotspot" slot="hotspot-head" data-position="0 1.5 0" data-normal="0 1 0.5" onclick="selectBodyPart('head')">H</button>
-          <button class="hotspot" slot="hotspot-chest" data-position="0 0.5 0.5" data-normal="0 0 1" onclick="selectBodyPart('chest')">C</button>
-          <button class="hotspot" slot="hotspot-abdomen" data-position="0 0 0" data-normal="0 0 1" onclick="selectBodyPart('abdomen')">A</button>
-          <button class="hotspot" slot="hotspot-legs" data-position="0.5 -1 0" data-normal="1 0 0" onclick="selectBodyPart('legs')">L</button>
-          <button class="hotspot" slot="hotspot-tail" data-position="0 -0.5 -1" data-normal="0 0 -1" onclick="selectBodyPart('tail')">T</button>
+          <!-- Hidden hotspots for reference, we'll access these via menu -->
+          <button class="hotspot" slot="hotspot-head" data-position="0 1.5 0" data-normal="0 1 0.5">H</button>
+          <button class="hotspot" slot="hotspot-chest" data-position="0 0.5 0.5" data-normal="0 0 1">C</button>
+          <button class="hotspot" slot="hotspot-abdomen" data-position="0 0 0" data-normal="0 0 1">A</button>
+          <button class="hotspot" slot="hotspot-legs" data-position="0.5 -1 0" data-normal="1 0 0">L</button>
+          <button class="hotspot" slot="hotspot-tail" data-position="0 -0.5 -1" data-normal="0 0 -1">T</button>
         </model-viewer>
         
         <script>
@@ -230,7 +251,7 @@ class _Pet3DViewerState extends State<Pet3DViewer> {
           Container(
             height: widget.viewerHeight,
             constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.6, // Limit height to 60% of screen
+              maxHeight: MediaQuery.of(context).size.height , // Limit height to 60% of screen
             ),
             decoration: BoxDecoration(
               color: widget.backgroundColor ?? 
@@ -270,19 +291,6 @@ class _Pet3DViewerState extends State<Pet3DViewer> {
                     ),
                 ],
               ),
-            ),
-          ),
-          
-          // Instructions text
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Tap on any body part to select symptoms or use the menu button.',
-              style: TextStyle(
-                color: isDark ? Colors.grey[400] : Colors.grey[700],
-                fontSize: 14,
-              ),
-              textAlign: TextAlign.center,
             ),
           ),
         ],

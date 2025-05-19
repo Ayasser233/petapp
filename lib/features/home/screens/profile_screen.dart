@@ -3,15 +3,15 @@ import 'package:get/get.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/app_colors.dart';
+import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:petapp/features/home/screens/settings_screen.dart'; // Add this import
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black87;
     final subTextColor = isDark ? Colors.white70 : Colors.black54;
     final cardColor = isDark ? const Color(0xFF2A2A2A) : Colors.white;

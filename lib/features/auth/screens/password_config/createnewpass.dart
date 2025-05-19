@@ -12,6 +12,7 @@ class CreateNewPasswordScreen extends StatefulWidget {
   const CreateNewPasswordScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _CreateNewPasswordScreenState createState() => _CreateNewPasswordScreenState();
 }
 

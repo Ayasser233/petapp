@@ -348,7 +348,7 @@ class ClinicDetailScreen extends StatelessWidget {
             margin: const EdgeInsets.only(top: 6),
             width: 6,
             height: 6,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: AppColors.orange,
               shape: BoxShape.circle,
             ),
