@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/app_colors.dart';
