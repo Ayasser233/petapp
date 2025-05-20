@@ -37,7 +37,7 @@ class ClinicDetailScreen extends StatelessWidget {
     ];
     
     // Consultation price
-    final consultationPrice = '\$75.00';
+    const consultationPrice = '\$75.00';
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -244,9 +244,9 @@ class ClinicDetailScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    Text(
+                    const Text(
                       consultationPrice,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.orange,
                         fontWeight: FontWeight.bold,
                         fontSize: 22,

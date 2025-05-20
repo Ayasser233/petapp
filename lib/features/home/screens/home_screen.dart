@@ -248,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                           Text(
                                             localizations.pointsAvailable,
-                                            style: TextStyle(
+                                            style: const TextStyle(
                                               color: Colors.white,
                                               fontSize: 12,
                                             ),
@@ -274,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     child: Text(
                                       localizations.redeemNow,
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                 ],
@@ -321,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 Text(
                                   localizations.vouchers,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 12,
                                   ),
@@ -352,7 +352,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                             child: Text(
                               localizations.seeAll,
-                              style: TextStyle(color: AppColors.orange),
+                              style: const TextStyle(color: AppColors.orange),
                             ),
                           ),
                         ],

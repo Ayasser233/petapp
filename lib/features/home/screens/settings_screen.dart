@@ -339,7 +339,7 @@ class SettingsScreen extends StatelessWidget {
   }
   
   Widget _buildAboutSettings(BuildContext context, Color cardColor) {
-    final localizations = AppLocalizations.of(context); // Get localizations
+    AppLocalizations.of(context); // Get localizations
 
     return Container(
       decoration: BoxDecoration(

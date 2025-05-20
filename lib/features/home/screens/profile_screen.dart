@@ -4,7 +4,6 @@ import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:petapp/features/home/screens/settings_screen.dart';
 import 'package:petapp/core/localization/app_localizations.dart'; // Add this import
 
 class ProfileScreen extends StatelessWidget {

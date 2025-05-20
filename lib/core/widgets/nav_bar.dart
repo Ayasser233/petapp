@@ -18,7 +18,7 @@ class CommonBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
     final backgroundColor = isDark ? AppColors.black : AppColors.white;
-    final localizations = AppLocalizations.of(context); // Get localizations
+    AppLocalizations.of(context); // Get localizations
     
     return Container(
       decoration: BoxDecoration(

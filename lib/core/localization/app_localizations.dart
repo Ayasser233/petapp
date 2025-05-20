@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 class AppLocalizations {
   final Locale locale;
@@ -220,7 +219,7 @@ class AppLocalizations {
       'receiveEmailUpdates': 'استقبال إشعارات البريد الإلكتروني',
       'playSoundForNotifications' : 'تشغيل صوت الإشعار',
       'readOurPrivacyPolicy' : 'اقرأ سياسة الخصوصية',
-     'readOurTermsOfService' : 'اقرأ شروط الخدمة',
+      'readOurTermsOfService' : 'اقرأ شروط الخدمة',
       'deleteYourAccountPermanently' : 'حذف حسابك نهائيا',
     },
   };

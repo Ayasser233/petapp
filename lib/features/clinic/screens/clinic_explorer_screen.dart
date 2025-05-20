@@ -33,16 +33,6 @@ class _ClinicExplorerScreenState extends State<ClinicExplorerScreen> {
   ];
   
   // Sample data for services
-  final List<String> _services = [
-    'All Services',
-    'Vaccination',
-    'Surgery',
-    'Grooming',
-    'Dental Care',
-    'Pet Hotel',
-    'Emergency',
-    'Consultation',
-  ];
   
   // Category tabs
   final List<String> _categories = [

@@ -24,7 +24,7 @@ class _HospitalBookingScreenState extends State<HospitalBookingScreen> {
   String? _selectedTimeSlot;
   
   // Selected pets
-  List<PetModel> _selectedPets = [];
+  final List<PetModel> _selectedPets = [];
   
   // Booking confirmation
   bool _isBookingConfirmed = false;
