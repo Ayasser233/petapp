@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../controllers.onboarding/controllers.onboarding.dart';
+import '../../../controllers.onboarding/controllers.onboarding.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:petapp/core/utils/app_colors.dart';

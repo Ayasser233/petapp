@@ -7,6 +7,7 @@ import 'package:petapp/core/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/di/service_locator.dart';
 
 // Add this function to reset app state
 Future<void> resetAppState() async {
@@ -17,6 +18,9 @@ Future<void> resetAppState() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize dependencies
+  await setupServiceLocator();
   
   // Uncomment the next line to reset the app state when you need to test from beginning
   // await resetAppState();

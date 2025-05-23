@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:petapp/core/services/api_error_handler.dart';
@@ -142,6 +144,7 @@ class ApiClient {
       await _handleTokenResponse(response);
       return response;
     } catch (e) {
+      log(e.toString());
       throw errorHandler.handleError(e);
     }
   }
@@ -221,9 +224,9 @@ class ApiClient {
   // Handle possible token in response
   Future<void> _handleTokenResponse(Response response) async {
     if (response.data is Map &&
-        response.data['token'] != null &&
-        response.data['token'] is String) {
-      await tokenService.saveToken(response.data['token']);
+        response.data['access_token'] != null &&
+        response.data['access_token'] is String) {
+      await tokenService.saveToken(response.data['access_token']);
     }
   }
   
