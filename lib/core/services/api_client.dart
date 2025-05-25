@@ -152,7 +152,7 @@ class ApiClient {
   Future<Response> login(String email, String password) async {
     try {
       final response = await _dio.post(ApiConstants.loginEndpoint, 
-        data: {'email': email, 'password': password});
+        data: {'identifier': email, 'password': password});
       await _handleTokenResponse(response);
       return response;
     } catch (e) {

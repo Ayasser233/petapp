@@ -1,42 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:petapp/core/styles/input_styles.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/routes/routes.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:petapp/core/utils/validation_utils.dart';
+import 'package:petapp/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:petapp/di/service_locator.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(
-              top: 56.0, left: 24.0, right: 24.0, bottom: 24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Text
-              HeaderText(
-                title: 'Welcome Back',
-                subtitle: 'Login to your account',
-              ),
-              SizedBox(height: 32.0),
-              // Add your login form here
-              LoginForm(),
-              // divider
-              DividerForm(dividerText: 'Or continue with'),
-              SizedBox(height: 16.0),
-              // footer
-              // Google & Apple Sign In Buttons - Vertical
-              SocialBtns(),
+    return BlocProvider(
+      create: (context) => sl<AuthCubit>(),
+      child: const Scaffold(
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.only(
+                top: 56.0, left: 24.0, right: 24.0, bottom: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header Text
+                HeaderText(
+                  title: 'Welcome Back',
+                  subtitle: 'Login to your account',
+                ),
+                SizedBox(height: 32.0),
+                // Add your login form here
+                LoginForm(),
+                // divider
+                DividerForm(dividerText: 'Or continue with'),
+                SizedBox(height: 16.0),
+                // footer
+                // Google & Apple Sign In Buttons - Vertical
+                SocialBtns(),
 
-              SignUpText(text: 'Don\'t have an account?', signUpText: ' Sign Up'),
-            ],
+                SignUpText(text: 'Don\'t have an account?', signUpText: ' Sign Up'),
+              ],
+            ),
           ),
         ),
       ),
@@ -81,9 +87,7 @@ class SignUpText extends StatelessWidget {
 }
 
 class SocialBtns extends StatelessWidget {
-  const SocialBtns({
-    super.key,
-  });
+  const SocialBtns({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +97,8 @@ class SocialBtns extends StatelessWidget {
           width: double.infinity,
           child: OutlinedButton(
             onPressed: () {
-              // TODO: Handle Google Sign-in
+              // Handle Google Sign-in using the AuthCubit
+              // context.read<AuthCubit>().signInWithGoogle();
             },
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14.0),
@@ -121,7 +126,8 @@ class SocialBtns extends StatelessWidget {
           width: double.infinity,
           child: OutlinedButton(
             onPressed: () {
-              // TODO: Handle Apple Sign-in
+              // Handle Apple Sign-in using the AuthCubit
+              // context.read<AuthCubit>().signInWithApple();
             },
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14.0),
@@ -193,12 +199,11 @@ class LoginForm extends StatefulWidget {
 }
 
 class _LoginFormState extends State<LoginForm> {
-  final _formKey = GlobalKey<FormState>(); // Add form key
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
   bool _obscurePassword = true;
-  bool _isLoading = false; // Add loading state
 
   @override
   void dispose() {
@@ -206,269 +211,265 @@ class _LoginFormState extends State<LoginForm> {
     _passwordController.dispose();
     super.dispose();
   }
-
-  // Validate email
-  String? _validateEmail(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your email';
-    }
-    if (!value.contains('@') || !value.contains('.')) {
-      return 'Please enter a valid email';
-    }
-    return null;
-  }
-
-  // Validate password
-  String? _validatePassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your password';
-    }
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
-    return null;
-  }
-
   // Handle sign in logic
-  void _handleSignIn() async {
+  void _handleSignIn() {
     // First validate form
     if (!_formKey.currentState!.validate()) {
       return;
     }
     
-    // Set loading state
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // Mock successful login
-      // In a real app, you'd make an API call to your backend here
-      
-      // Save login state
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool('isLoggedIn', true);
-      
-      // Navigate to home screen
-      Get.offAllNamed(AppRoutes.home);
-    } catch (e) {
-      // Show error message
-      Get.snackbar(
-        'Error',
-        'Failed to sign in: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.1),
-        colorText: Colors.red,
-      );
-    } finally {
-      // Always reset loading state
-      setState(() {
-        _isLoading = false;
-      });
+    // Use AuthCubit to login
+    context.read<AuthCubit>().login(
+      _emailController.text.trim(), 
+      _passwordController.text
+    );
+    
+    // Save remember me preference if needed
+    if (_rememberMe) {
+      _saveUserEmail();
     }
+  }
+  
+  // Save user email if remember me is checked
+  Future<void> _saveUserEmail() async {
+    // You could implement this with your token service or shared preferences
+    // This is just a placeholder
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
     
-    return Form(
-      key: _formKey, // Add form key
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Column(
-          children: [
-            // Email field
-            TextFormField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Iconsax.user, color: AppColors.orange),
-                suffixIcon: _emailController.text.isNotEmpty 
-                  ? IconButton(
-                      icon: const Icon(Icons.clear, color: Colors.grey),
-                      onPressed: () => setState(() => _emailController.clear()),
-                    )
-                  : null,
-                hintText: 'Email',
-                hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[400],
-                ),
-                filled: true,
-                fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                focusedErrorBorder: focusedFieldStyle(),
-                focusedBorder: focusedFieldStyle(),
-                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                errorStyle: const TextStyle(height: 0.8),
-              ),
-              validator: _validateEmail,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              keyboardType: TextInputType.emailAddress,
-              style: Theme.of(context).textTheme.bodyMedium,
-              onChanged: (value) => setState(() {}),
-            ),
-            const SizedBox(height: 16.0),
-            
-            // Password field
-            TextFormField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Iconsax.lock, color: AppColors.orange),
-                suffixIcon: IconButton(
-                  icon: Icon(
-                    _obscurePassword ? Iconsax.eye_slash : Iconsax.eye,
-                    color: Colors.grey,
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthLoginSuccess) {
+          // Show success message
+          Get.snackbar(
+            'Login Successful',
+            'Welcome back!',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green.withOpacity(0.1),
+            colorText: Colors.green,
+            borderRadius: 8,
+            margin: const EdgeInsets.all(16),
+          );
+          
+          // Navigate to home or dashboard
+          Get.offAllNamed(AppRoutes.home);
+        } else if (state is AuthFailure) {
+          // Show error message
+          Get.snackbar(
+            'Login Failed',
+            state.message,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red.withOpacity(0.1),
+            colorText: Colors.red,
+            borderRadius: 8,
+            margin: const EdgeInsets.all(16),
+          );
+        }
+      },
+      child: Form(
+        key: _formKey,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: Column(
+            children: [
+              // Email field
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Iconsax.user, color: AppColors.orange),
+                  suffixIcon: _emailController.text.isNotEmpty 
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: Colors.grey),
+                        onPressed: () => setState(() => _emailController.clear()),
+                      )
+                    : null,
+                  hintText: 'Email',
+                  hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[400],
                   ),
-                  onPressed: () {
-                    setState(() {
-                      _obscurePassword = !_obscurePassword;
-                    });
-                  },
+                  filled: true,
+                  fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedErrorBorder: focusedFieldStyle(),
+                  focusedBorder: focusedFieldStyle(),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                  errorStyle: const TextStyle(height: 0.8),
                 ),
-                hintText: 'Password',
-                hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[400],
-                ),
-                filled: true,
-                fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                focusedErrorBorder: focusedFieldStyle(),
-                focusedBorder: focusedFieldStyle(),
-                contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                errorStyle: const TextStyle(height: 0.8),
+                validator: ValidationUtils.validateEmail,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                keyboardType: TextInputType.emailAddress,
+                style: Theme.of(context).textTheme.bodyMedium,
+                onChanged: (value) => setState(() {}),
               ),
-              validator: _validatePassword,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              obscureText: _obscurePassword,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 8),
-            
-            // Remember me & forgot password row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // remember me checkbox
-                Row(
-                  children: [
-                    Theme(
-                      data: Theme.of(context).copyWith(
-                        checkboxTheme: CheckboxThemeData(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          fillColor: WidgetStateProperty.resolveWith<Color>(
-                            (Set<WidgetState> states) {
-                              if (states.contains(WidgetState.selected)) {
-                                return AppColors.orange;
-                              }
-                              return Colors.transparent;
-                            },
-                          ),
-                        ),
-                      ),
-                      child: Checkbox(
-                        value: _rememberMe,
-                        onChanged: (value) {
-                          setState(() {
-                            _rememberMe = value ?? true;
-                          });
-                        },
-                        side: BorderSide(
-                          color: isDark ? Colors.grey : Colors.grey.shade400,
-                          width: 1.5,
-                        ),
-                      ),
+              const SizedBox(height: 16.0),
+              
+              // Password field
+              TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Iconsax.lock, color: AppColors.orange),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Iconsax.eye_slash : Iconsax.eye,
+                      color: Colors.grey,
                     ),
-                    Text(
-                      'Remember me',
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
+                  hintText: 'Password',
+                  hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[400],
+                  ),
+                  filled: true,
+                  fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedErrorBorder: focusedFieldStyle(),
+                  focusedBorder: focusedFieldStyle(),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                  errorStyle: const TextStyle(height: 0.8),
+                ),
+                validator: ValidationUtils.validatePassword,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                obscureText: _obscurePassword,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 8),
+              
+              // Remember me & forgot password row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // remember me checkbox
+                  Row(
+                    children: [
+                      Theme(
+                        data: Theme.of(context).copyWith(
+                          checkboxTheme: CheckboxThemeData(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            fillColor: WidgetStateProperty.resolveWith<Color>(
+                              (Set<WidgetState> states) {
+                                if (states.contains(WidgetState.selected)) {
+                                  return AppColors.orange;
+                                }
+                                return Colors.transparent;
+                              },
+                            ),
+                          ),
+                        ),
+                        child: Checkbox(
+                          value: _rememberMe,
+                          onChanged: (value) {
+                            setState(() {
+                              _rememberMe = value ?? true;
+                            });
+                          },
+                          side: BorderSide(
+                            color: isDark ? Colors.grey : Colors.grey.shade400,
+                            width: 1.5,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        'Remember me',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isDark ? Colors.grey[300] : Colors.grey[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  // forgot password button
+                  TextButton(
+                    onPressed: () {
+                      // Navigate to Forgot Password Screen
+                      Get.toNamed(AppRoutes.forgotPassword);
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: AppColors.orange,
+                    ),
+                    child: Text(
+                      'Forgot Password?',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: isDark ? Colors.grey[300] : Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.orange,
                       ),
                     ),
-                  ],
-                ),
-                
-                // forgot password button
-                TextButton(
-                  onPressed: () {
-                    // Navigate to Forgot Password Screen
-                    Get.toNamed(AppRoutes.forgotPassword);
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.orange,
                   ),
-                  child: Text(
-                    'Forgot Password?',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.orange,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 32.0),
-            
-            // Sign In button with loading state
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _handleSignIn,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  backgroundColor: AppColors.orange,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  elevation: 0,
-                  disabledBackgroundColor: AppColors.orange.withOpacity(0.5),
-                ),
-                child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2.0,
-                      ),
-                    )
-                  : Text(
-                      'Sign In',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 32.0),
+              
+              // Sign In button with loading state from BlocBuilder
+              SizedBox(
+                width: double.infinity,
+                child: BlocBuilder<AuthCubit, AuthState>(
+                  builder: (context, state) {
+                    final bool isLoading = state is AuthLoading;
+                    
+                    return ElevatedButton(
+                      onPressed: isLoading ? null : _handleSignIn,
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        backgroundColor: AppColors.orange,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        elevation: 0,
+                        disabledBackgroundColor: AppColors.orange.withOpacity(0.5),
+                      ),
+                      child: isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.0,
+                            ),
+                          )
+                        : Text(
+                            'Sign In',
+                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

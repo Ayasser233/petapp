@@ -18,7 +18,7 @@ class PhoneInputField extends StatefulWidget {
     this.onChanged,
     this.hintText = 'Phone Number',
     required this.isDark,
-    this.validator,
+    this.validator, String? errorText,
   });
 
   @override

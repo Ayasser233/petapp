@@ -1,5 +1,4 @@
 import 'package:petapp/core/services/api_client.dart';
-import 'package:petapp/features/auth/data/models/user_model.dart';
 
 class AuthRepository {
   final ApiClient _apiClient;
@@ -15,10 +14,10 @@ class AuthRepository {
     }
   }
 
-  Future<UserModel> login(String email, String password) async {
+  Future<String> login(String email, String password) async {
     try {
       final response = await _apiClient.login(email, password);
-      return UserModel.fromJson(response.data['user']);
+      return response.data['access_token'];
     } catch (e) {
       rethrow;
     }
@@ -64,10 +63,10 @@ class AuthRepository {
     }
   }
 
-  Future<UserModel> getUserProfile() async {
+  Future<String> getUserProfile() async {
     try {
       final response = await _apiClient.getUserProfile();
-      return UserModel.fromJson(response.data);
+      return response.data['access_token'];
     } catch (e) {
       rethrow;
     }

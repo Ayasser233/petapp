@@ -15,7 +15,7 @@ class AuthLoading extends AuthState {}
 
 // User is authenticated
 class AuthAuthenticated extends AuthState {
-  final UserModel user;
+  final String user;
 
   const AuthAuthenticated({required this.user});
   
@@ -39,7 +39,7 @@ class AuthRegistrationSuccess extends AuthState {
 
 // Login was successful
 class AuthLoginSuccess extends AuthState {
-  final UserModel user;
+  final String user;
 
   const AuthLoginSuccess({required this.user});
   
@@ -63,9 +63,17 @@ class AuthLogoutSuccess extends AuthState {}
 // An error occurred
 class AuthFailure extends AuthState {
   final String message;
+  final String? errorDetails;
+  final int? errorCode;
+  final Map<String, String>? fieldErrors;
 
-  const AuthFailure({required this.message});
+  const AuthFailure({
+    required this.message,
+    this.errorDetails,
+    this.errorCode,
+    this.fieldErrors,
+  });
   
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, errorDetails, errorCode, fieldErrors];
 }
