@@ -12,7 +12,8 @@ class Pet3DViewer extends StatefulWidget {
   final bool allowZoom;
   final double viewerHeight;
   final Color? backgroundColor;
-  final Function(String)? onSymptomSelected;
+  final Function(String) onSymptomSelected;
+  final Function(String)? onBodyPartSelected; // Add this callback
 
   const Pet3DViewer({
     super.key,
@@ -20,9 +21,10 @@ class Pet3DViewer extends StatefulWidget {
     this.modelPath,
     this.allowRotation = true,
     this.allowZoom = true,
-    this.viewerHeight = 500,
+    this.viewerHeight = 300,
     this.backgroundColor,
-    this.onSymptomSelected,
+    required this.onSymptomSelected,
+    this.onBodyPartSelected, // Add this parameter
   });
 
   @override
@@ -31,7 +33,6 @@ class Pet3DViewer extends StatefulWidget {
 
 class _Pet3DViewerState extends State<Pet3DViewer> with SingleTickerProviderStateMixin {
   bool _isLoading = true;
-  bool _isMenuOpen = false;
   late WebViewController _controller;
   late AnimationController _animController;
   
@@ -42,6 +43,17 @@ class _Pet3DViewerState extends State<Pet3DViewer> with SingleTickerProviderStat
     'legs': ['Limping', 'Joint pain', 'Swelling', 'Mobility issues'],
     'tail': ['Irritation', 'Injury', 'Wagging issues', 'Pain when touched'],
   };
+
+  // Define a map for clickable regions of the model
+  final Map<String, List<Vector3>> _bodyPartRegions = {
+    'head': [Vector3(-10, 20, 0), Vector3(10, 40, 20)], // Example bounding box for head
+    'chest': [Vector3(-15, 0, -10), Vector3(15, 20, 10)], // Example for chest
+    'abdomen': [Vector3(-15, -10, -10), Vector3(15, 0, 10)], // Example for abdomen
+    'legs': [Vector3(-15, -40, -10), Vector3(15, -10, 10)], // Example for legs
+    'tail': [Vector3(-5, -40, -30), Vector3(5, -30, -10)], // Example for tail
+  };
+
+  String? _highlightedPart;
 
   @override
   void initState() {
@@ -82,6 +94,21 @@ class _Pet3DViewerState extends State<Pet3DViewer> with SingleTickerProviderStat
         },
       )
       ..addJavaScriptChannel(
+        'modelClicked',
+        onMessageReceived: (JavaScriptMessage message) {
+          try {
+            final coords = jsonDecode(message.message);
+            final x = (coords['x'] as double) * MediaQuery.of(context).size.width;
+            final y = (coords['y'] as double) * widget.viewerHeight;
+            
+            // Use _handleModelTap with these coordinates
+            _handleModelClickFromWebView(Offset(x, y));
+          } catch (e) {
+            debugPrint('Error handling model click: $e');
+          }
+        },
+      )
+      ..addJavaScriptChannel(
         'modelLoaded',
         onMessageReceived: (_) {
           setState(() {
@@ -110,16 +137,6 @@ class _Pet3DViewerState extends State<Pet3DViewer> with SingleTickerProviderStat
   }
 
   // Toggle side menu
-  void _toggleMenu() {
-    setState(() {
-      _isMenuOpen = !_isMenuOpen;
-      if (_isMenuOpen) {
-        _animController.forward();
-      } else {
-        _animController.reverse();
-      }
-    });
-  }
 
   // Add this method to load and encode models
   Future<String> _getEncodedModelData(String assetPath) async {
@@ -187,18 +204,39 @@ class _Pet3DViewerState extends State<Pet3DViewer> with SingleTickerProviderStat
             --poster-color: transparent;
           }
           
-          /* Hide hotspots by default - we'll use the side menu instead */
-          // .hotspot {
-          //   display: none;
-          // }
+          .hotspot {
+            display: block;
+            width: 20px;
+            height: 20px;
+            border-radius: 10px;
+            border: none;
+            background-color: orange;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+            position: relative;
+            transition: all 0.3s ease-in-out;
+          }
+          
+          .hotspot:hover {
+            transform: scale(1.2);
+            background-color: #ff7700;
+          }
+          
+          .annotation {
+            background-color: #ffffff;
+            position: absolute;
+            transform: translate(10px, 10px);
+            border-radius: 10px;
+            padding: 10px;
+            font-weight: bold;
+          }
         </style>
       </head>
       <body>
         <model-viewer
           src="$modelSrc"
           alt="3D Model of ${widget.petType}"
-          camera-controls="false"
-          disable-zoom="true"
+          camera-controls="${widget.allowRotation ? 'true' : 'false'}"
+          disable-zoom="${!widget.allowZoom ? 'true' : 'false'}"
           auto-rotate="false"
           rotation-per-second="0deg"
           camera-orbit="0deg 75deg 2.5m"
@@ -209,24 +247,87 @@ class _Pet3DViewerState extends State<Pet3DViewer> with SingleTickerProviderStat
           shadow-intensity="0"
           id="petModel"
           >
-          <!-- Hidden hotspots for reference, we'll access these via menu -->
-          <button class="hotspot" slot="hotspot-head" data-position="0 1.5 0" data-normal="0 1 0.5">H</button>
-          <button class="hotspot" slot="hotspot-chest" data-position="0 0.5 0.5" data-normal="0 0 1">C</button>
-          <button class="hotspot" slot="hotspot-abdomen" data-position="0 0 0" data-normal="0 0 1">A</button>
-          <button class="hotspot" slot="hotspot-legs" data-position="0.5 -1 0" data-normal="1 0 0">L</button>
-          <button class="hotspot" slot="hotspot-tail" data-position="0 -0.5 -1" data-normal="0 0 -1">T</button>
+          <!-- Visible hotspots for body parts -->
+          <button class="hotspot" slot="hotspot-head" data-position="0 1.5 0" data-normal="0 1 0.5" data-part="head">
+            <div class="annotation">Head</div>
+          </button>
+          <button class="hotspot" slot="hotspot-chest" data-position="0 0.5 0.5" data-normal="0 0 1" data-part="chest">
+            <div class="annotation">Chest</div>
+          </button>
+          <button class="hotspot" slot="hotspot-abdomen" data-position="0 0 0" data-normal="0 0 1" data-part="abdomen">
+            <div class="annotation">Abdomen</div>
+          </button>
+          <button class="hotspot" slot="hotspot-legs" data-position="0.5 -1 0" data-normal="1 0 0" data-part="legs">
+            <div class="annotation">Legs</div>
+          </button>
+          <button class="hotspot" slot="hotspot-tail" data-position="0 -0.5 -1" data-normal="0 0 -1" data-part="tail">
+            <div class="annotation">Tail</div>
+          </button>
         </model-viewer>
         
         <script>
-          function selectBodyPart(part) {
-            // Send message to Flutter
-            window.bodyPartSelected.postMessage(part);
-          }
+          const modelViewer = document.querySelector('model-viewer');
+          const hotspots = document.querySelectorAll('.hotspot');
+          
+          // Hide annotations by default
+          document.querySelectorAll('.annotation').forEach(annotation => {
+            annotation.style.opacity = '0';
+            annotation.style.display = 'none';
+          });
+          
+          // Show annotation on hover
+          hotspots.forEach(hotspot => {
+            const annotation = hotspot.querySelector('.annotation');
+            
+            hotspot.addEventListener('mouseover', () => {
+              annotation.style.display = 'block';
+              setTimeout(() => {
+                annotation.style.opacity = '1';
+              }, 50);
+            });
+            
+            hotspot.addEventListener('mouseout', () => {
+              annotation.style.opacity = '0';
+              setTimeout(() => {
+                annotation.style.display = 'none';
+              }, 300);
+            });
+            
+            // When clicking a hotspot, send the body part to Flutter
+            hotspot.addEventListener('click', () => {
+              const part = hotspot.getAttribute('data-part');
+              window.bodyPartSelected.postMessage(part);
+            });
+          });
+          
+          // Allow click anywhere on the model
+          modelViewer.addEventListener('click', (event) => {
+            const rect = modelViewer.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const normalizedX = x / rect.width;
+            const normalizedY = y / rect.height;
+            
+            // Send coordinates to Flutter for ray-casting
+            window.modelClicked.postMessage(JSON.stringify({
+              x: normalizedX,
+              y: normalizedY
+            }));
+          });
           
           // Notify Flutter when the model is loaded
-          document.querySelector('model-viewer').addEventListener('load', function() {
+          modelViewer.addEventListener('load', function() {
             window.modelLoaded.postMessage('loaded');
+            
+            // Position the hotspots based on model size
+            positionHotspots();
           });
+          
+          // Function to position hotspots based on model size
+          function positionHotspots() {
+            // This would need more sophisticated positioning based on actual model
+            // Just a placeholder to demonstrate
+          }
         </script>
       </body>
       </html>
@@ -322,10 +423,8 @@ class _Pet3DViewerState extends State<Pet3DViewer> with SingleTickerProviderStat
                 style: TextStyle(color: textColor),
               ),
               onTap: () {
-                if (widget.onSymptomSelected != null) {
-                  widget.onSymptomSelected!('$localBodyPart: $symptom');
-                }
-                Navigator.pop(context);
+                widget.onSymptomSelected('$localBodyPart: $symptom');
+                              Navigator.pop(context);
               },
             );
           }).toList(),
@@ -342,4 +441,83 @@ class _Pet3DViewerState extends State<Pet3DViewer> with SingleTickerProviderStat
       ),
     );
   }
+
+  // Add this method to handle taps on the model
+  void _handleModelTap(TapUpDetails details) {
+    // Convert screen coordinates to model coordinates
+    final RenderBox box = context.findRenderObject() as RenderBox;
+    final localPosition = box.globalToLocal(details.globalPosition);
+    
+    // Calculate ray from camera through tap point
+    final ray = _calculateRayFromCamera(localPosition);
+    
+    // Check which body part was hit
+    String? hitPart = _findIntersectedBodyPart(ray);
+    
+    if (hitPart != null && widget.onBodyPartSelected != null) {
+      widget.onBodyPartSelected!(hitPart);
+    }
+  }
+  
+  // Update these methods with simple implementations for testing:
+
+  String? _findIntersectedBodyPart(Ray ray) {
+    // Simplified implementation - divide screen into regions for testing
+    final screenHeight = widget.viewerHeight;
+    final position = ray.origin;
+    
+    // Simple division of the screen into body parts for testing
+    if (position.y < screenHeight * 0.2) {
+      return 'head';
+    } else if (position.y < screenHeight * 0.4) {
+      return 'chest';
+    } else if (position.y < screenHeight * 0.6) {
+      return 'abdomen';
+    } else if (position.y < screenHeight * 0.8) {
+      return 'legs';
+    } else {
+      return 'tail';
+    }
+  }
+  
+  // Placeholder for ray calculation
+  Ray _calculateRayFromCamera(Offset position) {
+    // Simplified ray calculation for testing
+    return Ray(
+      Vector3(position.dx, position.dy, 0),
+      Vector3(0, 0, -1)
+    );
+  }
+
+  // Add this method to your _Pet3DViewerState class
+
+  void _handleModelClickFromWebView(Offset position) {
+    // Calculate ray from camera through tap point
+    final ray = _calculateRayFromCamera(position);
+    
+    // Check which body part was hit
+    String? hitPart = _findIntersectedBodyPart(ray);
+    
+    if (hitPart != null) {
+      // Show symptom dialog directly
+      _showSymptomSelectionDialog(context, hitPart);
+      
+      // Also notify parent if needed
+      if (widget.onBodyPartSelected != null) {
+        widget.onBodyPartSelected!(hitPart);
+      }
+    }
+  }
+}
+
+// You may need to define these classes if not already imported
+class Vector3 {
+  final double x, y, z;
+  Vector3(this.x, this.y, this.z);
+}
+
+class Ray {
+  final Vector3 origin;
+  final Vector3 direction;
+  Ray(this.origin, this.direction);
 }
