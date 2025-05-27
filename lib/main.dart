@@ -29,14 +29,14 @@ void main() async {
   final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
   final isOnboardingCompleted = prefs.getBool('isOnboardingCompleted') ?? false;
 
-  String initialRoute;
-  if (!isOnboardingCompleted) {
-    initialRoute = AppRoutes.onboarding;
-  } else if (isLoggedIn) {
-    initialRoute = AppRoutes.home;
-  } else {
-    initialRoute = AppRoutes.signUp;
-  }
+  String initialRoute = AppRoutes.home;
+  // if (!isOnboardingCompleted) {
+  //   initialRoute = AppRoutes.onboarding;
+  // } else if (isLoggedIn) {
+  //   initialRoute = AppRoutes.home;
+  // } else {
+  //   initialRoute = AppRoutes.signUp;
+  // }
   
   // Initialize settings provider
   final settingsProvider = SettingsProvider();

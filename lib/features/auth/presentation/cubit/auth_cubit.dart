@@ -131,7 +131,7 @@ class AuthCubit extends Cubit<AuthState> {
   Map<String, String>? _extractFieldErrors(DioException e) {
     try {
       final data = e.response?.data;
-      if (data == null || !(data is Map)) return null;
+      if (data == null || data is! Map) return null;
       
       // Check for common validation error formats
       if (data.containsKey('errors') && data['errors'] is Map) {

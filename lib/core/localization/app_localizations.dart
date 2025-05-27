@@ -66,7 +66,7 @@ class AppLocalizations {
 
   // Add new getters for home screen
   String get clinicVisit => _localizedValues[locale.languageCode]?['clinicVisit'] ?? 'Clinic Visit';
-  String get animalView3D => _localizedValues[locale.languageCode]?['animalView3D'] ?? '3D Animal View';
+  String get animalView3D => _localizedValues[locale.languageCode]?['animalView3D'] ?? 'Symptom Checker';
   String get virtualVet => _localizedValues[locale.languageCode]?['virtualVet'] ?? 'Virtual Vet';
   String get searchPlaceholder => _localizedValues[locale.languageCode]?['searchPlaceholder'] ?? 'Search clinics, services...';
   String get redeemAndSave => _localizedValues[locale.languageCode]?['redeemAndSave'] ?? 'Redeem & Save';
@@ -135,7 +135,7 @@ class AppLocalizations {
       'confirm': 'Confirm',
       'confirmDeleteAccount': 'Are you sure you want to delete your account? This action cannot be undone.',
       'clinicVisit': 'Clinic Visit',
-      'animalView3D': '3D Animal View',
+      'animalView3D': 'Symptom Checker',
       'virtualVet': 'Virtual Vet',
       'searchPlaceholder': 'Search clinics, services...',
       'redeemAndSave': 'Redeem & Save',
@@ -200,7 +200,7 @@ class AppLocalizations {
       'confirm': 'تأكيد',
       'confirmDeleteAccount': 'هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.',
       'clinicVisit': 'زيارة العيادة',
-      'animalView3D': 'عرض الحيوان ثلاثي الأبعاد',
+      'animalView3D': 'مشخص الأعراض',
       'virtualVet': 'طبيب بيطري افتراضي',
       'searchPlaceholder': 'البحث عن عيادات، خدمات...',
       'redeemAndSave': 'استبدال ووفر',

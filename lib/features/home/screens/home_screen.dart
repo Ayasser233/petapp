@@ -114,16 +114,27 @@ class _HomeScreenState extends State<HomeScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          _buildServiceItem(context, localizations.clinicVisit,
-                              Icons.medical_services_outlined, isDark,
-                              onTap: () => Get.toNamed(AppRoutes.clinicExplorer)),
                           _buildServiceItem(
-                              context, localizations.animalView3D, Icons.threed_rotation, isDark,
-                              onTap: () => Get.toNamed(AppRoutes.pet3DModelSelector)),
+                            context, 
+                            localizations.clinicVisit,
+                            'assets/icons/icons-01.png', // Replace with your doctor icon asset path
+                            isDark,
+                            onTap: () => Get.toNamed(AppRoutes.clinicExplorer)
+                          ),
                           _buildServiceItem(
-                              context, localizations.virtualVet, Icons.videocam_outlined, isDark,
-                              onTap: () =>
-                                  _navigateToServicesByCategory('Consultation')),
+                            context, 
+                            localizations.animalView3D, 
+                            'assets/icons/icons-02.png', // Replace with your pet icon asset path 
+                            isDark,
+                            onTap: () => Get.toNamed(AppRoutes.pet3DModelSelector)
+                          ),
+                          // _buildServiceItem(
+                          //   context, 
+                          //   localizations.virtualVet, 
+                          //   Icons.videocam_outlined, 
+                          //   isDark,
+                          //   onTap: () => _navigateToServicesByCategory('Consultation')
+                          // ),
                         ],
                       ),
 
@@ -396,45 +407,74 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildServiceItem(
     BuildContext context, 
     String title, 
-    IconData icon,
+    String icon,
     bool isDark,
     {VoidCallback? onTap}
   ) {
     return GestureDetector(
       onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isDark 
-                ? AppColors.orange.withOpacity(0.15) 
-                : AppColors.orange.withOpacity(0.1),
-              shape: BoxShape.circle,
-              boxShadow: [
-                if (!isDark) BoxShadow(
-                  color: AppColors.orange.withOpacity(0.15),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+      child: Container(
+        width: 150, // Fixed width
+        height: 150, // Fixed height
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          // Enhanced background for light theme
+          color: isDark 
+            ? AppColors.lightblack 
+            : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          // Enhanced shadow for light theme
+          boxShadow: [
+            if (!isDark) BoxShadow(
+              color: Colors.grey.withOpacity(0.25), // More pronounced shadow
+              blurRadius: 12, // Larger blur
+              spreadRadius: 1, // Add spread
+              offset: const Offset(0, 4), // Deeper shadow
             ),
-            child: Icon(
-              icon,
-              color: AppColors.orange,
-              size: 28, // Slightly larger
+          ],
+          // Add subtle border in light theme for extra definition
+          border: !isDark
+            ? Border.all(color: Colors.grey.withOpacity(0.1), width: 1.0)
+            : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Image container with highlight effect
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: !isDark ? BoxDecoration(
+                // Add a subtle circular background for the icon in light theme
+                shape: BoxShape.circle,
+                color: AppColors.orange.withOpacity(0.1),
+              ) : null,
+              child: Image.asset(
+                icon,
+                width: 70, // Slightly smaller for better proportions
+                height: 70,
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? Colors.white : Colors.black87,
+            const SizedBox(height: 8),
+            // Title text
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w700, // Bolder text
+                  color: isDark 
+                    ? Colors.white 
+                    : Colors.black87,
+                  // Add letter spacing in light theme
+                  letterSpacing: !isDark ? 0.3 : null,
                 ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
