@@ -8,7 +8,7 @@ class AppTheme{
   static ThemeData lightTheme = ThemeData(
     // surfaceTintColor: AppColors.orange,
     useMaterial3: true,
-    fontFamily: 'Poppins',
+    fontFamily: 'Alilato Arabic Regular',
     primaryColor: AppColors.orange,
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
@@ -24,7 +24,7 @@ class AppTheme{
   );
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: 'Poppins',
+    fontFamily: 'Alilato Arabic Regular',
     primaryColor: AppColors.orange,
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.black,

@@ -162,9 +162,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               Expanded(
                                 child: Text(
                                   localizations.searchPlaceholder,
-                                  style: TextStyle(
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                     color: isDark ? Colors.grey[400] : Colors.grey,
-                                    fontSize: 16,
                                   ),
                                 ),
                               ),
@@ -192,7 +191,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                             child: Text(
                               localizations.viewHistory,
-                              style: const TextStyle(color: AppColors.orange),
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: AppColors.orange,                              ),
                             ),
                           ),
                         ],
@@ -249,19 +249,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                         children: [
                                           Text(
                                             '3,540',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .headlineSmall
-                                                ?.copyWith(
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+                                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                           Text(
                                             localizations.pointsAvailable,
-                                            style: const TextStyle(
+                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                               color: Colors.white,
-                                              fontSize: 12,
                                             ),
                                           ),
                                         ],
@@ -285,7 +281,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                     child: Text(
                                       localizations.redeemNow,
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.orange,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -322,19 +321,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                 const SizedBox(height: 8),
                                 Text(
                                   '4',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall
-                                      ?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
+                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 Text(
                                   localizations.vouchers,
-                                  style: const TextStyle(
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.white,
-                                    fontSize: 12,
                                   ),
                                 ),
                               ],
@@ -363,7 +358,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                             child: Text(
                               localizations.seeAll,
-                              style: const TextStyle(color: AppColors.orange),
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                color: AppColors.orange,
+                              ),
                             ),
                           ),
                         ],
@@ -461,11 +458,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 title,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700, // Bolder text
-                  color: isDark 
-                    ? Colors.white 
-                    : Colors.black87,
-                  // Add letter spacing in light theme
+                  fontWeight: FontWeight.w700,
+                  color: isDark ? Colors.white : Colors.black87,
                   letterSpacing: !isDark ? 0.3 : null,
                 ),
                 textAlign: TextAlign.center,
@@ -545,9 +539,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(width: 4),
                         Text(
                           clinic.distance,
-                          style: const TextStyle(
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: Colors.white,
-                            fontSize: 10,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -585,8 +578,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: Text(
                           clinic.location,
-                          style: TextStyle(
-                            fontSize: 12,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: isDark ? Colors.grey[400] : Colors.grey[600],
                           ),
                           maxLines: 1,
@@ -607,16 +599,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 4),
                       Text(
                         clinic.rating.toString(),
-                        style: const TextStyle(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
                         ),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         '(${clinic.reviews})',
-                        style: TextStyle(
-                          fontSize: 12,
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: isDark ? Colors.grey[400] : Colors.grey[600],
                         ),
                       ),

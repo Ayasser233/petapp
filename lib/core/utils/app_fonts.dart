@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppFonts {
   //* Font Name
-  static const String fontFamily = "Poppins";
+  static const String fontFamily = "Alilato Arabic Regular";
   //* Font Weight
   static const FontWeight light = FontWeight.w300;
   static const FontWeight regular = FontWeight.w400;
