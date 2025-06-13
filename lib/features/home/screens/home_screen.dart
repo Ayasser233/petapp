@@ -5,8 +5,9 @@ import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/widgets/custom_app_bar.dart';
+import 'package:petapp/core/widgets/rewards_card.dart';
 import 'package:petapp/features/clinic/models/clinic_model.dart';
-import 'package:petapp/core/localization/app_localizations.dart'; // Add this import
+import 'package:petapp/core/localization/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -69,40 +70,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _navigateToServicesByCategory(String category) {
-    final clinicsInCategory = nearbyClinics
-        .where((clinic) =>
-            clinic.category.toLowerCase().contains(category.toLowerCase()))
-        .toList();
-
-    if (clinicsInCategory.isNotEmpty) {
-      Get.toNamed(
-        AppRoutes.clinicDetail,
-        arguments: clinicsInCategory.first.toMap(),
-      );
-    } else {
-      Get.toNamed(
-        AppRoutes.clinicDetail,
-        arguments: nearbyClinics.first.toMap(),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
-    final localizations = AppLocalizations.of(context); // Get localizations
+    final localizations = AppLocalizations.of(context);
 
     return BaseScreen(
       navBarIndex: 0,
       appBar: CustomAppBar(
-        showLogo: true, // Show the logo in the AppBar
+        showLogo: true,
         isDark: isDark,
       ),
       body: SafeArea(
         child: Column(
           children: [
-            // Scrollable content
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -117,33 +99,25 @@ class _HomeScreenState extends State<HomeScreen> {
                           _buildServiceItem(
                             context, 
                             localizations.clinicVisit,
-                            'assets/icons/icons-01.png', // Replace with your doctor icon asset path
+                            'assets/icons/icons-01.png',
                             isDark,
                             onTap: () => Get.toNamed(AppRoutes.clinicExplorer)
                           ),
                           _buildServiceItem(
                             context, 
                             localizations.animalView3D, 
-                            'assets/icons/icons-02.png', // Replace with your pet icon asset path 
+                            'assets/icons/icons-02.png',
                             isDark,
                             onTap: () => Get.toNamed(AppRoutes.pet3DModelSelector)
                           ),
-                          // _buildServiceItem(
-                          //   context, 
-                          //   localizations.virtualVet, 
-                          //   Icons.videocam_outlined, 
-                          //   isDark,
-                          //   onTap: () => _navigateToServicesByCategory('Consultation')
-                          // ),
                         ],
                       ),
 
                       const SizedBox(height: 24),
 
-                      // Search bar - now acts as a button
+                      // Search bar
                       GestureDetector(
                         onTap: () {
-                          // Navigate to clinics search screen when tapped
                           Get.toNamed(AppRoutes.clinicExplorer, arguments: {'openSearch': true});
                         },
                         child: Container(
@@ -174,168 +148,20 @@ class _HomeScreenState extends State<HomeScreen> {
                       
                       const SizedBox(height: 24),
 
-                      // Redeem & Save section
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            localizations.redeemAndSave,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : Colors.black87,
-                                ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              // Handle See All tap for rewards
-                            },
-                            child: Text(
-                              localizations.viewHistory,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: AppColors.orange,                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Rewards & Points card
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 16),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [AppColors.orange, Color(0xFFF5A623)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.orange.withOpacity(0.3),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            // Points section
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(8),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          shape: BoxShape.circle,
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(0.1),
-                                              blurRadius: 4,
-                                              offset: const Offset(0, 2),
-                                            ),
-                                          ],
-                                        ),
-                                        child: const Icon(Icons.stars_rounded,
-                                            color: AppColors.orange, size: 24),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            '3,540',
-                                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          Text(
-                                            localizations.pointsAvailable,
-                                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      // Navigate to redeem points screen
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      foregroundColor: AppColors.orange,
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 16, vertical: 8),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      elevation: 2,
-                                    ),
-                                    child: Text(
-                                      localizations.redeemNow,
-                                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.orange,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              height: 100,
-                              width: 1,
-                              color: Colors.white.withOpacity(0.3),
-                              margin: const EdgeInsets.symmetric(horizontal: 16),
-                            ),
-                            // Vouchers section
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Icon(
-                                      Icons.confirmation_number_outlined,
-                                      color: AppColors.orange,
-                                      size: 24),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  '4',
-                                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  localizations.vouchers,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                      // Reusable Rewards Card
+                      RewardsCard(
+                        points: 3540,
+                        vouchers: 3,
+                        onRedeemTap: () {
+                          // Navigate to redeem screen
+                          Get.toNamed('/redeem');
+                        },
+                        onVouchersTap: () {
+                          Get.toNamed(AppRoutes.vouchers);
+                        },
+                        onViewHistoryTap: () {
+                          Get.toNamed(AppRoutes.pointsHistory);
+                        },
                       ),
                       
                       const SizedBox(height: 24),
@@ -353,7 +179,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           TextButton(
                             onPressed: () {
-                              // Handle See All tap
                               Get.toNamed(AppRoutes.clinicExplorer);
                             },
                             child: Text(
@@ -367,9 +192,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(height: 16),
 
-                      // Near You cards with improved design
+                      // Near You cards
                       SizedBox(
-                        height: 220, // Slightly taller for better visuals
+                        height: 220,
                         child: ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: nearbyClinics.length,
@@ -388,7 +213,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               );
                             }),
                       ),
-                      // Add some bottom padding
                       const SizedBox(height: 16),
                     ],
                   ),

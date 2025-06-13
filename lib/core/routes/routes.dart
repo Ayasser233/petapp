@@ -11,7 +11,7 @@ import 'package:petapp/features/location/screens/set_location.dart';
 import 'package:petapp/features/home/screens/home_screen.dart';
 import 'package:petapp/features/clinic/screens/clinic_detail_screen.dart';
 import 'package:petapp/features/home/screens/activity_screen.dart';
-import 'package:petapp/features/home/screens/profile_screen.dart';
+import 'package:petapp/features/profile/screens/profile_screen.dart';
 import 'package:petapp/features/pet/screens/pet_3d_viewer/pet_3d_viewer_screen.dart';
 import 'package:petapp/features/pet/screens/pet_3d_viewer/pet_3d_model_selector.dart';
 import 'package:petapp/features/clinic/screens/hospital_booking_screen.dart';
@@ -22,6 +22,8 @@ import 'package:petapp/features/pet/screens/add_pet.dart';
 import 'package:petapp/features/pet/screens/pet_profile.dart';
 // Add import for settings screen
 import 'package:petapp/features/home/screens/settings_screen.dart';
+import 'package:petapp/features/profile/screens/points_history_screen.dart';
+import 'package:petapp/features/profile/screens/vouchers_screen.dart';
 
 class AppRoutes {
   static const String onboarding = '/onboarding';
@@ -49,6 +51,9 @@ class AppRoutes {
   static const String petProfile = '/pet-profile';
   // Add settings route constant here
   static const String settings = '/settings';
+  static const String vouchers = '/vouchers';
+  static const String pointsHistory = '/points-history';
+  static const String redeem = '/redeem';
 
   static List<GetPage> get getPages => [
         GetPage(name: onboarding, page: () => const OnboardingScreen()),
@@ -107,5 +112,7 @@ class AppRoutes {
         ),
         // Add settings page to the list
         GetPage(name: settings, page: () => const SettingsScreen()),
+        GetPage(name: vouchers, page: () => const VouchersScreen()),
+        GetPage(name: pointsHistory, page: () => const PointsHistoryScreen()),
       ];
 }

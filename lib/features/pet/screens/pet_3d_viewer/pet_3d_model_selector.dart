@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
+import 'package:petapp/core/utils/helper_functions.dart';
 
 class Pet3DModelSelector extends StatelessWidget {
   const Pet3DModelSelector({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = THelperFunctions.isDarkMode(context);
     final backgroundColor = isDark ? Colors.black : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black;
     final cardColor = isDark ? Colors.grey[850] : Colors.white;
@@ -150,19 +151,15 @@ class Pet3DModelSelector extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 petType,
-                style: TextStyle(
-                  fontSize: 18, 
-                  fontWeight: FontWeight.bold,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   color: textColor,
-                ),
+                  )
               ),
               const SizedBox(height: 8),
               Text(
                 'View $petType Anatomy',
-                style: const TextStyle(
-                  color: AppColors.orange,
-                  fontSize: 14,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium
+                    ?.copyWith(color: AppColors.orange),
               ),
               const SizedBox(height: 16),
               Container(
@@ -172,13 +169,13 @@ class Pet3DModelSelector extends StatelessWidget {
                   color: AppColors.orange.withOpacity(isDark ? 0.2 : 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Center(
+                child: Center(
                   child: Text(
                     'Open Model',
-                    style: TextStyle(
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.orange,
                       fontWeight: FontWeight.bold,
-                    ),
+                      ),
                   ),
                 ),
               ),
