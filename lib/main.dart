@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/di/service_locator.dart';
+import 'package:petapp/core/services/location_service.dart';
 
 // Add this function to reset app state
 Future<void> resetAppState() async {
@@ -22,6 +23,9 @@ void main() async {
   // Initialize dependencies
   await setupServiceLocator();
   
+  // Initialize services
+  await initServices();
+  
   // Uncomment the next line to reset the app state when you need to test from beginning
   // await resetAppState();
   
@@ -30,13 +34,13 @@ void main() async {
   final isOnboardingCompleted = prefs.getBool('isOnboardingCompleted') ?? false;
 
   String initialRoute = AppRoutes.home;
-  // if (!isOnboardingCompleted) {
-  //   initialRoute = AppRoutes.onboarding;
-  // } else if (isLoggedIn) {
-  //   initialRoute = AppRoutes.home;
-  // } else {
-  //   initialRoute = AppRoutes.signUp;
-  // }
+  if (!isOnboardingCompleted) {
+    initialRoute = AppRoutes.onboarding;
+  } else if (isLoggedIn) {
+    initialRoute = AppRoutes.home;
+  } else {
+    initialRoute = AppRoutes.signUp;
+  }
   
   // Initialize settings provider
   final settingsProvider = SettingsProvider();
@@ -48,6 +52,16 @@ void main() async {
     ],
     child: MyApp(initialRoute: initialRoute),
   ));
+}
+
+/// Initialize all services
+Future<void> initServices() async {
+  print('Starting services...');
+  
+  // Initialize location service
+  await Get.putAsync(() async => LocationService());
+  
+  print('All services started...');
 }
 
 // Convert to StatefulWidget

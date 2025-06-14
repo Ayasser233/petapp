@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/constants.dart';
 
@@ -11,7 +12,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     this.title,
     this.showLogo = false,
-    required this.isDark,
+    required this.isDark, required List<Obx> actions,
   });
 
   @override

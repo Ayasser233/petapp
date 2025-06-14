@@ -2,10 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 	<dict>
+		<!-- Location permissions -->
+		<key>NSLocationWhenInUseUsageDescription</key>
+		<string>Aleefy App needs access to your location to find nearby veterinary clinics and provide personalized services.</string>
+		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Aleefy App needs access to your location to find nearby veterinary clinics and provide personalized services.</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Petapp</string>
+		<string>Aleefy App</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -13,7 +18,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>petapp</string>
+		<string>Aleefy App</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>

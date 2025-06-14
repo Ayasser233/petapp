@@ -42,7 +42,9 @@ dependencies:
   flutter_native_splash: ^2.4.1
   smooth_page_indicator: ^1.2.1
   flutter_svg: ^2.0.9
-  geolocator: ^9.0.2
+  geolocator: ^10.1.0
+  geocoding: ^3.0.0
+  permission_handler: ^11.2.0
   shared_preferences: ^2.3.3
   model_viewer_plus: ^1.7.0
   # flutter_gl: ^0.0.21

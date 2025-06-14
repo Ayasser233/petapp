@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
+import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/widgets/custom_app_bar.dart';
 import 'package:petapp/core/widgets/rewards_card.dart';
+import 'package:petapp/core/services/location_service.dart';
 import 'package:petapp/features/clinic/models/clinic_model.dart';
+import 'package:petapp/features/clinic/services/clinic_service.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,51 +19,77 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  // Sample data for nearby clinics
-  final List<ClinicModel> nearbyClinics = [
-    ClinicModel(
-      id: '1',
-      name: 'Banfield Pet Hospital',
-      category: 'Hospital',
-      location: 'Los Angeles, CA',
-      distance: '15 minutes',
-      image: 'assets/images/pet_hospital.jpg',
-      description:
-          'Banfield Pet Hospital is a network of specialized animal hospitals that offer emergency and specialist services. They focus on the care of pets that require specialized medical attention.',
-      rating: 4.8,
-      reviews: 324,
-      patients: 709,
-      yearsExperience: 15,
-    ),
-    ClinicModel(
-      id: '2',
-      name: 'VCA Animal Hospital',
-      category: 'Hospital',
-      location: 'Brooklyn, NY',
-      distance: '20 minutes',
-      image: 'assets/images/pet_hospital2.jpg',
-      description:
-          'VCA Animal Hospital provides a full range of general medical and surgical services as well as specialized treatments for companion animals.',
-      rating: 4.6,
-      reviews: 287,
-      patients: 583,
-      yearsExperience: 12,
-    ),
-    ClinicModel(
-      id: '3',
-      name: 'BluePearl Pet Hospital',
-      category: 'Hospital',
-      location: 'Healdsburg, CA',
-      distance: '11 minutes',
-      image: 'assets/images/pet_hospital3.jpg',
-      description:
-          'BluePearl Pet Hospital is a network of specialized animal hospitals that offer emergency and specialist services. They focus on the care of pets that require specialized medical attention.',
-      rating: 4.7,
-      reviews: 127,
-      patients: 709,
-      yearsExperience: 15,
-    ),
-  ];
+  final ClinicService _clinicService = ClinicService();
+  late final LocationService _locationService;
+  
+  List<ClinicModel> nearbyClinics = [];
+  bool _isLoadingClinics = true;
+  bool _locationDialogShown = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _locationService = Get.put(LocationService());
+    _initializeHomeScreen();
+  }
+
+  /// Initialize home screen with location and clinics
+  Future<void> _initializeHomeScreen() async {
+    try {
+      // Wait a bit for the screen to settle
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      // Show location permission dialog on first launch
+      if (_locationService.isFirstLaunch && !_locationDialogShown) {
+        _locationDialogShown = true;
+        final shouldRequestLocation = await _locationService.showFirstTimeLocationDialog();
+        
+        if (shouldRequestLocation) {
+          await _locationService.requestLocationPermission();
+        }
+      }
+
+      // Load nearby clinics
+      await _loadNearbyClinics();
+    } catch (e) {
+      print('Error initializing home screen: $e');
+      setState(() {
+        _isLoadingClinics = false;
+      });
+    }
+  }
+
+  /// Load nearby clinics
+  Future<void> _loadNearbyClinics() async {
+    if (!mounted) return;
+    
+    setState(() {
+      _isLoadingClinics = true;
+    });
+
+    try {
+      final clinics = await _clinicService.getNearByClinics();
+      if (mounted) {
+        setState(() {
+          nearbyClinics = clinics;
+        });
+      }
+    } catch (e) {
+      print('Error loading nearby clinics: $e');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingClinics = false;
+        });
+      }
+    }
+  }
+
+  /// Handle refresh
+  Future<void> _handleRefresh() async {
+    await _locationService.refreshLocation();
+    await _loadNearbyClinics();
+  }
 
   void _navigateToClinicDetail(ClinicModel clinic) {
     Get.toNamed(
@@ -70,6 +98,24 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _navigateToServicesByCategory(String category) {
+    final clinicsInCategory = nearbyClinics
+        .where((clinic) =>
+            clinic.category.toLowerCase().contains(category.toLowerCase()))
+        .toList();
+
+    if (clinicsInCategory.isNotEmpty) {
+      Get.toNamed(
+        AppRoutes.clinicDetail,
+        arguments: clinicsInCategory.first.toMap(),
+      );
+    } else if (nearbyClinics.isNotEmpty) {
+      Get.toNamed(
+        AppRoutes.clinicDetail,
+        arguments: nearbyClinics.first.toMap(),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,72 +127,117 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: CustomAppBar(
         showLogo: true,
         isDark: isDark,
+        actions: [
+          // Location indicator button
+          Obx(() => IconButton(
+            onPressed: () {
+              if (_locationService.isPermissionGranted) {
+                _handleRefresh();
+              } else {
+                _locationService.requestLocationPermission().then((_) {
+                  if (_locationService.isPermissionGranted) {
+                    _loadNearbyClinics();
+                  }
+                });
+              }
+            },
+            icon: _locationService.isLoading
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.orange),
+                    ),
+                  )
+                : Icon(
+                    _locationService.isPermissionGranted 
+                        ? Icons.location_on 
+                        : Icons.location_off,
+                    color: _locationService.isPermissionGranted 
+                        ? AppColors.orange 
+                        : Colors.grey,
+                  ),
+            tooltip: _locationService.isPermissionGranted 
+                ? 'Refresh location' 
+                : 'Enable location',
+          )),
+        ],
       ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Featured Services Row
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildServiceItem(
-                            context, 
-                            localizations.clinicVisit,
-                            'assets/icons/icons-01.png',
-                            isDark,
-                            onTap: () => Get.toNamed(AppRoutes.clinicExplorer)
-                          ),
-                          _buildServiceItem(
-                            context, 
-                            localizations.animalView3D, 
-                            'assets/icons/icons-02.png',
-                            isDark,
-                            onTap: () => Get.toNamed(AppRoutes.pet3DModelSelector)
-                          ),
-                        ],
-                      ),
+              child: RefreshIndicator(
+                onRefresh: _handleRefresh,
+                color: AppColors.orange,
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Location header
+                        Obx(() => _buildLocationHeader(context, isDark, localizations)),
 
-                      const SizedBox(height: 24),
+                        const SizedBox(height: 16),
 
-                      // Search bar
-                      GestureDetector(
-                        onTap: () {
-                          Get.toNamed(AppRoutes.clinicExplorer, arguments: {'openSearch': true});
-                        },
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: isDark ? AppColors.lightblack : Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.search,
-                                color: isDark ? Colors.grey[400] : Colors.grey,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  localizations.searchPlaceholder,
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: isDark ? Colors.grey[400] : Colors.grey,
+                        // Featured Services Row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildServiceItem(
+                              context, 
+                              localizations.clinicVisit,
+                              'assets/icons/icons-01.png',
+                              isDark,
+                              onTap: () => Get.toNamed(AppRoutes.clinicExplorer)
+                            ),
+                            _buildServiceItem(
+                              context, 
+                              localizations.animalView3D, 
+                              'assets/icons/icons-02.png',
+                              isDark,
+                              onTap: () => Get.toNamed(AppRoutes.pet3DModelSelector)
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Search bar
+                        GestureDetector(
+                          onTap: () {
+                            Get.toNamed(AppRoutes.clinicExplorer, arguments: {'openSearch': true});
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isDark ? AppColors.lightblack : Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.search,
+                                  color: isDark ? Colors.grey[400] : Colors.grey,
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    localizations.searchPlaceholder,
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: isDark ? Colors.grey[400] : Colors.grey,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                      
-                      const SizedBox(height: 24),
+                        
+                        const SizedBox(height: 24),
 
                       // Reusable Rewards Card
                       RewardsCard(
@@ -166,61 +257,277 @@ class _HomeScreenState extends State<HomeScreen> {
                       
                       const SizedBox(height: 24),
 
-                      // Near You section
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            localizations.nearYou,
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: isDark ? Colors.white : Colors.black87,
+                        // Near You section
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              localizations.nearYou,
+                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                  ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Get.toNamed(AppRoutes.clinicExplorer);
+                              },
+                              child: Text(
+                                localizations.seeAll,
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: AppColors.orange,
                                 ),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Get.toNamed(AppRoutes.clinicExplorer);
-                            },
-                            child: Text(
-                              localizations.seeAll,
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: AppColors.orange,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
 
-                      // Near You cards
-                      SizedBox(
-                        height: 220,
-                        child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: nearbyClinics.length,
-                            itemBuilder: (context, index) {
-                              final clinic = nearbyClinics[index];
-                              return Padding(
-                                padding: EdgeInsets.only(
-                                  right: index == nearbyClinics.length - 1 ? 0 : 16.0,
-                                ),
-                                child: _buildNearbyCard(
-                                  context,
-                                  clinic: clinic,
-                                  isDark: isDark,
-                                  onTap: () => _navigateToClinicDetail(clinic),
-                                ),
-                              );
-                            }),
-                      ),
-                      const SizedBox(height: 16),
-                    ],
+                        // Near You cards
+                        SizedBox(
+                          height: 220,
+                          child: _isLoadingClinics
+                              ? _buildLoadingClinics(isDark)
+                              : nearbyClinics.isEmpty
+                                  ? _buildEmptyState(context, isDark)
+                                  : ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: nearbyClinics.length,
+                                      itemBuilder: (context, index) {
+                                        final clinic = nearbyClinics[index];
+                                        return Padding(
+                                          padding: EdgeInsets.only(
+                                            right: index == nearbyClinics.length - 1 ? 0 : 16.0,
+                                          ),
+                                          child: _buildNearbyCard(
+                                            context,
+                                            clinic: clinic,
+                                            isDark: isDark,
+                                            onTap: () => _navigateToClinicDetail(clinic),
+                                          ),
+                                        );
+                                      }),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Build location header
+  Widget _buildLocationHeader(BuildContext context, bool isDark, AppLocalizations localizations) {
+    if (!_locationService.isPermissionGranted) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.orange.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: AppColors.orange.withOpacity(0.3)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: AppColors.orange.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.location_off,
+                color: AppColors.orange,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Location Access Disabled',
+                    style:  TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.lightorange,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    'Enable location to find nearby clinics',
+                    style: TextStyle(
+                      color: AppColors.lightorange,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            TextButton(
+              onPressed: () => _locationService.requestLocationPermission(),
+              style: TextButton.styleFrom(
+                backgroundColor: AppColors.orange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+              child: const Text('Enable', style: TextStyle(fontSize: 12)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[800] : Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: AppColors.orange.withOpacity(0.2),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.location_on,
+              color: AppColors.orange,
+              size: 18,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Current Location',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  _locationService.currentCity.isNotEmpty 
+                      ? _locationService.currentCity 
+                      : 'Getting location...',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_locationService.isLoading)
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.orange),
+              ),
+            )
+          else
+            IconButton(
+              onPressed: _handleRefresh,
+              icon: const Icon(Icons.refresh, size: 18),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+              tooltip: 'Refresh location',
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Build loading clinics widget
+  Widget _buildLoadingClinics(bool isDark) {
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: 3,
+      itemBuilder: (context, index) {
+        return Container(
+          width: 200,
+          margin: EdgeInsets.only(right: index == 2 ? 0 : 16),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey[800] : Colors.grey[200],
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.orange),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Loading clinics...',
+                style: TextStyle(
+                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Build empty state
+  Widget _buildEmptyState(BuildContext context, bool isDark) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[800] : Colors.grey[100],
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.location_searching,
+            size: 48,
+            color: isDark ? Colors.grey[500] : Colors.grey[400],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No clinics found nearby',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Try enabling location or check back later',
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: isDark ? Colors.grey[500] : Colors.grey[500],
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: _handleRefresh,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.orange,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text('Retry', style: TextStyle(color: Colors.white)),
+          ),
+        ],
       ),
     );
   }
@@ -235,8 +542,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 150, // Fixed width
-        height: 150, // Fixed height
+        width: 150,
+        height: 150,
         margin: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           // Enhanced background for light theme
