@@ -102,8 +102,8 @@ class ClinicExplorerController extends GetxController {
       // Apply initial filters
       applyFilters();
     } catch (e) {
-      print('Error loading clinic data: $e');
-      Get.snackbar('Error', 'Failed to load clinics. Please try again.');
+      throw Exception('Error loading clinic data: $e');
+      // Get.snackbar('Error', 'Failed to load clinics. Please try again.');
     } finally {
       isLoading.value = false;
     }
@@ -159,8 +159,6 @@ class ClinicExplorerController extends GetxController {
     regionHierarchy.value = hierarchy;
     regions.value = allUniqueRegions.toList()..sort();
 
-    print('Region Hierarchy: $hierarchy');
-    print('All Regions: ${regions.value}');
   }
 
   /// Get cities for a specific governorate
@@ -197,7 +195,7 @@ class ClinicExplorerController extends GetxController {
 
       filteredClinics.value = filtered;
     } catch (e) {
-      print('Error applying filters: $e');
+      throw Exception('Error applying filters: $e');
     }
   }
 

@@ -6,7 +6,7 @@ class ActivityService {
   ActivityService._internal();
 
   // Sample data - in real app this would come from API/database
-  List<VetActivity> _activities = [
+  final List<VetActivity> _activities = [
     VetActivity(
       id: '1',
       vetName: 'Sarah Johnson',

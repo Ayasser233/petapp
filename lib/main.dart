@@ -9,6 +9,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/core/services/location_service.dart';
+import 'package:petapp/core/services/connectivity_service.dart';
 
 // Add this function to reset app state
 Future<void> resetAppState() async {
@@ -19,56 +20,39 @@ Future<void> resetAppState() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+  // Register ConnectivityService with GetX
+
   // Initialize dependencies
   await setupServiceLocator();
-  
+
   // Initialize services
   await initServices();
-  
-  // Uncomment the next line to reset the app state when you need to test from beginning
-  // await resetAppState();
-  
-  final prefs = await SharedPreferences.getInstance();
-  final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-  final isOnboardingCompleted = prefs.getBool('isOnboardingCompleted') ?? false;
 
-  String initialRoute = AppRoutes.home;
-  if (!isOnboardingCompleted) {
-    initialRoute = AppRoutes.onboarding;
-  } else if (isLoggedIn) {
-    initialRoute = AppRoutes.home;
-  } else {
-    initialRoute = AppRoutes.signUp;
-  }
-  
+  // await resetAppState();
+
   // Initialize settings provider
   final settingsProvider = SettingsProvider();
   await settingsProvider.initPrefs();
-  
+
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider.value(value: settingsProvider),
     ],
-    child: MyApp(initialRoute: initialRoute),
+    child: const MyApp(),
   ));
 }
 
 /// Initialize all services
 Future<void> initServices() async {
-  print('Starting services...');
-  
   // Initialize location service
   await Get.putAsync(() async => LocationService());
-  
-  print('All services started...');
+  await Get.putAsync(() async => ConnectivityService());
+
 }
 
-// Convert to StatefulWidget
 class MyApp extends StatefulWidget {
-  final String initialRoute;
-  
-  const MyApp({required this.initialRoute, super.key});
+  const MyApp({super.key});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -82,7 +66,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     // Get the settings provider
     _settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
-    
+
     // Add listener to update the UI when settings change
     _settingsProvider.addListener(_onSettingsChanged);
   }
@@ -103,7 +87,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Pet App',
+      title: 'Aleefy',
       themeMode: _settingsProvider.getThemeMode(),
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
@@ -115,7 +99,7 @@ class _MyAppState extends State<MyApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
-      initialRoute: widget.initialRoute,
+      initialRoute: AppRoutes.networkSplash, // Always start with the splash
       getPages: AppRoutes.getPages,
     );
   }

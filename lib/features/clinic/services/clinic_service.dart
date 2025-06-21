@@ -289,8 +289,7 @@ class ClinicService {
     try {
       return await _updateClinicsWithDistances(_allClinics);
     } catch (e) {
-      print('Error getting all clinics: $e');
-      return _allClinics;
+      throw Exception('Failed to get all clinics: ${e.toString()}');
     }
   }
 
@@ -308,8 +307,7 @@ class ClinicService {
       final sortedClinics = _sortClinicsByDistance(allClinics, currentPosition);
       return sortedClinics.take(limit).toList();
     } catch (e) {
-      print('Error getting nearby clinics: $e');
-      return _allClinics.take(limit).toList();
+      throw Exception('Failed to get nearby clinics: ${e.toString()}');
     }
   }
 
@@ -346,8 +344,7 @@ class ClinicService {
 
       return filteredClinics;
     } catch (e) {
-      print('Error searching clinics: $e');
-      return [];
+      throw Exception('Failed to search clinics: ${e.toString()}');
     }
   }
 
@@ -359,8 +356,7 @@ class ClinicService {
       
       return _filterByCategory(allClinics, category);
     } catch (e) {
-      print('Error getting clinics by category: $e');
-      return [];
+      throw Exception('Failed to get clinics by category "$category": ${e.toString()}');
     }
   }
 
@@ -371,13 +367,12 @@ class ClinicService {
       final currentPosition = _locationService.currentPosition;
       
       if (currentPosition == null) {
-        return allClinics;
+        throw Exception('Location service not available or permission not granted');
       }
 
       return _filterByDistance(allClinics, currentPosition, maxDistanceKm);
     } catch (e) {
-      print('Error getting clinics within distance: $e');
-      return [];
+      throw Exception('Failed to get clinics within ${maxDistanceKm}km: ${e.toString()}');
     }
   }
 
@@ -387,8 +382,7 @@ class ClinicService {
       final allClinics = await getAllClinics();
       return allClinics.firstWhere((clinic) => clinic.id == id);
     } catch (e) {
-      print('Clinic not found with ID: $id');
-      return null;
+      throw Exception('Clinic not found with ID "$id": ${e.toString()}');
     }
   }
 
@@ -406,8 +400,7 @@ class ClinicService {
       
       return allClinics.take(limit).toList();
     } catch (e) {
-      print('Error getting popular clinics: $e');
-      return [];
+      throw Exception('Failed to get popular clinics: ${e.toString()}');
     }
   }
 
@@ -423,6 +416,10 @@ class ClinicService {
                    service.toLowerCase().contains('critical'));
       }).toList();
 
+      if (emergencyClinics.isEmpty) {
+        throw Exception('No emergency clinics found');
+      }
+
       // Sort by distance if location available
       final currentPosition = _locationService.currentPosition;
       if (currentPosition != null) {
@@ -431,68 +428,95 @@ class ClinicService {
       
       return emergencyClinics;
     } catch (e) {
-      print('Error getting emergency clinics: $e');
-      return [];
+      throw Exception('Failed to get emergency clinics: ${e.toString()}');
     }
   }
 
   /// Get available categories
   List<String> getAvailableCategories() {
-    final categories = _allClinics.map((clinic) => clinic.category).toSet().toList();
-    categories.insert(0, 'All');
-    return categories;
+    try {
+      final categories = _allClinics.map((clinic) => clinic.category).toSet().toList();
+      categories.insert(0, 'All');
+      return categories;
+    } catch (e) {
+      throw Exception('Failed to get available categories: ${e.toString()}');
+    }
   }
 
   /// Get available services
   List<String> getAvailableServices() {
-    final services = <String>{};
-    for (final clinic in _allClinics) {
-      services.addAll(clinic.services);
+    try {
+      final services = <String>{};
+      for (final clinic in _allClinics) {
+        services.addAll(clinic.services);
+      }
+      return services.toList()..sort();
+    } catch (e) {
+      throw Exception('Failed to get available services: ${e.toString()}');
     }
-    return services.toList()..sort();
   }
 
   // Private helper methods
 
   /// Update clinics with calculated distances
   Future<List<ClinicModel>> _updateClinicsWithDistances(List<ClinicModel> clinics) async {
-    final currentPosition = _locationService.currentPosition;
-    
-    if (currentPosition == null) {
-      return clinics;
+    try {
+      final currentPosition = _locationService.currentPosition;
+      
+      if (currentPosition == null) {
+        return clinics;
+      }
+
+      return clinics.map((clinic) {
+        try {
+          final distance = clinic.calculateDistanceFromCurrentLocation(
+            currentPosition.latitude,
+            currentPosition.longitude,
+          );
+
+          final formattedDistance = distance != null 
+              ? _locationService.formatDistance(distance)
+              : 'Unknown';
+
+          return clinic.copyWith(distance: formattedDistance);
+        } catch (e) {
+          throw Exception('Failed to calculate distance for clinic "${clinic.name}": ${e.toString()}');
+        }
+      }).toList();
+    } catch (e) {
+      throw Exception('Failed to update clinics with distances: ${e.toString()}');
     }
-
-    return clinics.map((clinic) {
-      final distance = clinic.calculateDistanceFromCurrentLocation(
-        currentPosition.latitude,
-        currentPosition.longitude,
-      );
-
-      final formattedDistance = distance != null 
-          ? _locationService.formatDistance(distance)
-          : 'Unknown';
-
-      return clinic.copyWith(distance: formattedDistance);
-    }).toList();
   }
 
   /// Filter clinics by search query
   List<ClinicModel> _filterByQuery(List<ClinicModel> clinics, String query) {
-    final lowerQuery = query.toLowerCase();
-    return clinics.where((clinic) {
-      return clinic.name.toLowerCase().contains(lowerQuery) ||
-             clinic.location.toLowerCase().contains(lowerQuery) ||
-             clinic.description.toLowerCase().contains(lowerQuery) ||
-             clinic.category.toLowerCase().contains(lowerQuery) ||
-             clinic.services.any((service) => 
-                 service.toLowerCase().contains(lowerQuery));
-    }).toList();
+    try {
+      if (query.isEmpty) return clinics;
+      
+      final lowerQuery = query.toLowerCase();
+      return clinics.where((clinic) {
+        return clinic.name.toLowerCase().contains(lowerQuery) ||
+               clinic.location.toLowerCase().contains(lowerQuery) ||
+               clinic.description.toLowerCase().contains(lowerQuery) ||
+               clinic.category.toLowerCase().contains(lowerQuery) ||
+               clinic.services.any((service) => 
+                   service.toLowerCase().contains(lowerQuery));
+      }).toList();
+    } catch (e) {
+      throw Exception('Failed to filter clinics by query "$query": ${e.toString()}');
+    }
   }
 
   /// Filter clinics by category
   List<ClinicModel> _filterByCategory(List<ClinicModel> clinics, String category) {
-    return clinics.where((clinic) => 
-        clinic.category.toLowerCase() == category.toLowerCase()).toList();
+    try {
+      if (category.isEmpty || category.toLowerCase() == 'all') return clinics;
+      
+      return clinics.where((clinic) => 
+          clinic.category.toLowerCase() == category.toLowerCase()).toList();
+    } catch (e) {
+      throw Exception('Failed to filter clinics by category "$category": ${e.toString()}');
+    }
   }
 
   /// Filter clinics by distance
@@ -501,35 +525,55 @@ class ClinicService {
     Position currentPosition, 
     double maxDistanceKm
   ) {
-    return clinics.where((clinic) {
-      final distance = clinic.calculateDistanceFromCurrentLocation(
-        currentPosition.latitude,
-        currentPosition.longitude,
-      );
-      return distance != null && distance / 1000 <= maxDistanceKm;
-    }).toList();
+    try {
+      if (maxDistanceKm <= 0) {
+        throw ArgumentError('Maximum distance must be greater than 0');
+      }
+
+      return clinics.where((clinic) {
+        try {
+          final distance = clinic.calculateDistanceFromCurrentLocation(
+            currentPosition.latitude,
+            currentPosition.longitude,
+          );
+          return distance != null && distance / 1000 <= maxDistanceKm;
+        } catch (e) {
+          throw Exception('Failed to calculate distance for clinic "${clinic.name}": ${e.toString()}');
+        }
+      }).toList();
+    } catch (e) {
+      throw Exception('Failed to filter clinics by distance ${maxDistanceKm}km: ${e.toString()}');
+    }
   }
 
   /// Sort clinics by distance
   List<ClinicModel> _sortClinicsByDistance(List<ClinicModel> clinics, Position currentPosition) {
-    clinics.sort((a, b) {
-      final distanceA = a.calculateDistanceFromCurrentLocation(
-        currentPosition.latitude,
-        currentPosition.longitude,
-      );
-      final distanceB = b.calculateDistanceFromCurrentLocation(
-        currentPosition.latitude,
-        currentPosition.longitude,
-      );
+    try {
+      clinics.sort((a, b) {
+        try {
+          final distanceA = a.calculateDistanceFromCurrentLocation(
+            currentPosition.latitude,
+            currentPosition.longitude,
+          );
+          final distanceB = b.calculateDistanceFromCurrentLocation(
+            currentPosition.latitude,
+            currentPosition.longitude,
+          );
 
-      if (distanceA == null && distanceB == null) return 0;
-      if (distanceA == null) return 1;
-      if (distanceB == null) return -1;
+          if (distanceA == null && distanceB == null) return 0;
+          if (distanceA == null) return 1;
+          if (distanceB == null) return -1;
 
-      return distanceA.compareTo(distanceB);
-    });
-    
-    return clinics;
+          return distanceA.compareTo(distanceB);
+        } catch (e) {
+          throw Exception('Failed to compare distances for clinics "${a.name}" and "${b.name}": ${e.toString()}');
+        }
+      });
+      
+      return clinics;
+    } catch (e) {
+      throw Exception('Failed to sort clinics by distance: ${e.toString()}');
+    }
   }
 
   /// Sort clinics by various criteria
@@ -538,24 +582,77 @@ class ClinicService {
     String sortBy, 
     Position currentPosition
   ) {
-    switch (sortBy.toLowerCase()) {
-      case 'distance':
-        return _sortClinicsByDistance(clinics, currentPosition);
-      case 'rating':
-        clinics.sort((a, b) => b.rating.compareTo(a.rating));
-        break;
-      case 'reviews':
-        clinics.sort((a, b) => b.reviews.compareTo(a.reviews));
-        break;
-      case 'name':
-        clinics.sort((a, b) => a.name.compareTo(b.name));
-        break;
-      case 'experience':
-        clinics.sort((a, b) => b.yearsExperience.compareTo(a.yearsExperience));
-        break;
-      default:
-        return _sortClinicsByDistance(clinics, currentPosition);
+    try {
+      switch (sortBy.toLowerCase()) {
+        case 'distance':
+          return _sortClinicsByDistance(clinics, currentPosition);
+        case 'rating':
+          clinics.sort((a, b) => b.rating.compareTo(a.rating));
+          break;
+        case 'reviews':
+          clinics.sort((a, b) => b.reviews.compareTo(a.reviews));
+          break;
+        case 'name':
+          clinics.sort((a, b) => a.name.compareTo(b.name));
+          break;
+        case 'experience':
+          clinics.sort((a, b) => b.yearsExperience.compareTo(a.yearsExperience));
+          break;
+        default:
+          return _sortClinicsByDistance(clinics, currentPosition);
+      }
+      return clinics;
+    } catch (e) {
+      throw Exception('Failed to sort clinics by "$sortBy": ${e.toString()}');
     }
-    return clinics;
   }
+}
+
+/// Custom exception classes for better error handling
+class ClinicServiceException implements Exception {
+  final String message;
+  final String? code;
+  final dynamic originalError;
+
+  const ClinicServiceException(
+    this.message, {
+    this.code,
+    this.originalError,
+  });
+
+  @override
+  String toString() {
+    if (code != null) {
+      return 'ClinicServiceException [$code]: $message';
+    }
+    return 'ClinicServiceException: $message';
+  }
+}
+
+class LocationNotAvailableException extends ClinicServiceException {
+  const LocationNotAvailableException([String? message])
+      : super(
+          message ?? 'Location service is not available or permission not granted',
+          code: 'LOCATION_NOT_AVAILABLE',
+        );
+}
+
+class ClinicNotFoundException extends ClinicServiceException {
+  final String clinicId;
+  
+  const ClinicNotFoundException(this.clinicId)
+      : super(
+          'Clinic not found with ID: $clinicId',
+          code: 'CLINIC_NOT_FOUND',
+        );
+}
+
+class InvalidDistanceException extends ClinicServiceException {
+  final double invalidDistance;
+  
+  const InvalidDistanceException(this.invalidDistance)
+      : super(
+          'Invalid distance value: $invalidDistance. Distance must be greater than 0',
+          code: 'INVALID_DISTANCE',
+        );
 }

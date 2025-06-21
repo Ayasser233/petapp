@@ -52,10 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
       // Load nearby clinics
       await _loadNearbyClinics();
     } catch (e) {
-      print('Error initializing home screen: $e');
-      setState(() {
-        _isLoadingClinics = false;
-      });
+      throw Exception('Error initializing home screen: $e');
     }
   }
 
@@ -75,7 +72,7 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       }
     } catch (e) {
-      print('Error loading nearby clinics: $e');
+      throw Exception('Error loading nearby clinics: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -98,24 +95,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _navigateToServicesByCategory(String category) {
-    final clinicsInCategory = nearbyClinics
-        .where((clinic) =>
-            clinic.category.toLowerCase().contains(category.toLowerCase()))
-        .toList();
-
-    if (clinicsInCategory.isNotEmpty) {
-      Get.toNamed(
-        AppRoutes.clinicDetail,
-        arguments: clinicsInCategory.first.toMap(),
-      );
-    } else if (nearbyClinics.isNotEmpty) {
-      Get.toNamed(
-        AppRoutes.clinicDetail,
-        arguments: nearbyClinics.first.toMap(),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

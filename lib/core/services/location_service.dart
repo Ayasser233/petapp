@@ -70,8 +70,7 @@ class LocationService extends GetxService {
       _isLocationEnabled.value = isEnabled;
       
       if (!isEnabled) {
-        print('Location services are disabled.');
-        return;
+        throw Exception('Location services are disabled.');
       }
 
       // Check permission status
@@ -83,7 +82,7 @@ class LocationService extends GetxService {
         _startLocationUpdates();
       }
     } catch (e) {
-      print('Error initializing location service: $e');
+      throw Exception('Error initializing location service: $e');
     } finally {
       _isLoading.value = false;
     }
@@ -96,8 +95,7 @@ class LocationService extends GetxService {
       _isPermissionGranted.value = permission == LocationPermission.whileInUse || 
                                    permission == LocationPermission.always;
     } catch (e) {
-      print('Error checking permission status: $e');
-      _isPermissionGranted.value = false;
+      throw Exception('Error checking permission status: $e');
     }
   }
 
@@ -131,9 +129,7 @@ class LocationService extends GetxService {
       
       return isGranted;
     } catch (e) {
-      print('Error requesting permission: $e');
-      _isPermissionGranted.value = false;
-      return false;
+      throw Exception('Error requesting permission: $e');
     }
   }
 
@@ -141,8 +137,7 @@ class LocationService extends GetxService {
   Future<Position?> getCurrentLocation() async {
     try {
       if (!_isPermissionGranted.value) {
-        print('Location permission not granted');
-        return null;
+        throw Exception('Location permission not granted');
       }
 
       _isLoading.value = true;
@@ -162,10 +157,9 @@ class LocationService extends GetxService {
       
       return position;
     } catch (e) {
-      print('Error getting current location: $e');
       // Try to load last known location
       await _loadLastKnownLocation();
-      return _currentPosition.value;
+      throw Exception('Error getting current location: $e');
     } finally {
       _isLoading.value = false;
     }
@@ -189,15 +183,9 @@ class LocationService extends GetxService {
         _saveLastKnownLocation(position);
       },
       onError: (error) {
-        print('Location stream error: $error');
+        throw Exception('Location stream error: $error');
       },
     );
-  }
-
-  /// Stop location updates
-  void stopLocationUpdates() {
-    _positionStream?.cancel();
-    _positionStream = null;
   }
 
   /// Save last known location
@@ -208,7 +196,7 @@ class LocationService extends GetxService {
       await prefs.setDouble('last_longitude', position.longitude);
       await prefs.setInt('last_location_timestamp', DateTime.now().millisecondsSinceEpoch);
     } catch (e) {
-      print('Error saving last known location: $e');
+      throw Exception('Error saving last known location: $e');
     }
   }
 
@@ -243,7 +231,7 @@ class LocationService extends GetxService {
         }
       }
     } catch (e) {
-      print('Error loading last known location: $e');
+      throw Exception('Error loading last known location: $e');
     }
   }
 
@@ -270,8 +258,8 @@ class LocationService extends GetxService {
         _currentCountry.value = placemark.country ?? '';
       }
     } catch (e) {
-      print('Error getting address: $e');
       _currentCity.value = 'Location found';
+      throw Exception('Error getting address: $e');
     }
   }
 

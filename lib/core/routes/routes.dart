@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:petapp/features/authentication/screens/onboarding/simple_network_splash.dart';
 import 'package:petapp/features/auth/presentation/screens/login/login.dart';
 import 'package:petapp/features/auth/presentation/screens/onboarding/onboarding.dart';
 import 'package:petapp/features/auth/presentation/screens/password_config/createnewpass.dart';
@@ -27,6 +28,7 @@ import 'package:petapp/features/profile/screens/vouchers_screen.dart';
 
 class AppRoutes {
   static const String onboarding = '/onboarding';
+  static const String networkSplash = '/network-splash';
   static const String signUp = '/signup';
   static const String login = '/login';
   static const String verifyEmail = '/verify-email';
@@ -56,6 +58,7 @@ class AppRoutes {
   static const String redeem = '/redeem';
 
   static List<GetPage> get getPages => [
+        GetPage(name: networkSplash, page: () => const NetworkSplashScreen()),
         GetPage(name: onboarding, page: () => const OnboardingScreen()),
         GetPage(name: signUp, page: () => const SignUpScreen()),
         GetPage(name: login, page: () => const LoginScreen()),
