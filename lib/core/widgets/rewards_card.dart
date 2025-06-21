@@ -221,7 +221,7 @@ class RewardsCard extends StatelessWidget {
                 ),
           ),
           Text(
-            localizations.available, // Changed from 'vouchers' to be more specific
+            'Available', // Changed from 'vouchers' to be more specific
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.white,
                 ),
@@ -235,7 +235,7 @@ class RewardsCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                localizations.tapToView,
+                'Tap to view',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       color: Colors.white,
                       fontSize: 10,

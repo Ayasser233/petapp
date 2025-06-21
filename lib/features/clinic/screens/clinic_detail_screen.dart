@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
@@ -24,7 +23,6 @@ class ClinicDetailScreen extends StatelessWidget {
     final backgroundColor = isDark ? Colors.black : Colors.white;
     // final cardColor = isDark ? Colors.grey[850] : Colors.white;
     // final borderColor = isDark ? Colors.grey[700] : Colors.grey[300];
-    final localizations = AppLocalizations.of(context);
 
     // Get clinic services
     final List<String> services = [
@@ -50,7 +48,7 @@ class ClinicDetailScreen extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
         title: Text(
-          localizations.clinicDetails,
+          'Clinic Details',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
             color: textColor,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
@@ -42,13 +41,12 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
     final cardColor = isDark ? Colors.grey[850] : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black;
     final subTextColor = isDark ? Colors.grey[400] : Colors.grey[700];
-    final localizations = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(
-          localizations.myPets,
+          'My Pets',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: textColor,
@@ -80,7 +78,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                     ],
                   ),
                   child: Text(
-                    '${_pets.length} ${_pets.length == 1 ? localizations.pet : localizations.pets}',
+                    '${_pets.length} ${_pets.length == 1 ? 'Pet' : 'Pets'}',
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -114,7 +112,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
         backgroundColor: AppColors.orange,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
-        label: Text(localizations.addPet),
+        label: const Text('Add Pet'),
       ),
     );
   }

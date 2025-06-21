@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
@@ -200,13 +199,12 @@ class _AddPetScreenState extends State<AddPetScreen> {
     final backgroundColor = isDark ? Colors.grey[900] : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black87;
     final inputFillColor = isDark ? Colors.grey[800] : Colors.grey[100];
-    final localizations = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(
-          localizations.addNewPet,
+          'Add New Pet',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: isDark ? Colors.white : Colors.black87,
@@ -309,7 +307,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                   children: [
                     // Pet name
                     Text(
-                      localizations.petName,
+                      'Pet Name',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -321,7 +319,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       controller: _nameController,
                       style: TextStyle(color: textColor),
                       decoration: InputDecoration(
-                        hintText: localizations.enterYourPetName,
+                        hintText: 'Enter your pet\'s name',
                         hintStyle: TextStyle(
                           color: isDark ? Colors.grey[400] : Colors.grey[600],
                         ),
@@ -338,7 +336,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return localizations.enterYourPetName;
+                          return 'Please enter your pet\'s name';
                         }
                         return null;
                       },
@@ -346,7 +344,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     const SizedBox(height: 20),
                     // Pet type
                     Text(
-                      localizations.petType,
+                      'Pet Type',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -403,7 +401,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     
                     // Birthdate
                     Text(
-                      localizations.birthdate,
+                      'Birthdate',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -446,7 +444,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     
                     // Notes
                     Text(
-                      localizations.specialNeedsOrNotes,
+                      'Special Needs or Notes',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -488,9 +486,9 @@ class _AddPetScreenState extends State<AddPetScreen> {
                           ),
                           elevation: 2,
                         ),
-                        child: Text(
-                          localizations.savePet,
-                          style: const TextStyle(
+                        child: const Text(
+                          'Save Pet',
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
