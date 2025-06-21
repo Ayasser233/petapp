@@ -339,7 +339,7 @@ class SettingsScreen extends StatelessWidget {
   }
   
   Widget _buildAboutSettings(BuildContext context, Color cardColor) {
-    AppLocalizations.of(context); // Get localizations
+    final localizations = AppLocalizations.of(context); // Get localizations
 
     return Container(
       decoration: BoxDecoration(
@@ -357,7 +357,7 @@ class SettingsScreen extends StatelessWidget {
         children: [
           _buildActionTile(
             context: context,
-            title: 'App Version',
+            title: localizations.appVersion,
             subtitle: 'v1.0.0',
             onTap: () {},
             icon: Icons.info_outline,
@@ -366,8 +366,8 @@ class SettingsScreen extends StatelessWidget {
           _buildDivider(),
           _buildActionTile(
             context: context,
-            title: 'Contact Support',
-            subtitle: 'Get help with the app',
+            title: localizations.contactSupport,
+            subtitle: localizations.getHelpWithTheApp,
             onTap: () {
               // Navigate to support
             },
@@ -376,8 +376,8 @@ class SettingsScreen extends StatelessWidget {
           _buildDivider(),
           _buildActionTile(
             context: context,
-            title: 'Rate the App',
-            subtitle: 'Leave a review on the store',
+            title: localizations.rateApp,
+            subtitle: localizations.leaveAReviewOnTheStore,
             onTap: () {
               // Open app store rating
             },

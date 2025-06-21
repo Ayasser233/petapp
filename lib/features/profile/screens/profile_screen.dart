@@ -106,7 +106,7 @@ class ProfileScreen extends StatelessWidget {
                 // Aleefy Points option
                 _buildProfileOption(
                   context,
-                  'Aleefy Points',
+                  localizations.aleefyPoints,
                   Icons.stars_rounded,
                   () {
                     Get.toNamed('/points-history');
@@ -268,6 +268,7 @@ class ProfileScreen extends StatelessWidget {
     {required bool isDark, required Color cardColor}
   ) {
     final defaultTextColor = isDark ? Colors.white : Colors.black87;
+    final localizations = AppLocalizations.of(context);
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
@@ -307,7 +308,7 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    'Vouchers',
+                    localizations.vouchers,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -341,18 +342,18 @@ class ProfileScreen extends StatelessWidget {
                   width: 1,
                 ),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.add_circle_outline,
                     color: AppColors.orange,
                     size: 20,
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
-                    'Got a voucher?',
-                    style: TextStyle(
+                    localizations.gotAVoucher,
+                    style: const TextStyle(
                       color: AppColors.orange,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,

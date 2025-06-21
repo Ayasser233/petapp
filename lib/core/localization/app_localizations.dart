@@ -48,7 +48,9 @@ class AppLocalizations {
   String get deleteAccount => _localizedValues[locale.languageCode]?['deleteAccount'] ?? 'Delete Account';
   String get appVersion => _localizedValues[locale.languageCode]?['appVersion'] ?? 'App Version';
   String get contactSupport => _localizedValues[locale.languageCode]?['contactSupport'] ?? 'Contact Support';
+  String get getHelpWithTheApp => _localizedValues[locale.languageCode]?['getHelpWithTheApp'] ?? 'Get Help with the App';
   String get rateApp => _localizedValues[locale.languageCode]?['rateApp'] ?? 'Rate the App';
+  String get leaveAReviewOnTheStore => _localizedValues[locale.languageCode]?['leaveAReviewOOnTheStore'] ?? 'Leave a review on the store';
   String get myProfile => _localizedValues[locale.languageCode]?['myProfile'] ?? 'My Profile';
   String get myPets => _localizedValues[locale.languageCode]?['myPets'] ?? 'My Pets';
   String get appointments => _localizedValues[locale.languageCode]?['appointments'] ?? 'Appointments';
@@ -89,6 +91,29 @@ class AppLocalizations {
   String get readOurPrivacyPolicy => _localizedValues[locale.languageCode]?['readOurPrivacyPolicy']?? 'Read Our Privacy Policy';
   String get readOurTermsOfService => _localizedValues[locale.languageCode]?['readOurTermsOfService']?? 'Read Our Terms of Service';
   String get deleteYourAccountPermanently => _localizedValues[locale.languageCode]?['deleteYourAccountPermanently']?? 'Delete Your Account Permanently';
+  String get currentLocation => _localizedValues[locale.languageCode]?['currentLocation'] ?? 'Current Location';
+  String get available => _localizedValues[locale.languageCode]?['Available'] ?? 'Available';
+  String get tapToView => _localizedValues[locale.languageCode]?['tapToView'] ?? 'Tap to View';
+  String get aleefyPoints => _localizedValues[locale.languageCode]?['aleefyPoints'] ?? 'Aleefy Points';
+  String get gotAVoucher => _localizedValues[locale.languageCode]?['gotAVoucher'] ?? 'Got a Voucher?';
+
+  String get pet => _localizedValues[locale.languageCode]?['pet'] ?? 'Pet';
+  String get pets => _localizedValues[locale.languageCode]?['pets'] ?? 'Pets';
+  String get addPet => _localizedValues[locale.languageCode]?['addPet'] ?? 'Add Pet';
+  String get savePet => _localizedValues[locale.languageCode]?['savePet'] ?? 'Save Pet';
+  String get addNewPet => _localizedValues[locale.languageCode]?['addNewPet'] ?? 'Add New Pet';
+  String get petName => _localizedValues[locale.languageCode]?['petName'] ?? 'Pet Name';
+  String get petType => _localizedValues[locale.languageCode]?['petType'] ?? 'Pet Type';
+  String get dog => _localizedValues[locale.languageCode]?['dog'] ?? 'Dog';
+  String get cat => _localizedValues[locale.languageCode]?['cat'] ?? 'Cat';
+  String get other => _localizedValues[locale.languageCode]?['other'] ?? 'Other';
+  String get birthdate => _localizedValues[locale.languageCode]?['birthdate'] ?? 'Birthdate';
+  String get specialNeedsOrNotes => _localizedValues[locale.languageCode]?['specialNeedsOrNotes'] ?? 'Special Needs or Notes';
+  String get noPetsAddedYet => _localizedValues[locale.languageCode]?['noPetsAddedYet'] ?? 'No pets added yet';
+  String get addYourFirstPet => _localizedValues[locale.languageCode]?['addYourFirstPet'] ?? 'Add your first pet';
+  String get addYourFurryFriends => _localizedValues[locale.languageCode]?['addYourFurryFriends'] ?? 'Add your furry friends to keep track of their health and appointments';
+  String get enterYourPetName => _localizedValues[locale.languageCode]?['enterYourPetName'] ?? 'Enter your pet\'s name';
+  
 
   // Define all localized values
   static const Map<String, Map<String, String>> _localizedValues = {
@@ -121,7 +146,9 @@ class AppLocalizations {
       'deleteAccount': 'Delete Account',
       'appVersion': 'App Version',
       'contactSupport': 'Contact Support',
+      'getHelpWithTheApp': 'Get Help with the App',
       'rateApp': 'Rate the App',
+      'leaveAReviewOOnTheStore': 'Leave a review on the store',
       'myProfile': 'My Profile',
       'myPets': 'My Pets',
       'appointments': 'Appointments',
@@ -156,6 +183,27 @@ class AppLocalizations {
       'readOurPrivacyPolicy' : 'Read Our Privacy Policy',
       'readOurTermsOfService' : 'Read Our Terms of Service',
       'deleteYourAccountPermanently' : 'Delete Your Account Permanently',
+      'currentLocation': 'Current Location',
+      'Available': 'Available',
+      'tapToView': 'Tap to View',
+      'aleefyPoints': 'Aleefy Points',
+      'gotAVoucher': 'Got a Voucher?',
+      'pet': 'Pet',
+      'pets': 'Pets',
+      'addPet': 'Add Pet',
+      'savePet': 'Save Pet',
+      'addNewPet': 'Add New Pet',
+      'petName': 'Pet Name',
+      'petType': 'Pet Type',
+      'dog': 'Dog',
+      'cat': 'Cat',
+      'other': 'Other',
+      'birthdate': 'Birthdate',
+      'specialNeedsOrNotes': 'Special Needs or Notes',
+      'noPetsAddedYet': 'No pets added yet',
+      'addYourFirstPet': 'Add your first pet',
+      'addYourFurryFriends': 'Add your furry friends to keep track of their health and appointments',
+      'enterYourPetName': 'Enter your pet\'s name',
     },
     'ar': {
       'appTitle': 'تطبيق الحيوانات الأليفة',
@@ -186,7 +234,9 @@ class AppLocalizations {
       'deleteAccount': 'حذف الحساب',
       'appVersion': 'إصدار التطبيق',
       'contactSupport': 'اتصل بالدعم',
+      'getHelpWithTheApp': 'احصل على مساعدة في التطبيق',
       'rateApp': 'قيم التطبيق',
+      'leaveAReviewOOnTheStore': 'اترك مراجعة في المتجر',
       'myProfile': 'ملفي الشخصي',
       'myPets': 'حيواناتي الأليفة',
       'appointments': 'المواعيد',
@@ -221,6 +271,27 @@ class AppLocalizations {
       'readOurPrivacyPolicy' : 'اقرأ سياسة الخصوصية',
       'readOurTermsOfService' : 'اقرأ شروط الخدمة',
       'deleteYourAccountPermanently' : 'حذف حسابك نهائيا',
+      'currentLocation': 'الموقع الحالي',
+      'Available': 'متاح',
+      'tapToView': 'اضغط للعرض',
+      'aleefyPoints': 'نقاط أليفي',
+      'gotAVoucher': 'هل لديك قسيمة؟',
+      'pet': 'حيوان أليف',
+      'pets': 'حيوانات أليفة',
+      'addPet': 'إضافة حيوان أليف',
+      'savePet': 'حفظ الحيوان الأليف',
+      'addNewPet': 'إضافة حيوان أليف جديد',
+      'petName': 'اسم الحيوان الأليف',
+      'petType': 'نوع الحيوان الأليف',
+      'dog': 'كلب',
+      'cat': 'قط',
+      'other': 'آخر',
+      'birthdate': 'تاريخ الميلاد',
+      'specialNeedsOrNotes': 'احتياجات خاصة أو ملاحظات',
+      'noPetsAddedYet': 'لم يتم إضافة حيوانات أليفة بعد',
+      'addYourFirstPet': 'أضف حيوانك الأليف الأول',
+      'addYourFurryFriends': 'أضف حيواناتك الأليفة لتتبع صحتهم ومواعيدهم',
+      'enterYourPetName': 'أدخل اسم حيوانك الأليف',
     },
   };
 }
