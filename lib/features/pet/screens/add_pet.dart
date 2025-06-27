@@ -177,16 +177,32 @@ class _AddPetScreenState extends State<AddPetScreen> {
       // For now, we'll just use the path or a placeholder
       final String imageToUse = _isImageFromGallery 
           ? _imagePath 
-          : 'assets/images/pet_placeholder.jpg';
+          : _selectedType.toLowerCase() == 'dog'
+              ? 'assets/images/dog_silhouette.png'
+              : _selectedType.toLowerCase() == 'cat'
+                  ? 'assets/images/cat_silhouette.png'
+                  : 'assets/images/pet_placeholder.jpg';
+      
+      // Create medical history with notes if provided
+      final medicalHistory = _notesController.text.isEmpty 
+          ? null 
+          : MedicalHistoryModel(
+              notes: _notesController.text,
+              vaccinations: [],
+              allergies: [],
+            );
       
       final newPet = PetModel(
         id: DateTime.now().millisecondsSinceEpoch.toString(),
         name: _nameController.text,
         image: imageToUse,
-        type: _selectedType,
-        specificType: _selectedType == 'Other' ? _specificTypeController.text : null,
-        birthdate: _selectedDate.toIso8601String().split('T')[0],
-        notes: _notesController.text.isEmpty ? null : _notesController.text,
+        species: _selectedType.toLowerCase(),
+        customSpecies: _selectedType == 'Other' ? _specificTypeController.text : null,
+        breed: null, // Can be added as a field in the form if needed
+        dateOfBirth: _selectedDate.toIso8601String().split('T')[0],
+        medicalHistory: medicalHistory,
+        status: 'active',
+        version: 1,
       );
       
       Get.back(result: newPet);

@@ -14,7 +14,7 @@ class ApiClient {
   final ConnectivityService connectivityService;
   
   // Base URL handling with fallback
-  final String _baseUrl = ApiConstants.apiBaseUrl;
+  late final String _baseUrl;
   final String _fallbackUrl = ApiConstants.fallbackApiBaseUrl;
   bool _usingFallbackUrl = false;
   
@@ -23,6 +23,7 @@ class ApiClient {
     required this.tokenService,
     required this.connectivityService,
   }) {
+    _baseUrl = ApiConstants.apiBaseUrl; // Get platform-specific base URL
     _dio = Dio(
       BaseOptions(
         baseUrl: _baseUrl,

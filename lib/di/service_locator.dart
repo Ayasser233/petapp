@@ -6,6 +6,9 @@ import 'package:petapp/core/services/token_service.dart';
 import 'package:petapp/features/auth/data/repositories/auth_repository.dart';
 import 'package:petapp/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:petapp/features/pet/services/pet_api_service.dart';
+import 'package:petapp/features/pet/repositories/pet_repository.dart';
+import 'package:petapp/features/pet/controllers/pet_controller.dart';
 
 final sl = GetIt.instance;
 
@@ -27,6 +30,15 @@ Future<void> setupServiceLocator() async {
   // Repositories
   sl.registerLazySingleton(() => AuthRepository(
     apiClient: sl(),
+  ));
+  
+  // Pet Feature
+  sl.registerLazySingleton(() => PetApiService());
+  sl.registerLazySingleton(() => PetRepository(
+    apiService: sl(),
+  ));
+  sl.registerFactory(() => PetController(
+    repository: sl(),
   ));
   
   // Cubits

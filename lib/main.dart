@@ -10,6 +10,7 @@ import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/core/services/location_service.dart';
 import 'package:petapp/core/services/connectivity_service.dart';
+import 'package:petapp/features/pet/controllers/pet_controller.dart';
 
 // Add this function to reset app state
 Future<void> resetAppState() async {
@@ -48,7 +49,9 @@ Future<void> initServices() async {
   // Initialize location service
   await Get.putAsync(() async => LocationService());
   await Get.putAsync(() async => ConnectivityService());
-
+  
+  // Initialize controllers
+  Get.lazyPut(() => sl<PetController>());
 }
 
 class MyApp extends StatefulWidget {

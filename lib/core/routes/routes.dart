@@ -13,6 +13,7 @@ import 'package:petapp/features/home/screens/home_screen.dart';
 import 'package:petapp/features/clinic/screens/clinic_detail_screen.dart';
 import 'package:petapp/features/home/screens/activity_screen.dart';
 import 'package:petapp/features/profile/screens/profile_screen.dart';
+import 'package:petapp/features/profile/screens/account_details_screen.dart';
 import 'package:petapp/features/pet/screens/pet_3d_viewer/pet_3d_viewer_screen.dart';
 import 'package:petapp/features/pet/screens/pet_3d_viewer/pet_3d_model_selector.dart';
 import 'package:petapp/features/clinic/screens/hospital_booking_screen.dart';
@@ -51,6 +52,7 @@ class AppRoutes {
   static const String myPets = '/my-pets';
   static const String addPet = '/add-pet';
   static const String petProfile = '/pet-profile';
+  static const String accountDetails = '/account-details';
   // Add settings route constant here
   static const String settings = '/settings';
   static const String vouchers = '/vouchers';
@@ -117,5 +119,11 @@ class AppRoutes {
         GetPage(name: settings, page: () => const SettingsScreen()),
         GetPage(name: vouchers, page: () => const VouchersScreen()),
         GetPage(name: pointsHistory, page: () => const PointsHistoryScreen()),
+        GetPage(
+          name: accountDetails,
+          page: () => const AccountDetailsScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+        ),
       ];
 }

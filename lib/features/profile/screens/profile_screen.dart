@@ -6,6 +6,7 @@ import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/features/profile/screens/account_details_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -34,47 +35,7 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Welcome section with user info
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    children: [
-                    
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            '${localizations.welcome} Aaron Smith',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '+1 234 567 8910',
-                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: subTextColor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
                 
                 // Profile options list
                 _buildProfileOption(
@@ -82,7 +43,18 @@ class ProfileScreen extends StatelessWidget {
                   localizations.myAccount,
                   Icons.person_outline,
                   () {
-                    // Navigate to account settings
+                    try {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const AccountDetailsScreen(),
+                        ),
+                      );
+                    } catch (e) {
+                      print('Navigation error: $e');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Error opening account details')),
+                      );
+                    }
                   },
                   isDark: isDark,
                   cardColor: cardColor,

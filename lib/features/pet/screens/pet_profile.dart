@@ -19,7 +19,7 @@ class PetProfileScreen extends StatelessWidget {
     final isDark = THelperFunctions.isDarkMode(context);
     
     // Get pet age
-    final age = _calculateAge(pet.birthdate);
+    final age = _calculateAge(pet.dateOfBirth);
     
     // Use app theme color instead of pet type-based colors
     const Color themeColor = AppColors.orange;
@@ -107,7 +107,7 @@ class PetProfileScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                pet.type == 'Other' ? pet.specificType! : pet.type,
+                                pet.customSpecies ?? pet.species,
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
@@ -152,7 +152,7 @@ class PetProfileScreen extends StatelessWidget {
                       _buildInfoCard(
                         context,
                         'Birthday',
-                        _formatDate(pet.birthdate),
+                        _formatDate(pet.dateOfBirth),
                         Icons.cake,
                         themeColor,
                         isDark,
@@ -160,9 +160,9 @@ class PetProfileScreen extends StatelessWidget {
                       const SizedBox(width: 16),
                       _buildInfoCard(
                         context,
-                        'Type',
-                        pet.type == 'Other' ? pet.specificType! : pet.type,
-                        pet.type == 'Dog' ? Icons.pets : Icons.emoji_nature,
+                        'Species',
+                        pet.customSpecies ?? pet.species.toUpperCase(),
+                        pet.species.toLowerCase() == 'dog' ? Icons.pets : Icons.emoji_nature,
                         themeColor,
                         isDark,
                       ),
@@ -172,7 +172,7 @@ class PetProfileScreen extends StatelessWidget {
                   const SizedBox(height: 24),
                   
                   // Notes section
-                  if (pet.notes != null && pet.notes!.isNotEmpty) ...[
+                  if (pet.medicalHistory?.notes != null && pet.medicalHistory!.notes!.isNotEmpty) ...[
                     _buildSectionHeader('Notes', Icons.note_alt, themeColor, textColor),
                     const SizedBox(height: 8),
                     Container(
@@ -184,7 +184,7 @@ class PetProfileScreen extends StatelessWidget {
                         border: Border.all(color: cardBorderColor),
                       ),
                       child: Text(
-                        pet.notes!,
+                        pet.medicalHistory!.notes!,
                         style: TextStyle(
                           color: textColor,
                           height: 1.5,
@@ -194,20 +194,43 @@ class PetProfileScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                   ],
                   
-                  // Clinic visits section
-                  _buildSectionHeader('Clinic Visits', Icons.medical_services, themeColor, textColor),
+                  // Breed info (if available)
+                  if (pet.breed != null && pet.breed!.isNotEmpty) ...[
+                    _buildSectionHeader('Breed', Icons.pets, themeColor, textColor),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: notesBgColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: cardBorderColor),
+                      ),
+                      child: Text(
+                        pet.breed!,
+                        style: TextStyle(
+                          color: textColor,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                  
+                  // Vaccinations section
+                  _buildSectionHeader('Vaccinations', Icons.medical_services, themeColor, textColor),
                   const SizedBox(height: 8),
                   
-                  if (pet.clinicVisits == null || pet.clinicVisits!.isEmpty)
-                    _buildEmptyVisitsCard(emptyStateBgColor, subTextColor, cardBorderColor)
+                  if (pet.medicalHistory?.vaccinations == null || pet.medicalHistory!.vaccinations!.isEmpty)
+                    _buildEmptyVaccinationsCard(emptyStateBgColor, subTextColor, cardBorderColor)
                   else
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: pet.clinicVisits!.length,
+                      itemCount: pet.medicalHistory!.vaccinations!.length,
                       itemBuilder: (context, index) {
-                        return _buildVisitCard(
-                          pet.clinicVisits![index], 
+                        return _buildVaccinationCard(
+                          pet.medicalHistory!.vaccinations![index], 
                           themeColor, 
                           cardColor, 
                           textColor, 
@@ -219,16 +242,58 @@ class PetProfileScreen extends StatelessWidget {
                     
                   const SizedBox(height: 24),
                   
-                  // Add visit button
+                  // Medical details section
+                  _buildSectionHeader('Medical Details', Icons.health_and_safety, themeColor, textColor),
+                  const SizedBox(height: 8),
+                  
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: cardBorderColor),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (pet.medicalHistory?.weight != null) ...[
+                          _buildMedicalDetailRow('Weight', '${pet.medicalHistory!.weight} kg', Icons.monitor_weight, textColor, subTextColor),
+                          const SizedBox(height: 12),
+                        ],
+                        if (pet.medicalHistory?.lastVetVisit != null) ...[
+                          _buildMedicalDetailRow('Last Vet Visit', _formatDate(pet.medicalHistory!.lastVetVisit!), Icons.event, textColor, subTextColor),
+                          const SizedBox(height: 12),
+                        ],
+                        if (pet.medicalHistory?.spayNeuterStatus != null) ...[
+                          _buildMedicalDetailRow(
+                            'Spayed/Neutered', 
+                            pet.medicalHistory!.spayNeuterStatus! ? 'Yes' : 'No', 
+                            Icons.pets, 
+                            textColor, 
+                            subTextColor
+                          ),
+                          const SizedBox(height: 12),
+                        ],
+                        if (pet.medicalHistory?.allergies != null && pet.medicalHistory!.allergies!.isNotEmpty) ...[
+                          _buildMedicalDetailRow('Allergies', pet.medicalHistory!.allergies!.join(', '), Icons.warning_amber, textColor, subTextColor),
+                        ],
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 24),
+                  
+                  // Add vaccination button
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
                       onPressed: () {
-                        // TODO: Implement add visit functionality
+                        // TODO: Implement add vaccination functionality
                       },
                       icon: const Icon(Icons.add, color: themeColor),
                       label: const Text(
-                        'Add Clinic Visit',
+                        'Add Vaccination',
                         style: TextStyle(color: themeColor),
                       ),
                       style: OutlinedButton.styleFrom(
@@ -315,151 +380,25 @@ class PetProfileScreen extends StatelessWidget {
     );
   }
   
-  Widget _buildEmptyVisitsCard(Color backgroundColor, Color textColor, Color borderColor) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.medical_services_outlined,
-            size: 48,
-            color: textColor,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No clinic visits yet',
-            style: TextStyle(
-              color: textColor,
-              fontSize: 16,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Add your pet\'s first clinic visit',
-            style: TextStyle(
-              color: textColor.withOpacity(0.8),
-              fontSize: 14,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildVisitCard(
-    ClinicVisit visit, 
-    Color themeColor, 
-    Color cardColor, 
-    Color textColor, 
-    Color subTextColor,
-    bool isDark,
-  ) {
-    // Tag background color
-    final tagBgColor = isDark ? Colors.grey[800]! : Colors.grey[200]!;
-    
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: isDark ? 2 : 1,
-      color: cardColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: themeColor.withOpacity(isDark ? 0.2 : 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.local_hospital,
-                        color: themeColor,
-                        size: 16,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      visit.clinicName,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: textColor,
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: tagBgColor,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    _formatDate(visit.date),
-                    style: TextStyle(
-                      color: subTextColor,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _buildVisitDetail('Reason', visit.reason, textColor, subTextColor),
-            if (visit.diagnosis != null)
-              _buildVisitDetail('Diagnosis', visit.diagnosis!, textColor, subTextColor),
-            if (visit.treatment != null)
-              _buildVisitDetail('Treatment', visit.treatment!, textColor, subTextColor),
-          ],
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildVisitDetail(String label, String value, Color textColor, Color subTextColor) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '$label: ',
-            style: TextStyle(
-              color: subTextColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: TextStyle(
-                color: textColor,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Empty placeholder - all old visit-related methods have been removed
 
   String _formatDate(String dateString) {
     final date = DateTime.parse(dateString);
-    return '${date.day}/${date.month}/${date.year}';
+    final now = DateTime.now();
+    
+    if (date.year == now.year) {
+      return '${_getMonthName(date.month)} ${date.day}';
+    } else {
+      return '${_getMonthName(date.month)} ${date.day}, ${date.year}';
+    }
+  }
+  
+  String _getMonthName(int month) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return months[month - 1];
   }
 
   String _calculateAge(String birthdate) {
@@ -550,6 +489,166 @@ class PetProfileScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+  
+  Widget _buildEmptyVaccinationsCard(Color backgroundColor, Color textColor, Color borderColor) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.vaccines,
+            color: AppColors.orange,
+            size: 48,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'No vaccinations recorded yet',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Add your pet\'s vaccinations to keep track of their health',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: textColor.withOpacity(0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildVaccinationCard(
+    VaccinationModel vaccination,
+    Color themeColor,
+    Color backgroundColor,
+    Color textColor,
+    Color subTextColor,
+    bool isDark,
+  ) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Vaccination header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: themeColor.withOpacity(isDark ? 0.2 : 0.1),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    vaccination.name,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                  ),
+                ),
+                Text(
+                  _formatDate(vaccination.date),
+                  style: TextStyle(
+                    color: subTextColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Vaccination details
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (vaccination.expiresAt != null) ...[
+                  _buildMedicalDetailRow(
+                    'Expires', 
+                    _formatDate(vaccination.expiresAt!), 
+                    Icons.event_busy, 
+                    textColor, 
+                    subTextColor
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  Widget _buildMedicalDetailRow(
+    String label,
+    String value,
+    IconData icon,
+    Color textColor,
+    Color subTextColor,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: subTextColor,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: subTextColor,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: textColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

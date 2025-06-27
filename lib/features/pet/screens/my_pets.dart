@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
+import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/pet/screens/add_pet.dart';
 import 'package:petapp/features/pet/screens/pet_profile.dart';
@@ -14,25 +15,8 @@ class MyPetsScreen extends StatefulWidget {
 }
 
 class _MyPetsScreenState extends State<MyPetsScreen> {
-  // Sample data for pets (in a real app, this would come from a database)
-  final List<PetModel> _pets = [
-    PetModel(
-      id: '1',
-      name: 'Max',
-      image: 'assets/images/pet1.jpg',
-      type: 'Dog',
-      birthdate: '2020-05-15',
-      notes: 'Allergic to chicken',
-    ),
-    PetModel(
-      id: '2',
-      name: 'Luna',
-      image: 'assets/images/pet2.jpg',
-      type: 'Cat',
-      birthdate: '2021-02-10',
-      notes: 'Needs special diet food',
-    ),
-  ];
+  // Using GetX controller for state management
+  final PetController _petController = Get.put(PetController());
 
   @override
   Widget build(BuildContext context) {
@@ -55,58 +39,109 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
         centerTitle: true,
         elevation: 0,
         backgroundColor: cardColor,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh, color: textColor),
+            onPressed: () => _petController.fetchPets(),
+            tooltip: 'Refresh pets',
+          ),
+        ],
       ),
-      body: _pets.isEmpty
-          ? _buildEmptyState(isDark, textColor, subTextColor!)
-          : Column(
+      body: Obx(() {
+        // Show loading indicator
+        if (_petController.isLoading.value) {
+          return Center(child: CircularProgressIndicator(color: AppColors.orange));
+        }
+        
+        // Show error message if any
+        if (_petController.error.value.isNotEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Header with count
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  decoration: BoxDecoration(
-                    color: cardColor,
-                    boxShadow: [
-                      BoxShadow(
-                        color: isDark 
-                            ? Colors.black.withOpacity(0.2) 
-                            : Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
+                Icon(Icons.error_outline, color: Colors.red, size: 60),
+                const SizedBox(height: 16),
+                Text(
+                  'Error loading pets',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor),
+                ),
+                const SizedBox(height: 8),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
                   child: Text(
-                    '${_pets.length} ${_pets.length == 1 ? 'Pet' : 'Pets'}',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: subTextColor,
-                    ),
+                    _petController.error.value,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: subTextColor),
                   ),
                 ),
-                
-                // Pet list
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _pets.length,
-                    itemBuilder: (context, index) {
-                      final pet = _pets[index];
-                      return _buildPetCard(pet, isDark, cardColor!, textColor, subTextColor!);
-                    },
+                const SizedBox(height: 24),
+                ElevatedButton(
+                  onPressed: _petController.fetchPets,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.orange,
+                    foregroundColor: Colors.white,
                   ),
+                  child: const Text('Retry'),
                 ),
               ],
             ),
+          );
+        }
+        
+        // Show empty state if no pets
+        if (_petController.pets.isEmpty) {
+          return _buildEmptyState(isDark, textColor, subTextColor!);
+        }
+        
+        // Show list of pets
+        return Column(
+          children: [
+            // Header with count
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: BoxDecoration(
+                color: cardColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: isDark 
+                        ? Colors.black.withOpacity(0.2) 
+                        : Colors.grey.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 3,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Text(
+                '${_petController.pets.length} ${_petController.pets.length == 1 ? 'Pet' : 'Pets'}',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: subTextColor,
+                ),
+              ),
+            ),
+            
+            // Pet list
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: _petController.pets.length,
+                itemBuilder: (context, index) {
+                  final pet = _petController.pets[index];
+                  return _buildPetCard(pet, isDark, cardColor!, textColor, subTextColor!);
+                },
+              ),
+            ),
+          ],
+        );
+      }),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final result = await Get.to(() => const AddPetScreen());
           if (result != null && result is PetModel) {
-            setState(() {
-              _pets.add(result);
-            });
+            _petController.addPet(result);
           }
         },
         backgroundColor: AppColors.orange,
@@ -161,9 +196,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
             onPressed: () async {
               final result = await Get.to(() => const AddPetScreen());
               if (result != null && result is PetModel) {
-                setState(() {
-                  _pets.add(result);
-                });
+                _petController.addPet(result);
               }
             },
             icon: const Icon(Icons.add),
@@ -185,12 +218,12 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
 
   Widget _buildPetCard(PetModel pet, bool isDark, Color cardColor, Color textColor, Color subTextColor) {
     // Get pet age
-    final age = _calculateAge(pet.birthdate);
+    final age = _calculateAge(pet.dateOfBirth);
     
-    // Pet type color
-    Color petTypeColor = pet.type == 'Dog' 
+    // Pet species color
+    Color petTypeColor = pet.species.toLowerCase() == 'dog' 
         ? Colors.blue 
-        : pet.type == 'Cat' 
+        : pet.species.toLowerCase() == 'cat' 
             ? Colors.purple 
             : AppColors.orange;
             
@@ -222,9 +255,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
             () => PetProfileScreen(pet: pet),
           );
           if (result == 'delete') {
-            setState(() {
-              _pets.removeWhere((p) => p.id == pet.id);
-            });
+            _petController.deletePet(pet.id);
           }
         },
         borderRadius: BorderRadius.circular(16),
@@ -270,7 +301,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        // Pet type tag
+                        // Pet species tag
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
@@ -278,7 +309,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            pet.type,
+                            pet.customSpecies ?? pet.species,
                             style: TextStyle(
                               color: petTypeColor,
                               fontSize: 12,
@@ -306,7 +337,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                         ),
                       ],
                     ),
-                    if (pet.notes != null && pet.notes!.isNotEmpty) ...[
+                    if (pet.medicalHistory?.notes != null && pet.medicalHistory!.notes!.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Row(
                         children: [
@@ -318,13 +349,38 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              pet.notes!,
+                              pet.medicalHistory!.notes!,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: subTextColor,
                                 fontSize: 14,
                                 fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    // Show breed if available
+                    if (pet.breed != null && pet.breed!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.pets,
+                            size: 16,
+                            color: subTextColor,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              'Breed: ${pet.breed}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: subTextColor,
+                                fontSize: 14,
                               ),
                             ),
                           ),
@@ -355,8 +411,8 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
     );
   }
 
-  String _calculateAge(String birthdate) {
-    final birth = DateTime.parse(birthdate);
+  String _calculateAge(String dateOfBirth) {
+    final birth = DateTime.parse(dateOfBirth);
     final now = DateTime.now();
     
     int years = now.year - birth.year;
