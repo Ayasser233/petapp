@@ -9,6 +9,8 @@ import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/validation_utils.dart';
 import 'package:petapp/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:petapp/di/service_locator.dart';
+import 'package:petapp/core/services/token_service.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Add this import
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -204,6 +206,13 @@ class _LoginFormState extends State<LoginForm> {
   final _passwordController = TextEditingController();
   bool _rememberMe = false;
   bool _obscurePassword = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberedEmail(); // Load saved email when screen opens
+  }
 
   @override
   void dispose() {
@@ -211,29 +220,64 @@ class _LoginFormState extends State<LoginForm> {
     _passwordController.dispose();
     super.dispose();
   }
+
+  // Load remembered email from SharedPreferences
+  Future<void> _loadRememberedEmail() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedEmail = prefs.getString('remembered_email');
+      final isRemembered = prefs.getBool('remember_me') ?? false;
+      
+      if (savedEmail != null && isRemembered) {
+        setState(() {
+          _emailController.text = savedEmail;
+          _rememberMe = true;
+        });
+      }
+    } catch (e) {
+      // Handle error by throwing exception
+      throw Exception('Error loading remembered email: $e');
+    }
+  }
+
+  // Save user email to SharedPreferences
+  Future<void> _saveUserEmail() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      
+      if (_rememberMe) {
+        // Save the email and remember me preference
+        await prefs.setString('remembered_email', _emailController.text.trim());
+        await prefs.setBool('remember_me', true);
+      } else {
+        // Clear saved email if remember me is unchecked
+        await prefs.remove('remembered_email');
+        await prefs.setBool('remember_me', false);
+      }
+    } catch (e) {
+      // Handle error by throwing exception
+      throw Exception('Error saving user email: $e');
+    }
+  }
+
   // Handle sign in logic
   void _handleSignIn() {
-    // First validate form
     if (!_formKey.currentState!.validate()) {
       return;
     }
     
-    // Use AuthCubit to login
+    // Clear previous error
+    setState(() {
+      _errorMessage = null;
+    });
+    
+    // Save email preference before login attempt
+    _saveUserEmail();
+    
     context.read<AuthCubit>().login(
       _emailController.text.trim(), 
       _passwordController.text
     );
-    
-    // Save remember me preference if needed
-    if (_rememberMe) {
-      _saveUserEmail();
-    }
-  }
-  
-  // Save user email if remember me is checked
-  Future<void> _saveUserEmail() async {
-    // You could implement this with your token service or shared preferences
-    // This is just a placeholder
   }
 
   @override
@@ -241,32 +285,18 @@ class _LoginFormState extends State<LoginForm> {
     final isDark = THelperFunctions.isDarkMode(context);
     
     return BlocListener<AuthCubit, AuthState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is AuthLoginSuccess) {
-          // Show success message
-          Get.snackbar(
-            'Login Successful',
-            'Welcome back!',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green.withOpacity(0.1),
-            colorText: Colors.green,
-            borderRadius: 8,
-            margin: const EdgeInsets.all(16),
-          );
-          
-          // Navigate to home or dashboard
+          // Use TokenService directly
+          final tokenService = Get.find<TokenService>();
+          await tokenService.saveToken(state.user);
+          // Navigate to home
           Get.offAllNamed(AppRoutes.home);
         } else if (state is AuthFailure) {
-          // Show error message
-          Get.snackbar(
-            'Login Failed',
-            state.message,
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red.withOpacity(0.1),
-            colorText: Colors.red,
-            borderRadius: 8,
-            margin: const EdgeInsets.all(16),
-          );
+          // Show red error message below password field
+          setState(() {
+            _errorMessage = "Wrong email or password";
+          });
         }
       },
       child: Form(
@@ -283,7 +313,13 @@ class _LoginFormState extends State<LoginForm> {
                   suffixIcon: _emailController.text.isNotEmpty 
                     ? IconButton(
                         icon: const Icon(Icons.clear, color: Colors.grey),
-                        onPressed: () => setState(() => _emailController.clear()),
+                        onPressed: () {
+                          setState(() {
+                            _emailController.clear();
+                            // Uncheck remember me if email is cleared
+                            _rememberMe = false;
+                          });
+                        },
                       )
                     : null,
                   hintText: 'Email',
@@ -361,6 +397,24 @@ class _LoginFormState extends State<LoginForm> {
                 obscureText: _obscurePassword,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
+              
+              // Error message below password
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(
+                        color: Colors.red,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              
               const SizedBox(height: 8),
               
               // Remember me & forgot password row
@@ -390,8 +444,10 @@ class _LoginFormState extends State<LoginForm> {
                           value: _rememberMe,
                           onChanged: (value) {
                             setState(() {
-                              _rememberMe = value ?? true;
+                              _rememberMe = value ?? false;
                             });
+                            // Save/clear email immediately when checkbox changes
+                            _saveUserEmail();
                           },
                           side: BorderSide(
                             color: isDark ? Colors.grey : Colors.grey.shade400,
@@ -411,7 +467,6 @@ class _LoginFormState extends State<LoginForm> {
                   // forgot password button
                   TextButton(
                     onPressed: () {
-                      // Navigate to Forgot Password Screen
                       Get.toNamed(AppRoutes.forgotPassword);
                     },
                     style: TextButton.styleFrom(

@@ -1,7 +1,8 @@
 
 class ApiConstants {
   // API URLs
-  static const String apiBaseUrl = 'https://alefy-backend.vercel.app';
+  // static const String apiBaseUrl = 'https://alefy-backend.vercel.app';
+  static const String apiBaseUrl = 'http://localhost:3000';
   static const String fallbackApiBaseUrl = 'https://alefy-backup-api.vercel.app';
   
   // Timeouts
