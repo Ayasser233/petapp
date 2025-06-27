@@ -1,7 +1,17 @@
 
+import 'dart:io';
+
 class ApiConstants {
   // API URLs
-  static const String apiBaseUrl = 'https://alefy-backend.vercel.app';
+  static String get apiBaseUrl {
+    // Use 10.0.2.2 for Android emulators to access host's localhost
+    if (Platform.isAndroid) {
+      return 'http://10.0.2.2:3000';
+    }
+    // Default for physical devices and iOS simulators
+    return 'http://localhost:3000';
+  }
+  
   static const String fallbackApiBaseUrl = 'https://alefy-backup-api.vercel.app';
   
   // Timeouts

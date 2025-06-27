@@ -5,6 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
+import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'dart:io';
 
 class HospitalBookingScreen extends StatefulWidget {
@@ -26,6 +27,20 @@ class _HospitalBookingScreenState extends State<HospitalBookingScreen> {
   // Selected pets
   final List<PetModel> _selectedPets = [];
   
+  // Pet controller
+  late final PetController _petController;
+  
+  @override
+  void initState() {
+    super.initState();
+    // Initialize PetController if it doesn't exist yet
+    if (!Get.isRegistered<PetController>()) {
+      _petController = Get.put(PetController());
+    } else {
+      _petController = Get.find<PetController>();
+    }
+  }
+  
   // Booking confirmation
   bool _isBookingConfirmed = false;
   String _bookingReference = '';
@@ -34,34 +49,6 @@ class _HospitalBookingScreenState extends State<HospitalBookingScreen> {
   final List<String> _morningSlots = ['09:00 AM', '10:00 AM', '11:00 AM'];
   final List<String> _afternoonSlots = ['01:00 PM', '02:00 PM', '03:00 PM', '04:00 PM'];
   final List<String> _eveningSlots = ['05:00 PM', '06:00 PM', '07:00 PM'];
-  
-  // Sample pets (in a real app, these would come from a database)
-  final List<PetModel> _userPets = [
-    PetModel(
-      id: '1',
-      name: 'Max',
-      image: 'assets/images/pet1.jpg',
-      type: 'Dog',
-      birthdate: '2020-05-15',
-      notes: 'Allergic to chicken',
-    ),
-    PetModel(
-      id: '2',
-      name: 'Luna',
-      image: 'assets/images/pet2.jpg',
-      type: 'Cat',
-      birthdate: '2021-02-10',
-      notes: 'Needs special diet food',
-    ),
-    PetModel(
-      id: '3',
-      name: 'Buddy',
-      image: 'assets/images/pet3.jpg',
-      type: 'Dog',
-      birthdate: '2019-11-20',
-      notes: 'Has anxiety during thunderstorms',
-    ),
-  ];
   
   @override
   Widget build(BuildContext context) {
@@ -263,7 +250,7 @@ class _HospitalBookingScreenState extends State<HospitalBookingScreen> {
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   Text(
-                                    pet.type,
+                                    pet.species.capitalize!,
                                     style: TextStyle(
                                       fontSize: 10,
                                       color: Colors.grey.shade600,
@@ -314,12 +301,15 @@ class _HospitalBookingScreenState extends State<HospitalBookingScreen> {
   }
   
   void _showPetSelectionModal() {
+    // Call fetchPets to ensure the list is up to date
+    _petController.fetchPets();
+    
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
+        builder: (context, setModalState) {
           return Container(
             height: MediaQuery.of(context).size.height * 0.7,
             decoration: const BoxDecoration(
@@ -374,102 +364,160 @@ class _HospitalBookingScreenState extends State<HospitalBookingScreen> {
                 
                 // Pet list
                 Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: _userPets.length,
-                    itemBuilder: (context, index) {
-                      final pet = _userPets[index];
-                      final isSelected = _selectedPets.any((p) => p.id == pet.id);
-                      
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(
-                            color: isSelected ? AppColors.orange : Colors.transparent,
-                            width: 2,
-                          ),
-                        ),
-                        child: InkWell(
-                          onTap: () {
-                            setState(() {
-                              if (isSelected) {
-                                _selectedPets.removeWhere((p) => p.id == pet.id);
-                              } else {
-                                _selectedPets.add(pet);
-                              }
-                            });
-                          },
-                          borderRadius: BorderRadius.circular(12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Row(
-                              children: [
-                                // Pet image
-                                CircleAvatar(
-                                  radius: 30,
-                                  backgroundImage: pet.image.startsWith('assets/')
-                                      ? AssetImage(pet.image) as ImageProvider
-                                      : FileImage(File(pet.image)),
-                                ),
-                                const SizedBox(width: 16),
-                                // Pet details
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        pet.name,
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        pet.type,
-                                        style: TextStyle(
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                      if (pet.notes != null && pet.notes!.isNotEmpty) ...[
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          pet.notes!,
-                                          style: TextStyle(
-                                            color: Colors.grey[500],
-                                            fontSize: 12,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                                // Checkbox
-                                Checkbox(
-                                  value: isSelected,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      if (value == true) {
-                                        if (!_selectedPets.any((p) => p.id == pet.id)) {
-                                          _selectedPets.add(pet);
-                                        }
-                                      } else {
-                                        _selectedPets.removeWhere((p) => p.id == pet.id);
-                                      }
-                                    });
-                                  },
-                                  activeColor: AppColors.orange,
-                                ),
-                              ],
+                  child: Obx(() {
+                    // Show loading indicator while fetching pets
+                    if (_petController.isLoading.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    
+                    // Show error message if there was a problem
+                    if (_petController.error.value.isNotEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Failed to load pets',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[700],
+                              ),
                             ),
-                          ),
+                            TextButton(
+                              onPressed: () => _petController.fetchPets(),
+                              child: const Text('Retry'),
+                            ),
+                          ],
                         ),
                       );
-                    },
-                  ),
+                    }
+                    
+                    // Show empty state if no pets
+                    if (_petController.pets.isEmpty) {
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.pets, size: 48, color: Colors.grey),
+                            const SizedBox(height: 16),
+                            Text(
+                              'You don\'t have any pets yet',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => Get.toNamed('/add-pet'),
+                              child: const Text('Add a Pet'),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
+                    
+                    // Show the pet list
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _petController.pets.length,
+                      itemBuilder: (context, index) {
+                        final pet = _petController.pets[index];
+                        final isSelected = _selectedPets.any((p) => p.id == pet.id);
+                        
+                        return Card(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(
+                              color: isSelected ? AppColors.orange : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
+                          child: InkWell(
+                            onTap: () {
+                              setModalState(() {
+                                if (isSelected) {
+                                  _selectedPets.removeWhere((p) => p.id == pet.id);
+                                } else {
+                                  _selectedPets.add(pet);
+                                }
+                              });
+                            },
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Row(
+                                children: [
+                                  // Pet image
+                                  CircleAvatar(
+                                    radius: 30,
+                                    backgroundImage: pet.image.startsWith('assets/')
+                                        ? AssetImage(pet.image) as ImageProvider
+                                        : FileImage(File(pet.image)),
+                                  ),
+                                  const SizedBox(width: 16),
+                                  // Pet details
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          pet.name,
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          pet.species.capitalize!,
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                          ),
+                                        ),
+                                        if (pet.medicalHistory?.notes != null && pet.medicalHistory!.notes!.isNotEmpty) ...[
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            pet.medicalHistory!.notes!,
+                                            style: TextStyle(
+                                              color: Colors.grey[500],
+                                              fontSize: 12,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  // Checkbox
+                                  Checkbox(
+                                    value: isSelected,
+                                    onChanged: (value) {
+                                      setModalState(() {
+                                        if (value == true) {
+                                          if (!_selectedPets.any((p) => p.id == pet.id)) {
+                                            _selectedPets.add(pet);
+                                          }
+                                        } else {
+                                          _selectedPets.removeWhere((p) => p.id == pet.id);
+                                        }
+                                      });
+                                    },
+                                    activeColor: AppColors.orange,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }),
                 ),
                 
                 // Confirm button

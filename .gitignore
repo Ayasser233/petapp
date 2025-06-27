@@ -42,3 +42,8 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /android/app/.cxx
+/android/app/build.gradle
+/android/build.gradle
+/android/flush-locks.gradle
+/android/gradle.properties
+/android/settings.gradle
