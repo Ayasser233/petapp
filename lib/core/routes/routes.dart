@@ -26,6 +26,7 @@ import 'package:petapp/features/pet/screens/pet_profile.dart';
 import 'package:petapp/features/home/screens/settings_screen.dart';
 import 'package:petapp/features/profile/screens/points_history_screen.dart';
 import 'package:petapp/features/profile/screens/vouchers_screen.dart';
+import 'package:petapp/features/profile/screens/favorites_screen.dart';
 
 class AppRoutes {
   static const String onboarding = '/onboarding';
@@ -58,6 +59,7 @@ class AppRoutes {
   static const String vouchers = '/vouchers';
   static const String pointsHistory = '/points-history';
   static const String redeem = '/redeem';
+  static const String favorites = '/favorites';
 
   static List<GetPage> get getPages => [
         GetPage(name: networkSplash, page: () => const NetworkSplashScreen()),
@@ -122,6 +124,12 @@ class AppRoutes {
         GetPage(
           name: accountDetails,
           page: () => const AccountDetailsScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+        ),
+        GetPage(
+          name: favorites,
+          page: () => const FavoritesScreen(),
           transition: Transition.rightToLeft,
           transitionDuration: const Duration(milliseconds: 250),
         ),

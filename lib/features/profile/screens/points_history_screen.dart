@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 
 class PointsHistoryScreen extends StatefulWidget {
   const PointsHistoryScreen({super.key});
@@ -44,10 +45,11 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
+    final localizations = AppLocalizations.of(context);
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Points History'),
+        title: Text(localizations.pointsHistory),
         centerTitle: true,
         elevation: 0,
       ),
@@ -92,14 +94,16 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '3,540 Points',
+                        localizations.pointsValue.replaceAll('{points}', '3,540'),
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
                       ),
                       Text(
-                        'Total earned: 4,540 • Total redeemed: 1,000',
+                        localizations.pointsSummary
+                            .replaceAll('{earned}', '4,540')
+                            .replaceAll('{redeemed}', '1,000'),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.white.withOpacity(0.9),
                             ),
@@ -207,13 +211,14 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date).inDays;
+    final localizations = AppLocalizations.of(context);
     
     if (difference == 0) {
-      return 'Today';
+      return localizations.dateToday;
     } else if (difference == 1) {
-      return 'Yesterday';
+      return localizations.dateYesterday;
     } else if (difference < 7) {
-      return '$difference days ago';
+      return localizations.dateDaysAgo.replaceAll('{days}', difference.toString());
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }

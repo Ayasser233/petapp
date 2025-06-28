@@ -52,7 +52,7 @@ class ProfileScreen extends StatelessWidget {
                     } catch (e) {
                       print('Navigation error: $e');
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Error opening account details')),
+                        SnackBar(content: Text(localizations.errorOpeningAccountDetails)),
                       );
                     }
                   },
@@ -78,10 +78,10 @@ class ProfileScreen extends StatelessWidget {
                 // Aleefy Points option
                 _buildProfileOption(
                   context,
-                  'Aleefy Points',
+                  localizations.aleefyPoints,
                   Icons.stars_rounded,
                   () {
-                    Get.toNamed('/points-history');
+                    Get.toNamed(AppRoutes.pointsHistory);
                   },
                   isDark: isDark,
                   cardColor: cardColor,
@@ -98,18 +98,58 @@ class ProfileScreen extends StatelessWidget {
                 
                 const SizedBox(height: 12),
                 
-                _buildProfileOption(
-                  context,
-                  localizations.favorites,
-                  Icons.favorite_border,
-                  () {
-                    // Navigate to favorites
-                  },
-                  isDark: isDark,
-                  cardColor: cardColor,
+                /*InkWell(
+                  onTap: () => Get.toNamed(AppRoutes.favorites),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+                    decoration: BoxDecoration(
+                      color: cardColor,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 5,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.lightorange.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.favorite_border,
+                            color: AppColors.orange,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Text(
+                            localizations.favorites,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: textColor,
+                            ),
+                          ),
+                        ),
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Colors.grey,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
                 
-                const SizedBox(height: 12),
+                const SizedBox(height: 12),*/
                 
                 _buildProfileOption(
                   context,
@@ -191,7 +231,7 @@ class ProfileScreen extends StatelessWidget {
                         // Navigate to terms
                       },
                       child: Text(
-                        'Terms and Conditions',
+                        localizations.termsOfService,
                         style: TextStyle(
                           color: subTextColor,
                           fontSize: 14,
@@ -207,7 +247,7 @@ class ProfileScreen extends StatelessWidget {
                         // Navigate to privacy policy
                       },
                       child: Text(
-                        'Privacy Policy',
+                        localizations.privacyPolicy,
                         style: TextStyle(
                           color: subTextColor,
                           fontSize: 14,
@@ -219,7 +259,7 @@ class ProfileScreen extends StatelessWidget {
                 
                 const SizedBox(height: 8),
                 Text(
-                  'Aleefy App v1.0.0',
+                  '${localizations.appTitle} v1.0.0',
                   style: TextStyle(
                     color: subTextColor,
                     fontSize: 14,
@@ -240,6 +280,7 @@ class ProfileScreen extends StatelessWidget {
     {required bool isDark, required Color cardColor}
   ) {
     final defaultTextColor = isDark ? Colors.white : Colors.black87;
+    final localizations = AppLocalizations.of(context);
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
@@ -279,7 +320,7 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(width: 16),
                 Expanded(
                   child: Text(
-                    'Vouchers',
+                    localizations.vouchers,
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -313,18 +354,18 @@ class ProfileScreen extends StatelessWidget {
                   width: 1,
                 ),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.add_circle_outline,
                     color: AppColors.orange,
                     size: 20,
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Text(
-                    'Got a voucher?',
-                    style: TextStyle(
+                    localizations.gotAVoucher,
+                    style: const TextStyle(
                       color: AppColors.orange,
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
@@ -342,6 +383,7 @@ class ProfileScreen extends StatelessWidget {
   // Show Add Voucher Dialog
   void _showAddVoucherDialog(BuildContext context, bool isDark) {
     final TextEditingController codeController = TextEditingController();
+    final localizations = AppLocalizations.of(context);
     
     showDialog(
       context: context,
@@ -353,7 +395,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           elevation: 0,
           backgroundColor: Colors.transparent,
-          child: _buildAddVoucherDialogContent(context, codeController, isDark),
+          child: _buildAddVoucherDialogContent(context, codeController, isDark, localizations),
         );
       },
     );
@@ -363,7 +405,8 @@ class ProfileScreen extends StatelessWidget {
   Widget _buildAddVoucherDialogContent(
     BuildContext context, 
     TextEditingController codeController, 
-    bool isDark
+    bool isDark,
+    AppLocalizations localizations
   ) {
     final cardColor = isDark ? const Color(0xFF2A2A2A) : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black87;
@@ -405,7 +448,7 @@ class ProfileScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Add Voucher',
+                      localizations.addVoucher,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -413,7 +456,7 @@ class ProfileScreen extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Enter your voucher code',
+                      localizations.enterYourVoucherCode,
                       style: TextStyle(
                         fontSize: 14,
                         color: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -446,7 +489,7 @@ class ProfileScreen extends StatelessWidget {
             child: TextField(
               controller: codeController,
               decoration: InputDecoration(
-                hintText: 'Enter voucher code',
+                hintText: localizations.enterVoucherCode,
                 hintStyle: TextStyle(
                   color: isDark ? Colors.grey[500] : Colors.grey[600],
                 ),
@@ -487,7 +530,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    'Cancel',
+                    localizations.cancel,
                     style: TextStyle(
                       color: isDark ? Colors.grey[400] : Colors.grey[600],
                       fontWeight: FontWeight.w600,
@@ -507,9 +550,9 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     elevation: 2,
                   ),
-                  child: const Text(
-                    'Add Voucher',
-                    style: TextStyle(
+                  child: Text(
+                    localizations.addVoucher,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -524,7 +567,7 @@ class ProfileScreen extends StatelessWidget {
           
           // Help text
           Text(
-            'Enter the voucher code you received from Aleefy or our partners',
+            localizations.voucherHelpText,
             style: TextStyle(
               fontSize: 12,
               color: isDark ? Colors.grey[500] : Colors.grey[600],
@@ -538,10 +581,12 @@ class ProfileScreen extends StatelessWidget {
   
   // Add voucher logic
   void _addVoucher(BuildContext context, String code) {
+    final localizations = AppLocalizations.of(context);
+    
     if (code.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a voucher code'),
+        SnackBar(
+          content: Text(localizations.pleaseEnterVoucherCode ?? 'Please enter a voucher code'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -566,7 +611,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Text('Validating voucher code: ${code.toUpperCase()}'),
+            Text(localizations.validatingVoucherCode?.replaceFirst('{code}', code.toUpperCase()) ?? 'Validating voucher code: ${code.toUpperCase()}'),
           ],
         ),
         backgroundColor: AppColors.orange,
@@ -590,14 +635,14 @@ class ProfileScreen extends StatelessWidget {
                 const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text('Voucher "${code.toUpperCase()}" added successfully!'),
+                  child: Text(localizations.voucherAddedSuccessfully?.replaceFirst('{code}', code.toUpperCase()) ?? 'Voucher "${code.toUpperCase()}" added successfully!'),
                 ),
               ],
             ),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
-              label: 'View',
+              label: localizations.view,
               textColor: Colors.white,
               onPressed: () {
                 Get.toNamed('/vouchers');
@@ -613,14 +658,14 @@ class ProfileScreen extends StatelessWidget {
                 const Icon(Icons.error, color: Colors.white),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text('Invalid voucher code: "${code.toUpperCase()}"'),
+                  child: Text(localizations.invalidVoucherCode?.replaceFirst('{code}', code.toUpperCase()) ?? 'Invalid voucher code: "${code.toUpperCase()}"'),
                 ),
               ],
             ),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
             action: SnackBarAction(
-              label: 'Retry',
+              label: localizations.retry,
               textColor: Colors.white,
               onPressed: () {
                 _showAddVoucherDialog(context, Theme.of(context).brightness == Brightness.dark);

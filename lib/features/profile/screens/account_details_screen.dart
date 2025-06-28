@@ -186,7 +186,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                     
                     // Name
                     _buildTextField(
-                      label: "Name",
+                      label: localizations?.name ?? "Name",
                       controller: _nameController,
                       icon: Icons.person,
                       enabled: _isEditing,
@@ -198,7 +198,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                     
                     // Email
                     _buildTextField(
-                      label: "Email",
+                      label: localizations?.email ?? "Email",
                       controller: _emailController,
                       icon: Icons.email,
                       enabled: _isEditing,
@@ -211,7 +211,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                     
                     // Phone
                     _buildTextField(
-                      label: "Phone",
+                      label: localizations?.phone ?? "Phone",
                       controller: _phoneController,
                       icon: Icons.phone,
                       enabled: _isEditing,
@@ -224,7 +224,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                     
                     // Date of Birth
                     _buildTextField(
-                      label: "Date of Birth",
+                      label: localizations?.dateOfBirth ?? "Date of Birth",
                       controller: _dobController,
                       icon: Icons.calendar_today,
                       enabled: _isEditing,
@@ -238,7 +238,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                     
                     // Address
                     _buildTextField(
-                      label: "Address",
+                      label: localizations?.address ?? "Address",
                       controller: _addressController,
                       icon: Icons.location_on,
                       enabled: _isEditing,

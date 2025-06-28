@@ -11,7 +11,8 @@ import 'package:petapp/core/widgets/phone_input_field.dart';
 import 'package:petapp/core/utils/validation_utils.dart';
 import 'package:petapp/core/models/country_code.dart';
 import 'package:petapp/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:petapp/di/service_locator.dart'; // Assuming you'll create this for DI
+import 'package:petapp/di/service_locator.dart'; 
+import 'package:petapp/core/localization/app_localizations.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -20,34 +21,33 @@ class SignUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => sl<AuthCubit>(),
-      child: const Scaffold(
+      child: Scaffold(
         body: SingleChildScrollView(
           child: Padding(
-            padding:
-                EdgeInsets.only(top: 56.0, left: 24.0, right: 24.0, bottom: 24.0),
+            padding: const EdgeInsets.only(top: 56.0, left: 24.0, right: 24.0, bottom: 24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header Text
                 HeaderText(
-                  title: 'Create Your Account',
-                  subtitle:
-                      'Lorem Ipsum is simply dummy text of the printing and typesetting industry.',
+                  title: AppLocalizations.of(context).createAccount,
+                  subtitle: AppLocalizations.of(context).accountCreationSubtitle,
                 ),
                 SizedBox(height: 32.0),
                 // Add your sign-up form here
-                SignUpForm(),
+                const SignUpForm(),
 
-                SizedBox(height: 16.0),
+                const SizedBox(height: 16.0),
 
                 // Terms and Privacy Policy
-                TermsAndPrivacyText(),
+                const TermsAndPrivacyText(),
 
-                SizedBox(height: 24.0),
+                const SizedBox(height: 24.0),
 
                 // Sign In Link
                 LoginText(
-                    text: 'Already have an account?', loginText: ' Sign In'),
+                    text: AppLocalizations.of(context).alreadyHaveAccount, 
+                    loginText: " ${AppLocalizations.of(context).signIn}"),
               ],
             ),
           ),
@@ -155,8 +155,8 @@ class _SignUpFormState extends State<SignUpForm> {
 
           // Show success message
           Get.snackbar(
-            'Registration Successful',
-            'Please verify your email to continue',
+            AppLocalizations.of(context).registrationSuccessful,
+            AppLocalizations.of(context).pleaseVerifyEmail,
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.green.withOpacity(0.1),
             colorText: Colors.green,
@@ -179,7 +179,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
           // Show error message
           Get.snackbar(
-            'Registration Failed',
+            AppLocalizations.of(context).registrationFailed,
             state.message,
             snackPosition: SnackPosition.BOTTOM,
             backgroundColor: Colors.red.withOpacity(0.1),
@@ -205,7 +205,7 @@ class _SignUpFormState extends State<SignUpForm> {
                   hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[400],
                   ),
-                  hintText: 'Full Name',
+                  hintText: AppLocalizations.of(context).fullName,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16.0),
                     borderSide: BorderSide.none,
@@ -253,7 +253,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 child: PhoneInputField(
                   controller: _phoneController,
                   isDark: isDark,
-                  hintText: 'Phone Number',
+                  hintText: AppLocalizations.of(context).phoneNumber,
                   // errorText: _phoneError,
                   onChanged: (phone, country) {
                     setState(() {
@@ -281,7 +281,7 @@ class _SignUpFormState extends State<SignUpForm> {
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Iconsax.sms, color: AppColors.orange),
-                  hintText: 'Email',
+                  hintText: AppLocalizations.of(context).email,
                   hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[400],
                   ),
@@ -337,7 +337,7 @@ class _SignUpFormState extends State<SignUpForm> {
                       });
                     },
                   ),
-                  hintText: 'Password',
+                  hintText: AppLocalizations.of(context).password,
                   hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[400],
                   ),
@@ -403,7 +403,7 @@ class _SignUpFormState extends State<SignUpForm> {
                         ),
                       )
                           : Text(
-                        'Sign Up',
+                        AppLocalizations.of(context).signUp,
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             color: Colors.white, fontWeight: FontWeight.w600),
                       ),
@@ -424,6 +424,8 @@ class TermsAndPrivacyText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
+    
     return Center(
       child: RichText(
         textAlign: TextAlign.center,
@@ -431,19 +433,20 @@ class TermsAndPrivacyText extends StatelessWidget {
           style: Theme.of(context).textTheme.labelSmall,
           children: [
             TextSpan(
-                text: 'By registering you agree to ',
+                text: '${localizations.termsAndConditionsAgreement} ',
                 style: Theme.of(context).textTheme.labelLarge),
             TextSpan(
-              text: 'Terms & Conditions',
+              text: localizations.termsAndConditions,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: AppColors.orange,
                 fontWeight: AppFonts.semiBold,
               ),
             ),
             TextSpan(
-                text: ' and ', style: Theme.of(context).textTheme.labelLarge),
+                text: ' ${localizations.and} ', 
+                style: Theme.of(context).textTheme.labelLarge),
             TextSpan(
-              text: 'Privacy Policy',
+              text: localizations.privacyPolicy,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: AppColors.orange,
                 fontWeight: AppFonts.semiBold,

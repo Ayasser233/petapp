@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import '../models/voucher_model.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 
 class VouchersScreen extends StatefulWidget {
   const VouchersScreen({super.key});
@@ -78,18 +79,19 @@ class _VouchersScreenState extends State<VouchersScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
+    final localizations = AppLocalizations.of(context);
     
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Vouchers'),
+        title: Text(localizations.myVouchers),
         centerTitle: true,
         elevation: 0,
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'Available (${_getAvailableVouchers().length})'),
-            Tab(text: 'Used (${_getUsedVouchers().length})'),
-            Tab(text: 'Expired (${_getExpiredVouchers().length})'),
+            Tab(text: '${localizations.available} (${_getAvailableVouchers().length})'),
+            Tab(text: '${localizations.used} (${_getUsedVouchers().length})'),
+            Tab(text: '${localizations.expired} (${_getExpiredVouchers().length})'),
           ],
           labelColor: AppColors.orange,
           unselectedLabelColor: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -145,14 +147,14 @@ class _VouchersScreenState extends State<VouchersScreen>
           ),
           const SizedBox(height: 16),
           Text(
-            'No vouchers found',
+            AppLocalizations.of(context).noVouchersFound,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Check back later for new offers',
+            AppLocalizations.of(context).checkBackLater,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[500],
                 ),

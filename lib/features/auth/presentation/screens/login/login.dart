@@ -10,7 +10,8 @@ import 'package:petapp/core/utils/validation_utils.dart';
 import 'package:petapp/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/core/services/token_service.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Add this import
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -19,30 +20,33 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => sl<AuthCubit>(),
-      child: const Scaffold(
+      child: Scaffold(
         body: SingleChildScrollView(
           child: Padding(
-            padding: EdgeInsets.only(
+            padding: const EdgeInsets.only(
                 top: 56.0, left: 24.0, right: 24.0, bottom: 24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header Text
                 HeaderText(
-                  title: 'Welcome Back',
-                  subtitle: 'Login to your account',
+                  title: AppLocalizations.of(context).welcomeBack,
+                  subtitle: AppLocalizations.of(context).loginToAccount,
                 ),
                 SizedBox(height: 32.0),
                 // Add your login form here
                 LoginForm(),
                 // divider
-                DividerForm(dividerText: 'Or continue with'),
-                SizedBox(height: 16.0),
+                DividerForm(dividerText: AppLocalizations.of(context).orContinueWith),
+                const SizedBox(height: 16.0),
                 // footer
                 // Google & Apple Sign In Buttons - Vertical
-                SocialBtns(),
+                const SocialBtns(),
 
-                SignUpText(text: 'Don\'t have an account?', signUpText: ' Sign Up'),
+                SignUpText(
+                  text: AppLocalizations.of(context).dontHaveAccount, 
+                  signUpText: ' ${AppLocalizations.of(context).signUp}'
+                ),
               ],
             ),
           ),
@@ -116,7 +120,7 @@ class SocialBtns extends StatelessWidget {
                     width: 20, height: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'Sign in with Google',
+                  AppLocalizations.of(context).signInWithGoogle,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
@@ -147,7 +151,7 @@ class SocialBtns extends StatelessWidget {
                         : Colors.black),
                 const SizedBox(width: 8),
                 Text(
-                  'Sign in with Apple',
+                  AppLocalizations.of(context).signInWithApple,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
@@ -295,7 +299,7 @@ class _LoginFormState extends State<LoginForm> {
         } else if (state is AuthFailure) {
           // Show red error message below password field
           setState(() {
-            _errorMessage = "Wrong email or password";
+            _errorMessage = AppLocalizations.of(context).wrongCredentials;
           });
         }
       },
@@ -322,7 +326,7 @@ class _LoginFormState extends State<LoginForm> {
                         },
                       )
                     : null,
-                  hintText: 'Email',
+                  hintText: AppLocalizations.of(context).email,
                   hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[400],
                   ),
@@ -369,7 +373,7 @@ class _LoginFormState extends State<LoginForm> {
                       });
                     },
                   ),
-                  hintText: 'Password',
+                  hintText: AppLocalizations.of(context).password,
                   hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey[400],
                   ),
@@ -456,7 +460,7 @@ class _LoginFormState extends State<LoginForm> {
                         ),
                       ),
                       Text(
-                        'Remember me',
+                        AppLocalizations.of(context).rememberMe,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: isDark ? Colors.grey[300] : Colors.grey[700],
                         ),
@@ -473,7 +477,7 @@ class _LoginFormState extends State<LoginForm> {
                       foregroundColor: AppColors.orange,
                     ),
                     child: Text(
-                      'Forgot Password?',
+                      AppLocalizations.of(context).forgotPassword,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w500,
                         color: AppColors.orange,
@@ -513,7 +517,7 @@ class _LoginFormState extends State<LoginForm> {
                             ),
                           )
                         : Text(
-                            'Sign In',
+                            AppLocalizations.of(context).signIn,
                             style: Theme.of(context).textTheme.labelLarge?.copyWith(
                               color: Colors.white,
                               fontWeight: FontWeight.w600,
