@@ -312,7 +312,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     // Address and distance
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.location_on,
                           color: AppColors.orange,
                           size: 16,
@@ -330,11 +330,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         ),
                         Text(
                           clinic['distance'],
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: AppColors.orange,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: subTextColor,
+                        ),
                         ),
                       ],
                     ),
@@ -356,11 +354,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           ),
                           child: Text(
                             clinic['services'][index],
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.orange,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: AppColors.orange,
+                                  fontWeight: FontWeight.w500,
+                                ),
                           ),
                         ),
                       ),

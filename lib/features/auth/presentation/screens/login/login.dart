@@ -33,9 +33,9 @@ class LoginScreen extends StatelessWidget {
                   title: AppLocalizations.of(context).welcomeBack,
                   subtitle: AppLocalizations.of(context).loginToAccount,
                 ),
-                SizedBox(height: 32.0),
+                const SizedBox(height: 32.0),
                 // Add your login form here
-                LoginForm(),
+                const LoginForm(),
                 // divider
                 DividerForm(dividerText: AppLocalizations.of(context).orContinueWith),
                 const SizedBox(height: 16.0),

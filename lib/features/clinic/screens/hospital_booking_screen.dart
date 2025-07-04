@@ -539,7 +539,7 @@ class _HospitalBookingScreenState extends State<HospitalBookingScreen> {
                     child: ElevatedButton(
                       onPressed: () {
                         // Update the main screen's state
-                        this.setState(() {});
+                        setState(() {});
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(

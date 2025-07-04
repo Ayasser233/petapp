@@ -33,7 +33,7 @@ class SignUpScreen extends StatelessWidget {
                   title: AppLocalizations.of(context).createAccount,
                   subtitle: AppLocalizations.of(context).accountCreationSubtitle,
                 ),
-                SizedBox(height: 32.0),
+                const SizedBox(height: 32.0),
                 // Add your sign-up form here
                 const SignUpForm(),
 

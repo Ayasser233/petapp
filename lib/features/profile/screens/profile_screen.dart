@@ -50,7 +50,6 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       );
                     } catch (e) {
-                      print('Navigation error: $e');
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(localizations.errorOpeningAccountDetails)),
                       );
@@ -586,7 +585,7 @@ class ProfileScreen extends StatelessWidget {
     if (code.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(localizations.pleaseEnterVoucherCode ?? 'Please enter a voucher code'),
+          content: Text(localizations.pleaseEnterVoucherCode),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -611,7 +610,7 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Text(localizations.validatingVoucherCode?.replaceFirst('{code}', code.toUpperCase()) ?? 'Validating voucher code: ${code.toUpperCase()}'),
+            Text(localizations.validatingVoucherCode.replaceFirst('{code}', code.toUpperCase())),
           ],
         ),
         backgroundColor: AppColors.orange,
@@ -635,7 +634,7 @@ class ProfileScreen extends StatelessWidget {
                 const Icon(Icons.check_circle, color: Colors.white),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(localizations.voucherAddedSuccessfully?.replaceFirst('{code}', code.toUpperCase()) ?? 'Voucher "${code.toUpperCase()}" added successfully!'),
+                  child: Text(localizations.voucherAddedSuccessfully.replaceFirst('{code}', code.toUpperCase())),
                 ),
               ],
             ),
@@ -658,7 +657,7 @@ class ProfileScreen extends StatelessWidget {
                 const Icon(Icons.error, color: Colors.white),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text(localizations.invalidVoucherCode?.replaceFirst('{code}', code.toUpperCase()) ?? 'Invalid voucher code: "${code.toUpperCase()}"'),
+                  child: Text(localizations.invalidVoucherCode.replaceFirst('{code}', code.toUpperCase())),
                 ),
               ],
             ),

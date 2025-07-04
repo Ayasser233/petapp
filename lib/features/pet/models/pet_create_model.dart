@@ -40,13 +40,11 @@ class PetCreateModel {
     if (model.medicalHistory != null) {
       final mh = model.medicalHistory!;
       medicalHistory = MedicalHistoryModel(
-        vaccinations: mh.vaccinations != null 
-            ? mh.vaccinations!.map((v) => VaccinationModel(
+        vaccinations: mh.vaccinations?.map((v) => VaccinationModel(
                 name: v.name,
                 date: v.date,
                 expiresAt: v.expiresAt
-              )).toList()
-            : null,
+              )).toList(),
         allergies: mh.allergies,
         spayNeuterStatus: mh.spayNeuterStatus,
         lastVetVisit: mh.lastVetVisit,

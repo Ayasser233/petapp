@@ -50,7 +50,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
       body: Obx(() {
         // Show loading indicator
         if (_petController.isLoading.value) {
-          return Center(child: CircularProgressIndicator(color: AppColors.orange));
+          return const Center(child: CircularProgressIndicator(color: AppColors.orange));
         }
         
         // Show error message if any
@@ -59,7 +59,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, color: Colors.red, size: 60),
+                const Icon(Icons.error_outline, color: Colors.red, size: 60),
                 const SizedBox(height: 16),
                 Text(
                   'Error loading pets',

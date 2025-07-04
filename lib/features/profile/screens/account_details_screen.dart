@@ -71,12 +71,12 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
 
     // Show success message
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         content: Row(
           children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 12),
-            const Expanded(
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 12),
+            Expanded(
               child: Text('Account details updated successfully!'),
             ),
           ],
@@ -128,9 +128,9 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                     CircleAvatar(
                       radius: 60,
                       backgroundColor: AppColors.orange.withOpacity(0.2),
-                      child: CircleAvatar(
+                      child: const CircleAvatar(
                         radius: 56,
-                        backgroundImage: const AssetImage('assets/images/profile.jpg'),
+                        backgroundImage: AssetImage('assets/images/profile.jpg'),
                       ),
                     ),
                     if (_isEditing)
