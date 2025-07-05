@@ -22,7 +22,7 @@ Future<void> resetAppState() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  // await resetAppState();  
   // Register ConnectivityService with GetX
 
   // Initialize dependencies
@@ -31,7 +31,7 @@ void main() async {
   // Initialize services
   await initServices();
 
-  // await resetAppState();
+  
 
   // Initialize settings provider
   final settingsProvider = SettingsProvider();

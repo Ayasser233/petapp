@@ -294,6 +294,7 @@ class _LoginFormState extends State<LoginForm> {
           // Use TokenService directly
           final tokenService = Get.find<TokenService>();
           await tokenService.saveToken(state.user);
+          print('Token saved successfully: ${state.user}');
           // Navigate to home
           Get.offAllNamed(AppRoutes.home);
         } else if (state is AuthFailure) {
