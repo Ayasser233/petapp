@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:petapp/core/services/api_client.dart';
 import 'package:petapp/core/services/api_error_handler.dart';
+import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/core/services/connectivity_service.dart';
 import 'package:petapp/core/services/token_service.dart';
 import 'package:petapp/features/auth/data/repositories/auth_repository.dart';
@@ -20,6 +21,9 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => ApiErrorHandler(scaffoldMessengerKey: sl()));
   sl.registerLazySingleton(() => TokenService());
   sl.registerLazySingleton(() => ConnectivityService());
+  
+  // Register AuthService
+  sl.registerLazySingleton(() => AuthService(tokenService: sl()));
   
   sl.registerLazySingleton(() => ApiClient(
     errorHandler: sl(),

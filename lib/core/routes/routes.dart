@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:petapp/core/middleware/auth_middleware.dart';
 import 'package:petapp/features/authentication/screens/onboarding/simple_network_splash.dart';
 import 'package:petapp/features/auth/presentation/screens/login/login.dart';
 import 'package:petapp/features/auth/presentation/screens/onboarding/onboarding.dart';
@@ -99,33 +100,48 @@ class AppRoutes {
           name: pet3DModelSelector,
           page: () => const Pet3DModelSelector(),
         ),
+        // Protected routes with middleware
         GetPage(
-            name: hospitalBooking, page: () => const HospitalBookingScreen()),
+            name: hospitalBooking,
+            page: () => const HospitalBookingScreen(),
+            middlewares: [AuthMiddleware()],
+        ),
         GetPage(name: clinicExplorer, page: () => const ClinicExplorerScreen()),
-        // Add these GetPage entries properly to the list
+        // Protected pet routes
         GetPage(
           name: myPets,
           page: () => const MyPetsScreen(),
+          middlewares: [AuthMiddleware()],
         ),
         GetPage(
           name: addPet,
           page: () => const AddPetScreen(),
+          middlewares: [AuthMiddleware()],
         ),
         GetPage(
           name: petProfile,
           page: () => PetProfileScreen(
             pet: Get.arguments,
           ),
+          middlewares: [AuthMiddleware()],
         ),
-        // Add settings page to the list
         GetPage(name: settings, page: () => const SettingsScreen()),
-        GetPage(name: vouchers, page: () => const VouchersScreen()),
-        GetPage(name: pointsHistory, page: () => const PointsHistoryScreen()),
+        GetPage(
+          name: vouchers,
+          page: () => const VouchersScreen(),
+          middlewares: [AuthMiddleware()],
+        ),
+        GetPage(
+          name: pointsHistory,
+          page: () => const PointsHistoryScreen(),
+          middlewares: [AuthMiddleware()],
+        ),
         GetPage(
           name: accountDetails,
           page: () => const AccountDetailsScreen(),
           transition: Transition.rightToLeft,
           transitionDuration: const Duration(milliseconds: 250),
+          middlewares: [AuthMiddleware()],
         ),
         GetPage(
           name: favorites,

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
+import 'package:petapp/core/services/auth_service.dart';
+import 'package:petapp/core/routes/routes.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -30,6 +32,9 @@ class _HospitalBookingScreenState extends State<HospitalBookingScreen> {
   // Pet controller
   late final PetController _petController;
   
+  // Auth service
+  final AuthService _authService = Get.find<AuthService>();
+  
   @override
   void initState() {
     super.initState();
@@ -39,6 +44,48 @@ class _HospitalBookingScreenState extends State<HospitalBookingScreen> {
     } else {
       _petController = Get.find<PetController>();
     }
+    
+    _checkAuthStatus();
+  }
+  
+  void _checkAuthStatus() {
+    // Check if user is authenticated
+    if (!_authService.canAccessProtectedFeature()) {
+      // Show dialog and then navigate back if not logged in
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showLoginRequiredDialog();
+      });
+    }
+  }
+  
+  void _showLoginRequiredDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Login Required'),
+        content: const Text('You need to be logged in to book appointments.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Get.back(); // Go back to previous screen
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Get.offNamed(AppRoutes.login); // Navigate to login screen
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.orange,
+            ),
+            child: const Text('Login'),
+          ),
+        ],
+      ),
+    );
   }
   
   // Booking confirmation

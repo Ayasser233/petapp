@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
+import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,6 +20,8 @@ class ProfileScreen extends StatelessWidget {
     final cardColor = isDark ? const Color(0xFF2A2A2A) : Colors.white;
     final backgroundColor = isDark ? Colors.black : const Color(0xFFF5F5F5);
     final localizations = AppLocalizations.of(context);
+    final authService = Get.find<AuthService>();
+    final isGuest = authService.authStatus == AuthStatus.guest;
     
     return BaseScreen(
       navBarIndex: 2,
@@ -37,6 +40,11 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: 10),
                 
+                // Guest user banner
+                if (isGuest)
+                  _buildGuestProfileBanner(context, isDark),
+                
+                if (!isGuest)
                 // Profile options list
                 _buildProfileOption(
                   context,
@@ -59,14 +67,18 @@ class ProfileScreen extends StatelessWidget {
                   cardColor: cardColor,
                 ),
 
-                const SizedBox(height: 12),
+                if (!isGuest) const SizedBox(height: 12),
                 
                 _buildProfileOption(
                   context,
                   localizations.myPets,
                   Icons.pets,
                   () {
-                    Get.toNamed(AppRoutes.myPets);
+                    if (isGuest) {
+                      _showLoginRequiredDialog(context);
+                    } else {
+                      Get.toNamed(AppRoutes.myPets);
+                    }
                   },
                   isDark: isDark,
                   cardColor: cardColor,
@@ -80,7 +92,11 @@ class ProfileScreen extends StatelessWidget {
                   localizations.aleefyPoints,
                   Icons.stars_rounded,
                   () {
-                    Get.toNamed(AppRoutes.pointsHistory);
+                    if (isGuest) {
+                      _showLoginRequiredDialog(context);
+                    } else {
+                      Get.toNamed(AppRoutes.pointsHistory);
+                    }
                   },
                   isDark: isDark,
                   cardColor: cardColor,
@@ -93,6 +109,7 @@ class ProfileScreen extends StatelessWidget {
                   context,
                   isDark: isDark,
                   cardColor: cardColor,
+                  isGuest: isGuest,
                 ),
                 
                 const SizedBox(height: 12),
@@ -146,7 +163,7 @@ class ProfileScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
+                );
                 
                 const SizedBox(height: 12),*/
                 
@@ -276,105 +293,94 @@ class ProfileScreen extends StatelessWidget {
   // Special vouchers option with Add New Voucher button
   Widget _buildVouchersOption(
     BuildContext context,
-    {required bool isDark, required Color cardColor}
+    {required bool isDark, required Color cardColor, bool isGuest = false}
   ) {
-    final defaultTextColor = isDark ? Colors.white : Colors.black87;
     final localizations = AppLocalizations.of(context);
     
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
       decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.0),
         color: cardColor,
-        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 5,
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 5.0,
+            spreadRadius: 0.0,
             offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Column(
-        children: [
-          // Main vouchers row
-          InkWell(
-            onTap: () {
-              Get.toNamed('/vouchers');
-            },
-            borderRadius: BorderRadius.circular(8),
-            child: Row(
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10.0),
+          onTap: () {
+            if (isGuest) {
+              _showLoginRequiredDialog(context);
+            } else {
+              Get.toNamed(AppRoutes.vouchers);
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.lightorange.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Icons.confirmation_number_outlined,
-                    color: AppColors.orange,
-                    size: 22,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Text(
-                    localizations.vouchers,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: defaultTextColor,
-                    ),
-                  ),
-                ),
-                const Icon(
-                  Icons.arrow_forward_ios,
-                  size: 16,
-                  color: Colors.grey,
-                ),
-              ],
-            ),
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Add New Voucher button
-          InkWell(
-            onTap: () => _showAddVoucherDialog(context, isDark),
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
-                color: AppColors.orange.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: AppColors.orange.withOpacity(0.3),
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.add_circle_outline,
-                    color: AppColors.orange,
-                    size: 20,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    localizations.gotAVoucher,
-                    style: const TextStyle(
+                Row(
+                  children: [
+                    Icon(
+                      Icons.card_giftcard,
                       color: AppColors.orange,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
+                      size: 24.0,
+                    ),
+                    const SizedBox(width: 12.0),
+                    Text(
+                      localizations.myVouchers,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: isDark ? Colors.white : Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Spacer(),
+                    Icon(
+                      Icons.arrow_forward_ios,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                      size: 16.0,
+                    ),
+                  ],
+                ),
+                if (!isGuest) ...[
+                  const SizedBox(height: 16.0),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 36.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Open redeem voucher dialog or navigate to redeem screen
+                        Get.toNamed(AppRoutes.redeem);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.orange,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.add, size: 16.0),
+                          const SizedBox(width: 4.0),
+                          Text(localizations.addVoucher),
+                        ],
+                      ),
                     ),
                   ),
                 ],
-              ),
+              ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -750,6 +756,94 @@ class ProfileScreen extends StatelessWidget {
         icon,
         color: AppColors.orange,
         size: 22,
+      ),
+    );
+  }
+  
+  // Show login required dialog
+  void _showLoginRequiredDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Login Required'),
+        content: const Text('You need to be logged in to access this feature.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Get.toNamed(AppRoutes.login);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.orange,
+            ),
+            child: const Text('Login'),
+          ),
+        ],
+      ),
+    );
+  }
+  
+  // Build guest profile banner
+  Widget _buildGuestProfileBanner(BuildContext context, bool isDark) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.orange.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.orange.withOpacity(0.3)),
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.person_outline,
+            size: 48,
+            color: AppColors.orange,
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'You\'re browsing as a guest',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.orange,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Create an account to access all features',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              Get.toNamed(AppRoutes.login);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.orange,
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Text(
+              'Login or Register',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

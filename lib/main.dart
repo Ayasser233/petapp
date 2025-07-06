@@ -11,6 +11,7 @@ import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/core/services/location_service.dart';
 import 'package:petapp/core/services/connectivity_service.dart';
 import 'package:petapp/core/services/token_service.dart';
+import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
 
 // Add this function to reset app state
@@ -53,6 +54,9 @@ Future<void> initServices() async {
   
   // Register TokenService with GetX
   Get.put(sl<TokenService>());
+  
+  // Initialize AuthService
+  await Get.putAsync(() async => await sl<AuthService>().init());
   
   // Initialize controllers
   Get.lazyPut(() => sl<PetController>());

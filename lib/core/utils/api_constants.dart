@@ -7,12 +7,14 @@ class ApiConstants {
     // Use 10.0.2.2 for Android emulators to access host's localhost
     if (Platform.isAndroid) {
       return 'http://10.0.2.2:3000';
+      return 'https://aleefy-app.com';
     }
     // Default for physical devices and iOS simulators
     return 'http://localhost:3000';
+    return 'https://aleefy-app.com';
   }
   
-  static const String fallbackApiBaseUrl = 'https://alefy-backup-api.vercel.app';
+  static const String fallbackApiBaseUrl = 'https://aleefy-app.com';
   
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 10);

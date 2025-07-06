@@ -4,6 +4,7 @@ import 'package:lottie/lottie.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/services/connectivity_service.dart';
+import 'package:petapp/core/services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NetworkSplashScreen extends StatefulWidget {
@@ -16,6 +17,7 @@ class NetworkSplashScreen extends StatefulWidget {
 class _NetworkSplashScreenState extends State<NetworkSplashScreen>
     with SingleTickerProviderStateMixin {
   final ConnectivityService _connectivityService = Get.find<ConnectivityService>();
+  final AuthService _authService = Get.find<AuthService>();
   bool _hasNavigated = false;
   bool _hasConnection = false;
   late final AnimationController _controller;
@@ -44,11 +46,16 @@ class _NetworkSplashScreenState extends State<NetworkSplashScreen>
       _hasNavigated = true;
       final prefs = await SharedPreferences.getInstance();
       final isOnboardingCompleted = prefs.getBool('isOnboardingCompleted') ?? false;
-      final isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-
+      
+      // Check auth status instead of just isLoggedIn
+      final authStatus = _authService.authStatus;
+      
       if (!isOnboardingCompleted) {
         Get.offAllNamed(AppRoutes.onboarding);
-      } else if (isLoggedIn) {
+      } else if (authStatus == AuthStatus.authenticated) {
+        Get.offAllNamed(AppRoutes.home);
+      } else if (authStatus == AuthStatus.guest) {
+        // Guest users also go to home screen
         Get.offAllNamed(AppRoutes.home);
       } else {
         Get.offAllNamed(AppRoutes.login);

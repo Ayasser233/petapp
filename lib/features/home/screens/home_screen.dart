@@ -7,6 +7,7 @@ import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/widgets/custom_app_bar.dart';
 import 'package:petapp/core/widgets/rewards_card.dart';
 import 'package:petapp/core/services/location_service.dart';
+import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/features/clinic/models/clinic_model.dart';
 import 'package:petapp/features/clinic/services/clinic_service.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
@@ -21,15 +22,18 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ClinicService _clinicService = ClinicService();
   late final LocationService _locationService;
+  final AuthService _authService = Get.find<AuthService>();
   
   List<ClinicModel> nearbyClinics = [];
   bool _isLoadingClinics = true;
   bool _locationDialogShown = false;
+  bool _isGuestUser = false;
 
   @override
   void initState() {
     super.initState();
     _locationService = Get.put(LocationService());
+    _isGuestUser = _authService.authStatus == AuthStatus.guest;
     _initializeHomeScreen();
   }
 
@@ -146,6 +150,10 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            // Guest user banner
+            if (_isGuestUser)
+              _buildGuestBanner(context),
+              
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _handleRefresh,
@@ -727,6 +735,53 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Build guest user banner
+  Widget _buildGuestBanner(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      color: AppColors.orange.withOpacity(0.1),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.info_outline,
+            color: AppColors.orange,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'You\'re browsing as a guest. Some features require login.',
+              style: TextStyle(
+                color: AppColors.orange,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.toNamed(AppRoutes.login);
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: AppColors.orange,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            child: const Text(
+              'Login',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
