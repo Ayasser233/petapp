@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:petapp/core/utils/app_colors.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/core/utils/helper_functions.dart';
 import '../models/vet_activity.dart';
 import '../utils/activity_utils.dart';
 import 'activity_actions.dart';
@@ -24,14 +26,15 @@ class ActivityCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDark = THelperFunctions.isDarkMode(context);
     
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
-      elevation: 2,
+      elevation: isDark ? 4 : 2,
+      shadowColor: isDark ? Colors.black.withOpacity(0.5) : Colors.grey.withOpacity(0.3),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
@@ -81,6 +84,7 @@ class ActivityCard extends StatelessWidget {
                 'Dr. ${activity.vetName}',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
               ),
               const SizedBox(height: 4),
@@ -96,14 +100,14 @@ class ActivityCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: ActivityUtils.getStatusColor(activity.status).withOpacity(0.1),
+            color: ActivityUtils.getStatusColor(activity.status).withOpacity(isDark ? 0.2 : 0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: ActivityUtils.getStatusColor(activity.status).withOpacity(0.3),
+              color: ActivityUtils.getStatusColor(activity.status).withOpacity(isDark ? 0.5 : 0.3),
             ),
           ),
           child: Text(
-            ActivityUtils.formatStatus(activity.status),
+            _getLocalizedStatus(context, activity.status),
             style: TextStyle(
               color: ActivityUtils.getStatusColor(activity.status),
               fontSize: 12,
@@ -128,6 +132,7 @@ class ActivityCard extends StatelessWidget {
           activity.appointmentDate,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white : Colors.black87,
               ),
         ),
         const SizedBox(width: 20),
@@ -141,6 +146,7 @@ class ActivityCard extends StatelessWidget {
           activity.appointmentTime,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
+                color: isDark ? Colors.white : Colors.black87,
               ),
         ),
       ],
@@ -159,25 +165,43 @@ class ActivityCard extends StatelessWidget {
         Expanded(
           child: Text(
             activity.serviceType,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
           ),
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.orange.withOpacity(0.1),
+            color: AppColors.orange.withOpacity(isDark ? 0.2 : 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
             activity.petName!,
-            style: const TextStyle(
-              color: AppColors.orange,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.orange,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
         ),
       ],
     );
   }
+
+  String _getLocalizedStatus(BuildContext context, String status) {
+    switch (status.toLowerCase()) {
+      case 'upcoming':
+        return AppLocalizations.of(context).upcoming;
+      case 'completed':
+        return AppLocalizations.of(context).completed;
+      case 'cancelled':
+        return AppLocalizations.of(context).cancelled;
+      case 'rescheduled':
+        return AppLocalizations.of(context).rescheduled;
+      default:
+        return status;
+    }
+  }
+
+  
 }

@@ -37,7 +37,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-
   }
 
   @override
@@ -155,7 +154,33 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           if (_selectedSymptom != null)
             Container(
               padding: const EdgeInsets.all(16),
-              child: Text('Selected: $_selectedSymptom'),
+              decoration: BoxDecoration(
+                color: AppColors.orange.withOpacity(0.1),
+                border: Border(
+                  top: BorderSide(color: AppColors.orange.withOpacity(0.3)),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: AppColors.orange),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Selected: $_selectedSymptom',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () => setState(() => _selectedSymptom = null),
+                    child: const Text(
+                      'Clear',
+                      style: TextStyle(color: AppColors.orange),
+                    ),
+                  ),
+                ],
+              ),
             ),
         ],
       ),
@@ -265,11 +290,8 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     );
   }
 
-  // Helper method to build body part items
-  // 1. First, update the _buildBodyPartItem method to remove the leading icon container
   Widget _buildBodyPartItem(String name, bool isDark, Color textColor) {
     return ListTile(
-      // Remove the leading container with icon
       title: Text(
         name,
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -290,7 +312,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     );
   }
 
-  // Reusable method to show symptom selection dialog
   void _showSymptomSelectionDialog(String bodyPart) {
     final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black;
@@ -357,7 +378,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     }
 
     // For body parts with multiple categories, show category selection dialog
-    // 2. Update the symptom selection dialog to remove the icon from the title row
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -380,7 +400,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
               ...categories.map(
                 (category) => ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                  // Remove the leading container with icon
                   title: Text(
                     category,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -417,7 +436,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     );
   }
 
-  // Show specific symptom list for a category
   void _showSymptomListDialog(String bodyPart, String category) {
     final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black;
@@ -499,7 +517,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             itemBuilder: (context, index) {
               final symptom = symptoms[index];
               return ListTile(
-                // Replace the icon with simple bullet point text
                 title: Text(
                   symptom['name'],
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -538,108 +555,338 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     );
   }
 
-  // Show detailed information for a specific symptom
   void _showSymptomDetailDialog(
       String bodyPart, String category, Map<String, dynamic> symptom) {
     final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black;
-    final bgColor = isDark ? Colors.grey[850] : Colors.white;
+    final bgColor = isDark ? Colors.grey[900] : Colors.white;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: bgColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Text(
-          symptom['name'],
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: textColor,
+      useSafeArea: false, // Allow full screen
+      builder: (context) => Dialog.fullscreen(
+        child: Scaffold(
+          backgroundColor: bgColor,
+          appBar: AppBar(
+            backgroundColor: bgColor,
+            elevation: 0,
+            title: Text(
+              symptom['name'],
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back, color: textColor),
+              onPressed: () => Navigator.pop(context),
+            ),
+            actions: [
+              // Optional: Add bookmark or share action
+              IconButton(
+                icon: Icon(Icons.bookmark_border, color: textColor),
+                onPressed: () {
+                  // Add bookmark functionality here
+                },
               ),
-          overflow: TextOverflow.ellipsis,
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: SingleChildScrollView(
+            ],
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
               children: [
-                // Description
-                Text(
-                  symptom['description'],
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: textColor,
-                      ),
+                // Symptom category badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: AppColors.orange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.orange.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    '$category • ${bodyPart.toUpperCase()}',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.orange,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
                 ),
-                const SizedBox(height: 16),
+                
+                const SizedBox(height: 20),
+                
+                // Description section
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[850] : Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Description',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: textColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        symptom['description'],
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: textColor,
+                              height: 1.5,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
 
-                // Possible causes
+                // Possible causes section
                 Text(
-                  'Possible Causes:',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  'Possible Causes',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: textColor,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
-                const SizedBox(height: 8),
-                ...List.generate(
-                  (symptom['causes'] as List).length,
-                  (index) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('• ',
-                            style: TextStyle(color: AppColors.orange)),
-                        Expanded(
-                          child: Text(
-                            symptom['causes'][index],
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: textColor,
-                                ),
-                          ),
+                const SizedBox(height: 12),
+                
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[850] : Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: List.generate(
+                      (symptom['causes'] as List).length,
+                      (index) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              margin: const EdgeInsets.only(top: 8, right: 12),
+                              decoration: const BoxDecoration(
+                                color: AppColors.orange,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                symptom['causes'][index],
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: textColor,
+                                      height: 1.5,
+                                    ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                
+                const SizedBox(height: 24),
 
-                // What to do
+                // What to do section
                 Text(
-                  'What to Do:',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  'What to Do',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: textColor,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
-                const SizedBox(height: 8),
-                ...List.generate(
-                  (symptom['actions'] as List).length,
-                  (index) => Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('• ',
-                            style: TextStyle(color: AppColors.orange)),
-                        Expanded(
-                          child: Text(
-                            symptom['actions'][index],
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  color: textColor,
+                const SizedBox(height: 12),
+                
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[850] : Colors.grey[50],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: List.generate(
+                      (symptom['actions'] as List).length,
+                      (index) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              width: 20,
+                              height: 20,
+                              margin: const EdgeInsets.only(top: 2, right: 12),
+                              decoration: BoxDecoration(
+                                color: AppColors.orange,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '${index + 1}',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                 ),
-                          ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                symptom['actions'][index],
+                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                      color: textColor,
+                                      height: 1.5,
+                                    ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // Warning/Note section
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.amber.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.warning_amber,
+                        color: Colors.amber,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Important Note',
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                    color: Colors.amber[700],
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'This information is for educational purposes only. Always consult with a qualified veterinarian for proper diagnosis and treatment.',
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: textColor,
+                                    height: 1.4,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 24),
+              ],
+            ),
+          ),
+          
+          // Bottom action buttons
+          bottomNavigationBar: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: bgColor,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Select Symptom button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _handleSymptomSelected(
+                          '$bodyPart: $category - ${symptom['name']}');
+                      _showSymptomChoiceDialog(bodyPart, category, symptom);
+                    },
+                    icon: const Icon(Icons.check_circle, size: 24),
+                    label: Text(
+                      _selectedSymptom != null ? 'Replace Selected Symptom' : 'Select This Symptom',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 12),
+                
+                // Emergency button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _goToVetFinder(symptom);
+                    },
+                    icon: const Icon(Icons.local_hospital, size: 24),
+                    label: Text(
+                      'Find Emergency Vet',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
                 ),
@@ -647,45 +894,10 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             ),
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Back',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Colors.grey,
-                  ),
-            ),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.orange,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-              _handleSymptomSelected(
-                  '$bodyPart: $category - ${symptom['name']}');
-              // Show choice dialog after selecting symptom - this fixes the warning
-              _showSymptomChoiceDialog(bodyPart, category, symptom);
-            },
-            child: Text(
-              _selectedSymptom != null ? 'Replace Symptom' : 'Select Symptom',
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Colors.white,
-                  ),
-            ),
-          ),
-        ],
       ),
     );
   }
 
-
-  // New method to show choice between vet and examples
   void _showSymptomChoiceDialog(
       String bodyPart, String category, Map<String, dynamic> symptom) {
     final isDark = THelperFunctions.isDarkMode(context);
@@ -789,21 +1001,18 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     );
   }
 
-  // Method to navigate to vet finder
+  // Method to navigate to vet finder (UPDATED - removed urgency)
   void _goToVetFinder(Map<String, dynamic> symptom) {
-    // You can pass the selected symptom to the vet finder screen
     Get.toNamed(
-      AppRoutes.clinicExplorer, // Replace with your actual vet finder route
+      AppRoutes.clinicExplorer,
       arguments: {
         'symptom': symptom['name'],
         'petType': widget.petType,
         'petName': widget.petName,
-        'urgency': _determineUrgency(symptom),
       },
     );
   }
 
-  // Method to show symptom examples with pictures
   void _showSymptomExamples(
       String bodyPart, String category, Map<String, dynamic> symptom) {
     final isDark = THelperFunctions.isDarkMode(context);
@@ -979,7 +1188,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     );
   }
 
-  // Method to show full screen image
   void _showFullScreenImage(String imageUrl, String caption) {
     showDialog(
       context: context,
@@ -1021,7 +1229,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     );
   }
 
-  // Helper method to get symptom images based on symptom name
   List<Map<String, String>> _getSymptomImages(String symptomName) {
     // This is where you would map symptom names to their corresponding images
     // For now, returning sample data
@@ -1051,30 +1258,5 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
       {'url': 'assets/images/symptoms/default_1.jpg', 'caption': 'Example 1'},
       {'url': 'assets/images/symptoms/default_2.jpg', 'caption': 'Example 2'},
     ];
-  }
-
-  // Helper method to determine urgency level
-  String _determineUrgency(Map<String, dynamic> symptom) {
-    final actions = (symptom['actions'] as List<String>);
-    
-    // Check for emergency keywords in actions
-    for (String action in actions) {
-      if (action.toLowerCase().contains('emergency') || 
-          action.toLowerCase().contains('urgent') ||
-          action.toLowerCase().contains('asap') ||
-          action.toLowerCase().contains('immediately')) {
-        return 'emergency';
-      }
-    }
-    
-    // Check for soon keywords
-    for (String action in actions) {
-      if (action.toLowerCase().contains('soon') || 
-          action.toLowerCase().contains('needed')) {
-        return 'soon';
-      }
-    }
-    
-    return 'routine';
   }
 }

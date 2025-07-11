@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:petapp/core/screens/base_screen.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 import '../models/vet_activity.dart';
 import '../services/activity_service.dart';
 import '../widgets/activity_filter_tabs.dart';
@@ -53,14 +54,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
           if (mounted) {
             ActivityDialogs.showSuccessSnackBar(
               context,
-              'Appointment cancelled successfully',
+              AppLocalizations.of(context).appointmentCancelledSuccessfully,
             );
           }
         } catch (e) {
           if (mounted) {
             ActivityDialogs.showErrorSnackBar(
               context,
-              'Failed to cancel appointment',
+              AppLocalizations.of(context).failedToCancelAppointment,
             );
           }
         }
@@ -69,15 +70,24 @@ class _ActivityScreenState extends State<ActivityScreen> {
   }
 
   void _onRescheduleActivity(VetActivity activity) {
-    ActivityDialogs.showInfoSnackBar(context, 'Reschedule feature coming soon!');
+    ActivityDialogs.showInfoSnackBar(
+      context, 
+      AppLocalizations.of(context).rescheduleFeatureComingSoon,
+    );
   }
 
   void _onReviewActivity(VetActivity activity) {
-    ActivityDialogs.showInfoSnackBar(context, 'Review feature coming soon!');
+    ActivityDialogs.showInfoSnackBar(
+      context, 
+      AppLocalizations.of(context).reviewFeatureComingSoon,
+    );
   }
 
   void _onBookAgainActivity(VetActivity activity) {
-    ActivityDialogs.showInfoSnackBar(context, 'Booking follow-up appointment...');
+    ActivityDialogs.showInfoSnackBar(
+      context, 
+      AppLocalizations.of(context).bookingFollowupAppointment,
+    );
   }
 
   @override
@@ -85,7 +95,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
     return BaseScreen(
       navBarIndex: 1,
       appBar: AppBar(
-        title: const Text('My Activity'),
+        title: Text(AppLocalizations.of(context).myActivity),
         centerTitle: true,
         elevation: 0,
       ),
@@ -96,7 +106,7 @@ class _ActivityScreenState extends State<ActivityScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Your Pet Care Activities',
+                AppLocalizations.of(context).yourPetCareActivities,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -146,14 +156,14 @@ class _ActivityScreenState extends State<ActivityScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'No activities found',
+            AppLocalizations.of(context).noActivitiesFound,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: Colors.grey[600],
                 ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Activities matching your filter will appear here',
+            AppLocalizations.of(context).activitiesMatchingFilterWillAppearHere,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.grey[500],
                 ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 
 class ActivityFilterTabs extends StatelessWidget {
   final String selectedFilter;
@@ -24,7 +25,7 @@ class ActivityFilterTabs extends StatelessWidget {
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: _FilterChip(
-              label: filter,
+              label: _getLocalizedFilter(context, filter),
               isSelected: isSelected,
               onTap: () => onFilterChanged(filter),
             ),
@@ -32,6 +33,21 @@ class ActivityFilterTabs extends StatelessWidget {
         }).toList(),
       ),
     );
+  }
+
+  String _getLocalizedFilter(BuildContext context, String filter) {
+    switch (filter.toLowerCase()) {
+      case 'all':
+        return AppLocalizations.of(context).all;
+      case 'upcoming':
+        return AppLocalizations.of(context).upcoming;
+      case 'completed':
+        return AppLocalizations.of(context).completed;
+      case 'cancelled':
+        return AppLocalizations.of(context).cancelled;
+      default:
+        return filter;
+    }
   }
 }
 
