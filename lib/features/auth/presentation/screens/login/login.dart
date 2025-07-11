@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/core/styles/input_styles.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
@@ -47,6 +48,9 @@ class LoginScreen extends StatelessWidget {
                   text: AppLocalizations.of(context).dontHaveAccount, 
                   signUpText: ' ${AppLocalizations.of(context).signUp}'
                 ),
+                
+                // Skip login button
+                const SkipLoginButton(),
               ],
             ),
           ),
@@ -87,6 +91,37 @@ class SignUpText extends StatelessWidget {
             ),
           )
         ],
+      ),
+    );
+  }
+}
+
+class SkipLoginButton extends StatelessWidget {
+  const SkipLoginButton({super.key});
+
+  void _skipLogin() async {
+    final AuthService authService = Get.find<AuthService>();
+    await authService.setGuestMode();
+    Get.offAllNamed(AppRoutes.home);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0),
+      child: Center(
+        child: TextButton(
+          onPressed: _skipLogin,
+          child: Text(
+            'Skip Login',
+            style: TextStyle(
+              color: AppColors.orange,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -293,8 +328,21 @@ class _LoginFormState extends State<LoginForm> {
         if (state is AuthLoginSuccess) {
           // Use TokenService directly
           final tokenService = Get.find<TokenService>();
+          final authService = Get.find<AuthService>();
+          
+          // Save token and mark as authenticated
           await tokenService.saveToken(state.user);
-          print('Token saved successfully: ${state.user}');
+          
+          // Set authenticated status
+          authService.setAuthenticated();
+          
+          // Clear guest mode if it was set
+          await authService.clearGuestMode();
+          
+          // Set login flag
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+          
           // Navigate to home
           Get.offAllNamed(AppRoutes.home);
         } else if (state is AuthFailure) {

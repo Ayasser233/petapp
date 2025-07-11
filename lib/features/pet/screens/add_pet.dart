@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
+import 'package:petapp/core/services/auth_service.dart';
+import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -23,8 +25,55 @@ class _AddPetScreenState extends State<AddPetScreen> {
   DateTime _selectedDate = DateTime.now().subtract(const Duration(days: 365));
   String _imagePath = 'assets/images/pet_placeholder.jpg';
   bool _isImageFromGallery = false;
+  final AuthService _authService = Get.find<AuthService>();
   
   final List<String> _petTypes = ['Dog', 'Cat', 'Other'];
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAuthStatus();
+  }
+  
+  void _checkAuthStatus() {
+    // Check if user is authenticated
+    if (!_authService.canAccessProtectedFeature()) {
+      // Show dialog and then navigate back if not logged in
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showLoginRequiredDialog();
+      });
+    }
+  }
+  
+  void _showLoginRequiredDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Login Required'),
+        content: const Text('You need to be logged in to add pets.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Get.back(); // Go back to previous screen
+            },
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              Get.offNamed(AppRoutes.login); // Navigate to login screen
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.orange,
+            ),
+            child: const Text('Login'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void dispose() {
