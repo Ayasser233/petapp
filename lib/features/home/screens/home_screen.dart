@@ -752,7 +752,7 @@ class _HomeScreenState extends State<HomeScreen> {
             color: AppColors.orange,
           ),
           const SizedBox(width: 10),
-          Expanded(
+          const Expanded(
             child: Text(
               'You\'re browsing as a guest. Some features require login.',
               style: TextStyle(

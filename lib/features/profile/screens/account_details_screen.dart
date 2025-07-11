@@ -99,7 +99,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     try {
       localizations = AppLocalizations.of(context);
     } catch (e) {
-      print('Error getting localizations: $e');
+      localizations = null; // Fallback if localization is not available
     }
 
     return Scaffold(

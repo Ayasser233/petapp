@@ -328,7 +328,7 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.card_giftcard,
                       color: AppColors.orange,
                       size: 24.0,
