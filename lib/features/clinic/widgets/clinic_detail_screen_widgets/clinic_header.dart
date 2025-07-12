@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
@@ -125,100 +126,89 @@ class _ClinicHeaderState extends State<ClinicHeader> {
     );
   }
 
-  /// Open Google Maps - Best Practice Implementation
+  /// Open Google Maps - Direct Implementation
   Future<void> _openGoogleMaps() async {
     // Get coordinates from clinic data
     final double? latitude = widget.clinic['latitude']?.toDouble();
     final double? longitude = widget.clinic['longitude']?.toDouble();
-    final String? mapUrl = widget.clinic['mapUrl']; // Direct link option
+    final String clinicName = widget.clinic['name'] ?? 'Pet Clinic';
+    final String encodedName = Uri.encodeComponent(clinicName);
     
     try {
-      // Option 1: Use direct map URL if provided
-      if (mapUrl != null && mapUrl.isNotEmpty) {
-        await _launchUrl(mapUrl);
-        return;
-      }
-      
-      // Option 2: Use coordinates if available
       if (latitude != null && longitude != null) {
-        await _launchWithCoordinates(latitude, longitude);
-        return;
+        debugPrint('Opening maps with coordinates: $latitude, $longitude');
+        
+        // Priority 1: Direct Google Maps app intent with label (Android)
+        final googleUri = Uri.parse('geo:0,0?q=$latitude,$longitude($encodedName)');
+        if (await canLaunchUrl(googleUri)) {
+          final success = await launchUrl(googleUri);
+          if (success) return;
+        }
+        
+        // Priority 2: Direct navigation intent (Android)
+        final navUri = Uri.parse('google.navigation:q=$latitude,$longitude&title=$encodedName');
+        if (await canLaunchUrl(navUri)) {
+          final success = await launchUrl(navUri);
+          if (success) return;
+        }
+        
+        // Priority 3: Google Maps URL (will open in app if available, otherwise browser)
+        final googleMapsUrl = Uri.parse('https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
+        final success = await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
+        if (success) return;
+        
+        // Priority 4: Open in browser as last resort
+        await launchUrl(
+          googleMapsUrl,
+          mode: LaunchMode.inAppWebView
+        );
+      } else {
+        // Fallback to location name if coordinates aren't available
+        final String location = widget.clinic['location'] ?? '';
+        if (location.isNotEmpty) {
+          final encodedLocation = Uri.encodeComponent(location);
+          final locationUri = Uri.parse('geo:0,0?q=$encodedLocation');
+          
+          if (await canLaunchUrl(locationUri)) {
+            final success = await launchUrl(locationUri);
+            if (success) return;
+          }
+          
+          // Fallback to web URL
+          final mapUrl = Uri.parse('https://www.google.com/maps/search/?api=1&query=$encodedLocation');
+          await launchUrl(mapUrl, mode: LaunchMode.externalApplication);
+        }
       }
-      
-      // Option 3: Fallback to location name
-      final String location = widget.clinic['location'] ?? 'Healdsburg, CA';
-      await _launchWithLocationName(location);
-      
     } catch (e) {
-      _showErrorMessage();
+      debugPrint('Error opening maps: $e');
+      // Open directly in browser without showing error dialog
+      _openInBrowser(latitude, longitude);
     }
   }
-
-  /// Launch with coordinates (most accurate)
-  Future<void> _launchWithCoordinates(double latitude, double longitude) async {
-    final urls = [
-      // Google Maps app (Android)
-      'geo:$latitude,$longitude?q=$latitude,$longitude',
-      // Google Maps web
-      'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
-      // Apple Maps (iOS)
-      'http://maps.apple.com/?ll=$latitude,$longitude',
-    ];
-    
-    for (String url in urls) {
-      if (await _launchUrl(url)) {
-        return;
-      }
-    }
-    
-    throw Exception('Could not launch any map URL');
-  }
-
-  /// Launch with location name
-  Future<void> _launchWithLocationName(String location) async {
-    final encodedLocation = Uri.encodeComponent(location);
-    final urls = [
-      // Google Maps web
-      'https://www.google.com/maps/search/?api=1&query=$encodedLocation',
-      // Apple Maps
-      'http://maps.apple.com/?q=$encodedLocation',
-    ];
-    
-    for (String url in urls) {
-      if (await _launchUrl(url)) {
-        return;
-      }
-    }
-    
-    throw Exception('Could not launch any map URL');
-  }
-
-  /// Launch URL helper
-  Future<bool> _launchUrl(String url) async {
+  
+  /// Open location directly in browser as a fallback
+  Future<void> _openInBrowser(double? latitude, double? longitude) async {
     try {
-      final Uri uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-        return true;
+      if (latitude != null && longitude != null) {
+        final url = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+        await launchUrl(
+          Uri.parse(url),
+          mode: LaunchMode.inAppWebView,
+        );
+      } else {
+        final location = widget.clinic['location'] ?? '';
+        if (location.isNotEmpty) {
+          final url = 'https://www.google.com/maps/search/?api=1&query=${Uri.encodeComponent(location)}';
+          await launchUrl(
+            Uri.parse(url),
+            mode: LaunchMode.inAppWebView,
+          );
+        }
       }
     } catch (e) {
-      // Continue to next URL
+      debugPrint('Failed to open in browser: $e');
     }
-    return false;
   }
 
-  /// Show error message
-  void _showErrorMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(AppLocalizations.of(context).cannotOpenMaps),
-        backgroundColor: Colors.red,
-        action: SnackBarAction(
-          label: AppLocalizations.of(context).ok,
-          textColor: Colors.white,
-          onPressed: () {},
-        ),
-      ),
-    );
-  }
+
 }
