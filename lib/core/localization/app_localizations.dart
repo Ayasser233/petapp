@@ -686,6 +686,31 @@ class AppLocalizations {
       'No slots available';
   String get booked =>
       _localizedValues[locale.languageCode]?['booked'] ?? 'Booked';
+  // Add these getters to your AppLocalizations class
+  String get favorite =>
+      _localizedValues[locale.languageCode]?['favorite'] ?? 'Favorite';
+  String get addedToFavorites =>
+      _localizedValues[locale.languageCode]?['addedToFavorites'] ??
+      'Added to favorites';
+  String get cannotOpenMaps =>
+      _localizedValues[locale.languageCode]?['cannotOpenMaps'] ??
+      'Cannot open maps. Please check if Google Maps is installed.';
+  // Add these getters to your AppLocalizations class
+  String get viewLocation =>
+      _localizedValues[locale.languageCode]?['viewLocation'] ?? 'View Location';
+  String get chooseMapApp =>
+      _localizedValues[locale.languageCode]?['chooseMapApp'] ??
+      'Choose how to view the location';
+  String get coordinates =>
+      _localizedValues[locale.languageCode]?['coordinates'] ?? 'Coordinates';
+  String get copyLocation =>
+      _localizedValues[locale.languageCode]?['copyLocation'] ?? 'Copy Location';
+  String get openInBrowser =>
+      _localizedValues[locale.languageCode]?['openInBrowser'] ??
+      'Open in Browser';
+  String get locationCopiedToClipboard =>
+      _localizedValues[locale.languageCode]?['locationCopiedToClipboard'] ??
+      'Location copied to clipboard';
 
 // Method for dynamic text
   String availableSlots(int count) {
@@ -1039,6 +1064,16 @@ class AppLocalizations {
       'noSlotsAvailable': 'No slots available',
       'booked': 'Booked',
       'availableSlots': '({count} available)',
+      'favorite': 'Favorite',
+      'addedToFavorites': 'Added to favorites',
+      'cannotOpenMaps':
+          'Cannot open maps. Please check if Google Maps is installed.',
+      'viewLocation': 'View Location',
+      'chooseMapApp': 'Choose how to view the location',
+      'coordinates': 'Coordinates',
+      'copyLocation': 'Copy Location',
+      'openInBrowser': 'Open in Browser',
+      'locationCopiedToClipboard': 'Location copied to clipboard',
     },
     'ar': {
       'appTitle': 'تطبيق الحيوانات الأليفة',
@@ -1328,6 +1363,15 @@ class AppLocalizations {
       'noSlotsAvailable': 'لا توجد مواعيد متاحة',
       'booked': 'محجوز',
       'availableSlots': '({count} متاح)',
+      'favorite': 'مفضل',
+      'addedToFavorites': 'تم إضافته للمفضلة',
+      'cannotOpenMaps': 'لا يمكن فتح الخرائط. يرجى التحقق من تثبيت خرائط جوجل.',
+      'viewLocation': 'عرض الموقع',
+      'chooseMapApp': 'اختر كيفية عرض الموقع',
+      'coordinates': 'الإحداثيات',
+      'copyLocation': 'نسخ الموقع',
+      'openInBrowser': 'فتح في المتصفح',
+      'locationCopiedToClipboard': 'تم نسخ الموقع إلى الحافظة',
     },
   };
 }
