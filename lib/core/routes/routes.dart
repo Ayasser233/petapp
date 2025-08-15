@@ -11,14 +11,14 @@ import 'package:petapp/features/auth/presentation/screens/signup/verifyemail.dar
 import 'package:petapp/features/location/screens/choose_location.dart';
 import 'package:petapp/features/location/screens/set_location.dart';
 import 'package:petapp/features/home/screens/home_screen.dart';
-import 'package:petapp/features/clinic/screens/clinic_detail_screen.dart';
+import 'package:petapp/features/clinics/screens/clinic_detail_screen.dart';
 import 'package:petapp/features/home/screens/activity_screen.dart';
 import 'package:petapp/features/profile/screens/profile_screen.dart';
 import 'package:petapp/features/profile/screens/account_details_screen.dart';
 import 'package:petapp/features/pet/screens/pet_3d_viewer/pet_3d_viewer_screen.dart';
 import 'package:petapp/features/pet/screens/pet_3d_viewer/pet_3d_model_selector.dart';
-import 'package:petapp/features/clinic/screens/hospital_booking_screen.dart';
-import 'package:petapp/features/clinic/screens/clinic_explorer_screen.dart';
+import 'package:petapp/features/clinics/screens/hospital_booking_screen.dart';
+import 'package:petapp/features/clinics/screens/clinic_explorer_screen.dart';
 // Add these imports for the pet-related screens
 import 'package:petapp/features/pet/screens/my_pets.dart';
 import 'package:petapp/features/pet/screens/add_pet.dart';

@@ -39,12 +39,12 @@ class AuthRegistrationSuccess extends AuthState {
 
 // Login was successful
 class AuthLoginSuccess extends AuthState {
-  final String user;
+  final String accessToken;
 
-  const AuthLoginSuccess({required this.user});
+  const AuthLoginSuccess(this.accessToken);
   
   @override
-  List<Object?> get props => [user];
+  List<Object?> get props => [accessToken];
 }
 
 // Email verification was successful

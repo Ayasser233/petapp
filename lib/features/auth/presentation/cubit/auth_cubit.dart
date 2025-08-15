@@ -36,10 +36,11 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> login(String email, String password) async {
-    emit(AuthLoading());
     try {
-      final user = await _authRepository.login(email, password);
-      emit(AuthLoginSuccess(user: user));
+    emit(AuthLoading());
+
+      final accessToken = await _authRepository.login(email, password);
+      emit(AuthLoginSuccess(accessToken));
     } on DioException catch (e) {
       emit(AuthFailure(
         message: _formatDioError(e, isSignup: false),

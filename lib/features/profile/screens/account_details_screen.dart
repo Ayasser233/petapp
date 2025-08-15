@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/features/profile/controller/profile_controller.dart';
 
 class AccountDetailsScreen extends StatefulWidget {
   const AccountDetailsScreen({super.key});
@@ -11,15 +13,8 @@ class AccountDetailsScreen extends StatefulWidget {
 }
 
 class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
-  // Sample user data - in a real app, this would come from a user controller or state manager
-  final Map<String, String> _userData = {
-    'name': 'Alex Johnson',
-    'email': 'alex.johnson@example.com',
-    'phone': '+1 (555) 123-4567',
-    'address': '123 Pet Street, New York, NY 10001',
-    'dateOfBirth': '1990-05-15',
-  };
-
+  final ProfileController _profileController = Get.find<ProfileController>();
+  
   // Form controllers
   late TextEditingController _nameController;
   late TextEditingController _emailController;
@@ -33,11 +28,26 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: _userData['name']);
-    _emailController = TextEditingController(text: _userData['email']);
-    _phoneController = TextEditingController(text: _userData['phone']);
-    _addressController = TextEditingController(text: _userData['address']);
-    _dobController = TextEditingController(text: _userData['dateOfBirth']);
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
+    _phoneController = TextEditingController();
+    _addressController = TextEditingController();
+    _dobController = TextEditingController();
+    
+    // Initialize controllers with actual data
+    _initializeWithProfileData();
+  }
+  
+  void _initializeWithProfileData() {
+    final profile = _profileController.userProfile;
+
+    if (profile != null) {
+      _nameController.text = profile.name ?? 'adel';
+      _emailController.text = profile.email;
+      _phoneController.text = profile.phone ?? '01115';
+      _addressController.text = profile.address ?? 'asdsasdsa';
+      _dobController.text = profile.dateOfBirth ?? '1990-01-01'; // Default date if not available
+    }
   }
 
   @override
@@ -56,36 +66,43 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
       
       // If we just finished editing, save the data
       if (!_isEditing) {
-        _saveUserData();
+        //_saveUserData();
       }
     });
   }
 
-  void _saveUserData() {
-    // In a real app, you would save this to an API or local storage
-    _userData['name'] = _nameController.text;
-    _userData['email'] = _emailController.text;
-    _userData['phone'] = _phoneController.text;
-    _userData['address'] = _addressController.text;
-    _userData['dateOfBirth'] = _dobController.text;
-
-    // Show success message
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.white),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text('Account details updated successfully!'),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
+    // void _saveUserData() async {
+    //   final success = await ProfileController.updateProfile(
+    //     name: _nameController.text,
+    //     email: _emailController.text,
+    //     phone: _phoneController.text,
+    //     address: _addressController.text,
+    //     dateOfBirth: _dobController.text,
+    //   );
+      
+    //   if (success) {
+    //     setState(() {
+    //       _isEditing = false;
+    //     });
+        
+    //     // Show success message
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       const SnackBar(
+    //         content: Row(
+    //           children: [
+    //             Icon(Icons.check_circle, color: Colors.white),
+    //             SizedBox(width: 12),
+    //             Expanded(
+    //               child: Text('Account details updated successfully!'),
+    //             ),
+    //           ],
+    //         ),
+    //         backgroundColor: Colors.green,
+    //         behavior: SnackBarBehavior.floating,
+    //       ),
+    //     );
+    //   }
+    // }
 
   @override
   Widget build(BuildContext context) {
@@ -524,7 +541,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
   Future<void> _selectDate(BuildContext context) async {
     DateTime initialDate;
     try {
-      initialDate = DateTime.parse(_userData['dateOfBirth'] ?? "1990-01-01");
+      initialDate = DateTime.parse("1990-01-01");
     } catch (e) {
       // Fallback to default date if parsing fails
       initialDate = DateTime(1990, 1, 1);

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
-import '../models/voucher_model.dart';
+import '../data/models/voucher_model.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 
 class VouchersScreen extends StatefulWidget {

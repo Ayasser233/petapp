@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/themes/app_theme.dart';
 import 'package:petapp/core/routes/routes.dart';
+import 'package:petapp/features/profile/controller/profile_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:petapp/core/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,6 +13,7 @@ import 'package:petapp/core/services/location_service.dart';
 import 'package:petapp/core/services/connectivity_service.dart';
 import 'package:petapp/core/services/token_service.dart';
 import 'package:petapp/core/services/auth_service.dart';
+import 'package:petapp/core/services/error_handler_service.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
 
 // Add this function to reset app state
@@ -24,15 +26,12 @@ Future<void> resetAppState() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await resetAppState();  
-  // Register ConnectivityService with GetX
 
   // Initialize dependencies
   await setupServiceLocator();
 
   // Initialize services
   await initServices();
-
-  
 
   // Initialize settings provider
   final settingsProvider = SettingsProvider();
@@ -48,6 +47,9 @@ void main() async {
 
 /// Initialize all services
 Future<void> initServices() async {
+  // Initialize ErrorHandlerService first
+  Get.put(ErrorHandlerService());
+  
   // Initialize location service
   await Get.putAsync(() async => LocationService());
   await Get.putAsync(() async => ConnectivityService());
@@ -60,6 +62,8 @@ Future<void> initServices() async {
   
   // Initialize controllers
   Get.lazyPut(() => sl<PetController>());
+  Get.lazyPut(() => sl<ProfileController>()); // Add this line
+
 }
 
 class MyApp extends StatefulWidget {

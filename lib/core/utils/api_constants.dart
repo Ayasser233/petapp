@@ -6,15 +6,15 @@ class ApiConstants {
   static String get apiBaseUrl {
     // Use 10.0.2.2 for Android emulators to access host's localhost
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2:3000';
-      return 'https://aleefy-app.com';
+      return 'http://95.111.253.44:3010';
+      
     }
     // Default for physical devices and iOS simulators
-    return 'http://localhost:3000';
-    return 'https://aleefy-app.com';
+    return 'http://95.111.253.44:3010';
+    
   }
   
-  static const String fallbackApiBaseUrl = 'https://aleefy-app.com';
+  static const String fallbackApiBaseUrl = 'http://api.aleefy-app.com:3010';
   
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 10);

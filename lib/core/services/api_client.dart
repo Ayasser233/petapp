@@ -2,22 +2,23 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
-import 'package:petapp/core/services/api_error_handler.dart';
+//import 'package:petapp/core/services/api_error_handler.dart';
+import 'package:petapp/core/services/error_handler_service.dart';
 import 'package:petapp/core/utils/api_constants.dart';
 import 'package:petapp/core/services/token_service.dart';
 import 'package:petapp/core/services/connectivity_service.dart';
 
 class ApiClient {
   late final Dio _dio;
-  final ApiErrorHandler errorHandler;
+  final ErrorHandlerService errorHandler;
   final TokenService tokenService;
   final ConnectivityService connectivityService;
-  
+
   // Base URL handling with fallback
   late final String _baseUrl;
   final String _fallbackUrl = ApiConstants.fallbackApiBaseUrl;
   bool _usingFallbackUrl = false;
-  
+
   ApiClient({
     required this.errorHandler,
     required this.tokenService,
@@ -36,10 +37,10 @@ class ApiClient {
         },
       ),
     );
-    
+
     _setupInterceptors();
   }
-  
+
   void _setupInterceptors() {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
@@ -48,19 +49,18 @@ class ApiClient {
         if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
         }
-        
+
         // Check connectivity before making request
         final isConnected = await connectivityService.isConnected();
         if (!isConnected) {
           return handler.reject(
             DioException(
-              requestOptions: options,
-              type: DioExceptionType.connectionError,
-              error: 'No internet connection'
-            ),
+                requestOptions: options,
+                type: DioExceptionType.connectionError,
+                error: 'No internet connection'),
           );
         }
-        
+
         return handler.next(options);
       },
       onResponse: (response, handler) {
@@ -68,18 +68,18 @@ class ApiClient {
         if (_usingFallbackUrl) {
           _checkPrimaryUrl();
         }
-        
+
         return handler.next(response);
       },
       onError: (DioException error, handler) async {
         // If server is unreachable and not using fallback URL yet
         if (_canUseFallback(error) && !_usingFallbackUrl) {
           debugPrint('Primary API unreachable, switching to fallback URL');
-          
+
           // Switch to fallback URL
           _usingFallbackUrl = true;
           _dio.options.baseUrl = _fallbackUrl;
-          
+
           // Retry the request with fallback URL
           try {
             final response = await _dio.request(
@@ -91,18 +91,18 @@ class ApiClient {
                 headers: error.requestOptions.headers,
               ),
             );
-            
+
             return handler.resolve(response);
           } catch (e) {
             // If fallback also fails, continue with error handling
           }
         }
-        
+
         // Let the error handler take care of the error
         return handler.next(error);
       },
     ));
-    
+
     // Add logging in debug mode
     if (kDebugMode) {
       _dio.interceptors.add(LogInterceptor(
@@ -111,13 +111,13 @@ class ApiClient {
       ));
     }
   }
-  
+
   bool _canUseFallback(DioException error) {
-    return error.type == DioExceptionType.connectionTimeout || 
-           error.type == DioExceptionType.connectionError ||
-           error.type == DioExceptionType.unknown;
+    return error.type == DioExceptionType.connectionTimeout ||
+        error.type == DioExceptionType.connectionError ||
+        error.type == DioExceptionType.unknown;
   }
-  
+
   // Check if the primary URL is back online
   Future<void> _checkPrimaryUrl() async {
     try {
@@ -125,9 +125,10 @@ class ApiClient {
         connectTimeout: const Duration(seconds: 5),
         receiveTimeout: const Duration(seconds: 5),
       ));
-      
-      final response = await testDio.get('$_baseUrl${ApiConstants.healthEndpoint}');
-      
+
+      final response =
+          await testDio.get('$_baseUrl${ApiConstants.healthEndpoint}');
+
       if (response.statusCode == 200) {
         _usingFallbackUrl = false;
         _dio.options.baseUrl = _baseUrl;
@@ -137,71 +138,78 @@ class ApiClient {
       // Primary still down, keep using fallback
     }
   }
-  
+
   // Authentication methods
   Future<Response> register(Map<String, dynamic> userData) async {
     try {
-      final response = await _dio.post(ApiConstants.registerEndpoint, data: userData);
+      final response =
+          await _dio.post(ApiConstants.registerEndpoint, data: userData);
       await _handleTokenResponse(response);
       return response;
     } catch (e) {
       log(e.toString());
-      throw errorHandler.handleError(e);
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
     }
   }
-  
+
   Future<Response> login(String email, String password) async {
     try {
-      final response = await _dio.post(ApiConstants.loginEndpoint, 
-        data: {'identifier': email, 'password': password});
+      final response = await _dio.post(ApiConstants.loginEndpoint,
+          data: {'identifier': email, 'password': password});
       await _handleTokenResponse(response);
       return response;
     } catch (e) {
-      throw errorHandler.handleError(e);
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
     }
   }
-  
+
   Future<Response> verifyEmail(String email, String otp) async {
     try {
-      final response = await _dio.post(ApiConstants.verifyEmailEndpoint, 
-        data: {'email': email, 'otp': otp});
+      final response = await _dio.post(ApiConstants.verifyEmailEndpoint,
+          data: {'email': email, 'otp': otp});
       return response;
     } catch (e) {
-      throw errorHandler.handleError(e);
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
     }
   }
-  
+
   Future<Response> resendVerification(String email) async {
     try {
-      final response = await _dio.post(ApiConstants.resendVerificationEndpoint, 
-        data: {'email': email});
+      final response = await _dio.post(ApiConstants.resendVerificationEndpoint,
+          data: {'email': email});
       return response;
     } catch (e) {
-      throw errorHandler.handleError(e);
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
     }
   }
-  
+
   Future<Response> forgotPassword(String email) async {
     try {
-      final response = await _dio.post(ApiConstants.forgotPasswordEndpoint, 
-        data: {'email': email});
+      final response = await _dio
+          .post(ApiConstants.forgotPasswordEndpoint, data: {'email': email});
       return response;
     } catch (e) {
-      throw errorHandler.handleError(e);
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
     }
   }
-  
+
   Future<Response> resetPassword(String token, String password) async {
     try {
-      final response = await _dio.post(ApiConstants.resetPasswordEndpoint, 
-        data: {'token': token, 'password': password});
+      final response = await _dio.post(ApiConstants.resetPasswordEndpoint,
+          data: {'token': token, 'password': password});
       await _handleTokenResponse(response);
       return response;
     } catch (e) {
-      throw errorHandler.handleError(e);
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
     }
   }
-  
+
   Future<Response> logout() async {
     try {
       final response = await _dio.post(ApiConstants.logoutEndpoint);
@@ -209,28 +217,30 @@ class ApiClient {
       return response;
     } catch (e) {
       await tokenService.clearToken(); // Clear token even if logout fails
-      throw errorHandler.handleError(e);
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
     }
   }
-  
+
   Future<Response> getUserProfile() async {
     try {
       final response = await _dio.get(ApiConstants.profileEndpoint);
       return response;
     } catch (e) {
-      throw errorHandler.handleError(e);
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
     }
   }
-  
+
   // Handle possible token in response
   Future<void> _handleTokenResponse(Response response) async {
-    if (response.data is Map &&
+    if (response.data is Map<String, dynamic> &&
         response.data['access_token'] != null &&
         response.data['access_token'] is String) {
       await tokenService.saveToken(response.data['access_token']);
     }
   }
-  
+
   // Generic HTTP methods
   Future<Response> get(
     String path, {
@@ -246,10 +256,11 @@ class ApiClient {
         cancelToken: cancelToken,
       );
     } catch (e) {
-      throw errorHandler.handleError(e);
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
     }
   }
-  
+
   Future<Response> post(
     String path, {
     dynamic data,
@@ -266,10 +277,11 @@ class ApiClient {
         cancelToken: cancelToken,
       );
     } catch (e) {
-      throw errorHandler.handleError(e);
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
     }
   }
-  
+
   Future<Response> put(
     String path, {
     dynamic data,
@@ -286,10 +298,11 @@ class ApiClient {
         cancelToken: cancelToken,
       );
     } catch (e) {
-      throw errorHandler.handleError(e);
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
     }
   }
-  
+
   Future<Response> delete(
     String path, {
     dynamic data,
@@ -306,7 +319,8 @@ class ApiClient {
         cancelToken: cancelToken,
       );
     } catch (e) {
-      throw errorHandler.handleError(e);
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
     }
   }
 }

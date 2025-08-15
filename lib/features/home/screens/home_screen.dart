@@ -8,8 +8,8 @@ import 'package:petapp/core/widgets/custom_app_bar.dart';
 import 'package:petapp/core/widgets/rewards_card.dart';
 import 'package:petapp/core/services/location_service.dart';
 import 'package:petapp/core/services/auth_service.dart';
-import 'package:petapp/features/clinic/models/clinic_model.dart';
-import 'package:petapp/features/clinic/services/clinic_service.dart';
+import 'package:petapp/features/clinics/models/clinic_model.dart';
+import 'package:petapp/features/clinics/services/clinic_service.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {

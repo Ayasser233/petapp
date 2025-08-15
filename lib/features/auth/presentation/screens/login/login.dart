@@ -331,7 +331,7 @@ class _LoginFormState extends State<LoginForm> {
           final authService = Get.find<AuthService>();
           
           // Save token and mark as authenticated
-          await tokenService.saveToken(state.user);
+          await tokenService.saveToken(state.accessToken);
           
           // Set authenticated status
           authService.setAuthenticated();
