@@ -8,7 +8,7 @@ import 'package:petapp/features/auth/data/repositories/auth_repository.dart';
 import 'package:petapp/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:petapp/features/pet/services/pet_api_service.dart';
-import 'package:petapp/features/pet/repositories/pet_repository.dart';
+import 'package:petapp/features/pet/data/repositories/pet_repository.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/profile/controller/profile_controller.dart';
 import 'package:petapp/features/profile/data/repositories/profile_repository.dart';

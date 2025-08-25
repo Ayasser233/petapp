@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
-import 'package:petapp/features/pet/repositories/pet_repository.dart';
+import 'package:petapp/features/pet/data/repositories/pet_repository.dart';
 
 class PetController extends GetxController {
   // Repository dependency

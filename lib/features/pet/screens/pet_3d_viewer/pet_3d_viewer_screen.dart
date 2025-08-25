@@ -139,10 +139,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
                 _buildBodyPartItem('Head', isDark, textColor),
-                _buildBodyPartItem('Chest', isDark, textColor),
-                _buildBodyPartItem('Abdomen', isDark, textColor),
                 _buildBodyPartItem('Legs', isDark, textColor),
-                _buildBodyPartItem('Tail', isDark, textColor),
                 _buildBodyPartItem('Skin & Coat', isDark, textColor),
                 _buildBodyPartItem('Pelvis', isDark, textColor),
                 _buildBodyPartItem('Buttocks', isDark, textColor),
