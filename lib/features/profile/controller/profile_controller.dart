@@ -34,10 +34,6 @@ class ProfileController extends GetxController {
     try {
       _isLoading.value = true;
       final token = await Get.find<TokenService>().getToken();
-      print('=== PROFILE LOAD DEBUG ===');
-    print('Has token: ${token != null}');
-    print('Token length: ${token?.length ?? 0}');
-    print('Token preview: ${token?.substring(0, token != null && token.length > 50 ? 50 : token.length) ?? 'null'}...');
     
       if (token == null || token.isEmpty) {
         throw Exception('No token found. User might not be authenticated.');
@@ -46,8 +42,6 @@ class ProfileController extends GetxController {
       _userProfile.value = profile;
     } catch (e) {
       // Error already handled by ErrorHandlerService
-      print('Failed to load profile: $e');
-
       if(e.toString().contains('401') || e.toString().contains('unauthorized')) {
        final tokenService = Get.find<TokenService>();
         await tokenService.clearToken();

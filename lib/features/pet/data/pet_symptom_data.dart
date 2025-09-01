@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/localization/app_localizations.dart';
 
 /// Data model for a symptom with photo support
 class PetSymptom {
@@ -6,9 +7,9 @@ class PetSymptom {
   final String description;
   final List<String> causes;
   final List<String> actions;
-  final String? imagePath; // Add image support
-  final String? emergencyLevel; // Add emergency level indicator
-  
+  final String? imagePath;
+  final String? emergencyLevel;
+
   const PetSymptom({
     required this.name,
     required this.description,
@@ -17,7 +18,65 @@ class PetSymptom {
     this.imagePath,
     this.emergencyLevel,
   });
-  
+
+  /// Get localized name with fallback
+  String getLocalizedName(BuildContext context) {
+    AppLocalizations? localizations;
+    try {
+      localizations = AppLocalizations.of(context);
+    } catch (e) {
+      localizations = null;
+    }
+    return localizations?.getSymptomName(name) ?? name;
+  }
+
+  /// Get localized description with fallback
+  String getLocalizedDescription(BuildContext context) {
+    AppLocalizations? localizations;
+    try {
+      localizations = AppLocalizations.of(context);
+    } catch (e) {
+      localizations = null;
+    }
+    return localizations?.getSymptomDescription(name) ?? description;
+  }
+
+  /// Get localized causes with fallback
+  List<String> getLocalizedCauses(BuildContext context) {
+    AppLocalizations? localizations;
+    try {
+      localizations = AppLocalizations.of(context);
+    } catch (e) {
+      localizations = null;
+    }
+
+    if (localizations == null) return causes;
+
+    return causes.asMap().entries.map((entry) {
+      final index = entry.key;
+      final originalCause = entry.value;
+      return localizations?.getSymptomCause(name, index) ?? originalCause;
+    }).toList();
+  }
+
+  /// Get localized actions with fallback
+  List<String> getLocalizedActions(BuildContext context) {
+    AppLocalizations? localizations;
+    try {
+      localizations = AppLocalizations.of(context);
+    } catch (e) {
+      localizations = null;
+    }
+
+    if (localizations == null) return actions;
+
+    return actions.asMap().entries.map((entry) {
+      final index = entry.key;
+      final originalAction = entry.value;
+      return localizations?.getSymptomAction(name, index) ?? originalAction;
+    }).toList();
+  }
+
   Map<String, dynamic> toMap() {
     return {
       'name': name,
@@ -32,91 +91,41 @@ class PetSymptom {
 
 /// Comprehensive pet symptom data based on Aleefy veterinary guide
 class PetSymptomData {
-  /// Get icon for a specific symptom category
-  static IconData getCategoryIcon(String category) {
+  /// Get localized category name with fallback
+  static String getLocalizedCategoryName(
+      BuildContext context, String category) {
+    AppLocalizations? localizations;
+    try {
+      localizations = AppLocalizations.of(context);
+    } catch (e) {
+      localizations = null;
+    }
+
     switch (category) {
       case 'Eye Symptoms':
-        return Icons.visibility;
+        return localizations?.eyeSymptoms ?? 'Eye Symptoms';
       case 'Ear Symptoms':
-        return Icons.hearing;
+        return localizations?.earSymptoms ?? 'Ear Symptoms';
       case 'Mouth & Teeth Symptoms':
-        return Icons.masks;
+        return localizations?.mouthTeethSymptoms ?? 'Mouth & Teeth Symptoms';
       case 'Skin & Coat Symptoms':
-        return Icons.texture;
+        return localizations?.skinCoatSymptoms ?? 'Skin & Coat Symptoms';
       case 'Movement & Limbs Issues':
-        return Icons.directions_walk;
-      case 'Digestive Problems':
-        return Icons.restaurant;
+        return localizations?.movementLimbsIssues ?? 'Movement & Limbs Issues';
       case 'Anus & Pooping Issues':
-        return Icons.circle_outlined;
+        return localizations?.anusPoopingIssues ?? 'Anus & Pooping Issues';
       case 'Male Genital Problems':
-        return Icons.male;
+        return localizations?.maleGenitalProblems ?? 'Male Genital Problems';
       case 'Female Genital Problems':
-        return Icons.female;
+        return localizations?.femaleGenitalProblems ??
+            'Female Genital Problems';
       case 'Urination Problems':
-        return Icons.water_drop;
-      case 'General':
+        return localizations?.urinationProblems ?? 'Urination Problems';
       default:
-        return Icons.medical_services;
+        return category;
     }
   }
-  
-  /// Get icon for a specific symptom based on its name
-  static IconData getSymptomIcon(String symptomName) {
-    // Eye symptoms
-    if (symptomName.contains('Eye') || symptomName.contains('Cloudy') || symptomName.contains('Squinting')) return Icons.remove_red_eye;
-    if (symptomName.contains('Discharge') && symptomName.contains('Eye')) return Icons.water_drop;
-    if (symptomName.contains('Third Eyelid')) return Icons.visibility_off;
-    if (symptomName.contains('Bulging')) return Icons.error;
-    
-    // Ear symptoms
-    if (symptomName.contains('Ear') || symptomName.contains('Hearing')) return Icons.hearing;
-    if (symptomName.contains('Head Tilt') || symptomName.contains('Balance')) return Icons.balance;
-    if (symptomName.contains('Black Stuff')) return Icons.cleaning_services;
-    
-    // Mouth symptoms
-    if (symptomName.contains('Breath')) return Icons.air;
-    if (symptomName.contains('Drool')) return Icons.water_drop;
-    if (symptomName.contains('Teeth') || symptomName.contains('Gums')) return Icons.masks;
-    if (symptomName.contains('Locked Jaw')) return Icons.lock;
-    if (symptomName.contains('Ulcers')) return Icons.healing;
-    
-    // Skin symptoms
-    if (symptomName.contains('Hair Loss') || symptomName.contains('Bald')) return Icons.content_cut;
-    if (symptomName.contains('Itch') || symptomName.contains('Scratch')) return Icons.back_hand;
-    if (symptomName.contains('Red') || symptomName.contains('Inflam')) return Icons.local_fire_department;
-    if (symptomName.contains('Dandruff') || symptomName.contains('Flaky')) return Icons.ac_unit;
-    if (symptomName.contains('Lump') || symptomName.contains('Bump')) return Icons.circle;
-    if (symptomName.contains('Dark') || symptomName.contains('Pigment')) return Icons.brightness_2;
-    
-    // Movement symptoms
-    if (symptomName.contains('Limp')) return Icons.directions_walk;
-    if (symptomName.contains('Stiff')) return Icons.accessibility_new;
-    if (symptomName.contains('Weak') || symptomName.contains('Collaps')) return Icons.airline_seat_flat;
-    if (symptomName.contains('Trembl') || symptomName.contains('Shak')) return Icons.vibration;
-    
-    // Digestive symptoms
-    if (symptomName.contains('Diarrhea')) return Icons.water;
-    if (symptomName.contains('Constipation')) return Icons.block;
-    if (symptomName.contains('Blood')) return Icons.bloodtype;
-    if (symptomName.contains('Vomit')) return Icons.sick;
-    
-    // Genital symptoms
-    if (symptomName.contains('Testicle')) return Icons.album;
-    if (symptomName.contains('Penis')) return Icons.linear_scale;
-    if (symptomName.contains('Vulva')) return Icons.spa;
-    
-    // Urination symptoms
-    if (symptomName.contains('Pee') || symptomName.contains('Urinat')) return Icons.water_drop;
-    if (symptomName.contains('Leaking')) return Icons.invert_colors;
-    
-    // Emergency symptoms
-    if (symptomName.contains('Emergency') || symptomName.contains('ASAP')) return Icons.emergency;
-    
-    // Default icon
-    return Icons.medical_services;
-  }
-  
+
   /// Get emergency level color
   static Color getEmergencyColor(String? emergencyLevel) {
     switch (emergencyLevel?.toLowerCase()) {
@@ -132,38 +141,52 @@ class PetSymptomData {
         return Colors.blue;
     }
   }
-  
-  /// Get icon for a body part
-  static IconData getBodyPartIcon(String bodyPart) {
-    switch (bodyPart) {
-      case 'head':
-        return Icons.face;
-      case 'chest':
-        return Icons.favorite;
-      case 'abdomen':
-        return Icons.restaurant;
-      case 'legs':
-        return Icons.directions_walk;
-      case 'tail':
-        return Icons.pets;
-      case 'skin':
-        return Icons.texture;
-      case 'pelvis':
-        return Icons.people;
-      case 'buttocks':
-        return Icons.circle_outlined;
-      default:
-        return Icons.pets;
-    }
+
+  /// Search symptoms by query with localization support
+  static List<PetSymptom> searchSymptoms(String query,
+      [BuildContext? context]) {
+    if (query.isEmpty) return [];
+
+    final allSymptoms = getAllSymptoms();
+    final lowerQuery = query.toLowerCase();
+
+    return allSymptoms.where((symptom) {
+      if (context != null) {
+        // Search in localized content if context is available
+        return symptom
+                .getLocalizedName(context)
+                .toLowerCase()
+                .contains(lowerQuery) ||
+            symptom
+                .getLocalizedDescription(context)
+                .toLowerCase()
+                .contains(lowerQuery) ||
+            symptom
+                .getLocalizedCauses(context)
+                .any((cause) => cause.toLowerCase().contains(lowerQuery)) ||
+            symptom
+                .getLocalizedActions(context)
+                .any((action) => action.toLowerCase().contains(lowerQuery));
+      } else {
+        // Fallback to original content
+        return symptom.name.toLowerCase().contains(lowerQuery) ||
+            symptom.description.toLowerCase().contains(lowerQuery) ||
+            symptom.causes
+                .any((cause) => cause.toLowerCase().contains(lowerQuery)) ||
+            symptom.actions
+                .any((action) => action.toLowerCase().contains(lowerQuery));
+      }
+    }).toList();
   }
-  
-  /// All symptom data organized by body part and category - Updated with Aleefy data
+
+  /// All symptom data organized by body part and category
   static final Map<String, Map<String, List<PetSymptom>>> symptoms = {
     'head': {
       'Eye Symptoms': [
         const PetSymptom(
           name: 'Eye Redness',
-          description: 'Noticed your pet\'s eye looking red? It could be something small like dust or something serious like an infection.',
+          description:
+              'Noticed your pet\'s eye looking red? It could be something small like dust or something serious like an infection.',
           causes: [
             'Dust, wind, or allergies',
             'Infection (like bacteria or herpes virus)',
@@ -174,12 +197,13 @@ class PetSymptomData {
             'If mild → Rinse with saline & monitor',
             'If the eye is swollen, squinting, has discharge, or your pet is pawing at it → Vet visit ASAP'
           ],
-          imagePath: 'assets/images/symptoms/eye_redness.jpg',
+          imagePath: 'assets/images/symptoms/eye_redness.png',
           emergencyLevel: 'moderate',
         ),
         const PetSymptom(
           name: 'Eye Discharge (Goopy Stuff)',
-          description: 'A little eye goop can be normal, but if it\'s thick, yellow, or green, it might mean an infection.',
+          description:
+              'A little eye goop can be normal, but if it\'s thick, yellow, or green, it might mean an infection.',
           causes: [
             'Normal in some breeds (like Persians)',
             'Allergies or mild irritation',
@@ -195,7 +219,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Cloudy Eye (Looks Foggy or Bluish)',
-          description: 'If your pet\'s eye looks cloudy or milky, it could be a normal age change or something serious.',
+          description:
+              'If your pet\'s eye looks cloudy or milky, it could be a normal age change or something serious.',
           causes: [
             'Older pets: Normal aging',
             'Cataracts (can cause blindness)',
@@ -211,7 +236,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Watery Eyes (Excessive Tearing)',
-          description: 'Some tearing is normal, but too much can mean an issue.',
+          description:
+              'Some tearing is normal, but too much can mean an issue.',
           causes: [
             'Allergies or mild irritation',
             'Blocked tear ducts (common in small dogs)',
@@ -227,7 +253,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Third Eyelid Showing',
-          description: 'Is there a white or pink piece of tissue covering part of your pet\'s eye, or sticking out from the corner? That\'s the third eyelid.',
+          description:
+              'Is there a white or pink piece of tissue covering part of your pet\'s eye, or sticking out from the corner? That\'s the third eyelid.',
           causes: [
             'Normal after sleeping – The third eyelid may show briefly when your pet wakes up',
             'Eye infection or nerve issues – Can cause the eyelid to stay up or become more visible',
@@ -245,7 +272,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Squinting or Keeping Eye Closed',
-          description: 'If your pet keeps one eye closed or blinks a lot, they might be in pain.',
+          description:
+              'If your pet keeps one eye closed or blinks a lot, they might be in pain.',
           causes: [
             'Irritation from dust or hair',
             'Corneal ulcer (scratch on the eye)',
@@ -260,7 +288,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Swelling Around the Eye',
-          description: 'If your pet\'s eye looks puffy or swollen, something is irritating it.',
+          description:
+              'If your pet\'s eye looks puffy or swollen, something is irritating it.',
           causes: [
             'Allergy or mild irritation',
             'Infection or injury',
@@ -275,7 +304,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Worms in the Eye',
-          description: 'Seeing something moving in your pet\'s eye? It might be a worm — and it needs quick attention.',
+          description:
+              'Seeing something moving in your pet\'s eye? It might be a worm — and it needs quick attention.',
           causes: [
             'Worms or white threads in or around the eye may be caused by a type of parasite',
             'These can damage the eye and cause pain, redness, or even vision loss if not treated quickly'
@@ -292,7 +322,8 @@ class PetSymptomData {
       'Ear Symptoms': [
         const PetSymptom(
           name: 'Itchy Ears (Scratching or Head Shaking)',
-          description: 'If your pet is shaking their head like a mini rockstar or scratching their ears a lot, something is bugging them!',
+          description:
+              'If your pet is shaking their head like a mini rockstar or scratching their ears a lot, something is bugging them!',
           causes: [
             'Ear infection (bacteria or yeast)',
             'Ear mites (tiny bugs, common in cats)',
@@ -309,7 +340,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Black Stuff in the Ear (Dark Wax or Debris)',
-          description: 'Noticed dark gunk in your pet\'s ears? It could be harmless wax or a sign of mites or infection!',
+          description:
+              'Noticed dark gunk in your pet\'s ears? It could be harmless wax or a sign of mites or infection!',
           causes: [
             'Normal wax (small amounts, no smell)',
             'Ear mites (coffee-ground-like debris, very itchy)',
@@ -324,7 +356,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Red or Swollen Ear',
-          description: 'Is your pet\'s ear red, puffy, or warm to the touch? It could be an infection, allergy, or swelling from too much head shaking.',
+          description:
+              'Is your pet\'s ear red, puffy, or warm to the touch? It could be an infection, allergy, or swelling from too much head shaking.',
           causes: [
             'Allergy – From food, fleas, or something in the environment',
             'Swelling from Shaking – A soft, balloon-like ear may be from broken blood vessels inside the ear flap',
@@ -341,7 +374,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Bad Smell from the Ear',
-          description: 'If your pet\'s ears smell like stinky cheese or moldy socks, it\'s usually an infection.',
+          description:
+              'If your pet\'s ears smell like stinky cheese or moldy socks, it\'s usually an infection.',
           causes: [
             'Yeast or bacterial infection (common in floppy-eared dogs)',
             'Mites (if also itchy & dark debris)',
@@ -356,7 +390,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Ear Discharge (Pus or Liquid Coming Out)',
-          description: 'If there\'s liquid or pus coming from the ear, it\'s usually an infection or something stuck inside.',
+          description:
+              'If there\'s liquid or pus coming from the ear, it\'s usually an infection or something stuck inside.',
           causes: [
             'Ear infection (yellow, brown, or green discharge)',
             'Ear mites (dark coffee-ground debris)',
@@ -371,7 +406,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Tilting Head to One Side',
-          description: 'Is your pet holding their head to one side, like they\'re trying to listen or think? It could be a sign of an ear problem or balance issue.',
+          description:
+              'Is your pet holding their head to one side, like they\'re trying to listen or think? It could be a sign of an ear problem or balance issue.',
           causes: [
             'Ear Infection – Especially in the inner or middle ear',
             'Ear Mites – If your pet is also scratching a lot',
@@ -387,7 +423,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Loss of Hearing or Not Responding to Sounds',
-          description: 'If your pet doesn\'t react to noises like they used to, their hearing might be affected.',
+          description:
+              'If your pet doesn\'t react to noises like they used to, their hearing might be affected.',
           causes: [
             'Ear infection or wax buildup (temporary hearing loss)',
             'Old age (gradual deafness)',
@@ -405,7 +442,8 @@ class PetSymptomData {
       'Mouth & Teeth Symptoms': [
         const PetSymptom(
           name: 'Bad Breath (Smelly Mouth)',
-          description: 'If your pet\'s kisses smell like a garbage can, something\'s up!',
+          description:
+              'If your pet\'s kisses smell like a garbage can, something\'s up!',
           causes: [
             'Dental disease (plaque, gingivitis, or infected teeth)',
             'Something stuck (food, hair, or a foreign object)',
@@ -421,7 +459,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Excessive Drooling',
-          description: 'Some drooling is normal, but if your pet is suddenly dripping like a leaky faucet, it\'s a sign of a problem!',
+          description:
+              'Some drooling is normal, but if your pet is suddenly dripping like a leaky faucet, it\'s a sign of a problem!',
           causes: [
             'Dental problem (infected tooth or gum disease)',
             'Mouth injury (something sharp stuck inside)',
@@ -453,7 +492,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Loose or Missing Teeth',
-          description: 'Puppies lose baby teeth, but adults shouldn\'t lose teeth!',
+          description:
+              'Puppies lose baby teeth, but adults shouldn\'t lose teeth!',
           causes: [
             'Puppy or kitten teething (normal under 6 months)',
             'Dental disease (if an adult pet loses teeth)',
@@ -469,7 +509,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Trouble Eating or Dropping Food',
-          description: 'If your pet loves food but suddenly struggles to eat, check their mouth!',
+          description:
+              'If your pet loves food but suddenly struggles to eat, check their mouth!',
           causes: [
             'Tooth pain or infection (hurts to chew)',
             'Mouth injury (cut, ulcer, or something stuck)',
@@ -485,7 +526,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Bleeding from the Mouth',
-          description: 'Seeing blood in your pet\'s mouth? It could be from the gums, teeth, or tongue — and it\'s important to find out why.',
+          description:
+              'Seeing blood in your pet\'s mouth? It could be from the gums, teeth, or tongue — and it\'s important to find out why.',
           causes: [
             'Gum disease (common cause)',
             'Mouth injury (bit tongue, sharp object)',
@@ -500,21 +542,21 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'White or Pale Gums',
-          description: 'Gums should be pink, not white or pale. This could mean serious illness!',
+          description:
+              'Gums should be pink, not white or pale. This could mean serious illness!',
           causes: [
             'Anemia (low blood count) (due to illness or parasites)',
             'Shock or blood loss (from internal bleeding)',
             'Serious illness (kidney/liver disease, poisoning)'
           ],
-          actions: [
-            'Vet visit ASAP (this is an emergency!)'
-          ],
+          actions: ['Vet visit ASAP (this is an emergency!)'],
           imagePath: 'assets/images/symptoms/pale_gums.jpg',
           emergencyLevel: 'emergency',
         ),
         const PetSymptom(
           name: 'Locked Jaw (Mouth Won\'t Open or Close)',
-          description: 'If your pet can\'t open or close their mouth properly, something is seriously wrong!',
+          description:
+              'If your pet can\'t open or close their mouth properly, something is seriously wrong!',
           causes: [
             'Injury or Fall – A hard hit or fall can damage the jaw (Common in cats!)',
             'Jaw Joint Problem – Dislocation or stiffness in the jaw joint',
@@ -522,15 +564,14 @@ class PetSymptomData {
             'Severe Infection or Swelling – A bad tooth or swelling can make movement painful',
             'Tetanus (Lockjaw) – A bacterial infection causing stiff muscles'
           ],
-          actions: [
-            '🚨 Vet visit ASAP! This is an emergency.'
-          ],
+          actions: [' Vet visit ASAP! This is an emergency.'],
           imagePath: 'assets/images/symptoms/locked_jaw.jpg',
           emergencyLevel: 'emergency',
         ),
         const PetSymptom(
           name: 'Oral Ulcers (Sores in the Mouth)',
-          description: 'Painful sores in the mouth can make eating difficult and may signal an infection!',
+          description:
+              'Painful sores in the mouth can make eating difficult and may signal an infection!',
           causes: [
             'Feline Calicivirus – Common in cats, causes mouth ulcers & flu-like symptoms',
             'Severe Dental Disease – Advanced gum infections can lead to ulcers',
@@ -545,13 +586,46 @@ class PetSymptomData {
           imagePath: 'assets/images/symptoms/oral_ulcers.jpg',
           emergencyLevel: 'urgent',
         ),
+        const PetSymptom(
+          name: 'Yellow or Brown Teeth (Tartar Buildup)',
+          description:
+              'If your pet\'s teeth look like they need a deep clean, tartar buildup might be the problem!',
+          causes: [
+            'Plaque & tartar buildup (common in small dog breeds & older pets)',
+            'Gingivitis (red gums with tartar)',
+            'Tooth decay (if severe)'
+          ],
+          actions: [
+            'If mild yellowing → Start brushing teeth regularly',
+            'If heavy tartar & bad breath → Vet dental cleaning needed'
+          ],
+          imagePath: 'assets/images/symptoms/yellow_brown_teeth.jpg',
+          emergencyLevel: 'mild',
+        ),
+        const PetSymptom(
+          name: 'Tongue or Lip Swelling',
+          description:
+              'A swollen tongue or lips can mean an allergic reaction or something stuck!',
+          causes: [
+            'Allergic reaction (insect sting, food, or medication)',
+            'Mouth injury (cut or something stuck)',
+            'Infection or tumor (if long-term swelling)'
+          ],
+          actions: [
+            'If sudden swelling → Vet ASAP (could be a serious allergy!)',
+            'If mild & no breathing issues → Monitor & check for a stuck object'
+          ],
+          imagePath: 'assets/images/symptoms/tongue_lip_swelling.jpg',
+          emergencyLevel: 'urgent',
+        ),
       ],
     },
     'skin': {
       'Skin & Coat Symptoms': [
         const PetSymptom(
           name: 'Hair Loss',
-          description: 'Noticing more hair on the floor, couch, or your clothes?',
+          description:
+              'Noticing more hair on the floor, couch, or your clothes?',
           causes: [
             'Normal Shedding – Some pets shed more in hot weather or certain seasons',
             'Poor Diet – Not enough good nutrients can lead to weak hair and extra shedding',
@@ -571,7 +645,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Bald Spots (Patches of Missing Hair)',
-          description: 'Do you see one or more spots where your pet\'s fur is completely gone?',
+          description:
+              'Do you see one or more spots where your pet\'s fur is completely gone?',
           causes: [
             'Fungal Infection – A skin problem that causes round, bare spots (like ringworm)',
             'Allergies – To food, dust, grass, or something your pet touched',
@@ -590,7 +665,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Itchy Skin (Scratching a Lot)',
-          description: 'A little scratching is normal, but too much means something\'s wrong!',
+          description:
+              'A little scratching is normal, but too much means something\'s wrong!',
           causes: [
             'Fleas or Mites – Tiny parasites that cause intense itching',
             'Skin Infection – Bacteria or fungus can irritate the skin',
@@ -608,7 +684,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Constant Licking in One Spot',
-          description: 'Your pet keeps licking or biting the same area over and over?',
+          description:
+              'Your pet keeps licking or biting the same area over and over?',
           causes: [
             'Allergies – To food, fleas, grass, or dust',
             'Itching – From skin infections or bug bites',
@@ -625,7 +702,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Red or Inflamed Skin',
-          description: 'Is your pet\'s skin looking red, warm, or sore in some areas?',
+          description:
+              'Is your pet\'s skin looking red, warm, or sore in some areas?',
           causes: [
             'Allergic Reaction – From food, shampoo, grass, dust, or something they touched',
             'Hot Spot – A red, wet, painful patch from too much licking or scratching',
@@ -644,7 +722,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Dandruff (Flaky Skin)',
-          description: 'If your pet\'s fur has little white flakes, it might be dry skin or something more!',
+          description:
+              'If your pet\'s fur has little white flakes, it might be dry skin or something more!',
           causes: [
             'Dry air – Common in winter or low humidity',
             'Poor diet – Lack of good fats can dry out the skin',
@@ -660,7 +739,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Scabs or Crusty Skin',
-          description: 'Is your pet\'s skin rough in spots? Those might be scabs from too much scratching.',
+          description:
+              'Is your pet\'s skin rough in spots? Those might be scabs from too much scratching.',
           causes: [
             'Scratching or biting too much (due to fleas, allergies, or infections)',
             'Skin infection – Bacteria causing sores and crusty patches',
@@ -693,7 +773,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Skin Turning Darker (Hyperpigmentation)',
-          description: 'Noticing your pet\'s skin turning dark or black in some areas?',
+          description:
+              'Noticing your pet\'s skin turning dark or black in some areas?',
           causes: [
             'Long-term irritation – From constant scratching, licking, or rubbing',
             'Skin allergies or infections – Ongoing skin problems can cause dark patches',
@@ -715,7 +796,8 @@ class PetSymptomData {
       'Movement & Limbs Issues': [
         const PetSymptom(
           name: 'Limping or Favoring One Leg',
-          description: 'If your pet avoids putting weight on one leg, they might be in pain!',
+          description:
+              'If your pet avoids putting weight on one leg, they might be in pain!',
           causes: [
             'Injury – A sprain, strain, or even a small cut on the paw',
             'Broken Bone or Dislocation – If the leg looks swollen or bent oddly',
@@ -733,7 +815,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Stiffness or Trouble Standing Up',
-          description: 'If your pet struggles to get up or moves stiffly, their joints or muscles might be sore.',
+          description:
+              'If your pet struggles to get up or moves stiffly, their joints or muscles might be sore.',
           causes: [
             'Arthritis – Joint pain, especially in older pets',
             'Muscle Soreness – After heavy play or running',
@@ -751,22 +834,22 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Sudden Weakness or Collapsing',
-          description: 'If your pet suddenly can\'t stand or falls over, it\'s an emergency!',
+          description:
+              'If your pet suddenly can\'t stand or falls over, it\'s an emergency!',
           causes: [
             'Heart Problem – Can cause fainting episodes',
             'Severe Pain or Injury – A hidden issue making them weak',
             'Low Blood Sugar (Hypoglycemia) – More common in small breeds',
             'Nerve or Brain Issue – Can affect balance and movement'
           ],
-          actions: [
-            '🚨 Take your pet to the vet immediately!'
-          ],
+          actions: ['🚨 Take your pet to the vet immediately!'],
           imagePath: 'assets/images/symptoms/collapsing.jpg',
           emergencyLevel: 'emergency',
         ),
         const PetSymptom(
           name: 'Trembling or Shaking',
-          description: 'Shaking can mean pain, cold, or something more serious!',
+          description:
+              'Shaking can mean pain, cold, or something more serious!',
           causes: [
             'Pain or Stress – If shaking happens with whining or hiding',
             'Cold (Hypothermia) – Especially in small or short-haired pets or wet',
@@ -784,7 +867,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Swollen or Painful Joints',
-          description: 'If your pet\'s leg or joint looks swollen, something\'s not right!',
+          description:
+              'If your pet\'s leg or joint looks swollen, something\'s not right!',
           causes: [
             'Injury or Sprain – From jumping or rough play',
             'Infection – If swelling comes with heat & redness',
@@ -805,7 +889,8 @@ class PetSymptomData {
       'Anus & Pooping Issues': [
         const PetSymptom(
           name: 'Scooting or Dragging Butt on the Floor',
-          description: 'If your pet keeps sliding their butt on the floor, they might be itchy or uncomfortable!',
+          description:
+              'If your pet keeps sliding their butt on the floor, they might be itchy or uncomfortable!',
           causes: [
             'Full or Infected Anal Glands – Small sacs near the anus get blocked (common in dogs)',
             'Worms – Especially tapeworms, which cause itching',
@@ -823,7 +908,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Swelling or Redness Around the Anus',
-          description: 'Noticed your pet\'s butt looks red, swollen, or something\'s sticking out? It could be irritation — or a sign something more serious is going on.',
+          description:
+              'Noticed your pet\'s butt looks red, swollen, or something\'s sticking out? It could be irritation — or a sign something more serious is going on.',
           causes: [
             'Anal Gland Problem – Swollen or infected glands near the anus',
             'Allergic Reaction – To food, fleas, or cleaning products',
@@ -841,7 +927,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Blood in Stool or Around the Anus',
-          description: 'Noticed blood when your pet poops or around their butt?',
+          description:
+              'Noticed blood when your pet poops or around their butt?',
           causes: [
             'Small Tear from Straining – Often from hard or dry poop',
             'Worms or Parasites',
@@ -858,7 +945,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Straining to Poop or Constipation',
-          description: 'If your pet keeps trying to poop but nothing comes out?',
+          description:
+              'If your pet keeps trying to poop but nothing comes out?',
           causes: [
             'Not Drinking Enough Water – Leads to hard, dry poop',
             'Hairballs (in cats) – Can slow or block the intestines',
@@ -876,7 +964,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Diarrhea',
-          description: 'Loose, watery poop? It might be something simple or more serious!',
+          description:
+              'Loose, watery poop? It might be something simple or more serious!',
           causes: [
             'Diet Change or Eating Something Bad – Common cause of mild diarrhea',
             'Worms or Infections',
@@ -897,7 +986,8 @@ class PetSymptomData {
       'Male Genital Problems': [
         const PetSymptom(
           name: 'Swollen Testicles',
-          description: 'If your pet\'s testicles look bigger than usual, something\'s up!',
+          description:
+              'If your pet\'s testicles look bigger than usual, something\'s up!',
           causes: [
             'Infection or inflammation',
             'Trauma (like a hit or fall)',
@@ -914,7 +1004,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Discharge from the Penis',
-          description: 'A small amount of pale yellow or clear fluid can be normal, but heavy or smelly discharge is not.',
+          description:
+              'A small amount of pale yellow or clear fluid can be normal, but heavy or smelly discharge is not.',
           causes: [
             'Normal Fluid – A small amount of pale yellow or clear discharge that appears occasionally',
             'Infection – Thick, smelly, or green discharge may mean bacteria are present',
@@ -931,7 +1022,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Red, Swollen, or Hanging Out Penis',
-          description: 'If your pet\'s penis won\'t go back inside, it\'s an emergency!',
+          description:
+              'If your pet\'s penis won\'t go back inside, it\'s an emergency!',
           causes: [
             'Hair or dirt stuck, preventing retraction',
             'Nerve damage or trauma',
@@ -946,7 +1038,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Lumps or Bleeding from the Genitals',
-          description: 'If you notice a lump, sore, or bleeding around your pet\'s genitals, don\'t ignore it!',
+          description:
+              'If you notice a lump, sore, or bleeding around your pet\'s genitals, don\'t ignore it!',
           causes: [
             'Infection – bacterial or fungal infection',
             'Injury or Irritation – From rough surfaces, excessive licking, or trauma',
@@ -965,7 +1058,8 @@ class PetSymptomData {
       'Female Genital Problems': [
         const PetSymptom(
           name: 'Swollen Vulva',
-          description: 'If your pet\'s vulva looks swollen, it might be a natural part of her cycle—or a health issue!',
+          description:
+              'If your pet\'s vulva looks swollen, it might be a natural part of her cycle—or a health issue!',
           causes: [
             'Normal Heat Cycle – If your pet isn\'t spayed, swelling with mild clear discharge and behavior changes is normal during heat',
             'Infection – If swelling comes with discharge or excessive licking',
@@ -982,7 +1076,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Discharge from the Vulva',
-          description: 'A little clear or whitish discharge is normal, but anything smelly or unusual isn\'t normal!',
+          description:
+              'A little clear or whitish discharge is normal, but anything smelly or unusual isn\'t normal!',
           causes: [
             'Normal Heat Cycle – If your pet isn\'t spayed, a small amount of clear discharge is expected',
             'Infection – Bacteria can cause irritation and unusual discharge',
@@ -999,7 +1094,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Something Sticking Out from the Vulva',
-          description: 'If you see a pink, red, or dark lump/tissue coming out of your pet\'s vulva, it\'s serious!',
+          description:
+              'If you see a pink, red, or dark lump/tissue coming out of your pet\'s vulva, it\'s serious!',
           causes: [
             'Straining During Birth – Can push tissue out (prolapse)',
             'Weak Pelvic Muscles – More common in older pets',
@@ -1019,7 +1115,8 @@ class PetSymptomData {
       'Urination Problems': [
         const PetSymptom(
           name: 'Peeing Too Much (Frequent Urination)',
-          description: 'If your pet is peeing much more than usual, even in small amounts, it could be a sign of illness.',
+          description:
+              'If your pet is peeing much more than usual, even in small amounts, it could be a sign of illness.',
           causes: [
             'Bladder Infection (UTI) – Can cause frequent, sometimes painful peeing',
             'Diabetes or Kidney Problems – Often comes with drinking more water',
@@ -1037,7 +1134,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Straining to Pee (Difficulty Urinating)',
-          description: 'If your pet squats for a long time but only a few drops—or nothing—comes out, it\'s a red flag!',
+          description:
+              'If your pet squats for a long time but only a few drops—or nothing—comes out, it\'s a red flag!',
           causes: [
             'Bladder Infection (UTI) – Can make peeing painful and difficult',
             'Bladder Stones – Can block urine flow or cause irritation',
@@ -1054,7 +1152,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Bloody Urine (Red or Pink Pee)',
-          description: 'If your pet\'s pee looks red or pink, don\'t ignore it!',
+          description:
+              'If your pet\'s pee looks red or pink, don\'t ignore it!',
           causes: [
             'Urinary tract infection (UTI) – Can cause irritation and bleeding',
             'Bladder Stones – Hard mineral build-up in the bladder that can cause irritation and bleeding',
@@ -1071,7 +1170,8 @@ class PetSymptomData {
         ),
         const PetSymptom(
           name: 'Not Peeing at All (Emergency!)',
-          description: 'If your pet hasn\'t peed in over 24 hours, it\'s a life-threatening emergency!',
+          description:
+              'If your pet hasn\'t peed in over 24 hours, it\'s a life-threatening emergency!',
           causes: [
             'Urinary blockage – Common in male cats and can be fatal if untreated',
             'Kidney failure – The kidneys stop filtering waste, leading to toxin buildup',
@@ -1089,7 +1189,7 @@ class PetSymptomData {
     },
     // Add more body parts and symptoms as needed
   };
-  
+
   /// Get all symptoms as a flat list for search functionality
   static List<PetSymptom> getAllSymptoms() {
     final List<PetSymptom> allSymptoms = [];
@@ -1100,48 +1200,38 @@ class PetSymptomData {
     });
     return allSymptoms;
   }
-  
-  /// Search symptoms by query
-  static List<PetSymptom> searchSymptoms(String query) {
-    if (query.isEmpty) return [];
-    
-    final allSymptoms = getAllSymptoms();
-    final lowerQuery = query.toLowerCase();
-    
-    return allSymptoms.where((symptom) {
-      return symptom.name.toLowerCase().contains(lowerQuery) ||
-             symptom.description.toLowerCase().contains(lowerQuery) ||
-             symptom.causes.any((cause) => cause.toLowerCase().contains(lowerQuery)) ||
-             symptom.actions.any((action) => action.toLowerCase().contains(lowerQuery));
-    }).toList();
-  }
-  
+
   /// Get symptoms by emergency level
   static List<PetSymptom> getSymptomsByEmergencyLevel(String emergencyLevel) {
     final allSymptoms = getAllSymptoms();
-    return allSymptoms.where((symptom) => 
-        symptom.emergencyLevel?.toLowerCase() == emergencyLevel.toLowerCase()).toList();
+    return allSymptoms
+        .where((symptom) =>
+            symptom.emergencyLevel?.toLowerCase() ==
+            emergencyLevel.toLowerCase())
+        .toList();
   }
-  
+
   /// Get emergency symptoms (urgent + emergency)
   static List<PetSymptom> getEmergencySymptoms() {
     final allSymptoms = getAllSymptoms();
-    return allSymptoms.where((symptom) => 
-        symptom.emergencyLevel?.toLowerCase() == 'emergency' ||
-        symptom.emergencyLevel?.toLowerCase() == 'urgent').toList();
+    return allSymptoms
+        .where((symptom) =>
+            symptom.emergencyLevel?.toLowerCase() == 'emergency' ||
+            symptom.emergencyLevel?.toLowerCase() == 'urgent')
+        .toList();
   }
-  
-  /// Convert the class-based model to map representation for ease of use
+
   static Map<String, Map<String, List<Map<String, dynamic>>>> getSymptomMaps() {
     final result = <String, Map<String, List<Map<String, dynamic>>>>{};
-    
+
     symptoms.forEach((bodyPart, categories) {
       result[bodyPart] = {};
       categories.forEach((category, symptomList) {
-        result[bodyPart]![category] = symptomList.map((symptom) => symptom.toMap()).toList();
+        result[bodyPart]![category] =
+            symptomList.map((symptom) => symptom.toMap()).toList();
       });
     });
-    
+
     return result;
   }
 }

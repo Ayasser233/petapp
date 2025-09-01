@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/pet/widgets/pet_3d_viewer.dart';
 import 'package:petapp/features/pet/data/pet_symptom_data.dart';
 
@@ -61,6 +62,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black;
     final backgroundColor = isDark ? Colors.grey[900] : Colors.grey[50];
+    final localizations = AppLocalizations.of(context);
 
     return Scaffold(
       appBar: AppBar(
@@ -138,11 +140,12 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                _buildBodyPartItem('Head', isDark, textColor),
-                _buildBodyPartItem('Legs', isDark, textColor),
-                _buildBodyPartItem('Skin & Coat', isDark, textColor),
-                _buildBodyPartItem('Pelvis', isDark, textColor),
-                _buildBodyPartItem('Buttocks', isDark, textColor),
+                _buildBodyPartItem(localizations.head, isDark, textColor),
+                _buildBodyPartItem(localizations.legs, isDark, textColor),
+                _buildBodyPartItem(
+                    localizations.skinAndCoat, isDark, textColor),
+                _buildBodyPartItem(localizations.pelvis, isDark, textColor),
+                _buildBodyPartItem(localizations.buttocks, isDark, textColor),
               ],
             ),
           ),
@@ -163,7 +166,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      'Selected: $_selectedSymptom',
+                      '${localizations.selected}: $_selectedSymptom',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w500,
                           ),
@@ -171,9 +174,9 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                   ),
                   TextButton(
                     onPressed: () => setState(() => _selectedSymptom = null),
-                    child: const Text(
-                      'Clear',
-                      style: TextStyle(color: AppColors.orange),
+                    child: Text(
+                      localizations.clear,
+                      style: const TextStyle(color: AppColors.orange),
                     ),
                   ),
                 ],
@@ -198,13 +201,14 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
 
   void _showHelpDialog(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final localizations = AppLocalizations.of(context);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: isDark ? Colors.grey[850] : Colors.white,
         title: Text(
-          'How to Use',
+          localizations.howToUse,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: isDark ? Colors.white : Colors.black,
               ),
@@ -214,33 +218,33 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHelpItem(
-              '1. Rotate:',
-              'Touch and drag to rotate the model',
+              '${localizations.step} 1: ${localizations.rotate}',
+              localizations.rotateInstructions,
               isDark,
             ),
             _buildHelpItem(
-              '2. Zoom:',
-              'Pinch to zoom in and out',
+              '${localizations.step} 2: ${localizations.zoom}',
+              localizations.zoomInstructions,
               isDark,
             ),
             _buildHelpItem(
-              '3. Select:',
-              'Tap on a body part to select it',
+              '${localizations.step} 3: ${localizations.selectText}',
+              localizations.selectInstructions,
               isDark,
             ),
             _buildHelpItem(
-              '4. Symptoms:',
-              'Choose symptoms for the selected body part',
+              '${localizations.step} 4: ${localizations.symptoms}',
+              localizations.symptomsInstructions,
               isDark,
             ),
             _buildHelpItem(
-              '5. View Selected:',
-              'Tap the symptoms icon in the top bar to see your selections',
+              '${localizations.step} 5: ${localizations.viewSelected}',
+              localizations.viewSelectedInstructions,
               isDark,
             ),
             _buildHelpItem(
-              '6. Find Vet:',
-              'After selecting symptoms, tap "Find Vet"',
+              '${localizations.step} 6: ${localizations.findVet}',
+              localizations.findVetInstructions,
               isDark,
             ),
           ],
@@ -249,7 +253,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Got it',
+              localizations.gotIt,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: AppColors.orange,
                   ),
@@ -313,25 +317,27 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black;
     final bgColor = isDark ? Colors.grey[850] : Colors.white;
+    final localizations = AppLocalizations.of(context);
 
     // Get symptom data from the separate file
     final bodyPartSymptoms = PetSymptomData.getSymptomMaps();
 
     // Convert body part name to mapping key
     String mappedBodyPart = bodyPart.toLowerCase();
-    if (mappedBodyPart == 'skin & coat') {
+    if (mappedBodyPart == localizations.skinAndCoat.toLowerCase()) {
       mappedBodyPart = 'skin';
-    } else if (mappedBodyPart == 'pelvis') {
-      // Keep as 'pelvis' - this is our new combined category
-    } else if (mappedBodyPart == 'buttocks') {
-      // Keep as 'buttocks' - this is our new category
+    } else if (mappedBodyPart == localizations.pelvis.toLowerCase()) {
+      mappedBodyPart = 'pelvis';
+    } else if (mappedBodyPart == localizations.buttocks.toLowerCase()) {
+      mappedBodyPart = 'buttocks';
+    } else if (mappedBodyPart == localizations.head.toLowerCase()) {
+      mappedBodyPart = 'head';
+    } else if (mappedBodyPart == localizations.legs.toLowerCase()) {
+      mappedBodyPart = 'legs';
     }
 
     // Create a user-friendly display title
     String displayTitle = bodyPart;
-    if (bodyPart.toLowerCase() != mappedBodyPart) {
-      displayTitle = bodyPart; // Keep original for display
-    }
 
     // Check if data exists for this body part
     if (!bodyPartSymptoms.containsKey(mappedBodyPart)) {
@@ -340,13 +346,13 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
         builder: (context) => AlertDialog(
           backgroundColor: bgColor,
           title: Text(
-            'No Data Available',
+            localizations.noDataAvailable,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: textColor,
                 ),
           ),
           content: Text(
-            'No symptom data found for $displayTitle.',
+            '${localizations.noSymptomDataFound} $displayTitle.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: textColor,
                 ),
@@ -355,7 +361,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'OK',
+                localizations.ok,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: AppColors.orange,
                     ),
@@ -383,7 +389,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           borderRadius: BorderRadius.circular(16),
         ),
         title: Text(
-          '$displayTitle Symptom Categories',
+          '$displayTitle ${localizations.symptomCategories}',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: textColor,
               ),
@@ -398,7 +404,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                 (category) => ListTile(
                   contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                   title: Text(
-                    category,
+                    PetSymptomData.getLocalizedCategoryName(context, category),
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: textColor,
                           fontWeight: FontWeight.w500,
@@ -422,7 +428,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              localizations.cancel,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: AppColors.orange,
                   ),
@@ -437,6 +443,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black;
     final bgColor = isDark ? Colors.grey[850] : Colors.white;
+    final localizations = AppLocalizations.of(context);
 
     // Get symptom data from the separate file
     final bodyPartSymptoms = PetSymptomData.getSymptomMaps();
@@ -452,13 +459,13 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
         builder: (context) => AlertDialog(
           backgroundColor: bgColor,
           title: Text(
-            'No Data Available',
+            localizations.noDataAvailable,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   color: textColor,
                 ),
           ),
           content: Text(
-            'No symptoms found for ${bodyPart == "skin" ? "Skin & Coat" : bodyPart} - $category.',
+            '${localizations.noSymptomsFound} ${bodyPart == "skin" ? localizations.skinAndCoat : bodyPart} - ${PetSymptomData.getLocalizedCategoryName(context, category)}.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: textColor,
                 ),
@@ -467,7 +474,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             TextButton(
               onPressed: () => Navigator.pop(context),
               child: Text(
-                'OK',
+                localizations.ok,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                       color: AppColors.orange,
                     ),
@@ -485,9 +492,10 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     // Display appropriate title based on body part
     String dialogTitle;
     if (bodyPart == 'skin') {
-      dialogTitle = 'Skin & Coat Symptoms';
+      dialogTitle = localizations.skinAndCoat;
     } else {
-      dialogTitle = '$category Symptoms';
+      dialogTitle =
+          '${PetSymptomData.getLocalizedCategoryName(context, category)} ${localizations.symptoms}';
     }
 
     showDialog(
@@ -513,16 +521,25 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             itemCount: symptoms.length,
             itemBuilder: (context, index) {
               final symptom = symptoms[index];
+              final petSymptom = PetSymptom(
+                name: symptom['name'],
+                description: symptom['description'],
+                causes: List<String>.from(symptom['causes']),
+                actions: List<String>.from(symptom['actions']),
+                imagePath: symptom['imagePath'],
+                emergencyLevel: symptom['emergencyLevel'],
+              );
+
               return ListTile(
                 title: Text(
-                  symptom['name'],
+                  petSymptom.getLocalizedName(context),
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: textColor,
                         fontWeight: FontWeight.w500,
                       ),
                 ),
                 subtitle: Text(
-                  '${symptom['description'].toString().split('.')[0]}...',
+                  '${petSymptom.getLocalizedDescription(context).split('.')[0]}...',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isDark ? Colors.grey[400] : Colors.grey[600],
                       ),
@@ -541,7 +558,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              localizations.cancel,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: AppColors.orange,
                   ),
@@ -557,6 +574,16 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black;
     final bgColor = isDark ? Colors.grey[900] : Colors.white;
+    final localizations = AppLocalizations.of(context);
+
+    final petSymptom = PetSymptom(
+      name: symptom['name'],
+      description: symptom['description'],
+      causes: List<String>.from(symptom['causes']),
+      actions: List<String>.from(symptom['actions']),
+      imagePath: symptom['imagePath'],
+      emergencyLevel: symptom['emergencyLevel'],
+    );
 
     showDialog(
       context: context,
@@ -568,7 +595,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             backgroundColor: bgColor,
             elevation: 0,
             title: Text(
-              symptom['name'],
+              petSymptom.getLocalizedName(context),
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     color: textColor,
                     fontWeight: FontWeight.bold,
@@ -595,7 +622,8 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
               children: [
                 // Symptom category badge
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppColors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -604,16 +632,16 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                     ),
                   ),
                   child: Text(
-                    '$category • ${bodyPart.toUpperCase()}',
+                    '${PetSymptomData.getLocalizedCategoryName(context, category)} • ${bodyPart.toUpperCase()}',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.orange,
                           fontWeight: FontWeight.w600,
                         ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 20),
-                
+
                 // Description section
                 Container(
                   width: double.infinity,
@@ -626,15 +654,16 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Description',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: textColor,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        localizations.description,
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: textColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        symptom['description'],
+                        petSymptom.getLocalizedDescription(context),
                         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                               color: textColor,
                               height: 1.5,
@@ -643,19 +672,19 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
 
                 // Possible causes section
                 Text(
-                  'Possible Causes',
+                  localizations.possibleCauses,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: textColor,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -665,9 +694,12 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: List.generate(
-                      (symptom['causes'] as List).length,
-                      (index) => Padding(
+                    children: petSymptom
+                        .getLocalizedCauses(context)
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                      return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -683,8 +715,11 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                             ),
                             Expanded(
                               child: Text(
-                                symptom['causes'][index],
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                entry.value,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(
                                       color: textColor,
                                       height: 1.5,
                                     ),
@@ -692,23 +727,23 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                             ),
                           ],
                         ),
-                      ),
-                    ),
+                      );
+                    }).toList(),
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
 
                 // What to do section
                 Text(
-                  'What to Do',
+                  localizations.whatToDo,
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: textColor,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
@@ -718,9 +753,14 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: List.generate(
-                      (symptom['actions'] as List).length,
-                      (index) => Padding(
+                    children: petSymptom
+                        .getLocalizedActions(context)
+                        .asMap()
+                        .entries
+                        .map((entry) {
+                      final index = entry.key;
+                      final action = entry.value;
+                      return Padding(
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -736,7 +776,10 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                               child: Center(
                                 child: Text(
                                   '${index + 1}',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -745,8 +788,11 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                             ),
                             Expanded(
                               child: Text(
-                                symptom['actions'][index],
-                                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                action,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(
                                       color: textColor,
                                       height: 1.5,
                                     ),
@@ -754,13 +800,13 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                             ),
                           ],
                         ),
-                      ),
-                    ),
+                      );
+                    }).toList(),
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // Warning/Note section
                 Container(
                   width: double.infinity,
@@ -786,16 +832,22 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Important Note',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              localizations.importantNote,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleSmall
+                                  ?.copyWith(
                                     color: Colors.amber[700],
                                     fontWeight: FontWeight.bold,
                                   ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'This information is for educational purposes only. Always consult with a qualified veterinarian for proper diagnosis and treatment.',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              localizations.disclaimerText,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
                                     color: textColor,
                                     height: 1.4,
                                   ),
@@ -806,12 +858,12 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 24),
               ],
             ),
           ),
-          
+
           // Bottom action buttons
           bottomNavigationBar: Container(
             padding: const EdgeInsets.all(20),
@@ -844,12 +896,14 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                     onPressed: () {
                       Navigator.pop(context);
                       _handleSymptomSelected(
-                          '$bodyPart: $category - ${symptom['name']}');
+                          '$bodyPart: $category - ${petSymptom.getLocalizedName(context)}');
                       _showSymptomChoiceDialog(bodyPart, category, symptom);
                     },
                     icon: const Icon(Icons.check_circle, size: 24),
                     label: Text(
-                      _selectedSymptom != null ? 'Replace Selected Symptom' : 'Select This Symptom',
+                      _selectedSymptom != null
+                          ? localizations.replaceSelectedSymptom
+                          : localizations.selectThisSymptom,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -857,9 +911,9 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Emergency button
                 SizedBox(
                   width: double.infinity,
@@ -879,7 +933,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                     },
                     icon: const Icon(Icons.local_hospital, size: 24),
                     label: Text(
-                      'Find Emergency Vet',
+                      localizations.findEmergencyVet,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -900,6 +954,16 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black;
     final bgColor = isDark ? Colors.grey[850] : Colors.white;
+    final localizations = AppLocalizations.of(context);
+
+    final petSymptom = PetSymptom(
+      name: symptom['name'],
+      description: symptom['description'],
+      causes: List<String>.from(symptom['causes']),
+      actions: List<String>.from(symptom['actions']),
+      imagePath: symptom['imagePath'],
+      emergencyLevel: symptom['emergencyLevel'],
+    );
 
     showDialog(
       context: context,
@@ -909,7 +973,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           borderRadius: BorderRadius.circular(16),
         ),
         title: Text(
-          'What would you like to do?',
+          localizations.whatWouldYouLikeToDo,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: textColor,
               ),
@@ -918,7 +982,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'You have selected: ${symptom['name']}',
+              '${localizations.youHaveSelected}: ${petSymptom.getLocalizedName(context)}',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: textColor,
                     fontWeight: FontWeight.w500,
@@ -926,7 +990,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            
+
             // Go to Vet Option
             Container(
               width: double.infinity,
@@ -946,7 +1010,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                 },
                 icon: const Icon(Icons.local_hospital, size: 24),
                 label: Text(
-                  'Find a Vet Nearby',
+                  localizations.findVetNearby,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -954,7 +1018,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                 ),
               ),
             ),
-            
+
             // See Examples Option
             SizedBox(
               width: double.infinity,
@@ -973,7 +1037,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                 },
                 icon: const Icon(Icons.photo_library, size: 24),
                 label: Text(
-                  'See Examples & Pictures',
+                  localizations.seeExamplesAndPictures,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -987,7 +1051,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Cancel',
+              localizations.cancel,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: Colors.grey,
                   ),
@@ -1015,9 +1079,11 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black;
     final bgColor = isDark ? Colors.grey[850] : Colors.white;
+    final localizations = AppLocalizations.of(context);
 
     // Sample images - replace with actual symptom images
-    final List<Map<String, String>> exampleImages = _getSymptomImages(symptom['name']);
+    final List<Map<String, String>> exampleImages =
+        _getSymptomImages(symptom['name']);
 
     showDialog(
       context: context,
@@ -1027,7 +1093,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           borderRadius: BorderRadius.circular(16),
         ),
         title: Text(
-          '${symptom['name']} - Examples',
+          '${symptom['name']} - ${localizations.examples}',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 color: textColor,
               ),
@@ -1040,14 +1106,14 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Visual Examples:',
+                  '${localizations.visualExamples}:',
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         color: textColor,
                         fontWeight: FontWeight.bold,
                       ),
                 ),
                 const SizedBox(height: 12),
-                
+
                 // Grid of example images
                 GridView.builder(
                   shrinkWrap: true,
@@ -1062,12 +1128,13 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                   itemBuilder: (context, index) {
                     final image = exampleImages[index];
                     return GestureDetector(
-                      onTap: () => _showFullScreenImage(image['url']!, image['caption']!),
+                      onTap: () => _showFullScreenImage(image['url']!),
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: isDark ? Colors.grey[600]! : Colors.grey[300]!,
+                            color:
+                                isDark ? Colors.grey[600]! : Colors.grey[300]!,
                           ),
                         ),
                         child: Column(
@@ -1096,27 +1163,15 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.all(4),
-                              child: Text(
-                                image['caption']!,
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: textColor,
-                                    ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
                           ],
                         ),
                       ),
                     );
                   },
                 ),
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Additional information
                 Container(
                   padding: const EdgeInsets.all(12),
@@ -1131,7 +1186,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Important Note:',
+                        '${localizations.importantNote}:',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
                               color: AppColors.orange,
                               fontWeight: FontWeight.bold,
@@ -1139,7 +1194,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'These are example images for reference only. Every pet is different, and symptoms may vary in severity and appearance. If you\'re unsure or concerned, please consult with a veterinarian.',
+                        localizations.exampleImagesDisclaimer,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: textColor,
                             ),
@@ -1155,7 +1210,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Back',
+              localizations.back,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: Colors.grey,
                   ),
@@ -1174,7 +1229,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
               _goToVetFinder(symptom);
             },
             child: Text(
-              'Find Vet',
+              localizations.findVet,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     color: Colors.white,
                   ),
@@ -1185,7 +1240,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     );
   }
 
-  void _showFullScreenImage(String imageUrl, String caption) {
+  void _showFullScreenImage(String imageUrl) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -1195,10 +1250,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           children: [
             AppBar(
               backgroundColor: Colors.black,
-              title: Text(
-                caption,
-                style: const TextStyle(color: Colors.white),
-              ),
               leading: IconButton(
                 icon: const Icon(Icons.close, color: Colors.white),
                 onPressed: () => Navigator.pop(context),
@@ -1210,10 +1261,10 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                   imageUrl,
                   fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) {
-                    return const Center(
+                    return Center(
                       child: Text(
-                        'Image not available',
-                        style: TextStyle(color: Colors.white),
+                        AppLocalizations.of(context).imageNotAvailable,
+                        style: const TextStyle(color: Colors.white),
                       ),
                     );
                   },
@@ -1227,33 +1278,174 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
   }
 
   List<Map<String, String>> _getSymptomImages(String symptomName) {
-    // This is where you would map symptom names to their corresponding images
-    // For now, returning sample data
-    
+    // Complete symptom image mapping based on your pet symptom data
+
     final Map<String, List<Map<String, String>>> symptomImageMap = {
-      'Eye Discharge': [
-        {'url': 'assets/images/symptoms/eye_discharge_1.jpg', 'caption': 'Mild eye discharge'},
-        {'url': 'assets/images/symptoms/eye_discharge_2.jpg', 'caption': 'Severe eye discharge'},
-        {'url': 'assets/images/symptoms/eye_discharge_3.jpg', 'caption': 'Infected eye'},
-        {'url': 'assets/images/symptoms/eye_discharge_4.jpg', 'caption': 'Normal vs abnormal'},
+      // Eye Problems (already included)
+      'Eye Redness': [
+        {'url': 'assets/images/symptoms/eye_redness_1.jpg'},
       ],
-      'Limping': [
-        {'url': 'assets/images/symptoms/limping_1.jpg', 'caption': 'Favoring one leg'},
-        {'url': 'assets/images/symptoms/limping_2.jpg', 'caption': 'Visible swelling'},
-        {'url': 'assets/images/symptoms/limping_3.jpg', 'caption': 'Abnormal gait'},
+      'Eye Discharge (Goopy Stuff)': [],
+      'Cloudy Eye (Looks Foggy or Bluish)': [
+        {'url': 'assets/images/symptoms/cloudy_eye_1.jpg'},
+        {'url': 'assets/images/symptoms/cloudy_eye_2.jpg'},
       ],
-      'Skin Irritation': [
-        {'url': 'assets/images/symptoms/skin_irritation_1.jpg', 'caption': 'Red, inflamed skin'},
-        {'url': 'assets/images/symptoms/skin_irritation_2.jpg', 'caption': 'Scratching behavior'},
-        {'url': 'assets/images/symptoms/skin_irritation_3.jpg', 'caption': 'Hair loss patches'},
+      'Watery Eyes (Excessive Tearing)': [
+        {'url': 'assets/images/symptoms/watery_eyes_1.jpg'}
       ],
-      // Add more symptom mappings as needed
+      'Third Eyelid Showing': [
+        {'url': 'assets/images/symptoms/third_eyelid_showing_1.jpg'},
+        {'url': 'assets/images/symptoms/third_eyelid_showing_2.jpg'},
+      ],
+      'Squinting or Keeping Eye Closed': [
+        {'url': 'assets/images/symptoms/squinting_eye_closed_1.jpg'},
+        {'url': 'assets/images/symptoms/squinting_eye_closed_2.jpg'},
+      ],
+      'Swelling Around the Eye': [
+        {'url': 'assets/images/symptoms/swelling_around_eye_1.jpg'},
+      ],
+      'Worms in the Eye': [
+        {'url': 'assets/images/symptoms/worms_in_eye_1.jpg'},
+        {'url': 'assets/images/symptoms/worms_in_eye_2.jpg'},
+      ],
+
+      // Ear Problems (already included)
+      'Itchy Ears (Scratching or Head Shaking)': [],
+      'Black Stuff in the Ear (Dark Wax or Debris)': [
+        {'url': 'assets/images/symptoms/black_stuff_in_ear_1.jpg'},
+        {'url': 'assets/images/symptoms/black_stuff_in_ear_2.jpg'},
+      ],
+      'Red or Swollen Ear': [
+        {'url': 'assets/images/symptoms/red_swollen_ear_1.jpg'},
+        {'url': 'assets/images/symptoms/red_swollen_ear_2.jpg'},
+        {'url': 'assets/images/symptoms/red_swollen_ear_3.jpg'},
+      ],
+      'Bad Smell from the Ear': [],
+      'Ear Discharge (Pus or Liquid Coming Out)': [],
+      'Tilting Head to One Side': [
+        {'url': 'assets/images/symptoms/tilting_head_1.jpg'},
+        {'url': 'assets/images/symptoms/tilting_head_2.jpg'},
+      ],
+      'Loss of Hearing or Not Responding to Sounds': [],
+
+      'Bad Breath (Smelly Mouth)': [],
+      'Excessive Drooling': [],
+      'Red, Swollen Gums': [
+        {'url': 'assets/images/symptoms/red_swollen_gums_1.jpg'},
+        {'url': 'assets/images/symptoms/red_swollen_gums_2.jpg'},
+      ],
+      'Loose or Missing Teeth': [],
+      'Trouble Eating or Dropping Food': [],
+      'Bleeding from the Mouth': [
+        {'url': 'assets/images/symptoms/bleeding_from_mouth_1.jpg'},
+        {'url': 'assets/images/symptoms/bleeding_from_mouth_2.jpg'},
+      ],
+      'White or Pale Gums': [],
+      'Locked Jaw (Mouth Won\'t Open or Close)': [],
+      'Oral Ulcers (Sores in the Mouth)': [
+        {'url': 'assets/images/symptoms/oral_ulcers_1.jpg'},
+      ],
+      'Yellow or Brown Teeth (Tartar Buildup)': [
+        {'url': 'assets/images/symptoms/yellow_brown_teeth_1.jpg'},
+        {'url': 'assets/images/symptoms/yellow_brown_teeth_2.jpg'},
+      ],
+
+      'Tongue or Lip Swelling': [
+        {'url': 'assets/images/symptoms/tongue_lip_swelling_1.jpg'},
+      ],
+
+      // Skin & Coat Problems
+      'Hair Loss': [
+      ],
+      'Bald Spots (Patches of Missing Hair)': [
+        {'url': 'assets/images/symptoms/bald_patches_1.jpg'},
+        {'url': 'assets/images/symptoms/bald_patches_2.jpg'},
+      ],
+      'Itchy Skin (Scratching a Lot)': [
+      ],
+      'Constant Licking in One Spot': [
+      ],
+      'Red or Inflamed Skin': [
+        {'url': 'assets/images/symptoms/inflamed_skin_1.jpg'},
+        {'url': 'assets/images/symptoms/inflamed_skin_2.jpg'},
+      ],
+      'Dandruff (Flaky Skin)': [
+        {'url': 'assets/images/symptoms/dandruff_1.jpg'},
+      ],
+      'Scabs or Crusty Skin': [
+        {'url': 'assets/images/symptoms/scabs_crusty_skin_1.jpg'},
+      ],
+      'Lumps or Bumps': [
+        {'url': 'assets/images/symptoms/dull_greasy_coat_1.jpg'},
+        {'url': 'assets/images/symptoms/dull_greasy_coat_2.jpg'},
+        {'url': 'assets/images/symptoms/dull_greasy_coat_3.jpg'},
+      ],
+      'Skin Turning Darker (Hyperpigmentation)': [
+        {'url': 'assets/images/symptoms/hyperpigmentation_1.jpg'},
+      ],
+
+      // Movement & Limbs Issues
+      'Limping or Favoring One Leg': [
+      ],
+      'Stiffness or Trouble Standing Up': [
+      ],
+      'Sudden Weakness or Collapsing': [
+      ],
+      'Trembling or Shaking': [
+      ],
+      'Swollen or Painful Joints': [
+      ],
+
+      // Anus & Pooping Issues
+      'Scooting or Dragging Butt on the Floor': [
+        {'url': 'assets/images/symptoms/scooting_dragging_butt_1.jpg'},
+        {'url': 'assets/images/symptoms/scooting_dragging_butt_2.jpg'},
+      ],
+      'Swelling or Redness Around the Anus': [
+        {'url': 'assets/images/symptoms/swelling_redness_anus_1.jpg'},
+      ],
+      'Blood in Stool or Around the Anus': [
+      ],
+      'Straining to Poop or Constipation': [
+      ],
+      'Diarrhea': [
+      ],
+
+      // Male Genital Problems
+      'Swollen Testicles': [
+      ],
+      'Discharge from the Penis': [
+      ],
+      'Red, Swollen, or Hanging Out Penis': [
+      ],
+      'Lumps or Bleeding from the Genitals': [
+      ],
+
+      // Female Genital Problems
+      'Swollen Vulva': [
+      ],
+      'Discharge from the Vulva': [
+      ],
+      'Something Sticking Out from the Vulva': [
+      ],
+
+      // Urination Problems
+      'Peeing Too Much (Frequent Urination)': [
+      ],
+      'Straining to Pee (Difficulty Urinating)': [
+      ],
+      'Bloody Urine (Red or Pink Pee)': [
+      ],
+      'Not Peeing at All (Emergency!)': [
+      ],
+
     };
-    
+
     // Return specific images for the symptom, or default images if not found
-    return symptomImageMap[symptomName] ?? [
-      {'url': 'assets/images/symptoms/default_1.jpg', 'caption': 'Example 1'},
-      {'url': 'assets/images/symptoms/default_2.jpg', 'caption': 'Example 2'},
-    ];
+    return symptomImageMap[symptomName] ??
+        [
+          {'url': 'assets/images/symptoms/default_symptom_1.jpg'},
+          {'url': 'assets/images/symptoms/default_symptom_2.jpg'},
+        ];
   }
 }

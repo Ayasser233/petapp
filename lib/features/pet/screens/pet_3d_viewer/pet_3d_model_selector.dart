@@ -3,12 +3,14 @@ import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 
 class Pet3DModelSelector extends StatelessWidget {
   const Pet3DModelSelector({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final isDark = THelperFunctions.isDarkMode(context);
     final backgroundColor = isDark ? Colors.black : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black;
@@ -18,7 +20,7 @@ class Pet3DModelSelector extends StatelessWidget {
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(
-          'Select Pet Type',
+          localizations.selectPetType,
           style: TextStyle(color: textColor),
         ),
         backgroundColor: backgroundColor,
@@ -35,7 +37,7 @@ class Pet3DModelSelector extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Choose a pet model to view anatomy',
+              localizations.choosePetModelToViewAnatomy,
               style: TextStyle(
                 fontSize: 16,
                 color: isDark ? Colors.grey[400] : Colors.grey[700],
@@ -50,15 +52,20 @@ class Pet3DModelSelector extends StatelessWidget {
                 Expanded(
                   child: _buildModelCard(
                     context,
-                    'Dog',
+                    localizations.dog,
                     'assets/images/dog_model_thumbnail.png',
                     () => Get.toNamed(
                       AppRoutes.pet3DViewer,
-                      arguments: {'petType': 'Dog', 'petName': 'Dog Model'},
+                      arguments: {
+                        'petType': 'Dog', 
+                        'petName': localizations.dogModel
+                      },
                     ),
                     cardColor,
                     textColor,
                     isDark,
+                    localizations.viewDogAnatomy,
+                    localizations,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -66,15 +73,20 @@ class Pet3DModelSelector extends StatelessWidget {
                 Expanded(
                   child: _buildModelCard(
                     context,
-                    'Cat',
+                    localizations.cat,
                     'assets/images/cat_model_thumbnail.png',
                     () => Get.toNamed(
                       AppRoutes.pet3DViewer,
-                      arguments: {'petType': 'Cat', 'petName': 'Cat Model'},
+                      arguments: {
+                        'petType': 'Cat', 
+                        'petName': localizations.catModel
+                      },
                     ),
                     cardColor,
                     textColor,
                     isDark,
+                    localizations.viewCatAnatomy,
+                    localizations,
                   ),
                 ),
               ],
@@ -101,7 +113,7 @@ class Pet3DModelSelector extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Use the 3D model to identify symptoms and explore pet anatomy. Tap on different body parts to learn more.',
+                      localizations.use3DModelToIdentifySymptoms,
                       style: TextStyle(
                         color: isDark ? Colors.grey[400] : Colors.grey[700],
                       ),
@@ -124,6 +136,8 @@ class Pet3DModelSelector extends StatelessWidget {
     Color? cardColor,
     Color textColor,
     bool isDark,
+    String anatomyText,
+    AppLocalizations localizations,
   ) {
     return GestureDetector(
       onTap: onTap,
@@ -153,11 +167,11 @@ class Pet3DModelSelector extends StatelessWidget {
                 petType,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                   color: textColor,
-                  )
+                ),
               ),
               const SizedBox(height: 8),
               Text(
-                'View $petType Anatomy',
+                anatomyText,
                 style: Theme.of(context).textTheme.bodyMedium
                     ?.copyWith(color: AppColors.orange),
               ),
@@ -171,11 +185,11 @@ class Pet3DModelSelector extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    'Open Model',
+                    localizations.openModel,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.orange,
                       fontWeight: FontWeight.bold,
-                      ),
+                    ),
                   ),
                 ),
               ),

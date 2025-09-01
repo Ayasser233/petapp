@@ -1,7 +1,5 @@
-import 'package:get/get.dart';
 import 'package:petapp/core/services/api_client.dart';
 import 'package:petapp/core/services/error_handler_service.dart';
-import 'package:petapp/core/services/token_service.dart';
 import 'package:petapp/features/profile/data/models/user_profile_model.dart';
 
 class ProfileRepository {

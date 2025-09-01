@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Add this import
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
-import 'package:petapp/core/localization/app_localizations.dart'; // Add this import
+import 'package:petapp/core/localization/app_localizations.dart';
 
 class CommonBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -18,7 +18,7 @@ class CommonBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
     final backgroundColor = isDark ? AppColors.black : AppColors.white;
-    AppLocalizations.of(context); // Get localizations
+    final localizations = AppLocalizations.of(context);
     
     return Container(
       decoration: BoxDecoration(
@@ -47,11 +47,10 @@ class CommonBottomNavBar extends StatelessWidget {
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
           unselectedLabelStyle: const TextStyle(fontSize: 11),
           items: [
-            _buildNavItem(Icons.home_outlined, Icons.home, 'Home', 0),
-            _buildCenterNavItem('My Activity', 1),
-            _buildNavItem(Icons.person_outline, Icons.person, 'Profile', 2),
+            _buildNavItem(Icons.home_outlined, Icons.home, localizations.home, 0),
+            _buildCenterNavItem(localizations.myActivity, 1),
+            _buildNavItem(Icons.person_outline, Icons.person, localizations.profile, 2),
           ],
-          // Then modify the onTap method:
           onTap: (index) {
             if (index == currentIndex) return;
             
