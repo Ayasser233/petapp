@@ -12,9 +12,7 @@ class ProfileRepository {
     try {
       final response = await _apiClient.getUserProfile();
       return UserProfileModel.fromJson(response.data);
-      
     } catch (error) {
-      
       ErrorHandlerService.instance.handleError(error);
       rethrow;
     }

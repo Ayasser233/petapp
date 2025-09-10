@@ -30,6 +30,44 @@ class VoucherModel {
   bool get isExpired => DateTime.now().isAfter(expiryDate);
   bool get isValid => !isUsed && !isExpired;
 
+  // Factory constructor for creating VoucherModel from JSON
+  factory VoucherModel.fromJson(Map<String, dynamic> json) {
+    return VoucherModel(
+      id: json['id']?.toString() ?? '',
+      title: json['title'] ?? '',
+      description: json['description'] ?? '',
+      code: json['code'] ?? '',
+      discount: (json['discount'] ?? 0).toDouble(),
+      discountType: json['discount_type'] ?? 'percentage',
+      expiryDate: json['expiry_date'] != null 
+          ? DateTime.parse(json['expiry_date']) 
+          : DateTime.now().add(const Duration(days: 30)),
+      isUsed: json['is_used'] ?? false,
+      usedDate: json['used_date'],
+      category: json['category'] ?? '',
+      minPurchaseAmount: json['min_purchase_amount']?.toDouble(),
+      imageUrl: json['image_url'],
+    );
+  }
+
+  // Convert VoucherModel to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'code': code,
+      'discount': discount,
+      'discount_type': discountType,
+      'expiry_date': expiryDate.toIso8601String(),
+      'is_used': isUsed,
+      'used_date': usedDate,
+      'category': category,
+      'min_purchase_amount': minPurchaseAmount,
+      'image_url': imageUrl,
+    };
+  }
+
   String get formattedDiscount {
     if (discountType == 'percentage') {
       return '${discount.toInt()}% OFF';

@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
-import 'package:petapp/features/profile/controller/profile_controller.dart';
+import 'package:petapp/core/services/auth_service.dart';
+import 'package:petapp/features/profile/controllers/profile_controller.dart';
 
 class AccountDetailsScreen extends StatefulWidget {
   const AccountDetailsScreen({super.key});
@@ -35,19 +36,76 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     _dobController = TextEditingController();
     
     // Initialize controllers with actual data
-    _initializeWithProfileData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeWithProfileData();
+    });
   }
   
   void _initializeWithProfileData() {
     final profile = _profileController.userProfile;
+    
+    // Debug: Print profile status
+
 
     if (profile != null) {
-      _nameController.text = profile.name ?? 'adel';
+      _nameController.text = profile.name ?? 'Guest User';
       _emailController.text = profile.email;
-      _phoneController.text = profile.phone ?? '01115';
-      _addressController.text = profile.address ?? 'asdsasdsa';
-      _dobController.text = profile.dateOfBirth ?? '1990-01-01'; // Default date if not available
+      _phoneController.text = profile.phone ?? '';
+      _addressController.text = profile.address ?? '';
+      _dobController.text = profile.dateOfBirth ?? '1990-01-01';
+    } else {
+      // Handle null profile case - Load from storage or show defaults
+      _loadDefaultOrStoredData();
     }
+  }
+  
+  void _loadDefaultOrStoredData() async {
+    // Try to load user data from storage or AuthService
+    try {
+      // If you have an AuthService with user data
+      final authService = Get.find<AuthService>();
+      
+      if (authService.authStatus == AuthStatus.authenticated) {
+        // For authenticated users, try to refresh profile
+        await _profileController.refreshProfile();
+        final profile = _profileController.userProfile;
+        
+        if (profile != null) {
+          _nameController.text = profile.name ?? 'User';
+          _emailController.text = profile.email;
+          _phoneController.text = profile.phone ?? '';
+          _addressController.text = profile.address ?? '';
+          _dobController.text = profile.dateOfBirth ?? '1990-01-01';
+        } else {
+          // Still null after refresh, use defaults
+          _setDefaultValues();
+        }
+      } else if (authService.authStatus == AuthStatus.guest) {
+        // Guest mode - show guest values
+        _nameController.text = 'Guest User';
+        _emailController.text = 'guest@example.com';
+        _phoneController.text = '';
+        _addressController.text = '';
+        _dobController.text = '1990-01-01';
+      } else {
+        // Unauthenticated - show empty fields
+        _nameController.text = '';
+        _emailController.text = '';
+        _phoneController.text = '';
+        _addressController.text = '';
+        _dobController.text = '';
+      }
+    } catch (e) {
+      _setDefaultValues();
+    }
+  }
+  
+  void _setDefaultValues() {
+    _nameController.text = 'User';
+    _emailController.text = 'user@example.com';
+    _phoneController.text = '';
+    _addressController.text = '';
+    _dobController.text = '1990-01-01';
   }
 
   @override

@@ -31,6 +31,17 @@ class LocationService extends GetxService {
   String get currentCountry => _currentCountry.value;
   bool get isFirstLaunch => _isFirstLaunch.value;
 
+  // Reactive getters for use in Obx widgets
+  RxBool get isLocationEnabledRx => _isLocationEnabled;
+  RxBool get isPermissionGrantedRx => _isPermissionGranted;
+  RxBool get isLoadingRx => _isLoading;
+  Rx<Position?> get currentPositionRx => _currentPosition;
+  RxString get currentAddressRx => _currentAddress;
+  RxString get currentCityRx => _currentCity;
+  RxString get currentStateRx => _currentState;
+  RxString get currentCountryRx => _currentCountry;
+  RxBool get isFirstLaunchRx => _isFirstLaunch;
+
   // Location update stream
   StreamSubscription<Position>? _positionStream;
 

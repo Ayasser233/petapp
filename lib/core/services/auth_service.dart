@@ -14,8 +14,11 @@ class AuthService extends GetxService {
   AuthService({required TokenService tokenService}) 
       : _tokenService = tokenService;
   
-  // Getter for auth status
+  // Getter for auth status (reactive)
   AuthStatus get authStatus => _authStatus.value;
+  
+  // Getter for reactive auth status
+  Rx<AuthStatus> get authStatusRx => _authStatus;
   
   // Stream to listen for auth changes
   Stream<AuthStatus> get authStateChanges => _authStatus.stream;

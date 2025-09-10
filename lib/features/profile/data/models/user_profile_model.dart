@@ -36,8 +36,12 @@ class UserProfileModel {
       profilePictureUrl: json['profile_picture_url'],
       emailVerified: json['email_verified'] ?? false,
       twoFactorEnabled: json['two_factor_enabled'] ?? false,
-      createdAt: DateTime.parse(json['created_at']),
-      updatedAt: DateTime.parse(json['updated_at']),
+      createdAt: json['created_at'] != null 
+          ? DateTime.parse(json['created_at']) 
+          : DateTime.now(),
+      updatedAt: json['updated_at'] != null 
+          ? DateTime.parse(json['updated_at']) 
+          : DateTime.now(),
     );
   }
 

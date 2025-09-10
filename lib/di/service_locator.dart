@@ -10,8 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:petapp/features/pet/services/pet_api_service.dart';
 import 'package:petapp/features/pet/data/repositories/pet_repository.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
-import 'package:petapp/features/profile/controller/profile_controller.dart';
+import 'package:petapp/features/profile/controllers/profile_controller.dart';
 import 'package:petapp/features/profile/data/repositories/profile_repository.dart';
+import 'package:petapp/features/profile/data/repositories/voucher_repository.dart';
 
 final sl = GetIt.instance;
 
@@ -56,6 +57,12 @@ Future<void> setupServiceLocator() async {
     () => ProfileController(profileRepository: sl()),
   );
   
+  // Voucher (no longer needs ApiClient - uses static data)
+  sl.registerLazySingleton<VoucherRepository>(
+    () => VoucherRepository(),
+  );
+  
+
   // Cubits
   sl.registerFactory(() => AuthCubit(
     authRepository: sl(),

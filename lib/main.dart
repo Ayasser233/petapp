@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/themes/app_theme.dart';
 import 'package:petapp/core/routes/routes.dart';
-import 'package:petapp/features/profile/controller/profile_controller.dart';
+import 'package:petapp/features/profile/controllers/profile_controller.dart';
 import 'package:provider/provider.dart';
 import 'package:petapp/core/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -62,7 +62,7 @@ Future<void> initServices() async {
   
   // Initialize controllers
   Get.lazyPut(() => sl<PetController>());
-  Get.lazyPut(() => sl<ProfileController>()); // Add this line
+  Get.lazyPut(() => sl<ProfileController>()); 
 
 }
 
@@ -112,6 +112,7 @@ class _MyAppState extends State<MyApp> {
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
+        
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       initialRoute: AppRoutes.networkSplash, // Always start with the splash

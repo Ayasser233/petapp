@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/profile/screens/account_details_screen.dart';
 
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
   
@@ -22,6 +23,7 @@ class ProfileScreen extends StatelessWidget {
     final localizations = AppLocalizations.of(context);
     final authService = Get.find<AuthService>();
     final isGuest = authService.authStatus == AuthStatus.guest;
+
     
     return BaseScreen(
       navBarIndex: 2,
@@ -87,7 +89,7 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 
                 // Aleefy Points option
-                _buildProfileOption(
+               _buildProfileOptionWithCount(
                   context,
                   localizations.aleefyPoints,
                   Icons.stars_rounded,
@@ -104,7 +106,6 @@ class ProfileScreen extends StatelessWidget {
                 
                 const SizedBox(height: 12),
                 
-                // Vouchers option with Add New Voucher button
                 _buildVouchersOption(
                   context,
                   isDark: isDark,
@@ -355,8 +356,8 @@ class ProfileScreen extends StatelessWidget {
                     padding: const EdgeInsets.only(left: 36.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        // Open redeem voucher dialog or navigate to redeem screen
-                        Get.toNamed(AppRoutes.redeem);
+                        // Open add voucher dialog
+                        _showAddVoucherDialog(context, isDark);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.orange,
@@ -625,7 +626,8 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
     
-    // Simulate API call
+    // Use the voucher controller to add voucher
+      // Simulate API call
     Future.delayed(const Duration(seconds: 2), () {
       // Simulate success/failure
       final isValid = code.toUpperCase().startsWith('ALEEFY') || 
@@ -681,6 +683,7 @@ class ProfileScreen extends StatelessWidget {
       }
     });
   }
+  }
   
   // Profile option widget
   Widget _buildProfileOption(
@@ -731,6 +734,73 @@ class ProfileScreen extends StatelessWidget {
                   fontWeight: FontWeight.w500,
                   color: textColor ?? defaultTextColor,
                 ),
+              ),
+            ),
+            const Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: Colors.grey,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  // Profile option with count display
+  Widget _buildProfileOptionWithCount(
+    BuildContext context, 
+    String title, 
+    IconData icon, 
+    VoidCallback onTap,
+    {bool isDark = false, Color cardColor = Colors.white, Color? textColor}
+  ) {
+    final defaultTextColor = isDark ? Colors.white : Colors.black87;
+    
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 5,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.lightorange.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: AppColors.orange,
+                size: 22,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: textColor ?? defaultTextColor,
+                    ),
+                  ),
+                ],
               ),
             ),
             const Icon(
@@ -847,4 +917,3 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
   }
-}
