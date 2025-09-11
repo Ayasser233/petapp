@@ -62,7 +62,7 @@ class VoucherRepository {
   ];
 
   // Current user vouchers (will be modified based on authentication)
-  static List<VoucherModel> _userVouchers = List.from(_dummyVouchers);
+  static final List<VoucherModel> _userVouchers = List.from(_dummyVouchers);
 
   VoucherRepository();
 

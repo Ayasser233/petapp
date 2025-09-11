@@ -6,6 +6,7 @@ import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/pet/widgets/pet_3d_viewer.dart';
 import 'package:petapp/features/pet/data/pet_symptom_data.dart';
+import 'package:petapp/core/widgets/cached_asset_image.dart';
 
 class Pet3DViewerScreen extends StatefulWidget {
   final String petType;
@@ -1144,22 +1145,31 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                                 borderRadius: const BorderRadius.vertical(
                                   top: Radius.circular(8),
                                 ),
-                                child: Image.asset(
-                                  image['url']!,
+                                child: CachedAssetImage(
+                                  assetPath: image['url']!,
                                   fit: BoxFit.cover,
                                   width: double.infinity,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      color: Colors.grey[300],
-                                      child: const Center(
-                                        child: Icon(
+                                  errorWidget: Container(
+                                    color: Colors.grey[300],
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const Icon(
                                           Icons.image_not_supported,
                                           color: Colors.grey,
                                           size: 40,
                                         ),
-                                      ),
-                                    );
-                                  },
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Image not found',
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -1257,17 +1267,15 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             ),
             Expanded(
               child: InteractiveViewer(
-                child: Image.asset(
-                  imageUrl,
+                child: CachedAssetImage(
+                  assetPath: imageUrl,
                   fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Center(
-                      child: Text(
-                        AppLocalizations.of(context).imageNotAvailable,
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    );
-                  },
+                  errorWidget: Center(
+                    child: Text(
+                      AppLocalizations.of(context).imageNotAvailable,
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -1285,7 +1293,9 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
       'Eye Redness': [
         {'url': 'assets/images/symptoms/eye_redness_1.jpg'},
       ],
-      'Eye Discharge (Goopy Stuff)': [],
+      'Eye Discharge (Goopy Stuff)': [
+        {'url': 'assets/images/symptoms/watery_eyes_1.jpg'},
+      ],
       'Cloudy Eye (Looks Foggy or Bluish)': [
         {'url': 'assets/images/symptoms/cloudy_eye_1.jpg'},
         {'url': 'assets/images/symptoms/cloudy_eye_2.jpg'},
@@ -1356,18 +1366,19 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
 
       // Skin & Coat Problems
       'Hair Loss': [
+        {'url': 'assets/images/symptoms/bald_patches_1.jpg'},
       ],
       'Bald Spots (Patches of Missing Hair)': [
         {'url': 'assets/images/symptoms/bald_patches_1.jpg'},
         {'url': 'assets/images/symptoms/bald_patches_2.jpg'},
       ],
       'Itchy Skin (Scratching a Lot)': [
+        {'url': 'assets/images/symptoms/inflamed_skin_1.jpg'},
       ],
       'Constant Licking in One Spot': [
       ],
       'Red or Inflamed Skin': [
         {'url': 'assets/images/symptoms/inflamed_skin_1.jpg'},
-        {'url': 'assets/images/symptoms/inflamed_skin_2.jpg'},
       ],
       'Dandruff (Flaky Skin)': [
         {'url': 'assets/images/symptoms/dandruff_1.jpg'},
@@ -1376,6 +1387,10 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
         {'url': 'assets/images/symptoms/scabs_crusty_skin_1.jpg'},
       ],
       'Lumps or Bumps': [
+        {'url': 'assets/images/symptoms/swelling_around_eye_1.jpg'},
+        {'url': 'assets/images/symptoms/tongue_lip_swelling_1.jpg'},
+      ],
+      'Dull or Greasy Coat': [
         {'url': 'assets/images/symptoms/dull_greasy_coat_1.jpg'},
         {'url': 'assets/images/symptoms/dull_greasy_coat_2.jpg'},
         {'url': 'assets/images/symptoms/dull_greasy_coat_3.jpg'},
@@ -1444,8 +1459,8 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     // Return specific images for the symptom, or default images if not found
     return symptomImageMap[symptomName] ??
         [
-          {'url': 'assets/images/symptoms/default_symptom_1.jpg'},
-          {'url': 'assets/images/symptoms/default_symptom_2.jpg'},
+          {'url': 'assets/images/symptoms/eye_redness_1.jpg'},
+          {'url': 'assets/images/symptoms/inflamed_skin_1.jpg'},
         ];
   }
 }

@@ -5,7 +5,7 @@ import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/widgets/custom_app_bar.dart';
-import 'package:petapp/core/widgets/rewards_card.dart';
+// import 'package:petapp/core/widgets/rewards_card.dart'; // TODO: Uncomment when APIs are ready
 import 'package:petapp/core/services/location_service.dart';
 import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/features/clinics/models/clinic_model.dart';
@@ -226,23 +226,69 @@ class _HomeScreenState extends State<HomeScreen> {
                         
                         const SizedBox(height: 24),
 
-                      // Reusable Rewards Card
-                      RewardsCard(
-                        points: 3540,
-                        vouchers: 3,
-                        onRedeemTap: () {
-                          // Navigate to redeem screen
-                          Get.toNamed('/redeem');
-                        },
-                        onVouchersTap: () {
-                          Get.toNamed(AppRoutes.vouchers);
-                        },
-                        onViewHistoryTap: () {
-                          Get.toNamed(AppRoutes.pointsHistory);
-                        },
-                      ),
-                      
-                      const SizedBox(height: 24),
+                        // Rewards Card - Only show for authenticated users
+                        if (!_isGuestUser) ...[
+                          // TODO: Uncomment when APIs are available
+                          // _buildRewardsCard(),
+                          
+                          // TEMPORARY: Comment out until APIs are ready
+                          // The logic below will be used when user data APIs are available
+                          /*
+                          // When APIs are ready, use this logic:
+                          FutureBuilder(
+                            future: _loadUserRewardsData(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(color: AppColors.orange),
+                                );
+                              }
+                              
+                              if (snapshot.hasError) {
+                                return const SizedBox.shrink(); // Hide on error
+                              }
+                              
+                              final userData = snapshot.data as Map<String, dynamic>?;
+                              return RewardsCard(
+                                points: userData?['points'] ?? 0,
+                                vouchers: userData?['vouchers'] ?? 0,
+                                onRedeemTap: () => Get.toNamed('/redeem'),
+                                onVouchersTap: () => Get.toNamed(AppRoutes.vouchers),
+                                onViewHistoryTap: () => Get.toNamed(AppRoutes.pointsHistory),
+                              );
+                            },
+                          ),
+                          */
+                          
+                          // Placeholder for authenticated users (remove when APIs are ready)
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: AppColors.orange.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: AppColors.orange.withOpacity(0.3)),
+                            ),
+                            child: const Row(
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  color: AppColors.orange,
+                                ),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Rewards and vouchers will appear here once user data APIs are connected.',
+                                    style: TextStyle(
+                                      color: AppColors.orange,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
 
                         // Near You section
                         Row(
@@ -785,4 +831,105 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+  // TODO: Uncomment and implement when APIs are ready
+  /*
+  /// Load user rewards data from API
+  Future<Map<String, dynamic>> _loadUserRewardsData() async {
+    try {
+      // TODO: Replace with actual API calls
+      // final pointsResponse = await ApiService.getUserPoints();
+      // final vouchersResponse = await ApiService.getUserVouchers();
+      
+      // For now, return mock data structure
+      return {
+        'points': 0, // pointsResponse.data['points']
+        'vouchers': 0, // vouchersResponse.data['available_vouchers']
+        'history': [], // pointsResponse.data['history']
+      };
+    } catch (e) {
+      print('Error loading user rewards data: $e');
+      return {
+        'points': 0,
+        'vouchers': 0,
+        'history': [],
+      };
+    }
+  }
+
+  /// Build rewards card with API data
+  Widget _buildRewardsCard() {
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _loadUserRewardsData(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            height: 120,
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Center(
+              child: CircularProgressIndicator(color: AppColors.orange),
+            ),
+          );
+        }
+        
+        if (snapshot.hasError) {
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.red.withOpacity(0.3)),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.error_outline, color: Colors.red),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Failed to load rewards data. Please try again.',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        
+        final userData = snapshot.data ?? {};
+        return RewardsCard(
+          points: userData['points'] ?? 0,
+          vouchers: userData['vouchers'] ?? 0,
+          onRedeemTap: () {
+            if (userData['points'] > 0) {
+              Get.toNamed('/redeem');
+            } else {
+              _showNoPointsDialog();
+            }
+          },
+          onVouchersTap: () => Get.toNamed(AppRoutes.vouchers),
+          onViewHistoryTap: () => Get.toNamed(AppRoutes.pointsHistory),
+        );
+      },
+    );
+  }
+
+  /// Show dialog when user has no points
+  void _showNoPointsDialog() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('No Points Available'),
+        content: const Text('You don\'t have any points to redeem yet. Start using our services to earn points!'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+  */
 }
