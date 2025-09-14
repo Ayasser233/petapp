@@ -1,0 +1,91 @@
+name: Version Bump and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+      custom_version:
+        description: 'Custom version (optional, overrides version_type)'
+        required: false
+        type: string
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        
+    - name: Install semver
+      run: npm install -g semver
+      
+    - name: Get current version
+      id: current_version
+      run: |
+        CURRENT_VERSION=$(grep 'version:' pubspec.yaml | cut -d ' ' -f 2 | cut -d '+' -f 1 | tr -d '\r')
+        BUILD_NUMBER=$(grep 'version:' pubspec.yaml | cut -d '+' -f 2 | tr -d '\r')
+        echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+        echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+        
+    - name: Calculate new version
+      id: new_version
+      run: |
+        if [ -n "${{ github.event.inputs.custom_version }}" ]; then
+          NEW_VERSION="${{ github.event.inputs.custom_version }}"
+        else
+          NEW_VERSION=$(semver -i ${{ github.event.inputs.version_type }} ${{ steps.current_version.outputs.CURRENT_VERSION }})
+        fi
+        NEW_BUILD_NUMBER=$(($(echo "${{ steps.current_version.outputs.BUILD_NUMBER }}" | sed 's/[^0-9]*//g') + 1))
+        echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "NEW_BUILD_NUMBER=$NEW_BUILD_NUMBER" >> $GITHUB_OUTPUT
+        echo "FULL_VERSION=$NEW_VERSION+$NEW_BUILD_NUMBER" >> $GITHUB_OUTPUT
+        
+    - name: Update pubspec.yaml
+      run: |
+        sed -i "s/version: .*/version: ${{ steps.new_version.outputs.FULL_VERSION }}/" pubspec.yaml
+        
+    - name: Update iOS version
+      run: |
+        # Update CFBundleShortVersionString
+        /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString ${{ steps.new_version.outputs.NEW_VERSION }}" ios/Runner/Info.plist
+        # Update CFBundleVersion
+        /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${{ steps.new_version.outputs.NEW_BUILD_NUMBER }}" ios/Runner/Info.plist
+        
+    - name: Update Android version
+      run: |
+        # Update versionName and versionCode in build.gradle
+        sed -i "s/versionCode flutter.versionCode/versionCode ${{ steps.new_version.outputs.NEW_BUILD_NUMBER }}/" android/app/build.gradle
+        sed -i "s/versionName flutter.versionName/versionName \"${{ steps.new_version.outputs.NEW_VERSION }}\"/" android/app/build.gradle
+        
+    - name: Commit version bump
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Bump version to ${{ steps.new_version.outputs.FULL_VERSION }}"
+        git tag "v${{ steps.new_version.outputs.NEW_VERSION }}"
+        git push origin main
+        git push origin "v${{ steps.new_version.outputs.NEW_VERSION }}"
+        
+    - name: Trigger build workflow
+      uses: peter-evans/repository-dispatch@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        event-type: version-bumped
+        client-payload: '{"version": "${{ steps.new_version.outputs.NEW_VERSION }}", "build_number": "${{ steps.new_version.outputs.NEW_BUILD_NUMBER }}"}'

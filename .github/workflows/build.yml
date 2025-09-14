@@ -1,0 +1,261 @@
+name: Build Flutter App
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build type'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+        - debug
+        - release
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'zulu'
+        java-version: '11'
+        
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.22.1'
+        channel: 'stable'
+        cache: true
+        
+    - name: Install dependencies
+      run: flutter pub get
+      
+    - name: Generate app icons
+      run: flutter pub run flutter_launcher_icons:main
+      
+    - name: Analyze code
+      run: flutter analyze
+      
+    - name: Run tests
+      run: flutter test
+      
+    - name: Build APK (Debug)
+      if: github.event.inputs.build_type == 'debug' || github.event.inputs.build_type == ''
+      run: flutter build apk --debug
+      
+    - name: Build APK (Release)
+      if: github.event.inputs.build_type == 'release'
+      run: flutter build apk --release
+      
+    - name: Build App Bundle (Release)
+      if: github.event.inputs.build_type == 'release'
+      run: flutter build appbundle --release
+      
+    - name: Upload APK Debug Artifact
+      if: github.event.inputs.build_type == 'debug' || github.event.inputs.build_type == ''
+      uses: actions/upload-artifact@v3
+      with:
+        name: petapp-debug-apk
+        path: build/app/outputs/flutter-apk/app-debug.apk
+        
+    - name: Upload APK Release Artifact
+      if: github.event.inputs.build_type == 'release'
+      uses: actions/upload-artifact@v3
+      with:
+        name: petapp-release-apk
+        path: build/app/outputs/flutter-apk/app-release.apk
+        
+    - name: Upload App Bundle Artifact
+      if: github.event.inputs.build_type == 'release'
+      uses: actions/upload-artifact@v3
+      with:
+        name: petapp-release-aab
+        path: build/app/outputs/bundle/release/app-release.aab
+
+  build-ios:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.22.1'
+        channel: 'stable'
+        cache: true
+        
+    - name: Install dependencies
+      run: flutter pub get
+      
+    - name: Generate app icons
+      run: flutter pub run flutter_launcher_icons:main
+      
+    - name: Install CocoaPods
+      run: |
+        cd ios
+        pod install
+        
+    - name: Build iOS (Debug)
+      if: github.event.inputs.build_type == 'debug' || github.event.inputs.build_type == ''
+      run: |
+        flutter build ios --debug --no-codesign
+        
+    - name: Build iOS (Release - No Code Sign)
+      if: github.event.inputs.build_type == 'release'
+      run: |
+        flutter build ios --release --no-codesign
+        
+    - name: Create IPA (Debug)
+      if: github.event.inputs.build_type == 'debug' || github.event.inputs.build_type == ''
+      run: |
+        mkdir -p build/ios/ipa
+        cd build/ios/iphoneos
+        zip -r ../ipa/petapp-debug.ipa Runner.app/
+        
+    - name: Create IPA (Release)
+      if: github.event.inputs.build_type == 'release'
+      run: |
+        mkdir -p build/ios/ipa
+        cd build/ios/iphoneos
+        zip -r ../ipa/petapp-release.ipa Runner.app/
+        
+    - name: Upload IPA Debug Artifact
+      if: github.event.inputs.build_type == 'debug' || github.event.inputs.build_type == ''
+      uses: actions/upload-artifact@v3
+      with:
+        name: petapp-debug-ipa
+        path: build/ios/ipa/petapp-debug.ipa
+        
+    - name: Upload IPA Release Artifact
+      if: github.event.inputs.build_type == 'release'
+      uses: actions/upload-artifact@v3
+      with:
+        name: petapp-release-ipa
+        path: build/ios/ipa/petapp-release.ipa
+
+  build-web:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.22.1'
+        channel: 'stable'
+        cache: true
+        
+    - name: Install dependencies
+      run: flutter pub get
+      
+    - name: Build Web
+      run: flutter build web --release
+      
+    - name: Archive Web Build
+      run: |
+        cd build/web
+        tar -czf ../../petapp-web.tar.gz .
+        
+    - name: Upload Web Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: petapp-web
+        path: petapp-web.tar.gz
+
+  create-release:
+    needs: [build-android, build-ios, build-web]
+    runs-on: ubuntu-latest
+    if: github.event.inputs.build_type == 'release' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Get version from pubspec.yaml
+      id: version
+      run: |
+        VERSION=$(grep 'version:' pubspec.yaml | cut -d ' ' -f 2 | tr -d '\r')
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "TAG=v$VERSION" >> $GITHUB_OUTPUT
+        
+    - name: Download Android APK
+      uses: actions/download-artifact@v3
+      with:
+        name: petapp-release-apk
+        path: ./artifacts/
+        
+    - name: Download Android AAB
+      uses: actions/download-artifact@v3
+      with:
+        name: petapp-release-aab
+        path: ./artifacts/
+        
+    - name: Download iOS IPA
+      uses: actions/download-artifact@v3
+      with:
+        name: petapp-release-ipa
+        path: ./artifacts/
+        
+    - name: Download Web Build
+      uses: actions/download-artifact@v3
+      with:
+        name: petapp-web
+        path: ./artifacts/
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.version.outputs.TAG }}
+        name: Release ${{ steps.version.outputs.VERSION }}
+        draft: false
+        prerelease: false
+        files: |
+          ./artifacts/app-release.apk
+          ./artifacts/app-release.aab
+          ./artifacts/petapp-release.ipa
+          ./artifacts/petapp-web.tar.gz
+        body: |
+          ## Release Notes
+          
+          ### 📱 Mobile Apps
+          - **Android APK**: Direct installation file for Android devices
+          - **Android AAB**: Google Play Store bundle format
+          - **iOS IPA**: iOS application package (requires proper signing for installation)
+          
+          ### 🌐 Web App
+          - **Web Build**: Flutter web application archive
+          
+          ### 📋 Installation Instructions
+          
+          **Android:**
+          1. Download the APK file
+          2. Enable "Unknown sources" in your device settings
+          3. Install the APK file
+          
+          **iOS:**
+          1. Download the IPA file
+          2. Use tools like AltStore or Sideloadly to install (requires Apple Developer account for proper signing)
+          
+          **Web:**
+          1. Download and extract the web archive
+          2. Serve the files using any web server
+          
+          ---
+          
+          🤖 This release was automatically generated by GitHub Actions.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
