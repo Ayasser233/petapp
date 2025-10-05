@@ -105,7 +105,7 @@ class _EnterVerificationCodeScreenState extends State<EnterVerificationCodeScree
         'Code Sent',
         'A new verification code has been sent to $_email',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green.withOpacity(0.1),
+        backgroundColor: Colors.green.withValues(alpha: 0.1),
         colorText: Colors.green,
       );
     } catch (e) {
@@ -355,7 +355,7 @@ class _EnterVerificationCodeScreenState extends State<EnterVerificationCodeScree
                     borderRadius: BorderRadius.circular(16.0),
                   ),
                   elevation: 0,
-                  disabledBackgroundColor: AppColors.orange.withOpacity(0.5),
+                  disabledBackgroundColor: AppColors.orange.withValues(alpha: 0.5),
                 ),
                 child: _isLoading
                   ? const SizedBox(

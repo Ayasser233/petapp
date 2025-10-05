@@ -264,9 +264,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: AppColors.orange.withOpacity(0.1),
+                              color: AppColors.orange.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppColors.orange.withOpacity(0.3)),
+                              border: Border.all(color: AppColors.orange.withValues(alpha: 0.3)),
                             ),
                             child: const Row(
                               children: [
@@ -360,16 +360,16 @@ class _HomeScreenState extends State<HomeScreen> {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: AppColors.orange.withOpacity(0.1),
+          color: AppColors.orange.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: AppColors.orange.withOpacity(0.3)),
+          border: Border.all(color: AppColors.orange.withValues(alpha: 0.3)),
         ),
         child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: AppColors.orange.withOpacity(0.2),
+                color: AppColors.orange.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -429,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
-              color: AppColors.orange.withOpacity(0.2),
+              color: AppColors.orange.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
             child: const Icon(
@@ -587,7 +587,7 @@ class _HomeScreenState extends State<HomeScreen> {
           // Enhanced shadow for light theme
           boxShadow: [
             if (!isDark) BoxShadow(
-              color: Colors.grey.withOpacity(0.25), // More pronounced shadow
+              color: Colors.grey.withValues(alpha: 0.25), // More pronounced shadow
               blurRadius: 12, // Larger blur
               spreadRadius: 1, // Add spread
               offset: const Offset(0, 4), // Deeper shadow
@@ -595,7 +595,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
           // Add subtle border in light theme for extra definition
           border: !isDark
-            ? Border.all(color: Colors.grey.withOpacity(0.1), width: 1.0)
+            ? Border.all(color: Colors.grey.withValues(alpha: 0.1), width: 1.0)
             : null,
         ),
         child: Column(
@@ -607,7 +607,7 @@ class _HomeScreenState extends State<HomeScreen> {
               decoration: !isDark ? BoxDecoration(
                 // Add a subtle circular background for the icon in light theme
                 shape: BoxShape.circle,
-                color: AppColors.orange.withOpacity(0.1),
+                color: AppColors.orange.withValues(alpha: 0.1),
               ) : null,
               child: Image.asset(
                 icon,
@@ -653,8 +653,8 @@ class _HomeScreenState extends State<HomeScreen> {
           boxShadow: [
             BoxShadow(
               color: isDark 
-                ? Colors.black.withOpacity(0.2) 
-                : Colors.grey.withOpacity(0.15),
+                ? Colors.black.withValues(alpha: 0.2) 
+                : Colors.grey.withValues(alpha: 0.15),
               spreadRadius: 1,
               blurRadius: 8,
               offset: const Offset(0, 3),
@@ -689,7 +689,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.6),
+                      color: Colors.black.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -790,7 +790,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-      color: AppColors.orange.withOpacity(0.1),
+      color: AppColors.orange.withValues(alpha: 0.1),
       child: Row(
         children: [
           const Icon(
@@ -879,9 +879,9 @@ class _HomeScreenState extends State<HomeScreen> {
           return Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(0.1),
+              color: Colors.red.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.red.withOpacity(0.3)),
+              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [

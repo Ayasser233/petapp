@@ -3,36 +3,54 @@ import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
+import 'package:petapp/features/pet/controllers/pet_controller.dart';
+import 'package:petapp/di/service_locator.dart';
 import 'dart:io';
 
-class PetProfileScreen extends StatelessWidget {
+class PetProfileScreen extends StatefulWidget {
   final PetModel pet;
-  
+
   const PetProfileScreen({
     super.key,
     required this.pet,
   });
 
   @override
+  State<PetProfileScreen> createState() => _PetProfileScreenState();
+}
+
+class _PetProfileScreenState extends State<PetProfileScreen> {
+  late final PetController _petController;
+  bool _isDeleting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _petController = sl<PetController>();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // Determine if dark theme is active
     final isDark = THelperFunctions.isDarkMode(context);
-    
+
     // Get pet age
-    final age = _calculateAge(pet.dateOfBirth);
-    
+    final age = _calculateAge(widget.pet.dateOfBirth);
+
     // Use app theme color instead of pet type-based colors
     const Color themeColor = AppColors.orange;
-    
+
     // Define theme-dependent colors
     final Color backgroundColor = isDark ? Colors.grey[900]! : Colors.white;
     final Color textColor = isDark ? Colors.white : Colors.grey[800]!;
     final Color subTextColor = isDark ? Colors.grey[400]! : Colors.grey[600]!;
     final Color cardColor = isDark ? Colors.grey[850]! : Colors.white;
-    final Color cardBorderColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final Color cardBorderColor =
+        isDark ? Colors.grey[800]! : Colors.grey[300]!;
     final Color notesBgColor = isDark ? Colors.grey[800]! : Colors.grey[100]!;
-    final Color emptyStateBgColor = isDark ? Colors.grey[800]! : Colors.grey[100]!;
-    
+    final Color emptyStateBgColor =
+        isDark ? Colors.grey[800]! : Colors.grey[100]!;
+
     return Scaffold(
       backgroundColor: backgroundColor,
       body: CustomScrollView(
@@ -59,13 +77,13 @@ class PetProfileScreen extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   // Pet image
-                  pet.image.startsWith('assets/')
+                  widget.pet.image.startsWith('assets/')
                       ? Image.asset(
-                          pet.image,
+                          widget.pet.image,
                           fit: BoxFit.cover,
                         )
                       : Image.file(
-                          File(pet.image),
+                          File(widget.pet.image),
                           fit: BoxFit.cover,
                         ),
                   // Gradient overlay
@@ -76,7 +94,7 @@ class PetProfileScreen extends StatelessWidget {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.7),
+                          Colors.black.withValues(alpha: 0.7),
                         ],
                       ),
                     ),
@@ -90,7 +108,7 @@ class PetProfileScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          pet.name,
+                          widget.pet.name,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 28,
@@ -101,13 +119,14 @@ class PetProfileScreen extends StatelessWidget {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                pet.customSpecies ?? pet.species,
+                                widget.pet.customSpecies ?? widget.pet.species,
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
@@ -116,9 +135,10 @@ class PetProfileScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
+                                color: Colors.white.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
@@ -138,7 +158,7 @@ class PetProfileScreen extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Pet details
           SliverToBoxAdapter(
             child: Padding(
@@ -152,7 +172,7 @@ class PetProfileScreen extends StatelessWidget {
                       _buildInfoCard(
                         context,
                         'Birthday',
-                        _formatDate(pet.dateOfBirth),
+                        _formatDate(widget.pet.dateOfBirth),
                         Icons.cake,
                         themeColor,
                         isDark,
@@ -161,19 +181,24 @@ class PetProfileScreen extends StatelessWidget {
                       _buildInfoCard(
                         context,
                         'Species',
-                        pet.customSpecies ?? pet.species.toUpperCase(),
-                        pet.species.toLowerCase() == 'dog' ? Icons.pets : Icons.emoji_nature,
+                        widget.pet.customSpecies ??
+                            widget.pet.species.toUpperCase(),
+                        widget.pet.species.toLowerCase() == 'dog'
+                            ? Icons.pets
+                            : Icons.emoji_nature,
                         themeColor,
                         isDark,
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Notes section
-                  if (pet.medicalHistory?.notes != null && pet.medicalHistory!.notes!.isNotEmpty) ...[
-                    _buildSectionHeader('Notes', Icons.note_alt, themeColor, textColor),
+                  if (widget.pet.medicalHistory?.notes != null &&
+                      widget.pet.medicalHistory!.notes!.isNotEmpty) ...[
+                    _buildSectionHeader(
+                        'Notes', Icons.note_alt, themeColor, textColor),
                     const SizedBox(height: 8),
                     Container(
                       width: double.infinity,
@@ -184,7 +209,7 @@ class PetProfileScreen extends StatelessWidget {
                         border: Border.all(color: cardBorderColor),
                       ),
                       child: Text(
-                        pet.medicalHistory!.notes!,
+                        widget.pet.medicalHistory!.notes!,
                         style: TextStyle(
                           color: textColor,
                           height: 1.5,
@@ -193,59 +218,43 @@ class PetProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                   ],
-                  
-                  // Breed info (if available)
-                  if (pet.breed != null && pet.breed!.isNotEmpty) ...[
-                    _buildSectionHeader('Breed', Icons.pets, themeColor, textColor),
-                    const SizedBox(height: 8),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: notesBgColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: cardBorderColor),
-                      ),
-                      child: Text(
-                        pet.breed!,
-                        style: TextStyle(
-                          color: textColor,
-                          height: 1.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                  
+
+
+
                   // Vaccinations section
-                  _buildSectionHeader('Vaccinations', Icons.medical_services, themeColor, textColor),
+                  _buildSectionHeader('Vaccinations', Icons.medical_services,
+                      themeColor, textColor),
                   const SizedBox(height: 8),
-                  
-                  if (pet.medicalHistory?.vaccinations == null || pet.medicalHistory!.vaccinations!.isEmpty)
-                    _buildEmptyVaccinationsCard(emptyStateBgColor, subTextColor, cardBorderColor)
+
+                  if (widget.pet.medicalHistory?.vaccinations == null ||
+                      widget.pet.medicalHistory!.vaccinations!.isEmpty)
+                    _buildEmptyVaccinationsCard(
+                        emptyStateBgColor, subTextColor, cardBorderColor)
                   else
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: pet.medicalHistory!.vaccinations!.length,
+                      itemCount:
+                          widget.pet.medicalHistory!.vaccinations!.length,
                       itemBuilder: (context, index) {
                         return _buildVaccinationCard(
-                          pet.medicalHistory!.vaccinations![index], 
-                          themeColor, 
-                          cardColor, 
-                          textColor, 
+                          widget.pet.medicalHistory!.vaccinations![index],
+                          themeColor,
+                          cardColor,
+                          textColor,
                           subTextColor,
                           isDark,
                         );
                       },
                     ),
-                    
+
                   const SizedBox(height: 24),
-                  
+
                   // Medical details section
-                  _buildSectionHeader('Medical Details', Icons.health_and_safety, themeColor, textColor),
+                  _buildSectionHeader('Medical Details',
+                      Icons.health_and_safety, themeColor, textColor),
                   const SizedBox(height: 8),
-                  
+
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
@@ -257,33 +266,54 @@ class PetProfileScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (pet.medicalHistory?.weight != null) ...[
-                          _buildMedicalDetailRow('Weight', '${pet.medicalHistory!.weight} kg', Icons.monitor_weight, textColor, subTextColor),
-                          const SizedBox(height: 12),
-                        ],
-                        if (pet.medicalHistory?.lastVetVisit != null) ...[
-                          _buildMedicalDetailRow('Last Vet Visit', _formatDate(pet.medicalHistory!.lastVetVisit!), Icons.event, textColor, subTextColor),
-                          const SizedBox(height: 12),
-                        ],
-                        if (pet.medicalHistory?.spayNeuterStatus != null) ...[
+                        if (widget.pet.medicalHistory?.weight != null) ...[
                           _buildMedicalDetailRow(
-                            'Spayed/Neutered', 
-                            pet.medicalHistory!.spayNeuterStatus! ? 'Yes' : 'No', 
-                            Icons.pets, 
-                            textColor, 
-                            subTextColor
-                          ),
+                              'Weight',
+                              '${widget.pet.medicalHistory!.weight} kg',
+                              Icons.monitor_weight,
+                              textColor,
+                              subTextColor),
                           const SizedBox(height: 12),
                         ],
-                        if (pet.medicalHistory?.allergies != null && pet.medicalHistory!.allergies!.isNotEmpty) ...[
-                          _buildMedicalDetailRow('Allergies', pet.medicalHistory!.allergies!.join(', '), Icons.warning_amber, textColor, subTextColor),
+                        if (widget.pet.medicalHistory?.lastVetVisit !=
+                            null) ...[
+                          _buildMedicalDetailRow(
+                              'Last Vet Visit',
+                              _formatDate(
+                                  widget.pet.medicalHistory!.lastVetVisit!),
+                              Icons.event,
+                              textColor,
+                              subTextColor),
+                          const SizedBox(height: 12),
+                        ],
+                        if (widget.pet.medicalHistory?.spayNeuterStatus !=
+                            null) ...[
+                          _buildMedicalDetailRow(
+                              'Spayed/Neutered',
+                              widget.pet.medicalHistory!.spayNeuterStatus!
+                                  ? 'Yes'
+                                  : 'No',
+                              Icons.pets,
+                              textColor,
+                              subTextColor),
+                          const SizedBox(height: 12),
+                        ],
+                        if (widget.pet.medicalHistory?.allergies != null &&
+                            widget
+                                .pet.medicalHistory!.allergies!.isNotEmpty) ...[
+                          _buildMedicalDetailRow(
+                              'Allergies',
+                              widget.pet.medicalHistory!.allergies!.join(', '),
+                              Icons.warning_amber,
+                              textColor,
+                              subTextColor),
                         ],
                       ],
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Add vaccination button
                   SizedBox(
                     width: double.infinity,
@@ -313,8 +343,9 @@ class PetProfileScreen extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildSectionHeader(String title, IconData icon, Color color, Color textColor) {
+
+  Widget _buildSectionHeader(
+      String title, IconData icon, Color color, Color textColor) {
     return Row(
       children: [
         Icon(icon, color: color, size: 20),
@@ -330,23 +361,23 @@ class PetProfileScreen extends StatelessWidget {
       ],
     );
   }
-  
+
   Widget _buildInfoCard(
-    BuildContext context, 
-    String title, 
-    String value, 
-    IconData icon, 
+    BuildContext context,
+    String title,
+    String value,
+    IconData icon,
     Color color,
     bool isDark,
   ) {
     final textColor = isDark ? Colors.white : Colors.grey[800];
     final subTextColor = isDark ? Colors.grey[400] : Colors.grey[600];
-    
+
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(isDark ? 0.15 : 0.1),
+          color: color.withValues(alpha: isDark ? 0.15 : 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -379,24 +410,34 @@ class PetProfileScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   // Empty placeholder - all old visit-related methods have been removed
 
   String _formatDate(String dateString) {
     final date = DateTime.parse(dateString);
     final now = DateTime.now();
-    
+
     if (date.year == now.year) {
       return '${_getMonthName(date.month)} ${date.day}';
     } else {
       return '${_getMonthName(date.month)} ${date.day}, ${date.year}';
     }
   }
-  
+
   String _getMonthName(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return months[month - 1];
   }
@@ -404,19 +445,19 @@ class PetProfileScreen extends StatelessWidget {
   String _calculateAge(String birthdate) {
     final birth = DateTime.parse(birthdate);
     final now = DateTime.now();
-    
+
     int years = now.year - birth.year;
     int months = now.month - birth.month;
-    
+
     if (now.day < birth.day) {
       months--;
     }
-    
+
     if (months < 0) {
       years--;
       months += 12;
     }
-    
+
     if (years > 0) {
       return years == 1 ? '1 year old' : '$years years old';
     } else {
@@ -428,7 +469,7 @@ class PetProfileScreen extends StatelessWidget {
     final dialogBgColor = isDark ? Colors.grey[850] : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black;
     final subTextColor = isDark ? Colors.grey[400] : Colors.grey[600];
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -450,7 +491,7 @@ class PetProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Are you sure you want to delete ${pet.name}?',
+              'Are you sure you want to delete ${widget.pet.name}?',
               textAlign: TextAlign.center,
               style: TextStyle(color: textColor),
             ),
@@ -476,12 +517,50 @@ class PetProfileScreen extends StatelessWidget {
             ),
           ),
           ElevatedButton.icon(
-            onPressed: () {
-              Navigator.pop(context); // Close dialog
-              Get.back(result: 'delete'); // Return to previous screen with delete result
-            },
-            icon: const Icon(Icons.delete_outline, size: 16),
-            label: const Text('Delete'),
+            onPressed: _isDeleting
+                ? null
+                : () async {
+                    Navigator.pop(context); // Close dialog
+                    setState(() => _isDeleting = true);
+
+                    try {
+                      final success =
+                          await _petController.deletePet(widget.pet.id);
+                      if (success) {
+                        Get.back(result: 'deleted');
+                        Get.snackbar(
+                          'Success',
+                          '${widget.pet.name} has been deleted.',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.green[100],
+                          colorText: Colors.green[800],
+                        );
+                      }
+                    } catch (e) {
+                      Get.snackbar(
+                        'Error',
+                        'Failed to delete pet. Please try again.',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.red[100],
+                        colorText: Colors.red[800],
+                      );
+                    } finally {
+                      if (mounted) {
+                        setState(() => _isDeleting = false);
+                      }
+                    }
+                  },
+            icon: _isDeleting
+                ? const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
+                  )
+                : const Icon(Icons.delete_outline, size: 16),
+            label: Text(_isDeleting ? 'Deleting...' : 'Delete'),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
@@ -491,8 +570,9 @@ class PetProfileScreen extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildEmptyVaccinationsCard(Color backgroundColor, Color textColor, Color borderColor) {
+
+  Widget _buildEmptyVaccinationsCard(
+      Color backgroundColor, Color textColor, Color borderColor) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -523,14 +603,14 @@ class PetProfileScreen extends StatelessWidget {
             'Add your pet\'s vaccinations to keep track of their health',
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: textColor.withOpacity(0.7),
+              color: textColor.withValues(alpha: 0.7),
             ),
           ),
         ],
       ),
     );
   }
-  
+
   Widget _buildVaccinationCard(
     VaccinationModel vaccination,
     Color themeColor,
@@ -547,7 +627,7 @@ class PetProfileScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.2 : 0.05),
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -560,7 +640,7 @@ class PetProfileScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: themeColor.withOpacity(isDark ? 0.2 : 0.1),
+              color: themeColor.withValues(alpha: isDark ? 0.2 : 0.1),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
@@ -595,12 +675,11 @@ class PetProfileScreen extends StatelessWidget {
               children: [
                 if (vaccination.expiresAt != null) ...[
                   _buildMedicalDetailRow(
-                    'Expires', 
-                    _formatDate(vaccination.expiresAt!), 
-                    Icons.event_busy, 
-                    textColor, 
-                    subTextColor
-                  ),
+                      'Expires',
+                      _formatDate(vaccination.expiresAt!),
+                      Icons.event_busy,
+                      textColor,
+                      subTextColor),
                 ],
               ],
             ),
@@ -609,7 +688,7 @@ class PetProfileScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildMedicalDetailRow(
     String label,
     String value,

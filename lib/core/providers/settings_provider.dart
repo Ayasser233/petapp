@@ -94,8 +94,7 @@ class SettingsProvider extends ChangeNotifier {
       case ThemePreference.dark:
         return ThemeMode.dark;
       case ThemePreference.system:
-      default:
-        return ThemeMode.system;
+      return ThemeMode.system;
     }
   }
   
@@ -105,8 +104,7 @@ class SettingsProvider extends ChangeNotifier {
       case LanguagePreference.arabic:
         return const Locale('ar', '');
       case LanguagePreference.english:
-      default:
-        return const Locale('en', '');
+      return const Locale('en', '');
     }
   }
 }

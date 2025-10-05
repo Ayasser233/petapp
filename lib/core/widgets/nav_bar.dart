@@ -25,7 +25,7 @@ class CommonBottomNavBar extends StatelessWidget {
         color: backgroundColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -80,7 +80,7 @@ class CommonBottomNavBar extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: currentIndex == index ? AppColors.lightorange.withOpacity(0.3) : Colors.transparent,
+          color: currentIndex == index ? AppColors.lightorange.withValues(alpha: 0.3) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Icon(currentIndex == index ? activeIcon : inactiveIcon),
@@ -97,7 +97,7 @@ class CommonBottomNavBar extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: currentIndex == index 
-                ? [AppColors.orange, AppColors.orange.withOpacity(0.8)]
+                ? [AppColors.orange, AppColors.orange.withValues(alpha: 0.8)]
                 : [Colors.grey.shade300, Colors.grey.shade200],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
@@ -105,7 +105,7 @@ class CommonBottomNavBar extends StatelessWidget {
           shape: BoxShape.circle,
           boxShadow: currentIndex == index ? [
             BoxShadow(
-              color: AppColors.orange.withOpacity(0.3),
+              color: AppColors.orange.withValues(alpha: 0.3),
               blurRadius: 8,
               spreadRadius: 2,
               offset: const Offset(0, 2),

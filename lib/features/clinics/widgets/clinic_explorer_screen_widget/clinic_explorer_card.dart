@@ -33,7 +33,7 @@ class ClinicExplorerCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       color: cardColor,
-      shadowColor: isDark ? Colors.black : Colors.grey.withOpacity(0.3),
+      shadowColor: isDark ? Colors.black : Colors.grey.withValues(alpha: 0.3),
       elevation: isDark ? 8 : 4,
       child: InkWell(
         onTap: () => controller.navigateToClinicDetail(clinic),
@@ -69,7 +69,7 @@ class ClinicExplorerCard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.6),
+              color: Colors.black.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
@@ -114,7 +114,7 @@ class ClinicExplorerCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.9),
+                color: Colors.green.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -189,8 +189,8 @@ class ClinicExplorerCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: clinic.isCurrentlyOpen
-                    ? Colors.green.withOpacity(0.1)
-                    : Colors.orange.withOpacity(0.1),
+                    ? Colors.green.withValues(alpha: 0.1)
+                    : Colors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Text(

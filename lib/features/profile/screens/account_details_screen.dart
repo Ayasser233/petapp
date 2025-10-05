@@ -15,7 +15,7 @@ class AccountDetailsScreen extends StatefulWidget {
 
 class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
   final ProfileController _profileController = Get.find<ProfileController>();
-  
+
   // Form controllers
   late TextEditingController _nameController;
   late TextEditingController _emailController;
@@ -34,23 +34,22 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     _phoneController = TextEditingController();
     _addressController = TextEditingController();
     _dobController = TextEditingController();
-    
+
     // Initialize controllers with actual data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initializeWithProfileData();
     });
   }
-  
+
   void _initializeWithProfileData() {
     final profile = _profileController.userProfile;
-    
+
     // Debug: Print profile status
 
-
     if (profile != null) {
-      _nameController.text = profile.name ?? 'Guest User';
+      _nameController.text = profile.name;
       _emailController.text = profile.email;
-      _phoneController.text = profile.phone ?? '';
+      _phoneController.text = profile.phone;
       _addressController.text = profile.address ?? '';
       _dobController.text = profile.dateOfBirth ?? '1990-01-01';
     } else {
@@ -58,22 +57,22 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
       _loadDefaultOrStoredData();
     }
   }
-  
+
   void _loadDefaultOrStoredData() async {
     // Try to load user data from storage or AuthService
     try {
       // If you have an AuthService with user data
       final authService = Get.find<AuthService>();
-      
+
       if (authService.authStatus == AuthStatus.authenticated) {
         // For authenticated users, try to refresh profile
         await _profileController.refreshProfile();
         final profile = _profileController.userProfile;
-        
+
         if (profile != null) {
-          _nameController.text = profile.name ?? 'User';
+          _nameController.text = profile.name;
           _emailController.text = profile.email;
-          _phoneController.text = profile.phone ?? '';
+          _phoneController.text = profile.phone;
           _addressController.text = profile.address ?? '';
           _dobController.text = profile.dateOfBirth ?? '1990-01-01';
         } else {
@@ -99,7 +98,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
       _setDefaultValues();
     }
   }
-  
+
   void _setDefaultValues() {
     _nameController.text = 'User';
     _emailController.text = 'user@example.com';
@@ -120,47 +119,101 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
 
   void _toggleEditing() {
     setState(() {
-      _isEditing = !_isEditing;
-      
-      // If we just finished editing, save the data
-      if (!_isEditing) {
-        //_saveUserData();
+      if (_isEditing) {
+        // Save data when switching from edit mode to view mode
+        _saveUserData();
+      } else {
+        // Just enable editing mode
+        _isEditing = true;
       }
     });
   }
 
-    // void _saveUserData() async {
-    //   final success = await ProfileController.updateProfile(
-    //     name: _nameController.text,
-    //     email: _emailController.text,
-    //     phone: _phoneController.text,
-    //     address: _addressController.text,
-    //     dateOfBirth: _dobController.text,
-    //   );
-      
-    //   if (success) {
-    //     setState(() {
-    //       _isEditing = false;
-    //     });
-        
-    //     // Show success message
-    //     ScaffoldMessenger.of(context).showSnackBar(
-    //       const SnackBar(
-    //         content: Row(
-    //           children: [
-    //             Icon(Icons.check_circle, color: Colors.white),
-    //             SizedBox(width: 12),
-    //             Expanded(
-    //               child: Text('Account details updated successfully!'),
-    //             ),
-    //           ],
-    //         ),
-    //         backgroundColor: Colors.green,
-    //         behavior: SnackBarBehavior.floating,
-    //       ),
-    //     );
-    //   }
-    // }
+  void _saveUserData() async {
+    // Split the name into firstName and lastName
+    final nameParts = _nameController.text.trim().split(' ');
+    final firstName = nameParts.isNotEmpty && nameParts.first.isNotEmpty
+        ? nameParts.first
+        : null;
+    final lastName =
+        nameParts.length > 1 && nameParts.sublist(1).join(' ').isNotEmpty
+            ? nameParts.sublist(1).join(' ')
+            : null;
+
+    print('🔍 ACCOUNT DETAILS SCREEN: Preparing save data');
+    print('   Name Controller: "${_nameController.text}"');
+    print('   Email Controller: "${_emailController.text}"');
+    print('   Phone Controller: "${_phoneController.text}"');
+    print('   Address Controller: "${_addressController.text}"');
+    print('   DOB Controller: "${_dobController.text}"');
+    print('   Parsed firstName: "$firstName"');
+    print('   Parsed lastName: "$lastName"');
+
+    try {
+      final success = await _profileController.updateProfile(
+        firstName: firstName,
+        lastName: lastName,
+        email: _emailController.text.trim().isNotEmpty
+            ? _emailController.text.trim()
+            : null,
+        phone: _phoneController.text.trim().isNotEmpty
+            ? _phoneController.text.trim()
+            : null,
+        address: _addressController.text.trim().isNotEmpty
+            ? _addressController.text.trim()
+            : null,
+        dateOfBirth: _dobController.text.trim().isNotEmpty
+            ? _dobController.text.trim()
+            : null,
+      );
+
+      if (success) {
+        setState(() {
+          _isEditing = false;
+        });
+
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text('Account details updated successfully!'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        // Refresh the UI with updated data
+        _initializeWithProfileData();
+      } else {
+        // Keep editing mode if save failed
+        // Error message will be shown by ProfileController
+      }
+    } catch (e) {
+      // Keep editing mode if save failed
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.error, color: Colors.white),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text('Failed to update profile: ${e.toString()}'),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +221,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     final backgroundColor = isDark ? Colors.black : const Color(0xFFF5F5F5);
     final cardColor = isDark ? const Color(0xFF2A2A2A) : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black87;
-    
+
     // Safely get localizations or use default value
     AppLocalizations? localizations;
     try {
@@ -184,10 +237,24 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
         centerTitle: true,
         elevation: 0,
         actions: [
-          IconButton(
-            icon: Icon(_isEditing ? Icons.save : Icons.edit),
-            onPressed: _toggleEditing,
-          ),
+          Obx(() => IconButton(
+                icon: _profileController.isLoading ||
+                        _profileController.isUpdating
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(AppColors.orange),
+                        ),
+                      )
+                    : Icon(_isEditing ? Icons.save : Icons.edit),
+                onPressed: _profileController.isLoading ||
+                        _profileController.isUpdating
+                    ? null
+                    : _toggleEditing,
+              )),
         ],
       ),
       body: SafeArea(
@@ -202,10 +269,11 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                   children: [
                     CircleAvatar(
                       radius: 60,
-                      backgroundColor: AppColors.orange.withOpacity(0.2),
+                      backgroundColor: AppColors.orange.withValues(alpha: 0.2),
                       child: const CircleAvatar(
                         radius: 56,
-                        backgroundImage: AssetImage('assets/images/profile.jpg'),
+                        backgroundImage:
+                            AssetImage('assets/images/profile.jpg'),
                       ),
                     ),
                     if (_isEditing)
@@ -228,9 +296,9 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Account Details Section
               Container(
                 padding: const EdgeInsets.all(16),
@@ -239,7 +307,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
@@ -258,7 +326,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Name
                     _buildTextField(
                       label: localizations?.name ?? "Name",
@@ -268,9 +336,9 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                       isDark: isDark,
                       cardColor: cardColor,
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Email
                     _buildTextField(
                       label: localizations?.email ?? "Email",
@@ -281,9 +349,9 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                       cardColor: cardColor,
                       keyboardType: TextInputType.emailAddress,
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Phone
                     _buildTextField(
                       label: localizations?.phone ?? "Phone",
@@ -294,9 +362,9 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                       cardColor: cardColor,
                       keyboardType: TextInputType.phone,
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Date of Birth
                     _buildTextField(
                       label: localizations?.dateOfBirth ?? "Date of Birth",
@@ -308,9 +376,9 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                       onTap: _isEditing ? () => _selectDate(context) : null,
                       readOnly: true,
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Address
                     _buildTextField(
                       label: localizations?.address ?? "Address",
@@ -324,9 +392,9 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Security Section
               Container(
                 padding: const EdgeInsets.all(16),
@@ -335,7 +403,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
@@ -354,14 +422,14 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Change Password Option
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppColors.lightorange.withOpacity(0.3),
+                          color: AppColors.lightorange.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -386,16 +454,16 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                         // Navigate to change password screen
                       },
                     ),
-                    
+
                     const Divider(),
-                    
+
                     // Two-Factor Authentication Option
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: AppColors.lightorange.withOpacity(0.3),
+                          color: AppColors.lightorange.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -416,15 +484,15 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                         onChanged: (value) {
                           // Enable/disable two-factor authentication
                         },
-                        activeColor: AppColors.orange,
+                        activeThumbColor: AppColors.orange,
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 24),
-              
+
               // Account Management Section
               Container(
                 padding: const EdgeInsets.all(16),
@@ -433,7 +501,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 2),
                     ),
@@ -452,14 +520,14 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    
+
                     // Deactivate Account Option
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.orange.withOpacity(0.2),
+                          color: Colors.orange.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -484,16 +552,16 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                         // Show deactivate account confirmation dialog
                       },
                     ),
-                    
+
                     const Divider(),
-                    
+
                     // Delete Account Option
                     ListTile(
                       contentPadding: EdgeInsets.zero,
                       leading: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.2),
+                          color: Colors.red.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: const Icon(
@@ -521,7 +589,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                   ],
                 ),
               ),
-              
+
               const SizedBox(height: 24),
             ],
           ),
@@ -546,7 +614,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     final textColor = isDark ? Colors.white : Colors.black87;
     final disabledColor = isDark ? Colors.grey[700] : Colors.grey[200];
     final borderColor = isDark ? Colors.grey[700] : Colors.grey[300];
-    
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -560,7 +628,9 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
         const SizedBox(height: 8),
         Container(
           decoration: BoxDecoration(
-            color: enabled ? (isDark ? Colors.grey[800] : Colors.grey[100]) : disabledColor,
+            color: enabled
+                ? (isDark ? Colors.grey[800] : Colors.grey[100])
+                : disabledColor,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: borderColor!,
@@ -604,7 +674,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
       // Fallback to default date if parsing fails
       initialDate = DateTime(1990, 1, 1);
     }
-    
+
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -617,7 +687,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
               primary: AppColors.orange,
               onPrimary: Colors.white,
             ),
-            dialogBackgroundColor: Colors.white,
+            dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
           ),
           child: child ?? Container(), // Safely handle null child
         );
@@ -626,7 +696,8 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
 
     if (pickedDate != null) {
       setState(() {
-        _dobController.text = "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+        _dobController.text =
+            "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
       });
     }
   }

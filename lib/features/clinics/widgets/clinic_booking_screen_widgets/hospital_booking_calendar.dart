@@ -53,7 +53,7 @@ class HospitalBookingCalendar extends StatelessWidget {
                   },
                   calendarStyle: CalendarStyle(
                     todayDecoration: BoxDecoration(
-                      color: AppColors.orange.withOpacity(0.5),
+                      color: AppColors.orange.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
                     selectedDecoration: const BoxDecoration(
@@ -62,7 +62,7 @@ class HospitalBookingCalendar extends StatelessWidget {
                     ),
                     defaultTextStyle: TextStyle(color: textColor),
                     weekendTextStyle: TextStyle(color: textColor),
-                    outsideTextStyle: TextStyle(color: textColor.withOpacity(0.3)),
+                    outsideTextStyle: TextStyle(color: textColor.withValues(alpha: 0.3)),
                   ),
                   headerStyle: HeaderStyle(
                     formatButtonVisible: false,

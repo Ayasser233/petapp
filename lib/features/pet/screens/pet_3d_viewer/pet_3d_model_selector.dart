@@ -180,7 +180,7 @@ class Pet3DModelSelector extends StatelessWidget {
                 width: double.infinity,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppColors.orange.withOpacity(isDark ? 0.2 : 0.1),
+                  color: AppColors.orange.withValues(alpha: isDark ? 0.2 : 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Center(

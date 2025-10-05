@@ -20,51 +20,47 @@ Future<void> setupServiceLocator() async {
   // Core services
   final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   sl.registerSingleton(scaffoldMessengerKey);
-  
+
   sl.registerLazySingleton(() => ErrorHandlerService());
   sl.registerLazySingleton(() => TokenService());
   sl.registerLazySingleton(() => ConnectivityService());
-  
+
   // Register AuthService
   sl.registerLazySingleton(() => AuthService(tokenService: sl()));
-  
+
   sl.registerLazySingleton(() => ApiClient(
-    errorHandler: sl(),
-    tokenService: sl(),
-    connectivityService: sl(),
-  ));
-  
+        errorHandler: sl(),
+        tokenService: sl(),
+        connectivityService: sl(),
+      ));
+
   // Repositories
   sl.registerLazySingleton(() => AuthRepository(
-    apiClient: sl(),
-  ));
-  
-  // Pet Feature
-  sl.registerLazySingleton(() => PetApiService());
-  sl.registerLazySingleton(() => PetRepository(
-    apiService: sl(),
-  ));
-  sl.registerFactory(() => PetController(
-    repository: sl(),
-  ));
+        apiClient: sl(),
+      ));
 
-   // Profile
+  // Pet Feature
+  sl.registerLazySingleton(() => PetApiService(apiClient: sl()));
+  sl.registerLazySingleton(() => PetRepository(apiService: sl()));
+  sl.registerFactory(() => PetController(repository: sl(),));
+
+  // Profile
   sl.registerLazySingleton<ProfileRepository>(
     () => ProfileRepository(apiClient: sl()),
   );
-  
+
   sl.registerLazySingleton<ProfileController>(
     () => ProfileController(profileRepository: sl()),
   );
-  
+
   // Voucher (no longer needs ApiClient - uses static data)
   sl.registerLazySingleton<VoucherRepository>(
     () => VoucherRepository(),
   );
-  
 
   // Cubits
   sl.registerFactory(() => AuthCubit(
-    authRepository: sl(),
-  ));
+        authRepository: sl(),
+        tokenService: sl(),
+      ));
 }

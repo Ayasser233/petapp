@@ -175,12 +175,12 @@ class _VouchersScreenState extends State<VouchersScreen>
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: isValid 
-              ? AppColors.orange.withOpacity(0.3)
-              : Colors.grey.withOpacity(0.3),
+              ? AppColors.orange.withValues(alpha: 0.3)
+              : Colors.grey.withValues(alpha: 0.3),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -345,7 +345,7 @@ class _VouchersScreenState extends State<VouchersScreen>
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(

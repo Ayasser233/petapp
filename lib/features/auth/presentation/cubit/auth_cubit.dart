@@ -3,22 +3,49 @@ import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:petapp/features/auth/data/repositories/auth_repository.dart';
+import 'package:petapp/features/auth/data/models/user_model.dart';
+import 'package:petapp/features/auth/data/models/auth_request_models.dart';
+import 'package:petapp/core/services/token_service.dart';
 
 part 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
   final AuthRepository _authRepository;
+  final TokenService _tokenService;
 
-  AuthCubit({required AuthRepository authRepository})
-      : _authRepository = authRepository,
-        super(AuthInitial());
+  AuthCubit({
+    required AuthRepository authRepository,
+    required TokenService tokenService,
+  }) : _authRepository = authRepository,
+       _tokenService = tokenService,
+       super(AuthInitial());
 
   Future<void> register(Map<String, dynamic> userData) async {
     emit(AuthLoading());
     try {
-      final user = await _authRepository.register(userData);
+      final request = RegisterRequest(
+        email: userData['email'] ?? '',
+        password: userData['password'] ?? '',
+        firstName: userData['firstName'] ?? userData['name'] ?? '',
+        lastName: userData['lastName'] ?? '',
+        username: userData['username'] ?? '',
+        mobile: userData['mobile'] ?? userData['phone'] ?? '',
+        role: userData['role'] ?? 'user',
+        turnstileToken: userData['turnstileToken'],
+      );
+      
+      final response = await _authRepository.register(request);
+      
+      // Save tokens if available
+      if (response.accessToken != null) {
+        await _tokenService.saveToken(response.accessToken!);
+      }
+      if (response.refreshToken != null) {
+        await _tokenService.saveRefreshToken(response.refreshToken!);
+      }
+      
       emit(AuthRegistrationSuccess(
-        user: user, 
+        user: response.user?.name ?? 'User', 
         email: userData['email']
       ));
     } on DioException catch (e) {
@@ -35,12 +62,22 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> login(String email, String password) async {
-    try {
+  Future<void> login(String identifier, String password, {String? turnstileToken}) async {
     emit(AuthLoading());
-
-      final accessToken = await _authRepository.login(email, password);
-      emit(AuthLoginSuccess(accessToken));
+    try {
+      final request = LoginRequest(
+        identifier: identifier,
+        password: password,
+        turnstileToken: turnstileToken,
+      );
+      
+      final response = await _authRepository.login(request);
+      
+      // Save tokens
+      await _tokenService.saveToken(response.accessToken);
+      await _tokenService.saveRefreshToken(response.refreshToken);
+      
+      emit(AuthLoginSuccess(response.accessToken));
     } on DioException catch (e) {
       emit(AuthFailure(
         message: _formatDioError(e, isSignup: false),
@@ -134,21 +171,26 @@ class AuthCubit extends Cubit<AuthState> {
       final data = e.response?.data;
       if (data == null || data is! Map) return null;
       
-      // Check for common validation error formats
-      if (data.containsKey('errors') && data['errors'] is Map) {
-        final errors = data['errors'] as Map;
-        final fieldErrors = <String, String>{};
-        
-        errors.forEach((key, value) {
-          if (value is List && value.isNotEmpty) {
-            fieldErrors[key] = value.first.toString();
-          } else if (value is String) {
-            fieldErrors[key] = value;
+      // Handle new server format: errorDetails.message array
+      if (data.containsKey('errorDetails') && data['errorDetails'] is Map) {
+        final errorDetails = data['errorDetails'] as Map;
+        if (errorDetails['message'] is List) {
+          final messages = errorDetails['message'] as List;
+          final fieldErrors = <String, String>{};
+          
+          for (final message in messages) {
+            if (message is Map) {
+              message.forEach((key, value) {
+                fieldErrors[key.toString()] = value.toString();
+              });
+            }
           }
-        });
-        
-        return fieldErrors.isNotEmpty ? fieldErrors : null;
+          
+          return fieldErrors.isNotEmpty ? fieldErrors : null;
+        }
       }
+      
+
     } catch (e) {
       debugPrint('Error extracting field errors: $e');
     }
@@ -158,7 +200,8 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> verifyEmail(String email, String otp) async {
     emit(AuthLoading());
     try {
-      await _authRepository.verifyEmail(email, otp);
+      final request = ConfirmEmailRequest(email: email, otp: otp);
+      await _authRepository.confirmEmail(request);
       emit(const AuthVerificationSuccess());
     } on DioException catch (e) {
       String errorMessage = 'Verification failed';
@@ -180,7 +223,8 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> resendVerification(String email) async {
     emit(AuthLoading());
     try {
-      await _authRepository.resendVerification(email);
+      final request = ResendOtpRequest(email: email);
+      await _authRepository.resendOtp(request);
       emit(const AuthResendVerificationSuccess());
     } on DioException catch (e) {
       String errorMessage = 'Failed to resend verification';
@@ -213,10 +257,96 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> checkAuthStatus() async {
     emit(AuthLoading());
     try {
-      final user = await _authRepository.getUserProfile();
-      emit(AuthAuthenticated(user: user));
+      final userProfile = await _authRepository.getUserProfile();
+      emit(AuthAuthenticated(user: userProfile.name));
     } catch (e) {
       emit(AuthUnauthenticated());
+    }
+  }
+
+  Future<void> forgotPassword(String email) async {
+    emit(AuthLoading());
+    try {
+      final request = ForgotPasswordRequest(email: email);
+      final response = await _authRepository.forgotPassword(request);
+      emit(AuthForgotPasswordSuccess(message: response.message));
+    } on DioException catch (e) {
+      emit(AuthFailure(
+        message: _formatDioError(e),
+        errorCode: e.response?.statusCode,
+      ));
+    } catch (e) {
+      emit(const AuthFailure(message: 'An unexpected error occurred'));
+    }
+  }
+
+  Future<void> resetPassword(String email, String otp, String password) async {
+    emit(AuthLoading());
+    try {
+      final request = ResetPasswordRequest(
+        email: email,
+        otp: otp,
+        password: password,
+      );
+      final response = await _authRepository.resetPassword(request);
+      emit(AuthPasswordResetSuccess(message: response.message));
+    } on DioException catch (e) {
+      emit(AuthFailure(
+        message: _formatDioError(e),
+        errorCode: e.response?.statusCode,
+      ));
+    } catch (e) {
+      emit(const AuthFailure(message: 'An unexpected error occurred'));
+    }
+  }
+
+  Future<void> updateProfile(Map<String, dynamic> profileData) async {
+    emit(AuthLoading());
+    try {
+      final request = UpdateProfileRequest(
+        name: profileData['name'],
+        firstName: profileData['firstName'],
+        lastName: profileData['lastName'],
+        phone: profileData['phone'],
+        mobile: profileData['mobile'],
+        address: profileData['address'],
+        dateOfBirth: profileData['dateOfBirth'],
+        username: profileData['username'],
+      );
+      final user = await _authRepository.updateUserProfile(request);
+      emit(AuthProfileUpdateSuccess(userProfile: user));
+    } on DioException catch (e) {
+      emit(AuthFailure(
+        message: _formatDioError(e),
+        errorCode: e.response?.statusCode,
+        fieldErrors: _extractFieldErrors(e),
+      ));
+    } catch (e) {
+      emit(const AuthFailure(message: 'An unexpected error occurred'));
+    }
+  }
+
+  Future<void> googleLogin() async {
+    emit(AuthLoading());
+    try {
+      final response = await _authRepository.googleLogin();
+      final user = response.user;
+      
+      // Save tokens
+      await _tokenService.saveToken(response.accessToken);
+      await _tokenService.saveRefreshToken(response.refreshToken);
+      
+      emit(AuthGoogleLoginSuccess(
+        accessToken: response.accessToken,
+        user: user,
+      ));
+    } on DioException catch (e) {
+      emit(AuthFailure(
+        message: _formatDioError(e),
+        errorCode: e.response?.statusCode,
+      ));
+    } catch (e) {
+      emit(const AuthFailure(message: 'An unexpected error occurred'));
     }
   }
 }

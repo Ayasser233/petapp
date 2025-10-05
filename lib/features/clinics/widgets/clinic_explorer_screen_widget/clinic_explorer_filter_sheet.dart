@@ -43,10 +43,10 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              
+
               // Header
               _buildHeader(context, textColor),
-              
+
               // Filters Content
               Expanded(
                 child: SingleChildScrollView(
@@ -67,7 +67,7 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
                   ),
                 ),
               ),
-              
+
               // Action buttons
               _buildActionButtons(context, isDark),
             ],
@@ -101,7 +101,8 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
   }
 
   /// Build region filter
-  Widget _buildRegionFilter(BuildContext context, Color textColor, Color? subTextColor) {
+  Widget _buildRegionFilter(
+      BuildContext context, Color textColor, Color? subTextColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -136,12 +137,13 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
   }
 
   /// Build region dropdown items
-  List<DropdownMenuItem<String>> _buildRegionDropdownItems(BuildContext context, Color textColor) {
+  List<DropdownMenuItem<String>> _buildRegionDropdownItems(
+      BuildContext context, Color textColor) {
     final items = <DropdownMenuItem<String>>[];
-    
+
     for (final region in controller.regions) {
       String displayText;
-      
+
       switch (region) {
         case 'allRegions':
           displayText = AppLocalizations.of(context).allRegions;
@@ -152,7 +154,7 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
         default:
           displayText = region;
       }
-      
+
       items.add(
         DropdownMenuItem<String>(
           value: region,
@@ -164,7 +166,7 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
           ),
         ),
       );
-      
+
       // Add cities for governorates
       if (controller.isGovernorate(region)) {
         final cities = controller.getCitiesForGovernorate(region);
@@ -186,12 +188,13 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
         }
       }
     }
-    
+
     return items;
   }
 
   /// Build service filter
-  Widget _buildServiceFilter(BuildContext context, Color textColor, Color? subTextColor) {
+  Widget _buildServiceFilter(
+      BuildContext context, Color textColor, Color? subTextColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -226,7 +229,8 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
   }
 
   /// Build service dropdown items
-  List<DropdownMenuItem<String>> _buildServiceDropdownItems(BuildContext context, Color textColor) {
+  List<DropdownMenuItem<String>> _buildServiceDropdownItems(
+      BuildContext context, Color textColor) {
     final services = [
       'allServices',
       ...controller.availableServices,
@@ -234,7 +238,7 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
 
     return services.map((service) {
       String displayText;
-      
+
       switch (service) {
         case 'allServices':
           displayText = AppLocalizations.of(context).allServices;
@@ -260,7 +264,7 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
         default:
           displayText = service;
       }
-      
+
       return DropdownMenuItem<String>(
         value: service,
         child: Text(
@@ -274,7 +278,8 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
   }
 
   /// Build sort filter
-  Widget _buildSortFilter(BuildContext context, Color textColor, Color? subTextColor) {
+  Widget _buildSortFilter(
+      BuildContext context, Color textColor, Color? subTextColor) {
     final sortOptions = [
       {'value': 'default', 'label': AppLocalizations.of(context).sortDefault},
       {'value': 'nearby', 'label': AppLocalizations.of(context).sortNearby},
@@ -294,34 +299,37 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
               ),
         ),
         const SizedBox(height: 12),
-        Obx(() => Column(
-              children: sortOptions.map((option) {
-                return RadioListTile<String>(
-                  value: option['value']!,
-                  groupValue: controller.sortOption.value,
-                  title: Text(
-                    option['label']!,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: textColor,
-                        ),
-                  ),
-                  activeColor: AppColors.orange,
-                  onChanged: (String? value) {
-                    if (value != null) {
-                      controller.sortOption.value = value;
-                    }
-                  },
-                  contentPadding: EdgeInsets.zero,
-                  visualDensity: VisualDensity.compact,
-                );
-              }).toList(),
+        Obx(() => RadioGroup<String>(
+              groupValue: controller.sortOption.value,
+              onChanged: (String? value) {
+                if (value != null) {
+                  controller.sortOption.value = value;
+                }
+              },
+              child: Column(
+                children: sortOptions.map((option) {
+                  return RadioListTile<String>(
+                    value: option['value']!,
+                    title: Text(
+                      option['label']!,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: textColor,
+                          ),
+                    ),
+                    activeColor: AppColors.orange,
+                    contentPadding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  );
+                }).toList(),
+              ),
             )),
       ],
     );
   }
 
   /// Build distance filter
-  Widget _buildDistanceFilter(BuildContext context, Color textColor, Color? subTextColor) {
+  Widget _buildDistanceFilter(
+      BuildContext context, Color textColor, Color? subTextColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -339,7 +347,8 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      AppLocalizations.of(context).distanceKm(controller.maxDistance.value.round()),
+                      AppLocalizations.of(context)
+                          .distanceKm(controller.maxDistance.value.round()),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: textColor,
                           ),
@@ -357,7 +366,7 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
                     activeTrackColor: AppColors.orange,
                     inactiveTrackColor: Colors.grey[300],
                     thumbColor: AppColors.orange,
-                    overlayColor: AppColors.orange.withOpacity(0.2),
+                    overlayColor: AppColors.orange.withValues(alpha: 0.2),
                     valueIndicatorColor: AppColors.orange,
                   ),
                   child: Slider(
@@ -365,7 +374,8 @@ class ClinicExplorerFilterSheet extends StatelessWidget {
                     min: 5.0,
                     max: 100.0,
                     divisions: 19,
-                    label: AppLocalizations.of(context).distanceKm(controller.maxDistance.value.round()),
+                    label: AppLocalizations.of(context)
+                        .distanceKm(controller.maxDistance.value.round()),
                     onChanged: (double value) {
                       controller.maxDistance.value = value;
                     },

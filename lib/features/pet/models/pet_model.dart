@@ -3,12 +3,11 @@ class PetModel {
   final String name;
   final String species;
   final String? customSpecies;
-  final String? breed;
   final String dateOfBirth;
   final MedicalHistoryModel? medicalHistory;
   final String status;
   final int version;
-  
+
   // Keep image for UI compatibility until backend provides images
   final String image;
 
@@ -17,7 +16,6 @@ class PetModel {
     required this.name,
     required this.species,
     this.customSpecies,
-    this.breed,
     required this.dateOfBirth,
     this.medicalHistory,
     required this.status,
@@ -29,8 +27,8 @@ class PetModel {
     final Map<String, dynamic> data = {
       'id': id,
       'name': name,
-      'species': species,
-      'dateOfBirth': dateOfBirth,
+      'species': species.toUpperCase(), // API expects uppercase
+      'dateOfBirth': dateOfBirth, // API expects camelCase
       'status': status,
       'version': version,
       'image': image, // Temporary field for UI compatibility
@@ -38,10 +36,6 @@ class PetModel {
 
     if (customSpecies != null) {
       data['customSpecies'] = customSpecies;
-    }
-
-    if (breed != null) {
-      data['breed'] = breed;
     }
 
     if (medicalHistory != null) {
@@ -61,15 +55,18 @@ class PetModel {
         imageAsset = 'assets/images/cat_silhouette.png';
       }
     }
-    
+
     return PetModel(
       id: map['id'] ?? '',
       name: map['name'] ?? '',
-      species: map['species'] ?? '',
+      species: (map['species'] ?? '')
+          .toString()
+          .toLowerCase(), // Convert to lowercase for UI consistency
       customSpecies: map['customSpecies'],
-      breed: map['breed'],
-      dateOfBirth: map['dateOfBirth'] ?? '',
-      medicalHistory: map['medicalHistory'] != null 
+      dateOfBirth: map['dateOfBirth'] ??
+          map['date_of_birth'] ??
+          '', // Handle both formats
+      medicalHistory: map['medicalHistory'] != null
           ? MedicalHistoryModel.fromMap(map['medicalHistory'])
           : null,
       status: map['status'] ?? 'active',
@@ -132,12 +129,13 @@ class MedicalHistoryModel {
           ? List<VaccinationModel>.from(
               map['vaccinations']?.map((x) => VaccinationModel.fromMap(x)))
           : null,
-      allergies: map['allergies'] != null
-          ? List<String>.from(map['allergies'])
-          : null,
+      allergies:
+          map['allergies'] != null ? List<String>.from(map['allergies']) : null,
       spayNeuterStatus: map['spayNeuterStatus'],
       lastVetVisit: map['lastVetVisit'],
-      weight: map['weight'] != null ? double.tryParse(map['weight'].toString()) : null,
+      weight: map['weight'] != null
+          ? double.tryParse(map['weight'].toString())
+          : null,
       notes: map['notes'],
     );
   }

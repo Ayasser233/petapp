@@ -34,7 +34,7 @@ class ActivityCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       elevation: isDark ? 4 : 2,
-      shadowColor: isDark ? Colors.black.withOpacity(0.5) : Colors.grey.withOpacity(0.3),
+      shadowColor: isDark ? Colors.black.withValues(alpha: 0.5) : Colors.grey.withValues(alpha: 0.3),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
@@ -68,7 +68,7 @@ class ActivityCard extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 25,
-          backgroundColor: ActivityUtils.getStatusColor(activity.status).withOpacity(0.2),
+          backgroundColor: ActivityUtils.getStatusColor(activity.status).withValues(alpha: 0.2),
           child: Icon(
             ActivityUtils.getActivityIcon(activity.type),
             color: ActivityUtils.getStatusColor(activity.status),
@@ -100,10 +100,10 @@ class ActivityCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: ActivityUtils.getStatusColor(activity.status).withOpacity(isDark ? 0.2 : 0.1),
+            color: ActivityUtils.getStatusColor(activity.status).withValues(alpha: isDark ? 0.2 : 0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: ActivityUtils.getStatusColor(activity.status).withOpacity(isDark ? 0.5 : 0.3),
+              color: ActivityUtils.getStatusColor(activity.status).withValues(alpha: isDark ? 0.5 : 0.3),
             ),
           ),
           child: Text(
@@ -173,7 +173,7 @@ class ActivityCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           decoration: BoxDecoration(
-            color: AppColors.orange.withOpacity(isDark ? 0.2 : 0.1),
+            color: AppColors.orange.withValues(alpha: isDark ? 0.2 : 0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(

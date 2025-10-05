@@ -1,8 +1,10 @@
 part of 'auth_cubit.dart';
 
+// The UserProfile class is imported through auth_cubit.dart
+
 abstract class AuthState extends Equatable {
   const AuthState();
-  
+
   @override
   List<Object?> get props => [];
 }
@@ -18,7 +20,7 @@ class AuthAuthenticated extends AuthState {
   final String user;
 
   const AuthAuthenticated({required this.user});
-  
+
   @override
   List<Object?> get props => [user];
 }
@@ -32,7 +34,7 @@ class AuthRegistrationSuccess extends AuthState {
   final String email;
 
   const AuthRegistrationSuccess({required this.user, required this.email});
-  
+
   @override
   List<Object?> get props => [user, email];
 }
@@ -42,7 +44,7 @@ class AuthLoginSuccess extends AuthState {
   final String accessToken;
 
   const AuthLoginSuccess(this.accessToken);
-  
+
   @override
   List<Object?> get props => [accessToken];
 }
@@ -55,6 +57,55 @@ class AuthVerificationSuccess extends AuthState {
 // Resending verification email was successful
 class AuthResendVerificationSuccess extends AuthState {
   const AuthResendVerificationSuccess();
+}
+
+// Forgot password OTP sent successfully
+class AuthForgotPasswordSuccess extends AuthState {
+  final String message;
+
+  const AuthForgotPasswordSuccess({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+// Password reset was successful
+class AuthPasswordResetSuccess extends AuthState {
+  final String message;
+
+  const AuthPasswordResetSuccess({required this.message});
+
+  @override
+  List<Object?> get props => [message];
+}
+
+// Token refresh was successful
+class AuthTokenRefreshSuccess extends AuthState {
+  const AuthTokenRefreshSuccess();
+}
+
+// Profile update was successful
+class AuthProfileUpdateSuccess extends AuthState {
+  final UserModel userProfile;
+
+  const AuthProfileUpdateSuccess({required this.userProfile});
+
+  @override
+  List<Object?> get props => [userProfile];
+}
+
+// Google login was successful
+class AuthGoogleLoginSuccess extends AuthState {
+  final String accessToken;
+  final UserModel user;
+
+  const AuthGoogleLoginSuccess({
+    required this.accessToken,
+    required this.user,
+  });
+
+  @override
+  List<Object?> get props => [accessToken, user];
 }
 
 // Logout was successful
@@ -73,7 +124,7 @@ class AuthFailure extends AuthState {
     this.errorCode,
     this.fieldErrors,
   });
-  
+
   @override
   List<Object?> get props => [message, errorDetails, errorCode, fieldErrors];
 }

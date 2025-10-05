@@ -125,7 +125,7 @@ class ProfileScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
+                          color: Colors.black.withValues(alpha: 0.05),
                           blurRadius: 5,
                           offset: const Offset(0, 2),
                         ),
@@ -136,7 +136,7 @@ class ProfileScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
-                            color: AppColors.lightorange.withOpacity(0.3),
+                            color: AppColors.lightorange.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Icon(
@@ -206,7 +206,7 @@ class ProfileScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
+                        color: Colors.black.withValues(alpha: 0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 2),
                       ),
@@ -304,7 +304,7 @@ class ProfileScreen extends StatelessWidget {
         color: cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 5.0,
             spreadRadius: 0.0,
             offset: const Offset(0, 2),
@@ -424,7 +424,7 @@ class ProfileScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -439,7 +439,7 @@ class ProfileScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.orange.withOpacity(0.2),
+                  color: AppColors.orange.withValues(alpha: 0.2),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -587,10 +587,13 @@ class ProfileScreen extends StatelessWidget {
   
   // Add voucher logic
   void _addVoucher(BuildContext context, String code) {
+    // Capture everything needed before any async gap to avoid using BuildContext later.
     final localizations = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     if (code.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text(localizations.pleaseEnterVoucherCode),
           backgroundColor: Colors.red,
@@ -604,7 +607,7 @@ class ProfileScreen extends StatelessWidget {
     Navigator.of(context).pop();
     
     // Show loading
-    ScaffoldMessenger.of(context).showSnackBar(
+    messenger.showSnackBar(
       SnackBar(
         content: Row(
           children: [
@@ -626,16 +629,14 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
     
-    // Use the voucher controller to add voucher
-      // Simulate API call
+    // Simulate API call
     Future.delayed(const Duration(seconds: 2), () {
-      // Simulate success/failure
       final isValid = code.toUpperCase().startsWith('ALEEFY') || 
-                     code.toUpperCase().startsWith('SAVE') ||
-                     code.toUpperCase().startsWith('DISCOUNT');
+                      code.toUpperCase().startsWith('SAVE') ||
+                      code.toUpperCase().startsWith('DISCOUNT');
       
       if (isValid) {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Row(
               children: [
@@ -658,7 +659,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.showSnackBar(
           SnackBar(
             content: Row(
               children: [
@@ -675,7 +676,10 @@ class ProfileScreen extends StatelessWidget {
               label: localizations.retry,
               textColor: Colors.white,
               onPressed: () {
-                _showAddVoucherDialog(context, Theme.of(context).brightness == Brightness.dark);
+                // Use a current context from Get if available instead of the stale one.
+                if (Get.context != null) {
+                  _showAddVoucherDialog(Get.context!, isDark);
+                }
               },
             ),
           ),
@@ -705,7 +709,7 @@ class ProfileScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 5,
               offset: const Offset(0, 2),
             ),
@@ -716,7 +720,7 @@ class ProfileScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.lightorange.withOpacity(0.3),
+                color: AppColors.lightorange.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -767,7 +771,7 @@ class ProfileScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 5,
               offset: const Offset(0, 2),
             ),
@@ -778,7 +782,7 @@ class ProfileScreen extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppColors.lightorange.withOpacity(0.3),
+                color: AppColors.lightorange.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Icon(
@@ -819,7 +823,7 @@ class ProfileScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppColors.lightorange.withOpacity(0.2),
+        color: AppColors.lightorange.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(
@@ -865,9 +869,9 @@ class ProfileScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.orange.withOpacity(0.1),
+        color: AppColors.orange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.orange.withOpacity(0.3)),
+        border: Border.all(color: AppColors.orange.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [

@@ -50,7 +50,6 @@ class CachedAssetImage extends StatelessWidget {
       await rootBundle.load(assetPath);
       return true;
     } catch (e) {
-      print('Asset not found: $assetPath - Error: $e');
       return false;
     }
   }

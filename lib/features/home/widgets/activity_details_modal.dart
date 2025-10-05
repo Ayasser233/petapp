@@ -76,7 +76,7 @@ class ActivityDetailsModal extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 30,
-          backgroundColor: ActivityUtils.getStatusColor(activity.status).withOpacity(0.2),
+          backgroundColor: ActivityUtils.getStatusColor(activity.status).withValues(alpha: 0.2),
           child: Icon(
             ActivityUtils.getActivityIcon(activity.type),
             color: ActivityUtils.getStatusColor(activity.status),

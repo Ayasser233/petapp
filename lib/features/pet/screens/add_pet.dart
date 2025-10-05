@@ -4,7 +4,9 @@ import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/core/routes/routes.dart';
-import 'package:petapp/features/pet/models/pet_model.dart';
+import 'package:petapp/di/service_locator.dart';
+import 'package:petapp/features/pet/controllers/pet_controller.dart';
+import 'package:petapp/features/pet/utils/pet_constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 
@@ -18,23 +20,30 @@ class AddPetScreen extends StatefulWidget {
 class _AddPetScreenState extends State<AddPetScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _specificTypeController = TextEditingController();
   final _notesController = TextEditingController();
-  
-  String _selectedType = 'Dog';
+
+  String _selectedSpecies = 'dog';
   DateTime _selectedDate = DateTime.now().subtract(const Duration(days: 365));
   String _imagePath = 'assets/images/pet_placeholder.jpg';
   bool _isImageFromGallery = false;
-  final AuthService _authService = Get.find<AuthService>();
-  
-  final List<String> _petTypes = ['Dog', 'Cat', 'Other'];
+  bool _isLoading = false;
+
+  final AuthService _authService = sl<AuthService>();
+  final PetController _petController = sl<PetController>();
+
+  List<String> _allowedSpecies = [];
 
   @override
   void initState() {
     super.initState();
     _checkAuthStatus();
+    _loadAllowedSpecies();
   }
-  
+
+  void _loadAllowedSpecies() {
+    _allowedSpecies = PetConstants.allowedSpecies;
+  }
+
   void _checkAuthStatus() {
     // Check if user is authenticated
     if (!_authService.canAccessProtectedFeature()) {
@@ -44,7 +53,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
       });
     }
   }
-  
+
   void _showLoginRequiredDialog() {
     showDialog(
       context: context,
@@ -78,14 +87,13 @@ class _AddPetScreenState extends State<AddPetScreen> {
   @override
   void dispose() {
     _nameController.dispose();
-    _specificTypeController.dispose();
     _notesController.dispose();
     super.dispose();
   }
 
   Future<void> _pickImage() async {
     final ImagePicker picker = ImagePicker();
-    
+
     // Show options dialog
     showModalBottomSheet(
       context: context,
@@ -116,7 +124,8 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     label: 'Camera',
                     onTap: () async {
                       Navigator.pop(context);
-                      final XFile? image = await picker.pickImage(source: ImageSource.camera);
+                      final XFile? image =
+                          await picker.pickImage(source: ImageSource.camera);
                       if (image != null) {
                         setState(() {
                           _imagePath = image.path;
@@ -130,7 +139,8 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     label: 'Gallery',
                     onTap: () async {
                       Navigator.pop(context);
-                      final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+                      final XFile? image =
+                          await picker.pickImage(source: ImageSource.gallery);
                       if (image != null) {
                         setState(() {
                           _imagePath = image.path;
@@ -147,7 +157,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
       },
     );
   }
-  
+
   Widget _buildImageSourceOption({
     required IconData icon,
     required String label,
@@ -161,7 +171,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: AppColors.orange.withOpacity(0.1),
+              color: AppColors.orange.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -192,7 +202,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
       lastDate: DateTime.now(),
       builder: (context, child) {
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        
+
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
@@ -201,18 +211,19 @@ class _AddPetScreenState extends State<AddPetScreen> {
               onSurface: isDark ? Colors.white : Colors.black,
               surface: isDark ? Colors.grey[850]! : Colors.white,
             ),
-            dialogBackgroundColor: isDark ? Colors.grey[900] : Colors.white,
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
                 foregroundColor: AppColors.orange,
               ),
             ),
+            dialogTheme: DialogThemeData(
+                backgroundColor: isDark ? Colors.grey[900] : Colors.white),
           ),
           child: child!,
         );
       },
     );
-    
+
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
@@ -220,41 +231,66 @@ class _AddPetScreenState extends State<AddPetScreen> {
     }
   }
 
-  void _savePet() {
-    if (_formKey.currentState!.validate()) {
+  Future<void> _savePet() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      // Validate species
+      if (!PetConstants.isValidSpecies(_selectedSpecies)) {
+        Get.snackbar(
+          'Invalid Species',
+          'Only cats and dogs are allowed.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[100],
+          colorText: Colors.red[800],
+        );
+        return;
+      }
+
       // In a real app, you would save the image to storage and get a URL
-      // For now, we'll just use the path or a placeholder
-      final String imageToUse = _isImageFromGallery 
-          ? _imagePath 
-          : _selectedType.toLowerCase() == 'dog'
+      final String imageToUse = _isImageFromGallery
+          ? _imagePath
+          : _selectedSpecies == 'dog'
               ? 'assets/images/dog_silhouette.png'
-              : _selectedType.toLowerCase() == 'cat'
+              : _selectedSpecies == 'cat'
                   ? 'assets/images/cat_silhouette.png'
                   : 'assets/images/pet_placeholder.jpg';
-      
-      // Create medical history with notes if provided
-      final medicalHistory = _notesController.text.isEmpty 
-          ? null 
-          : MedicalHistoryModel(
-              notes: _notesController.text,
-              vaccinations: [],
-              allergies: [],
-            );
-      
-      final newPet = PetModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: _nameController.text,
-        image: imageToUse,
-        species: _selectedType.toLowerCase(),
-        customSpecies: _selectedType == 'Other' ? _specificTypeController.text : null,
-        breed: null, // Can be added as a field in the form if needed
-        dateOfBirth: _selectedDate.toIso8601String().split('T')[0],
-        medicalHistory: medicalHistory,
-        status: 'active',
-        version: 1,
+
+      // Create pet data
+      final petData = {
+        'name': _nameController.text.trim(),
+        'species': _selectedSpecies.toUpperCase(), // Backend expects uppercase
+        'dateOfBirth': _selectedDate
+            .toIso8601String()
+            .split('T')[0], // Backend expects camelCase
+        'image_url': imageToUse,
+        'notes': _notesController.text.trim(),
+      };
+
+      final success = await _petController.createPet(petData);
+
+      if (success) {
+        Get.back(result: true);
+        Get.snackbar(
+          'Success!',
+          '${_nameController.text} has been added successfully.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green[100],
+          colorText: Colors.green[800],
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        'Error',
+        'Failed to add pet. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[100],
+        colorText: Colors.red[800],
       );
-      
-      Get.back(result: newPet);
+    } finally {
+      setState(() => _isLoading = false);
     }
   }
 
@@ -295,7 +331,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppColors.orange.withOpacity(isDark ? 0.2 : 0.1),
+                      AppColors.orange.withValues(alpha: isDark ? 0.2 : 0.1),
                       backgroundColor!,
                     ],
                     begin: Alignment.topCenter,
@@ -318,7 +354,8 @@ class _AddPetScreenState extends State<AddPetScreen> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(isDark ? 0.3 : 0.1),
+                                color: Colors.black
+                                    .withValues(alpha: isDark ? 0.3 : 0.1),
                                 spreadRadius: 1,
                                 blurRadius: 5,
                                 offset: const Offset(0, 2),
@@ -347,7 +384,8 @@ class _AddPetScreenState extends State<AddPetScreen> {
                               color: AppColors.orange,
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: isDark ? Colors.grey[800]! : Colors.white,
+                                color:
+                                    isDark ? Colors.grey[800]! : Colors.white,
                                 width: 2,
                               ),
                             ),
@@ -363,7 +401,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                   ),
                 ),
               ),
-              
+
               // Form fields
               Padding(
                 padding: const EdgeInsets.all(20),
@@ -418,52 +456,17 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     ),
                     const SizedBox(height: 12),
                     Row(
-                      children: _petTypes.map((type) {
+                      children: _allowedSpecies.map((species) {
                         return Expanded(
                           child: Padding(
                             padding: const EdgeInsets.only(right: 8),
-                            child: _buildTypeOption(type, isDark),
+                            child: _buildSpeciesOption(species, isDark),
                           ),
                         );
                       }).toList(),
                     ),
                     const SizedBox(height: 20),
-                    // Specific type (if Other is selected)
-                    if (_selectedType == 'Other') ...[
-                      Text(
-                        'Specify Pet Type',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        controller: _specificTypeController,
-                        style: TextStyle(color: textColor),
-                        decoration: InputDecoration(
-                          hintText: 'e.g., Rabbit, Bird, etc.',
-                          hintStyle: TextStyle(
-                            color: isDark ? Colors.grey[400] : Colors.grey[600],
-                          ),
-                          filled: true,
-                          fillColor: inputFillColor,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (_selectedType == 'Other' && (value == null || value.isEmpty)) {
-                            return 'Please specify your pet\'s type';
-                          }
-                          return null;
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-                    
+
                     // Birthdate
                     Text(
                       'Birthdate',
@@ -477,7 +480,8 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     GestureDetector(
                       onTap: () => _selectDate(context),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 16),
                         decoration: BoxDecoration(
                           color: inputFillColor,
                           borderRadius: BorderRadius.circular(12),
@@ -506,7 +510,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Notes
                     Text(
                       'Special Needs or Notes',
@@ -521,7 +525,8 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       controller: _notesController,
                       style: TextStyle(color: textColor),
                       decoration: InputDecoration(
-                        hintText: 'Any special needs, allergies, or notes about your pet',
+                        hintText:
+                            'Any special needs, allergies, or notes about your pet',
                         hintStyle: TextStyle(
                           color: isDark ? Colors.grey[400] : Colors.grey[600],
                         ),
@@ -536,13 +541,13 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       maxLines: 4,
                     ),
                     const SizedBox(height: 30),
-                    
+
                     // Save button
                     SizedBox(
                       width: double.infinity,
                       height: 56,
                       child: ElevatedButton(
-                        onPressed: _savePet,
+                        onPressed: _isLoading ? null : _savePet,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.orange,
                           foregroundColor: Colors.white,
@@ -551,13 +556,22 @@ class _AddPetScreenState extends State<AddPetScreen> {
                           ),
                           elevation: 2,
                         ),
-                        child: const Text(
-                          'Save Pet',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                'Save Pet',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -570,39 +584,43 @@ class _AddPetScreenState extends State<AddPetScreen> {
       ),
     );
   }
-  
-  Widget _buildTypeOption(String type, bool isDark) {
-    final bool isSelected = _selectedType == type;
-    
+
+  Widget _buildSpeciesOption(String species, bool isDark) {
+    final bool isSelected = _selectedSpecies == species;
+
     IconData iconData;
     Color color;
-    
-    switch (type) {
-      case 'Dog':
+    String displayName;
+
+    switch (species) {
+      case 'dog':
         iconData = Icons.pets;
         color = Colors.blue;
+        displayName = 'Dog';
         break;
-      case 'Cat':
+      case 'cat':
         iconData = Icons.pets;
         color = Colors.purple;
+        displayName = 'Cat';
         break;
       default:
         iconData = Icons.pets;
         color = AppColors.orange;
+        displayName = species.toUpperCase();
     }
-    
-    final backgroundColor = isDark 
-        ? (isSelected ? color.withOpacity(0.2) : Colors.grey[800])
-        : (isSelected ? color.withOpacity(0.1) : Colors.grey[100]);
-        
+
+    final backgroundColor = isDark
+        ? (isSelected ? color.withValues(alpha: 0.2) : Colors.grey[800])
+        : (isSelected ? color.withValues(alpha: 0.1) : Colors.grey[100]);
+
     final textColor = isDark
         ? (isSelected ? color : Colors.grey[400])
         : (isSelected ? color : Colors.grey[700]);
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {
-          _selectedType = type;
+          _selectedSpecies = species;
         });
       },
       child: Container(
@@ -619,12 +637,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
           children: [
             Icon(
               iconData,
-              color: isSelected ? color : (isDark ? Colors.grey[400] : Colors.grey),
+              color: isSelected
+                  ? color
+                  : (isDark ? Colors.grey[400] : Colors.grey),
               size: 28,
             ),
             const SizedBox(height: 8),
             Text(
-              type,
+              displayName,
               style: TextStyle(
                 color: textColor,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,

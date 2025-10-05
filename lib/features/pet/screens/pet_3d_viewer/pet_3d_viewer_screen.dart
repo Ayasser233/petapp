@@ -156,9 +156,9 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: AppColors.orange.withOpacity(0.1),
+                color: AppColors.orange.withValues(alpha: 0.1),
                 border: Border(
-                  top: BorderSide(color: AppColors.orange.withOpacity(0.3)),
+                  top: BorderSide(color: AppColors.orange.withValues(alpha: 0.3)),
                 ),
               ),
               child: Row(
@@ -626,10 +626,10 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: AppColors.orange.withOpacity(0.1),
+                    color: AppColors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
-                      color: AppColors.orange.withOpacity(0.3),
+                      color: AppColors.orange.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
@@ -813,10 +813,10 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                   width: double.infinity,
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.amber.withOpacity(0.1),
+                    color: Colors.amber.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: Colors.amber.withOpacity(0.3),
+                      color: Colors.amber.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
@@ -872,7 +872,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
               color: bgColor,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 10,
                   offset: const Offset(0, -5),
                 ),
@@ -1186,10 +1186,10 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppColors.orange.withOpacity(0.1),
+                    color: AppColors.orange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: AppColors.orange.withOpacity(0.3),
+                      color: AppColors.orange.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Column(

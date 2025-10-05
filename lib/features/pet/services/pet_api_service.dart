@@ -1,312 +1,273 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:petapp/core/services/api_client.dart';
+import 'package:petapp/core/services/error_handler_service.dart';
 import 'package:petapp/core/utils/api_constants.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
-import 'package:petapp/features/pet/models/pet_create_model.dart';
-import 'package:petapp/core/services/token_service.dart';
-import 'package:get_it/get_it.dart';
+import 'package:petapp/features/pet/models/pet_species_model.dart';
+import 'package:petapp/features/pet/utils/pet_constants.dart';
 
 class PetApiService {
-  final http.Client _client;
-  final TokenService _tokenService;
-  
-  PetApiService({
-    http.Client? client, 
-    TokenService? tokenService
-  }) : _client = client ?? http.Client(),
-       _tokenService = tokenService ?? GetIt.instance<TokenService>();
-  
-  // Get all pets for the authenticated user
-  Future<List<PetModel>> getUserPets() async {
+  final ApiClient _apiClient;
+
+  PetApiService({required ApiClient apiClient}) : _apiClient = apiClient;
+
+  /// Create a new pet - Limited to cats and dogs only
+  Future<PetModel> createPet(Map<String, dynamic> petData) async {
     try {
-      // Get authentication token
-      final token = await _tokenService.getToken();
-      if (token == null) {
-        throw Exception('Authentication token not found. Please log in again.');
-      }
-      
-      final response = await _client.get(
-        Uri.parse('${ApiConstants.apiBaseUrl}${ApiConstants.petsEndpoint}'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      ).timeout(ApiConstants.connectionTimeout);
+      // Validate species - only allow cats and dogs
+      final species = petData['species']?.toString();
+      PetConstants.validateSpecies(species, operation: 'create pet');
 
-      if (response.statusCode == 200) {
-        final List<dynamic> petsJson = json.decode(response.body);
-        
-        // Filter out owner data for privacy/security
-        for (var pet in petsJson) {
-          if (pet is Map && pet.containsKey('owner')) {
-            pet.remove('owner');
-          }
-        }
-        
-        return petsJson.map((json) => PetModel.fromMap(json)).toList();
-      } else {
-        throw Exception('Failed to load pets: ${response.statusCode}');
-      }
-    } catch (e) {
-      // Fallback to the backup API if the main one fails
-      try {
-        // Get authentication token for fallback API
-        final token = await _tokenService.getToken();
-        if (token == null) {
-          throw Exception('Authentication token not found. Please log in again.');
-        }
-        
-        final response = await _client.get(
-          Uri.parse('${ApiConstants.fallbackApiBaseUrl}${ApiConstants.petsEndpoint}'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        ).timeout(ApiConstants.connectionTimeout);
+      print('🐾 Creating pet with data: $petData');
 
-        if (response.statusCode == 200) {
-          final List<dynamic> petsJson = json.decode(response.body);
-          
-          // Filter out owner data for privacy/security
-          for (var pet in petsJson) {
-            if (pet is Map && pet.containsKey('owner')) {
-              pet.remove('owner');
-            }
-          }
-          
-          return petsJson.map((json) => PetModel.fromMap(json)).toList();
-        } else {
-          throw Exception('Failed to load pets from fallback API: ${response.statusCode}');
-        }
-      } catch (fallbackError) {
-        throw Exception('Error fetching pets: $e. Fallback error: $fallbackError');
-      }
+      final response = await _apiClient.post(
+        ApiConstants.petsEndpoint,
+        data: petData,
+      );
+
+      print('✅ Pet created successfully: ${response.data}');
+
+      // Handle nested response structure
+      final userData =
+          response.data['pet'] ?? response.data['data'] ?? response.data;
+      return PetModel.fromMap(userData);
+    } catch (error) {
+      print('❌ Failed to create pet: $error');
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
     }
   }
 
-  // Get pet by ID
+  /// Get all pets for the authenticated user (paginated)
+  Future<List<PetModel>> getUserPets({int? page, int? limit}) async {
+    try {
+      print('🐾 Fetching user pets (page: $page, limit: $limit)');
+
+      final queryParams = <String, dynamic>{};
+      if (page != null) queryParams['page'] = page;
+      if (limit != null) queryParams['limit'] = limit;
+
+      final response = await _apiClient.get(
+        ApiConstants.petsEndpoint,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+
+      print('✅ Pets fetched successfully: ${response.data}');
+
+      // Handle different response structures
+      List<dynamic> petsJson = [];
+
+      if (response.data == null) {
+        print('📝 API returned null response, returning empty list');
+        return [];
+      }
+
+      if (response.data is Map) {
+        // Paginated response structure
+        final mapData = response.data as Map;
+        petsJson = (mapData['pets'] ??
+            mapData['data'] ??
+            mapData['items'] ??
+            []) as List<dynamic>;
+
+        // If none of the expected keys exist and the response contains a single pet object
+        if (petsJson.isEmpty && mapData.containsKey('id')) {
+          petsJson = [mapData];
+        }
+      } else if (response.data is List) {
+        // Direct array response
+        petsJson = response.data as List<dynamic>;
+      } else {
+        print('📝 Unexpected response structure, returning empty list');
+        return [];
+      }
+
+      // Filter out null items and convert to PetModel list
+      return petsJson
+          .where((json) => json != null)
+          .map((json) => PetModel.fromMap(json))
+          .toList();
+    } catch (error) {
+      print('❌ Failed to fetch pets: $error');
+
+      // Check if this is a "no data" scenario that should return empty list instead of error
+      final errorString = error.toString().toLowerCase();
+
+      // Handle HTTP status codes that indicate "no data" rather than actual errors
+      if (errorString.contains('404') ||
+          errorString.contains('not found') ||
+          errorString.contains('no pets found') ||
+          errorString.contains('empty response')) {
+        print('📝 No pets found, returning empty list instead of error');
+        return [];
+      }
+
+      // For authentication errors, network errors, and other actual problems, still throw
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
+  /// Get allowed pet species
+  Future<List<PetSpecies>> getAllowedSpecies() async {
+    try {
+      print('🐾 Fetching allowed pet species');
+
+      final response = await _apiClient.get(
+        ApiConstants.petSpeciesAllowedEndpoint,
+      );
+
+      print('✅ Species fetched successfully: ${response.data}');
+
+      // Handle different response structures
+      List<dynamic> speciesJson;
+      if (response.data is Map) {
+        speciesJson = response.data['species'] ??
+            response.data['data'] ??
+            response.data['items'] ??
+            [response.data];
+      } else {
+        speciesJson = response.data as List<dynamic>;
+      }
+
+      return speciesJson.map((json) => PetSpecies.fromJson(json)).toList();
+    } catch (error) {
+      print('❌ Failed to fetch species: $error');
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
+  /// Get pet details by ID
   Future<PetModel> getPetById(String id) async {
     try {
-      // Get authentication token
-      final token = await _tokenService.getToken();
-      if (token == null) {
-        throw Exception('Authentication token not found. Please log in again.');
-      }
-      
-      final response = await _client.get(
-        Uri.parse('${ApiConstants.apiBaseUrl}${ApiConstants.petDetailEndpoint(id)}'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      ).timeout(ApiConstants.connectionTimeout);
+      print('🐾 Fetching pet details for ID: $id');
 
-      if (response.statusCode == 200) {
-        final petJson = json.decode(response.body);
-        
-        // Remove owner data for privacy/security
-        if (petJson is Map && petJson.containsKey('owner')) {
-          petJson.remove('owner');
-        }
-        
-        return PetModel.fromMap(petJson);
-      } else {
-        throw Exception('Failed to load pet details: ${response.statusCode}');
-      }
-    } catch (e) {
-      // Try fallback API
-      try {
-        // Get authentication token for fallback API
-        final token = await _tokenService.getToken();
-        if (token == null) {
-          throw Exception('Authentication token not found. Please log in again.');
-        }
-        
-        final response = await _client.get(
-          Uri.parse('${ApiConstants.fallbackApiBaseUrl}${ApiConstants.petDetailEndpoint(id)}'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        ).timeout(ApiConstants.connectionTimeout);
+      final response = await _apiClient.get(
+        ApiConstants.petDetailEndpoint(id),
+      );
 
-        if (response.statusCode == 200) {
-          final petJson = json.decode(response.body);
-          
-          // Remove owner data for privacy/security
-          if (petJson is Map && petJson.containsKey('owner')) {
-            petJson.remove('owner');
-          }
-          
-          return PetModel.fromMap(petJson);
-        } else {
-          throw Exception('Failed to load pet details from fallback API: ${response.statusCode}');
-        }
-      } catch (fallbackError) {
-        throw Exception('Error fetching pet details: $e. Fallback error: $fallbackError');
-      }
+      print('✅ Pet details fetched successfully: ${response.data}');
+
+      // Handle nested response structure
+      final petData =
+          response.data['pet'] ?? response.data['data'] ?? response.data;
+      return PetModel.fromMap(petData);
+    } catch (error) {
+      print('❌ Failed to fetch pet details: $error');
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
     }
   }
 
-  // Add a new pet
+  /// Update pet by ID - Limited to cats and dogs only
+  Future<PetModel> updatePet(String id, Map<String, dynamic> petData) async {
+    try {
+      // Validate species if being updated - only allow cats and dogs
+      final species = petData['species']?.toString();
+      if (species != null) {
+        PetConstants.validateSpecies(species, operation: 'update pet');
+      }
+
+      print('🐾 Updating pet $id with data: $petData');
+
+      final response = await _apiClient.patch(
+        ApiConstants.petUpdateEndpoint(id),
+        data: petData,
+      );
+
+      print('✅ Pet updated successfully: ${response.data}');
+
+      // Handle nested response structure
+      final updatedPetData =
+          response.data['pet'] ?? response.data['data'] ?? response.data;
+      return PetModel.fromMap(updatedPetData);
+    } catch (error) {
+      print('❌ Failed to update pet: $error');
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
+  /// Soft delete pet by ID
+  Future<void> deletePet(String id) async {
+    try {
+      print('🐾 Soft deleting pet: $id');
+
+      await _apiClient.delete(
+        ApiConstants.petDeleteEndpoint(id),
+      );
+
+      print('✅ Pet soft deleted successfully');
+    } catch (error) {
+      print('❌ Failed to delete pet: $error');
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
+  /// Restore soft-deleted pet by ID
+  Future<PetModel> restorePet(String id) async {
+    try {
+      print('🐾 Restoring pet: $id');
+
+      final response = await _apiClient.patch(
+        ApiConstants.petRestoreEndpoint(id),
+      );
+
+      print('✅ Pet restored successfully: ${response.data}');
+
+      // Handle nested response structure
+      final restoredPetData =
+          response.data['pet'] ?? response.data['data'] ?? response.data;
+      return PetModel.fromMap(restoredPetData);
+    } catch (error) {
+      print('❌ Failed to restore pet: $error');
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
+  /// Permanently delete pet by ID (admin only)
+  Future<void> hardDeletePet(String id) async {
+    try {
+      print('🐾 Hard deleting pet: $id');
+
+      await _apiClient.delete(
+        ApiConstants.petHardDeleteEndpoint(id),
+      );
+
+      print('✅ Pet permanently deleted');
+    } catch (error) {
+      print('❌ Failed to permanently delete pet: $error');
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
+  /// Get pet details with appointments
+  Future<Map<String, dynamic>> getPetWithAppointments(String id) async {
+    try {
+      print('🐾 Fetching pet with appointments for ID: $id');
+
+      final response = await _apiClient.get(
+        ApiConstants.petAppointmentsEndpoint(id),
+      );
+
+      print('✅ Pet with appointments fetched successfully: ${response.data}');
+
+      // Return full response data including pet and appointments
+      return response.data is Map<String, dynamic>
+          ? response.data as Map<String, dynamic>
+          : {'data': response.data};
+    } catch (error) {
+      print('❌ Failed to fetch pet with appointments: $error');
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
+  // Legacy method - kept for backward compatibility
   Future<PetModel> addPet(PetModel pet) async {
-    try {
-      // Get authentication token
-      final token = await _tokenService.getToken();
-      if (token == null) {
-        throw Exception('Authentication token not found. Please log in again.');
-      }
-      
-      // Convert PetModel to PetCreateModel to match the required schema
-      final petCreateModel = PetCreateModel.fromPetModel(pet);
-      
-      final response = await _client.post(
-        Uri.parse('${ApiConstants.apiBaseUrl}${ApiConstants.petsEndpoint}'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode(petCreateModel.toJson()),
-      ).timeout(ApiConstants.connectionTimeout);
-
-      if (response.statusCode == 201) {
-        final petJson = json.decode(response.body);
-        return PetModel.fromMap(petJson);
-      } else {
-        throw Exception('Failed to add pet: ${response.statusCode}');
-      }
-    } catch (e) {
-      // Try fallback API
-      try {
-        // Get authentication token for fallback API
-        final token = await _tokenService.getToken();
-        if (token == null) {
-          throw Exception('Authentication token not found. Please log in again.');
-        }
-        
-        // Convert PetModel to PetCreateModel for the fallback API
-        final petCreateModel = PetCreateModel.fromPetModel(pet);
-        
-        final response = await _client.post(
-          Uri.parse('${ApiConstants.fallbackApiBaseUrl}${ApiConstants.petsEndpoint}'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-          body: json.encode(petCreateModel.toJson()),
-        ).timeout(ApiConstants.connectionTimeout);
-
-        if (response.statusCode == 201) {
-          final petJson = json.decode(response.body);
-          return PetModel.fromMap(petJson);
-        } else {
-          throw Exception('Failed to add pet to fallback API: ${response.statusCode}');
-        }
-      } catch (fallbackError) {
-        throw Exception('Error adding pet: $e. Fallback error: $fallbackError');
-      }
-    }
-  }
-
-  // Update a pet
-  Future<PetModel> updatePet(String id, PetModel pet) async {
-    try {
-      // Get authentication token
-      final token = await _tokenService.getToken();
-      if (token == null) {
-        throw Exception('Authentication token not found. Please log in again.');
-      }
-      
-      // Convert PetModel to the format expected by the API
-      final petCreateModel = PetCreateModel.fromPetModel(pet);
-      
-      final response = await _client.put(
-        Uri.parse('${ApiConstants.apiBaseUrl}${ApiConstants.petDetailEndpoint(id)}'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode(petCreateModel.toJson()),
-      ).timeout(ApiConstants.connectionTimeout);
-
-      if (response.statusCode == 200) {
-        final petJson = json.decode(response.body);
-        return PetModel.fromMap(petJson);
-      } else {
-        throw Exception('Failed to update pet: ${response.statusCode}');
-      }
-    } catch (e) {
-      // Try fallback API
-      try {
-        // Get authentication token for fallback API
-        final token = await _tokenService.getToken();
-        if (token == null) {
-          throw Exception('Authentication token not found. Please log in again.');
-        }
-        
-        // Convert PetModel to the format expected by the API
-        final petCreateModel = PetCreateModel.fromPetModel(pet);
-      
-        final response = await _client.put(
-          Uri.parse('${ApiConstants.fallbackApiBaseUrl}${ApiConstants.petDetailEndpoint(id)}'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-          body: json.encode(petCreateModel.toJson()),
-        ).timeout(ApiConstants.connectionTimeout);
-
-        if (response.statusCode == 200) {
-          final petJson = json.decode(response.body);
-          return PetModel.fromMap(petJson);
-        } else {
-          throw Exception('Failed to update pet on fallback API: ${response.statusCode}');
-        }
-      } catch (fallbackError) {
-        throw Exception('Error updating pet: $e. Fallback error: $fallbackError');
-      }
-    }
-  }
-
-  // Delete a pet
-  Future<bool> deletePet(String id) async {
-    try {
-      // Get authentication token
-      final token = await _tokenService.getToken();
-      if (token == null) {
-        throw Exception('Authentication token not found. Please log in again.');
-      }
-      
-      final response = await _client.delete(
-        Uri.parse('${ApiConstants.apiBaseUrl}${ApiConstants.petDetailEndpoint(id)}'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      ).timeout(ApiConstants.connectionTimeout);
-
-      return response.statusCode == 200 || response.statusCode == 204;
-    } catch (e) {
-      // Try fallback API
-      try {
-        // Get authentication token for fallback API
-        final token = await _tokenService.getToken();
-        if (token == null) {
-          throw Exception('Authentication token not found. Please log in again.');
-        }
-        
-        final response = await _client.delete(
-          Uri.parse('${ApiConstants.fallbackApiBaseUrl}${ApiConstants.petDetailEndpoint(id)}'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        ).timeout(ApiConstants.connectionTimeout);
-
-        return response.statusCode == 200 || response.statusCode == 204;
-      } catch (fallbackError) {
-        throw Exception('Error deleting pet: $e. Fallback error: $fallbackError');
-      }
-    }
+    return createPet(pet.toMap());
   }
 }

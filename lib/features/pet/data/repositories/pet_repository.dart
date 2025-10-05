@@ -1,67 +1,133 @@
 import 'package:petapp/features/pet/models/pet_model.dart';
+import 'package:petapp/features/pet/models/pet_species_model.dart';
 import 'package:petapp/features/pet/services/pet_api_service.dart';
+import 'package:petapp/features/pet/utils/pet_constants.dart';
+import 'package:petapp/core/services/error_handler_service.dart';
 
 class PetRepository {
   final PetApiService _apiService;
-  
-  PetRepository({PetApiService? apiService}) 
-    : _apiService = apiService ?? PetApiService();
 
-  // Get all pets for the current user
-  Future<List<PetModel>> getUserPets() async {
+  PetRepository({required PetApiService apiService}) : _apiService = apiService;
+
+  /// Create a new pet - Limited to cats and dogs only
+  Future<PetModel> createPet(Map<String, dynamic> petData) async {
     try {
-      return await _apiService.getUserPets();
-    } catch (e) {
-      // If API fails, return fallback data
-      // This could also be loaded from local storage in a real app
-      return _getFallbackPets();
+      // Validate species at repository level - only allow cats and dogs
+      final species = petData['species']?.toString();
+      if (species == null || species.isEmpty) {
+        throw Exception('Species is required. Must be either "cat" or "dog".');
+      }
+      PetConstants.validateSpecies(species, operation: 'create pet');
+
+      return await _apiService.createPet(petData);
+    } catch (error) {
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
     }
   }
 
-  // Get a specific pet by ID
+  /// Get all pets for the current user with pagination support
+  Future<List<PetModel>> getUserPets({int? page, int? limit}) async {
+    try {
+      return await _apiService.getUserPets(page: page, limit: limit);
+    } catch (e) {
+      print('❌ Repository: Failed to fetch pets from API: $e');
+      // Return empty list instead of sample data so users see proper empty state
+      // In production, you might want to return cached data from local storage here
+      print('📝 Returning empty list to show proper empty state');
+      return [];
+    }
+  }
+
+  /// Get allowed pet species
+  Future<List<PetSpecies>> getAllowedSpecies() async {
+    try {
+      return await _apiService.getAllowedSpecies();
+    } catch (error) {
+      print('❌ Repository: Failed to fetch species, using fallback: $error');
+      // Return fallback species list
+      return _getFallbackSpecies();
+    }
+  }
+
+  /// Get a specific pet by ID
   Future<PetModel> getPetById(String id) async {
     try {
       return await _apiService.getPetById(id);
     } catch (e) {
+      print('❌ Repository: Failed to fetch pet $id, using fallback: $e');
       // Return a fallback pet if we can't get it from the API
       final fallbackPets = _getFallbackPets();
-      final pet = fallbackPets.firstWhere(
-        (pet) => pet.id == id, 
-        orElse: () => throw Exception('Pet not found')
-      );
+      final pet = fallbackPets.firstWhere((pet) => pet.id == id,
+          orElse: () => throw Exception('Pet not found'));
       return pet;
     }
   }
 
-  // Add a new pet
+  /// Update a pet's details - Limited to cats and dogs only
+  Future<PetModel> updatePet(String id, Map<String, dynamic> petData) async {
+    try {
+      // Validate species if being updated - only allow cats and dogs
+      final species = petData['species']?.toString();
+      if (species != null) {
+        PetConstants.validateSpecies(species, operation: 'update pet');
+      }
+
+      return await _apiService.updatePet(id, petData);
+    } catch (error) {
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
+  /// Soft delete a pet
+  Future<void> deletePet(String id) async {
+    try {
+      await _apiService.deletePet(id);
+    } catch (error) {
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
+  /// Restore a soft-deleted pet
+  Future<PetModel> restorePet(String id) async {
+    try {
+      return await _apiService.restorePet(id);
+    } catch (error) {
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
+  /// Permanently delete a pet (admin only)
+  Future<void> hardDeletePet(String id) async {
+    try {
+      await _apiService.hardDeletePet(id);
+    } catch (error) {
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
+  /// Get pet details with appointments
+  Future<Map<String, dynamic>> getPetWithAppointments(String id) async {
+    try {
+      return await _apiService.getPetWithAppointments(id);
+    } catch (error) {
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
+  // Legacy method - kept for backward compatibility
   Future<PetModel> addPet(PetModel pet) async {
-    try {
-      return await _apiService.addPet(pet);
-    } catch (e) {
-      // In a real app, we might save locally if API fails
-      // For now, just return the pet with a fake ID
-      return pet; // Assuming the ID is already set
-    }
+    return createPet(pet.toMap());
   }
 
-  // Update a pet's details
-  Future<PetModel> updatePet(String id, PetModel pet) async {
-    try {
-      return await _apiService.updatePet(id, pet);
-    } catch (e) {
-      // In a real app, we might update locally if API fails
-      return pet;
-    }
-  }
-
-  // Delete a pet
-  Future<bool> deletePet(String id) async {
-    try {
-      return await _apiService.deletePet(id);
-    } catch (e) {
-      // In a real app, we might mark as "to delete" locally
-      return true; // Optimistically return true
-    }
+  // Legacy method - kept for backward compatibility with PetModel parameter
+  Future<PetModel> updatePetModel(String id, PetModel pet) async {
+    return updatePet(id, pet.toMap());
   }
 
   // Fallback pets in case the API fails (this would typically come from local storage)
@@ -82,6 +148,8 @@ class PetRepository {
               expiresAt: '2026-01-15',
             )
           ],
+          weight: 25.5,
+          spayNeuterStatus: true,
         ),
         status: 'active',
         version: 1,
@@ -91,13 +159,66 @@ class PetRepository {
         name: 'Luna',
         image: 'assets/images/pet2.jpg',
         species: 'cat',
-        dateOfBirth: '2021-02-10',
+        dateOfBirth: '2021-03-10',
         medicalHistory: MedicalHistoryModel(
-          notes: 'Needs special diet food',
+          notes: 'Indoor cat, very playful',
+          vaccinations: [
+            VaccinationModel(
+              name: 'FVRCP',
+              date: '2025-02-20',
+              expiresAt: '2026-02-20',
+            )
+          ],
           weight: 4.2,
+          spayNeuterStatus: true,
         ),
         status: 'active',
         version: 1,
+      ),
+      PetModel(
+        id: '3',
+        name: 'Charlie',
+        image: 'assets/images/pet1.jpg',
+        species: 'dog',
+        dateOfBirth: '2019-08-22',
+        medicalHistory: MedicalHistoryModel(
+          notes: 'Loves swimming, regular exercise needed',
+          allergies: ['grass', 'pollen'],
+          vaccinations: [
+            VaccinationModel(
+              name: 'DHPP',
+              date: '2025-01-10',
+              expiresAt: '2026-01-10',
+            ),
+            VaccinationModel(
+              name: 'Rabies',
+              date: '2025-01-15',
+              expiresAt: '2026-01-15',
+            )
+          ],
+          weight: 32.0,
+          spayNeuterStatus: false,
+        ),
+        status: 'active',
+        version: 1,
+      ),
+    ];
+  }
+
+  // Fallback species list - Limited to cats and dogs only
+  List<PetSpecies> _getFallbackSpecies() {
+    return [
+      PetSpecies(
+        id: '1',
+        name: 'Dog',
+        description: 'Domestic dogs',
+        isActive: true,
+      ),
+      PetSpecies(
+        id: '2',
+        name: 'Cat',
+        description: 'Domestic cats',
+        isActive: true,
       ),
     ];
   }

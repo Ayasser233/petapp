@@ -139,7 +139,7 @@ class SocialBtns extends StatelessWidget {
           child: OutlinedButton(
             onPressed: () {
               // Handle Google Sign-in using the AuthCubit
-              // context.read<AuthCubit>().signInWithGoogle();
+              context.read<AuthCubit>().googleLogin();
             },
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14.0),
@@ -314,7 +314,7 @@ class _LoginFormState extends State<LoginForm> {
     _saveUserEmail();
     
     context.read<AuthCubit>().login(
-      _emailController.text.trim(), 
+      _emailController.text.trim(), // This will be used as identifier (can be email or phone)
       _passwordController.text
     );
   }
@@ -327,6 +327,26 @@ class _LoginFormState extends State<LoginForm> {
       listener: (context, state) async {
         if (state is AuthLoginSuccess) {
           // Use TokenService directly
+          final tokenService = Get.find<TokenService>();
+          final authService = Get.find<AuthService>();
+          
+          // Save token and mark as authenticated
+          await tokenService.saveToken(state.accessToken);
+          
+          // Set authenticated status
+          authService.setAuthenticated();
+          
+          // Clear guest mode if it was set
+          await authService.clearGuestMode();
+          
+          // Set login flag
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+          
+          // Navigate to home
+          Get.offAllNamed(AppRoutes.home);
+        } else if (state is AuthGoogleLoginSuccess) {
+          // Handle Google login success
           final tokenService = Get.find<TokenService>();
           final authService = Get.find<AuthService>();
           
@@ -554,7 +574,7 @@ class _LoginFormState extends State<LoginForm> {
                           borderRadius: BorderRadius.circular(12.0),
                         ),
                         elevation: 0,
-                        disabledBackgroundColor: AppColors.orange.withOpacity(0.5),
+                        disabledBackgroundColor: AppColors.orange.withValues(alpha: 0.5),
                       ),
                       child: isLoading
                         ? const SizedBox(

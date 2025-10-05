@@ -34,7 +34,7 @@ class ClinicExplorerCategoryTabs extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppColors.orange.withOpacity(isDark ? 0.2 : 0.1)
+                      ? AppColors.orange.withValues(alpha: isDark ? 0.2 : 0.1)
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(

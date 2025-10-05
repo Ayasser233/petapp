@@ -241,10 +241,10 @@ class _CountryCodePickerState extends State<_CountryCodePicker> {
                   ),
                   onTap: () => widget.onCountrySelected(country),
                   selected: isSelected,
-                  selectedColor: AppColors.orange.withOpacity(0.1),
+                  selectedColor: AppColors.orange.withValues(alpha: 0.1),
                   selectedTileColor: widget.isDark 
-                      ? AppColors.orange.withOpacity(0.1) 
-                      : AppColors.orange.withOpacity(0.05),
+                      ? AppColors.orange.withValues(alpha: 0.1) 
+                      : AppColors.orange.withValues(alpha: 0.05),
                 );
               },
             ),

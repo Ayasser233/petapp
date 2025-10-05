@@ -90,7 +90,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
         'Error',
         'Failed to reset password: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.1),
+        backgroundColor: Colors.red.withValues(alpha: 0.1),
         colorText: Colors.red,
       );
     } finally {
@@ -299,7 +299,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                       borderRadius: BorderRadius.circular(16.0),
                     ),
                     elevation: 0,
-                    disabledBackgroundColor: AppColors.orange.withOpacity(0.5),
+                    disabledBackgroundColor: AppColors.orange.withValues(alpha: 0.5),
                   ),
                   child: _isLoading
                     ? const SizedBox(

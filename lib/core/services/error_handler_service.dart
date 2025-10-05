@@ -59,8 +59,24 @@ class ErrorHandlerService extends GetxService {
       // Check nested errorDetails (your API structure)
       if (data['errorDetails'] is Map<String, dynamic>) {
         final errorDetails = data['errorDetails'] as Map<String, dynamic>;
+        
+        // Handle new validation format with array of field errors
+        if (errorDetails['message'] is List) {
+          final messages = errorDetails['message'] as List;
+          if (messages.isNotEmpty) {
+            // Extract first field error for display
+            if (messages.first is Map) {
+              final firstError = messages.first as Map;
+              final message = firstError.values.first;
+              return message.toString();
+            }
+            return messages.first.toString();
+          }
+        }
+        
+        // Fallback to simple message
         final nestedMessage = errorDetails['message'] ?? errorDetails['error'];
-        if (nestedMessage != null && nestedMessage.isNotEmpty) {
+        if (nestedMessage != null && nestedMessage.isNotEmpty && nestedMessage is! List) {
           return nestedMessage.toString();
         }
       }

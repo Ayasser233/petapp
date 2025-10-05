@@ -21,7 +21,7 @@ class SettingsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.lightorange.withOpacity(0.3),
+              color: AppColors.lightorange.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -118,7 +118,7 @@ class SettingsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -183,7 +183,7 @@ class SettingsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -234,7 +234,7 @@ class SettingsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -294,7 +294,7 @@ class SettingsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -347,7 +347,7 @@ class SettingsScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 5,
             offset: const Offset(0, 2),
           ),
@@ -409,7 +409,7 @@ class SettingsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppColors.lightorange.withOpacity(0.3),
+                  color: AppColors.lightorange.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -482,7 +482,7 @@ class SettingsScreen extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.lightorange.withOpacity(0.3),
+              color: AppColors.lightorange.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -518,7 +518,7 @@ class SettingsScreen extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.white,
+            activeThumbColor: Colors.white,
             activeTrackColor: AppColors.orange,
             inactiveThumbColor: Colors.white,
             inactiveTrackColor: Colors.grey.shade300,
@@ -531,7 +531,7 @@ class SettingsScreen extends StatelessWidget {
   Widget _buildActionTile({required BuildContext context, required String title, required String subtitle, required VoidCallback onTap, required IconData icon, bool showArrow = true, bool isDestructive = false}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDestructive ? Colors.red : (isDark ? Colors.white : Colors.black87);
-    final subTextColor = isDestructive ? Colors.red.withOpacity(0.7) : (isDark ? Colors.white70 : Colors.black54);
+    final subTextColor = isDestructive ? Colors.red.withValues(alpha: 0.7) : (isDark ? Colors.white70 : Colors.black54);
     
     return Material(
       color: Colors.transparent,
@@ -546,8 +546,8 @@ class SettingsScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: isDestructive 
-                      ? Colors.red.withOpacity(0.2) 
-                      : AppColors.lightorange.withOpacity(0.3),
+                      ? Colors.red.withValues(alpha: 0.2) 
+                      : AppColors.lightorange.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
@@ -600,8 +600,8 @@ class SettingsScreen extends StatelessWidget {
         gradient: LinearGradient(
           colors: [
             Colors.transparent,
-            Colors.grey.withOpacity(0.3),
-            Colors.grey.withOpacity(0.3),
+            Colors.grey.withValues(alpha: 0.3),
+            Colors.grey.withValues(alpha: 0.3),
             Colors.transparent,
           ],
           stops: const [0.0, 0.2, 0.8, 1.0],

@@ -6,15 +6,15 @@ class ApiConstants {
   static String get apiBaseUrl {
     // Use 10.0.2.2 for Android emulators to access host's localhost
     if (Platform.isAndroid) {
-      return 'http://95.111.253.44:3010';
+      return 'http://10.0.2.2:3000/api/v1';
       
     }
     // Default for physical devices and iOS simulators
-    return 'http://95.111.253.44:3010';
+    return 'http://localhost:3000/api/v1';
     
   }
   
-  static const String fallbackApiBaseUrl = 'http://api.aleefy-app.com:3010';
+  static const String fallbackApiBaseUrl = 'http://10.0.2.2:3000/api/v1';
   
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 10);
@@ -22,22 +22,32 @@ class ApiConstants {
   static const Duration sendTimeout = Duration(seconds: 10);
   
   // API Health Check
-  static const String healthEndpoint = '/api/health';
+  static const String healthEndpoint = '/health';
   
   // Auth Endpoints
-  static const String authEndpoint = '/api/auth';
-  static const String registerEndpoint = '/api/auth/register';
-  static const String loginEndpoint = '/api/auth/login';
-  static const String logoutEndpoint = '/api/auth/logout';
-  static const String profileEndpoint = '/api/auth/profile';
-  static const String verifyEmailEndpoint = '/api/auth/verify-email';
-  static const String resendVerificationEndpoint = '/api/auth/resend-verification';
-  static const String forgotPasswordEndpoint = '/api/auth/forgot-password';
-  static const String resetPasswordEndpoint = '/api/auth/reset-password';
+  static const String authEndpoint = '/auth';
+  static const String registerEndpoint = '/auth/register';
+  static const String loginEndpoint = '/auth/login';
+  static const String logoutEndpoint = '/auth/logout';
+  static const String profileEndpoint = '/auth/profile';
+  static const String confirmEndpoint = 'auth/confirm';
+  static const String resendOtpEndpoint = '/auth/resend-otp';
+  static const String confirmNewEmailEndpoint = '/auth/confirm/new';
+  static const String forgotPasswordEndpoint = 'auth/forgot/password';
+  static const String resetPasswordEndpoint = '/auth/reset/password';
+  static const String refreshTokenEndpoint = '/auth/refresh';
+  static const String updateProfileEndpoint = '/auth/me';
+  static const String googleLoginEndpoint = '/auth/google/login';
   
   // Pet Endpoints
-  static const String petsEndpoint = '/api/pets';
-  static String petDetailEndpoint(String id) => '/api/pets/$id';
+  static const String petsEndpoint = '/pets';
+  static const String petSpeciesAllowedEndpoint = '/pets/species/allowed';
+  static String petDetailEndpoint(String id) => '/pets/$id';
+  static String petUpdateEndpoint(String id) => '/pets/$id';
+  static String petDeleteEndpoint(String id) => '/pets/$id';
+  static String petRestoreEndpoint(String id) => '/pets/$id/restore';
+  static String petHardDeleteEndpoint(String id) => '/pets/$id/hard';
+  static String petAppointmentsEndpoint(String id) => '/pets/$id/appointments';
   
   // Symptoms Endpoints
   static const String symptomsEndpoint = '/api/symptoms';

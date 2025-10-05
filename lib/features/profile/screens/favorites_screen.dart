@@ -77,7 +77,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           Icon(
             Icons.favorite_border,
             size: 80,
-            color: AppColors.orange.withOpacity(0.7),
+            color: AppColors.orange.withValues(alpha: 0.7),
           ),
           const SizedBox(height: 16),
           Text(
@@ -190,7 +190,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 2),
               ),
@@ -349,7 +349,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
-                            color: AppColors.lightorange.withOpacity(0.3),
+                            color: AppColors.lightorange.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(

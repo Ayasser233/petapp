@@ -66,7 +66,7 @@ class RewardsCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: AppColors.orange.withOpacity(0.3),
+                color: AppColors.orange.withValues(alpha: 0.3),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -81,7 +81,7 @@ class RewardsCard extends StatelessWidget {
               Container(
                 height: 100,
                 width: 1,
-                color: Colors.white.withOpacity(0.3),
+                color: Colors.white.withValues(alpha: 0.3),
                 margin: const EdgeInsets.symmetric(horizontal: 16),
               ),
               // Vouchers section (only available vouchers)
@@ -106,7 +106,7 @@ class RewardsCard extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: 0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -172,11 +172,11 @@ class RewardsCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: vouchers > 0 ? Colors.white : Colors.white.withOpacity(0.7),
+              color: vouchers > 0 ? Colors.white : Colors.white.withValues(alpha: 0.7),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
+                  color: Colors.black.withValues(alpha: 0.1),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -186,7 +186,7 @@ class RewardsCard extends StatelessWidget {
               children: [
                 Icon(
                   Icons.confirmation_number_outlined,
-                  color: vouchers > 0 ? AppColors.orange : AppColors.orange.withOpacity(0.5),
+                  color: vouchers > 0 ? AppColors.orange : AppColors.orange.withValues(alpha: 0.5),
                   size: 24,
                 ),
                 if (vouchers > 0)
@@ -231,7 +231,7 @@ class RewardsCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(

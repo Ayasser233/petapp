@@ -144,7 +144,6 @@ class ApiClient {
     try {
       final response =
           await _dio.post(ApiConstants.registerEndpoint, data: userData);
-      await _handleTokenResponse(response);
       return response;
     } catch (e) {
       log(e.toString());
@@ -153,10 +152,30 @@ class ApiClient {
     }
   }
 
-  Future<Response> login(String email, String password) async {
+  Future<Response> login(String identifier, String password,
+      {String? turnstileToken}) async {
     try {
-      final response = await _dio.post(ApiConstants.loginEndpoint,
-          data: {'identifier': email, 'password': password});
+      final Map<String, dynamic> data = {
+        'identifier': identifier,
+        'password': password,
+      };
+
+      if (turnstileToken != null && turnstileToken.isNotEmpty) {
+        data['turnstileToken'] = turnstileToken;
+      }
+      final response = await _dio.post(ApiConstants.loginEndpoint, data: data);
+      await _handleTokenResponse(response);
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  } 
+
+  Future<Response> confirmEmail(String email, String otp) async {
+    try {
+      final response = await _dio.post(ApiConstants.confirmEndpoint,
+          data: {'email': email, 'otp': otp});
       await _handleTokenResponse(response);
       return response;
     } catch (e) {
@@ -165,10 +184,10 @@ class ApiClient {
     }
   }
 
-  Future<Response> verifyEmail(String email, String otp) async {
+  Future<Response> resendOtp(String email) async {
     try {
-      final response = await _dio.post(ApiConstants.verifyEmailEndpoint,
-          data: {'email': email, 'otp': otp});
+      final response = await _dio
+          .post(ApiConstants.resendOtpEndpoint, data: {'email': email});
       return response;
     } catch (e) {
       ErrorHandlerService.instance.handleError(e);
@@ -176,10 +195,10 @@ class ApiClient {
     }
   }
 
-  Future<Response> resendVerification(String email) async {
+  Future<Response> confirmNewEmail(String email, String otp) async {
     try {
-      final response = await _dio.post(ApiConstants.resendVerificationEndpoint,
-          data: {'email': email});
+      final response = await _dio.post(ApiConstants.confirmNewEmailEndpoint,
+          data: {'email': email, 'otp': otp});
       return response;
     } catch (e) {
       ErrorHandlerService.instance.handleError(e);
@@ -198,10 +217,22 @@ class ApiClient {
     }
   }
 
-  Future<Response> resetPassword(String token, String password) async {
+  Future<Response> resetPassword(
+      String email, String otp, String password) async {
     try {
       final response = await _dio.post(ApiConstants.resetPasswordEndpoint,
-          data: {'token': token, 'password': password});
+          data: {'email': email, 'otp': otp, 'password': password});
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> refreshToken(String refreshToken) async {
+    try {
+      final response = await _dio.post(ApiConstants.refreshTokenEndpoint,
+          data: {'refreshToken': refreshToken});
       await _handleTokenResponse(response);
       return response;
     } catch (e) {
@@ -213,10 +244,10 @@ class ApiClient {
   Future<Response> logout() async {
     try {
       final response = await _dio.post(ApiConstants.logoutEndpoint);
-      await tokenService.clearToken();
+      await tokenService.clearAllTokens();
       return response;
     } catch (e) {
-      await tokenService.clearToken(); // Clear token even if logout fails
+      await tokenService.clearAllTokens(); // Clear tokens even if logout fails
       ErrorHandlerService.instance.handleError(e);
       rethrow;
     }
@@ -232,12 +263,55 @@ class ApiClient {
     }
   }
 
+  Future<Response> updateUserProfile(Map<String, dynamic> userData) async {
+    try {
+      // Debug logging for profile update
+      print('🚀 UPDATE PROFILE REQUEST:');
+      print('   Endpoint: ${ApiConstants.updateProfileEndpoint}');
+      print('   Full URL: ${_dio.options.baseUrl}${ApiConstants.updateProfileEndpoint}');
+      print('   Data: $userData');
+      
+      final response =
+          await _dio.patch(ApiConstants.updateProfileEndpoint, data: userData);
+      
+      print('✅ UPDATE PROFILE SUCCESS: ${response.statusCode}');
+      print('   Response: ${response.data}');
+      
+      return response;
+    } catch (e) {
+      print('❌ UPDATE PROFILE ERROR: $e');
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> googleLogin() async {
+    try {
+      final response = await _dio.post(ApiConstants.googleLoginEndpoint);
+      await _handleTokenResponse(response);
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
   // Handle possible token in response
   Future<void> _handleTokenResponse(Response response) async {
-    if (response.data is Map<String, dynamic> &&
-        response.data['access_token'] != null &&
-        response.data['access_token'] is String) {
-      await tokenService.saveToken(response.data['access_token']);
+    if (response.data is Map<String, dynamic>) {
+      final data = response.data as Map<String, dynamic>;
+
+      // Handle both accessToken and access_token formats
+      final accessToken = data['accessToken'] ?? data['access_token'];
+      final refreshToken = data['refreshToken'] ?? data['refresh_token'];
+
+      if (accessToken != null) {
+        await tokenService.saveToken(accessToken.toString());
+      }
+
+      if (refreshToken != null) {
+        await tokenService.saveRefreshToken(refreshToken.toString());
+      }
     }
   }
 
@@ -291,6 +365,27 @@ class ApiClient {
   }) async {
     try {
       return await _dio.put(
+        path,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+        cancelToken: cancelToken,
+      );
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> patch(
+    String path, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
+    try {
+      return await _dio.patch(
         path,
         data: data,
         queryParameters: queryParameters,

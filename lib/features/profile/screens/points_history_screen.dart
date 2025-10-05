@@ -68,7 +68,7 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.orange.withOpacity(0.3),
+                  color: AppColors.orange.withValues(alpha: 0.3),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -105,7 +105,7 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
                             .replaceAll('{earned}', '4,540')
                             .replaceAll('{redeemed}', '1,000'),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                             ),
                       ),
                     ],
@@ -142,7 +142,7 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -153,7 +153,7 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(

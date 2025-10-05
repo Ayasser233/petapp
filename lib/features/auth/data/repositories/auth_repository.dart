@@ -1,55 +1,75 @@
 import 'package:petapp/core/services/api_client.dart';
+import 'package:petapp/features/auth/data/models/user_model.dart';
+import 'package:petapp/features/auth/data/models/auth_request_models.dart';
+import 'package:petapp/features/auth/data/models/auth_response_models.dart';
 
 class AuthRepository {
   final ApiClient _apiClient;
 
   AuthRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
-  Future<String> register(Map<String, dynamic> userData) async {
+  Future<RegisterResponse> register(RegisterRequest request) async {
     try {
-      final response = await _apiClient.register(userData);
-      return response.data['access_token'];
+      final response = await _apiClient.register(request.toJson());
+      return RegisterResponse.fromJson(response.data);
     } catch (e) {
       rethrow; // Let the Cubit handle errors
     }
   }
 
-  Future<String> login(String email, String password) async {
+  Future<AuthResponse> login(LoginRequest request) async {
     try {
-      final response = await _apiClient.login(email, password);
-      return response.data['access_token'];
+      final response = await _apiClient.login(
+        request.identifier,
+        request.password,
+        turnstileToken: request.turnstileToken,
+      );
+      return AuthResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> verifyEmail(String email, String otp) async {
+  Future<ConfirmEmailResponse> confirmEmail(ConfirmEmailRequest request) async {
     try {
-      await _apiClient.verifyEmail(email, otp);
+      final response = await _apiClient.confirmEmail(request.email, request.otp);
+      return ConfirmEmailResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> resendVerification(String email) async {
+  Future<ResendOtpResponse> resendOtp(ResendOtpRequest request) async {
     try {
-      await _apiClient.resendVerification(email);
+      final response = await _apiClient.resendOtp(request.email);
+      return ResendOtpResponse.fromJson(response.data ?? {'message': 'OTP sent successfully'});
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> forgotPassword(String email) async {
+  Future<ForgotPasswordResponse> forgotPassword(ForgotPasswordRequest request) async {
     try {
-      await _apiClient.forgotPassword(email);
+      final response = await _apiClient.forgotPassword(request.email);
+      return ForgotPasswordResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<void> resetPassword(String token, String password) async {
+  Future<ResetPasswordResponse> resetPassword(ResetPasswordRequest request) async {
     try {
-      await _apiClient.resetPassword(token, password);
+      final response = await _apiClient.resetPassword(request.email, request.otp, request.password);
+      return ResetPasswordResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<ConfirmEmailResponse> confirmNewEmail(ConfirmNewEmailRequest request) async {
+    try {
+      final response = await _apiClient.confirmNewEmail(request.email, request.otp);
+      return ConfirmEmailResponse.fromJson(response.data ?? {'message': 'Email confirmed successfully'});
     } catch (e) {
       rethrow;
     }
@@ -63,10 +83,37 @@ class AuthRepository {
     }
   }
 
-  Future<String> getUserProfile() async {
+  Future<UserModel> getUserProfile() async {
     try {
       final response = await _apiClient.getUserProfile();
-      return response.data['access_token'];
+      return UserModel.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<UserModel> updateUserProfile(UpdateProfileRequest request) async {
+    try {
+      final response = await _apiClient.updateUserProfile(request.toJson());
+      return UserModel.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<RefreshTokenResponse> refreshToken(RefreshTokenRequest request) async {
+    try {
+      final response = await _apiClient.refreshToken(request.refreshToken);
+      return RefreshTokenResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<AuthResponse> googleLogin() async {
+    try {
+      final response = await _apiClient.googleLogin();
+      return AuthResponse.fromJson(response.data);
     } catch (e) {
       rethrow;
     }

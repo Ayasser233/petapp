@@ -123,10 +123,17 @@ class _SignUpFormState extends State<SignUpForm> {
       return;
     }
 
-    // Prepare data for API with the country code
+    // Split name into first and last name (simple split by space)
+    final nameParts = _nameController.text.trim().split(' ');
+    final firstName = nameParts.isNotEmpty ? nameParts[0] : '';
+    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+    
+    // Prepare data for new API format
     final Map<String, dynamic> userData = {
-      'username': _nameController.text,
-      'mobileNumber': '${_selectedCountry.dialCode}${_phoneController.text}',
+      'firstName': firstName,
+      'lastName': lastName,
+      'username': _nameController.text.replaceAll(' ', '').toLowerCase(), // Create username from name
+      'mobile': '${_selectedCountry.dialCode}${_phoneController.text}',
       'email': _emailController.text,
       'password': _passwordController.text,
       'role': 'user',
@@ -158,7 +165,7 @@ class _SignUpFormState extends State<SignUpForm> {
             AppLocalizations.of(context).registrationSuccessful,
             AppLocalizations.of(context).pleaseVerifyEmail,
             snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green.withOpacity(0.1),
+            backgroundColor: Colors.green.withValues(alpha: 0.1),
             colorText: Colors.green,
             borderRadius: 8,
             margin: const EdgeInsets.all(16),
@@ -182,7 +189,7 @@ class _SignUpFormState extends State<SignUpForm> {
             AppLocalizations.of(context).registrationFailed,
             state.message,
             snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red.withOpacity(0.1),
+            backgroundColor: Colors.red.withValues(alpha: 0.1),
             colorText: Colors.red,
             borderRadius: 8,
             margin: const EdgeInsets.all(16),
@@ -391,7 +398,7 @@ class _SignUpFormState extends State<SignUpForm> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16.0),
                         ),
-                        disabledBackgroundColor: AppColors.orange.withOpacity(0.5),
+                        disabledBackgroundColor: AppColors.orange.withValues(alpha: 0.5),
                       ),
                       child: isLoading
                           ? const SizedBox(
