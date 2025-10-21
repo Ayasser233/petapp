@@ -16,9 +16,9 @@ class AuthCubit extends Cubit<AuthState> {
   AuthCubit({
     required AuthRepository authRepository,
     required TokenService tokenService,
-  }) : _authRepository = authRepository,
-       _tokenService = tokenService,
-       super(AuthInitial());
+  })  : _authRepository = authRepository,
+        _tokenService = tokenService,
+        super(AuthInitial());
 
   Future<void> register(Map<String, dynamic> userData) async {
     emit(AuthLoading());
@@ -28,14 +28,14 @@ class AuthCubit extends Cubit<AuthState> {
         password: userData['password'] ?? '',
         firstName: userData['firstName'] ?? userData['name'] ?? '',
         lastName: userData['lastName'] ?? '',
-        username: userData['username'] ?? '',
+        username: userData['username'], // Only include if provided
         mobile: userData['mobile'] ?? userData['phone'] ?? '',
-        role: userData['role'] ?? 'user',
+        role: userData['role'], // Only include if provided
         turnstileToken: userData['turnstileToken'],
       );
-      
+
       final response = await _authRepository.register(request);
-      
+
       // Save tokens if available
       if (response.accessToken != null) {
         await _tokenService.saveToken(response.accessToken!);
@@ -43,11 +43,9 @@ class AuthCubit extends Cubit<AuthState> {
       if (response.refreshToken != null) {
         await _tokenService.saveRefreshToken(response.refreshToken!);
       }
-      
+
       emit(AuthRegistrationSuccess(
-        user: response.user?.name ?? 'User', 
-        email: userData['email']
-      ));
+          user: response.user?.name ?? 'User', email: userData['email']));
     } on DioException catch (e) {
       emit(AuthFailure(
         message: _formatDioError(e, isSignup: true),
@@ -56,13 +54,13 @@ class AuthCubit extends Cubit<AuthState> {
       ));
     } catch (e) {
       emit(AuthFailure(
-        message: 'An unexpected error occurred. Please try again.',
-        errorDetails: e.toString()
-      ));
+          message: 'An unexpected error occurred. Please try again.',
+          errorDetails: e.toString()));
     }
   }
 
-  Future<void> login(String identifier, String password, {String? turnstileToken}) async {
+  Future<void> login(String identifier, String password,
+      {String? turnstileToken}) async {
     emit(AuthLoading());
     try {
       final request = LoginRequest(
@@ -70,13 +68,13 @@ class AuthCubit extends Cubit<AuthState> {
         password: password,
         turnstileToken: turnstileToken,
       );
-      
+
       final response = await _authRepository.login(request);
-      
+
       // Save tokens
       await _tokenService.saveToken(response.accessToken);
       await _tokenService.saveRefreshToken(response.refreshToken);
-      
+
       emit(AuthLoginSuccess(response.accessToken));
     } on DioException catch (e) {
       emit(AuthFailure(
@@ -85,19 +83,18 @@ class AuthCubit extends Cubit<AuthState> {
       ));
     } catch (e) {
       emit(AuthFailure(
-        message: 'Unable to login. Please check your credentials and try again.',
-        errorDetails: e.toString()
-      ));
+          message:
+              'Unable to login. Please check your credentials and try again.',
+          errorDetails: e.toString()));
     }
   }
-  
+
   // Helper method to format DioException errors
   String _formatDioError(DioException e, {bool isSignup = false}) {
     // Default messages based on context
-    final defaultMessage = isSignup 
-        ? 'Unable to create account.' 
-        : 'Login failed.';
-        
+    final defaultMessage =
+        isSignup ? 'Unable to create account.' : 'Login failed.';
+
     // Handle no response cases
     if (e.response == null) {
       if (e.type == DioExceptionType.connectionTimeout) {
@@ -108,26 +105,26 @@ class AuthCubit extends Cubit<AuthState> {
       }
       return '$defaultMessage Please try again later.';
     }
-    
+
     // Handle different status codes
     switch (e.response?.statusCode) {
       case 400:
-        return _extractErrorMessage(e.response?.data) ?? 
+        return _extractErrorMessage(e.response?.data) ??
             'Please check your information and try again.';
       case 401:
-        return isSignup 
-            ? 'Authentication failed. Please try again.' 
+        return isSignup
+            ? 'Authentication failed. Please try again.'
             : 'Invalid email or password.';
       case 403:
         return 'You don\'t have permission to perform this action.';
       case 404:
         return 'Service not found. Please try again later.';
       case 409:
-        return isSignup 
-            ? 'Account already exists with this email or phone number.' 
+        return isSignup
+            ? 'Account already exists with this email or phone number.'
             : 'Account conflict. Please contact support.';
       case 422:
-        return _extractErrorMessage(e.response?.data) ?? 
+        return _extractErrorMessage(e.response?.data) ??
             'Please fix the errors in your submission.';
       case 429:
         return 'Too many attempts. Please try again later.';
@@ -137,20 +134,21 @@ class AuthCubit extends Cubit<AuthState> {
       case 503:
         return 'Server error. Please try again later.';
       default:
-        return _extractErrorMessage(e.response?.data) ?? '$defaultMessage Please try again.';
+        return _extractErrorMessage(e.response?.data) ??
+            '$defaultMessage Please try again.';
     }
   }
-  
+
   // Helper method to extract error message from response data
   String? _extractErrorMessage(dynamic responseData) {
     try {
       if (responseData == null) return null;
-      
+
       if (responseData is Map) {
         // Check common patterns
         if (responseData.containsKey('message')) {
           return responseData['message'];
-        } 
+        }
         if (responseData.containsKey('error')) {
           final error = responseData['error'];
           if (error is String) return error;
@@ -164,20 +162,20 @@ class AuthCubit extends Cubit<AuthState> {
     }
     return null;
   }
-  
+
   // Extract field-specific validation errors (email taken, password too weak, etc)
   Map<String, String>? _extractFieldErrors(DioException e) {
     try {
       final data = e.response?.data;
       if (data == null || data is! Map) return null;
-      
+
       // Handle new server format: errorDetails.message array
       if (data.containsKey('errorDetails') && data['errorDetails'] is Map) {
         final errorDetails = data['errorDetails'] as Map;
         if (errorDetails['message'] is List) {
           final messages = errorDetails['message'] as List;
           final fieldErrors = <String, String>{};
-          
+
           for (final message in messages) {
             if (message is Map) {
               message.forEach((key, value) {
@@ -185,12 +183,10 @@ class AuthCubit extends Cubit<AuthState> {
               });
             }
           }
-          
+
           return fieldErrors.isNotEmpty ? fieldErrors : null;
         }
       }
-      
-
     } catch (e) {
       debugPrint('Error extracting field errors: $e');
     }
@@ -205,7 +201,7 @@ class AuthCubit extends Cubit<AuthState> {
       emit(const AuthVerificationSuccess());
     } on DioException catch (e) {
       String errorMessage = 'Verification failed';
-      
+
       if (e.response != null) {
         try {
           errorMessage = e.response?.data['message'] ?? errorMessage;
@@ -213,7 +209,7 @@ class AuthCubit extends Cubit<AuthState> {
           // Use default error message
         }
       }
-      
+
       emit(AuthFailure(message: errorMessage));
     } catch (e) {
       emit(const AuthFailure(message: 'An unexpected error occurred'));
@@ -228,7 +224,7 @@ class AuthCubit extends Cubit<AuthState> {
       emit(const AuthResendVerificationSuccess());
     } on DioException catch (e) {
       String errorMessage = 'Failed to resend verification';
-      
+
       if (e.response != null) {
         try {
           errorMessage = e.response?.data['message'] ?? errorMessage;
@@ -236,7 +232,7 @@ class AuthCubit extends Cubit<AuthState> {
           // Use default error message
         }
       }
-      
+
       emit(AuthFailure(message: errorMessage));
     } catch (e) {
       emit(const AuthFailure(message: 'An unexpected error occurred'));
@@ -331,11 +327,11 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final response = await _authRepository.googleLogin();
       final user = response.user;
-      
+
       // Save tokens
       await _tokenService.saveToken(response.accessToken);
       await _tokenService.saveRefreshToken(response.refreshToken);
-      
+
       emit(AuthGoogleLoginSuccess(
         accessToken: response.accessToken,
         user: user,

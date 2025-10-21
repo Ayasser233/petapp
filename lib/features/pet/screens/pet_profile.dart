@@ -66,6 +66,20 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
             ),
             actions: [
               IconButton(
+                icon: const Icon(Icons.edit, color: Colors.white),
+                onPressed: () async {
+                  final result = await Get.toNamed(
+                    '/update-pet',
+                    arguments: widget.pet,
+                  );
+                  if (result == true) {
+                    // Refresh pet data after update
+                    await _petController.fetchPets();
+                    Get.back(); // Go back to refresh the list
+                  }
+                },
+              ),
+              IconButton(
                 icon: const Icon(Icons.delete_outline, color: Colors.white),
                 onPressed: () {
                   _showDeleteConfirmation(context, isDark);
@@ -126,7 +140,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                widget.pet.customSpecies ?? widget.pet.species,
+                                widget.pet.species,
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
@@ -181,8 +195,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                       _buildInfoCard(
                         context,
                         'Species',
-                        widget.pet.customSpecies ??
-                            widget.pet.species.toUpperCase(),
+                        widget.pet.species.toUpperCase(),
                         widget.pet.species.toLowerCase() == 'dog'
                             ? Icons.pets
                             : Icons.emoji_nature,
@@ -192,11 +205,94 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                     ],
                   ),
 
+                  const SizedBox(height: 16),
+
+                  // Gender and Weight
+                  Row(
+                    children: [
+                      if (widget.pet.gender != null)
+                        Expanded(
+                          child: _buildInfoCard(
+                            context,
+                            'Gender',
+                            widget.pet.gender == 'MALE' ? 'Male' : 'Female',
+                            widget.pet.gender == 'MALE'
+                                ? Icons.male
+                                : Icons.female,
+                            themeColor,
+                            isDark,
+                          ),
+                        ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Spay/Neuter Status
+                  if (widget.pet.spayNeuterStatus != null)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: cardColor,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: cardBorderColor),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.medical_services,
+                            color: themeColor,
+                            size: 24,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            widget.pet.spayNeuterStatus!
+                                ? 'Spayed/Neutered'
+                                : 'Not Spayed/Neutered',
+                            style: TextStyle(
+                              color: textColor,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
                   const SizedBox(height: 24),
 
+                  // Allergies section
+                  if (widget.pet.allergies != null &&
+                      widget.pet.allergies!.isNotEmpty) ...[
+                    _buildSectionHeader('Allergies', Icons.warning_amber,
+                        themeColor, textColor),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: widget.pet.allergies!.map((allergy) {
+                        return Chip(
+                          label: Text(allergy),
+                          backgroundColor:
+                              AppColors.orange.withValues(alpha: 0.2),
+                          labelStyle: TextStyle(color: textColor),
+                          avatar: const Icon(
+                            Icons.warning_amber,
+                            size: 18,
+                            color: AppColors.orange,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+
+                  const SizedBox(height: 8),
+
                   // Notes section
-                  if (widget.pet.medicalHistory?.notes != null &&
-                      widget.pet.medicalHistory!.notes!.isNotEmpty) ...[
+                  if (widget.pet.notes != null &&
+                      widget.pet.notes!.isNotEmpty) ...[
                     _buildSectionHeader(
                         'Notes', Icons.note_alt, themeColor, textColor),
                     const SizedBox(height: 8),
@@ -209,7 +305,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                         border: Border.all(color: cardBorderColor),
                       ),
                       child: Text(
-                        widget.pet.medicalHistory!.notes!,
+                        widget.pet.notes!,
                         style: TextStyle(
                           color: textColor,
                           height: 1.5,
@@ -218,8 +314,6 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                     ),
                     const SizedBox(height: 24),
                   ],
-
-
 
                   // Vaccinations section
                   _buildSectionHeader('Vaccinations', Icons.medical_services,
@@ -266,15 +360,50 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (widget.pet.medicalHistory?.weight != null) ...[
+                        // Show primary weight field
+                        if (widget.pet.weight != null) ...[
                           _buildMedicalDetailRow(
                               'Weight',
-                              '${widget.pet.medicalHistory!.weight} kg',
+                              '${widget.pet.weight} kg',
                               Icons.monitor_weight,
                               textColor,
                               subTextColor),
                           const SizedBox(height: 12),
                         ],
+                        // Show gender
+                        if (widget.pet.gender != null) ...[
+                          _buildMedicalDetailRow(
+                              'Gender',
+                              widget.pet.gender == 'MALE' ? 'Male' : 'Female',
+                              widget.pet.gender == 'MALE'
+                                  ? Icons.male
+                                  : Icons.female,
+                              textColor,
+                              subTextColor),
+                          const SizedBox(height: 12),
+                        ],
+                        // Show primary spay/neuter status
+                        if (widget.pet.spayNeuterStatus != null) ...[
+                          _buildMedicalDetailRow(
+                              'Spayed/Neutered',
+                              widget.pet.spayNeuterStatus! ? 'Yes' : 'No',
+                              Icons.medical_services,
+                              textColor,
+                              subTextColor),
+                          const SizedBox(height: 12),
+                        ],
+                        // Show primary allergies
+                        if (widget.pet.allergies != null &&
+                            widget.pet.allergies!.isNotEmpty) ...[
+                          _buildMedicalDetailRow(
+                              'Allergies',
+                              widget.pet.allergies!.join(', '),
+                              Icons.warning_amber,
+                              textColor,
+                              subTextColor),
+                          const SizedBox(height: 12),
+                        ],
+                        // Show last vet visit from medical history if available
                         if (widget.pet.medicalHistory?.lastVetVisit !=
                             null) ...[
                           _buildMedicalDetailRow(
@@ -282,29 +411,6 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                               _formatDate(
                                   widget.pet.medicalHistory!.lastVetVisit!),
                               Icons.event,
-                              textColor,
-                              subTextColor),
-                          const SizedBox(height: 12),
-                        ],
-                        if (widget.pet.medicalHistory?.spayNeuterStatus !=
-                            null) ...[
-                          _buildMedicalDetailRow(
-                              'Spayed/Neutered',
-                              widget.pet.medicalHistory!.spayNeuterStatus!
-                                  ? 'Yes'
-                                  : 'No',
-                              Icons.pets,
-                              textColor,
-                              subTextColor),
-                          const SizedBox(height: 12),
-                        ],
-                        if (widget.pet.medicalHistory?.allergies != null &&
-                            widget
-                                .pet.medicalHistory!.allergies!.isNotEmpty) ...[
-                          _buildMedicalDetailRow(
-                              'Allergies',
-                              widget.pet.medicalHistory!.allergies!.join(', '),
-                              Icons.warning_amber,
                               textColor,
                               subTextColor),
                         ],
@@ -448,9 +554,12 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
 
     int years = now.year - birth.year;
     int months = now.month - birth.month;
+    int days = now.day - birth.day;
 
-    if (now.day < birth.day) {
+    if (days < 0) {
       months--;
+      final previousMonth = DateTime(now.year, now.month, 0);
+      days += previousMonth.day;
     }
 
     if (months < 0) {
@@ -458,10 +567,28 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
       months += 12;
     }
 
+    // Build age string
+    List<String> ageParts = [];
+
     if (years > 0) {
-      return years == 1 ? '1 year old' : '$years years old';
+      ageParts.add(years == 1 ? '1 year' : '$years years');
+    }
+
+    if (months > 0 && years < 2) {
+      ageParts.add(months == 1 ? '1 month' : '$months months');
+    }
+
+    if (days > 0 && years == 0 && months == 0) {
+      ageParts.add(days == 1 ? '1 day' : '$days days');
+    }
+
+    // Return formatted age (show max 2 parts to avoid clutter)
+    if (ageParts.isEmpty) {
+      return 'Newborn';
+    } else if (ageParts.length >= 2) {
+      return '${ageParts[0]}, ${ageParts[1]} old';
     } else {
-      return months == 1 ? '1 month old' : '$months months old';
+      return '${ageParts[0]} old';
     }
   }
 
@@ -527,7 +654,8 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                       final success =
                           await _petController.deletePet(widget.pet.id);
                       if (success) {
-                        Get.back(result: 'deleted');
+                        // Navigate to My Pets screen after successful deletion
+                        Get.offAllNamed('/my-pets');
                         Get.snackbar(
                           'Success',
                           '${widget.pet.name} has been deleted.',

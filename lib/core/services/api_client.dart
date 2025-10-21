@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
@@ -18,6 +19,10 @@ class ApiClient {
   late final String _baseUrl;
   final String _fallbackUrl = ApiConstants.fallbackApiBaseUrl;
   bool _usingFallbackUrl = false;
+
+  // Token refresh handling
+  bool _isRefreshing = false;
+  final List<void Function(String token)> _pendingRequests = [];
 
   ApiClient({
     required this.errorHandler,
@@ -72,6 +77,39 @@ class ApiClient {
         return handler.next(response);
       },
       onError: (DioException error, handler) async {
+        // Handle 401 Unauthorized - Token expired
+        if (error.response?.statusCode == 401) {
+          debugPrint('🔄 Token expired, attempting to refresh...');
+
+          // Try to refresh the token
+          final newToken = await _refreshAccessToken();
+
+          if (newToken != null) {
+            // Retry the original request with new token
+            error.requestOptions.headers['Authorization'] = 'Bearer $newToken';
+
+            try {
+              final response = await _dio.request(
+                error.requestOptions.path,
+                data: error.requestOptions.data,
+                queryParameters: error.requestOptions.queryParameters,
+                options: Options(
+                  method: error.requestOptions.method,
+                  headers: error.requestOptions.headers,
+                ),
+              );
+              return handler.resolve(response);
+            } catch (e) {
+              // If retry fails, continue with error handling
+              debugPrint('❌ Retry after refresh failed: $e');
+            }
+          } else {
+            // Token refresh failed, user needs to login again
+            debugPrint('❌ Token refresh failed, logging out...');
+            await tokenService.clearAllTokens();
+          }
+        }
+
         // If server is unreachable and not using fallback URL yet
         if (_canUseFallback(error) && !_usingFallbackUrl) {
           debugPrint('Primary API unreachable, switching to fallback URL');
@@ -170,7 +208,7 @@ class ApiClient {
       ErrorHandlerService.instance.handleError(e);
       rethrow;
     }
-  } 
+  }
 
   Future<Response> confirmEmail(String email, String otp) async {
     try {
@@ -268,15 +306,16 @@ class ApiClient {
       // Debug logging for profile update
       print('🚀 UPDATE PROFILE REQUEST:');
       print('   Endpoint: ${ApiConstants.updateProfileEndpoint}');
-      print('   Full URL: ${_dio.options.baseUrl}${ApiConstants.updateProfileEndpoint}');
+      print(
+          '   Full URL: ${_dio.options.baseUrl}${ApiConstants.updateProfileEndpoint}');
       print('   Data: $userData');
-      
+
       final response =
           await _dio.patch(ApiConstants.updateProfileEndpoint, data: userData);
-      
+
       print('✅ UPDATE PROFILE SUCCESS: ${response.statusCode}');
       print('   Response: ${response.data}');
-      
+
       return response;
     } catch (e) {
       print('❌ UPDATE PROFILE ERROR: $e');
@@ -289,6 +328,108 @@ class ApiClient {
     try {
       final response = await _dio.post(ApiConstants.googleLoginEndpoint);
       await _handleTokenResponse(response);
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  // Appointment methods
+  Future<Response> getAppointments({
+    int page = 1,
+    int limit = 10,
+    String? status,
+  }) async {
+    try {
+      final queryParams = {
+        'page': page,
+        'limit': limit,
+        if (status != null) 'status': status,
+      };
+      final response = await _dio.get(
+        ApiConstants.appointmentsEndpoint,
+        queryParameters: queryParams,
+      );
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> getAppointmentDetails(String appointmentId) async {
+    try {
+      final response = await _dio.get(
+        ApiConstants.appointmentDetailEndpoint(appointmentId),
+      );
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> createAppointment(
+      Map<String, dynamic> appointmentData) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.appointmentsEndpoint,
+        data: appointmentData,
+      );
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> cancelAppointment(String appointmentId) async {
+    try {
+      final response = await _dio.patch(
+        ApiConstants.appointmentCancelEndpoint(appointmentId),
+      );
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> completeAppointment(String appointmentId) async {
+    try {
+      final response = await _dio.patch(
+        ApiConstants.appointmentCompleteEndpoint(appointmentId),
+      );
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> submitAppointmentReview(
+    String appointmentId,
+    Map<String, dynamic> reviewData,
+  ) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.appointmentReviewEndpoint(appointmentId),
+        data: reviewData,
+      );
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> validatePointsOrCoupon(Map<String, dynamic> data) async {
+    try {
+      final response = await _dio.post(
+        ApiConstants.pointsValidateEndpoint,
+        data: data,
+      );
       return response;
     } catch (e) {
       ErrorHandlerService.instance.handleError(e);
@@ -312,6 +453,79 @@ class ApiClient {
       if (refreshToken != null) {
         await tokenService.saveRefreshToken(refreshToken.toString());
       }
+    }
+  }
+
+  // Refresh access token using refresh token
+  Future<String?> _refreshAccessToken() async {
+    try {
+      // Prevent multiple simultaneous refresh requests
+      if (_isRefreshing) {
+        debugPrint('🔄 Refresh already in progress, waiting...');
+        // Wait for the ongoing refresh to complete
+        final completer = Completer<String?>();
+        _pendingRequests.add((token) => completer.complete(token));
+        return await completer.future;
+      }
+
+      _isRefreshing = true;
+
+      final refreshTokenValue = await tokenService.getRefreshToken();
+      if (refreshTokenValue == null || refreshTokenValue.isEmpty) {
+        debugPrint('❌ No refresh token available');
+        _isRefreshing = false;
+        return null;
+      }
+
+      debugPrint('🔄 Refreshing token...');
+
+      // Create a new Dio instance without interceptors to avoid infinite loop
+      final refreshDio = Dio(BaseOptions(
+        baseUrl: _dio.options.baseUrl,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+      ));
+
+      final response = await refreshDio.post(
+        ApiConstants.refreshTokenEndpoint,
+        data: {'refreshToken': refreshTokenValue},
+      );
+
+      if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
+        final data = response.data as Map<String, dynamic>;
+        final newAccessToken = data['accessToken'] ?? data['access_token'];
+        final newRefreshToken = data['refreshToken'] ?? data['refresh_token'];
+
+        if (newAccessToken != null) {
+          await tokenService.saveToken(newAccessToken.toString());
+
+          if (newRefreshToken != null) {
+            await tokenService.saveRefreshToken(newRefreshToken.toString());
+          }
+
+          debugPrint('✅ Token refreshed successfully');
+
+          // Resolve all pending requests with the new token
+          for (var callback in _pendingRequests) {
+            callback(newAccessToken.toString());
+          }
+          _pendingRequests.clear();
+
+          _isRefreshing = false;
+          return newAccessToken.toString();
+        }
+      }
+
+      debugPrint('❌ Failed to refresh token: Invalid response');
+      _isRefreshing = false;
+      return null;
+    } catch (e) {
+      debugPrint('❌ Error refreshing token: $e');
+      _isRefreshing = false;
+      _pendingRequests.clear();
+      return null;
     }
   }
 

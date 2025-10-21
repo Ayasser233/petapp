@@ -11,7 +11,7 @@ import 'package:petapp/core/widgets/phone_input_field.dart';
 import 'package:petapp/core/utils/validation_utils.dart';
 import 'package:petapp/core/models/country_code.dart';
 import 'package:petapp/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:petapp/di/service_locator.dart'; 
+import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 
 class SignUpScreen extends StatelessWidget {
@@ -24,14 +24,16 @@ class SignUpScreen extends StatelessWidget {
       child: Scaffold(
         body: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.only(top: 56.0, left: 24.0, right: 24.0, bottom: 24.0),
+            padding: const EdgeInsets.only(
+                top: 56.0, left: 24.0, right: 24.0, bottom: 24.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Header Text
                 HeaderText(
                   title: AppLocalizations.of(context).createAccount,
-                  subtitle: AppLocalizations.of(context).accountCreationSubtitle,
+                  subtitle:
+                      AppLocalizations.of(context).accountCreationSubtitle,
                 ),
                 const SizedBox(height: 32.0),
                 // Add your sign-up form here
@@ -46,7 +48,7 @@ class SignUpScreen extends StatelessWidget {
 
                 // Sign In Link
                 LoginText(
-                    text: AppLocalizations.of(context).alreadyHaveAccount, 
+                    text: AppLocalizations.of(context).alreadyHaveAccount,
                     loginText: " ${AppLocalizations.of(context).signIn}"),
               ],
             ),
@@ -69,7 +71,8 @@ class _SignUpFormState extends State<SignUpForm> {
   bool _isFormValid = false;
 
   final _formKey = GlobalKey<FormState>(); // Add a form key for validation
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -77,7 +80,8 @@ class _SignUpFormState extends State<SignUpForm> {
   CountryCode _selectedCountry = CountryCodes.commonCodes.first;
 
   // Add these variables to track field errors
-  String? _nameError;
+  String? _firstNameError;
+  String? _lastNameError;
   String? _phoneError;
   String? _emailError;
   String? _passwordError;
@@ -87,7 +91,8 @@ class _SignUpFormState extends State<SignUpForm> {
     super.initState();
 
     // Add listeners to text fields
-    _nameController.addListener(_checkFormValidity);
+    _firstNameController.addListener(_checkFormValidity);
+    _lastNameController.addListener(_checkFormValidity);
     _phoneController.addListener(_checkFormValidity);
     _emailController.addListener(_checkFormValidity);
     _passwordController.addListener(_checkFormValidity);
@@ -95,7 +100,8 @@ class _SignUpFormState extends State<SignUpForm> {
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -104,8 +110,11 @@ class _SignUpFormState extends State<SignUpForm> {
 
   // Check form validity
   void _checkFormValidity() {
-    final isValid = _nameController.text.isNotEmpty &&
+    final isValid = _firstNameController.text.isNotEmpty &&
+        _lastNameController.text.isNotEmpty &&
         _phoneController.text.isNotEmpty &&
+        !_phoneController.text
+            .startsWith('0') && // Phone should not start with 0
         _emailController.text.isNotEmpty &&
         _emailController.text.contains('@') &&
         _passwordController.text.isNotEmpty &&
@@ -118,25 +127,20 @@ class _SignUpFormState extends State<SignUpForm> {
 
   // Handle sign up
   void _handleSignUp() {
-    // First validate the form
+    // Validate the form - this will show errors if any
     if (_formKey.currentState?.validate() != true) {
       return;
     }
 
-    // Split name into first and last name (simple split by space)
-    final nameParts = _nameController.text.trim().split(' ');
-    final firstName = nameParts.isNotEmpty ? nameParts[0] : '';
-    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
-    
     // Prepare data for new API format
     final Map<String, dynamic> userData = {
-      'firstName': firstName,
-      'lastName': lastName,
-      'username': _nameController.text.replaceAll(' ', '').toLowerCase(), // Create username from name
-      'mobile': '${_selectedCountry.dialCode}${_phoneController.text}',
-      'email': _emailController.text,
+      'firstName': _firstNameController.text.trim(),
+      'lastName': _lastNameController.text.trim(),
+      'email': _emailController.text.trim(),
       'password': _passwordController.text,
-      'role': 'user',
+      'mobile': '${_selectedCountry.dialCode}${_phoneController.text}',
+      'turnstileToken':
+          'cf-turnstile-token', // Static token for now, in production this should be generated
     };
 
     // Use the cubit to register
@@ -151,7 +155,8 @@ class _SignUpFormState extends State<SignUpForm> {
       listener: (context, state) {
         // Reset field errors
         setState(() {
-          _nameError = null;
+          _firstNameError = null;
+          _lastNameError = null;
           _phoneError = null;
           _emailError = null;
           _passwordError = null;
@@ -177,8 +182,9 @@ class _SignUpFormState extends State<SignUpForm> {
           // Handle field-specific errors if available
           if (state.fieldErrors != null && state.fieldErrors!.isNotEmpty) {
             setState(() {
-              _nameError = state.fieldErrors!['username'];
-              _phoneError = state.fieldErrors!['mobileNumber'];
+              _firstNameError = state.fieldErrors!['firstName'];
+              _lastNameError = state.fieldErrors!['lastName'];
+              _phoneError = state.fieldErrors!['mobile'];
               _emailError = state.fieldErrors!['email'];
               _passwordError = state.fieldErrors!['password'];
             });
@@ -193,7 +199,8 @@ class _SignUpFormState extends State<SignUpForm> {
             colorText: Colors.red,
             borderRadius: 8,
             margin: const EdgeInsets.all(16),
-            duration: const Duration(seconds: 5), // Give more time to read errors
+            duration:
+                const Duration(seconds: 5), // Give more time to read errors
           );
         }
       },
@@ -204,15 +211,15 @@ class _SignUpFormState extends State<SignUpForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Name field with custom error
+              // First Name field
               TextFormField(
-                controller: _nameController,
+                controller: _firstNameController,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Iconsax.user, color: AppColors.orange),
                   hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[400],
-                  ),
-                  hintText: AppLocalizations.of(context).fullName,
+                        color: Colors.grey[400],
+                      ),
+                  hintText: AppLocalizations.of(context).firstName,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16.0),
                     borderSide: BorderSide.none,
@@ -232,19 +239,63 @@ class _SignUpFormState extends State<SignUpForm> {
                   contentPadding: const EdgeInsets.symmetric(
                       vertical: 16.0, horizontal: 16.0),
                   errorStyle: const TextStyle(height: 0.8),
-                  errorText: _nameError,
+                  errorText: _firstNameError,
                 ),
-                autovalidateMode: AutovalidateMode.onUserInteraction,
+                autovalidateMode: AutovalidateMode.disabled,
                 validator: ValidationUtils.validateName,
                 keyboardType: TextInputType.name,
                 textInputAction: TextInputAction.next,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-                // Show API-specific errors
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
                 onChanged: (value) {
                   setState(() {
-                    _nameError = null;
+                    _firstNameError = null;
+                  });
+                },
+              ),
+              const SizedBox(height: 16.0),
+
+              // Last Name field
+              TextFormField(
+                controller: _lastNameController,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Iconsax.user, color: AppColors.orange),
+                  hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.grey[400],
+                      ),
+                  hintText: AppLocalizations.of(context).lastName,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16.0),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedErrorBorder: focusedFieldStyle(),
+                  focusedBorder: focusedFieldStyle(),
+                  filled: true,
+                  fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                  contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16.0, horizontal: 16.0),
+                  errorStyle: const TextStyle(height: 0.8),
+                  errorText: _lastNameError,
+                ),
+                autovalidateMode: AutovalidateMode.disabled,
+                validator: ValidationUtils.validateName,
+                keyboardType: TextInputType.name,
+                textInputAction: TextInputAction.next,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                onChanged: (value) {
+                  setState(() {
+                    _lastNameError = null;
                   });
                 },
               ),
@@ -255,7 +306,9 @@ class _SignUpFormState extends State<SignUpForm> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16.0),
                   color: isDark ? AppColors.lightblack : Colors.grey[100],
-                  border: _phoneError != null ? Border.all(color: Colors.red) : null,
+                  border: _phoneError != null
+                      ? Border.all(color: Colors.red)
+                      : null,
                 ),
                 child: PhoneInputField(
                   controller: _phoneController,
@@ -285,38 +338,38 @@ class _SignUpFormState extends State<SignUpForm> {
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
+                autovalidateMode: AutovalidateMode.disabled,
                 decoration: InputDecoration(
-                  prefixIcon: const Icon(Iconsax.sms, color: AppColors.orange),
-                  hintText: AppLocalizations.of(context).email,
-                  hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[400],
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedErrorBorder: focusedFieldStyle(),
-                  focusedBorder: focusedFieldStyle(),
-                  filled: true,
-                  fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 16.0, horizontal: 16.0),
-                  errorStyle: const TextStyle(height: 0.8),
-                  errorText: _emailError
-                ),
+                    prefixIcon:
+                        const Icon(Iconsax.sms, color: AppColors.orange),
+                    hintText: AppLocalizations.of(context).email,
+                    hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[400],
+                        ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedErrorBorder: focusedFieldStyle(),
+                    focusedBorder: focusedFieldStyle(),
+                    filled: true,
+                    fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 16.0, horizontal: 16.0),
+                    errorStyle: const TextStyle(height: 0.8),
+                    errorText: _emailError),
                 validator: ValidationUtils.validateEmail,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isDark ? Colors.white : Colors.black,
-                ),
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
                 // Show API-specific errors
                 onChanged: (value) {
                   setState(() {
@@ -330,7 +383,7 @@ class _SignUpFormState extends State<SignUpForm> {
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
+                autovalidateMode: AutovalidateMode.disabled,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Iconsax.lock, color: AppColors.orange),
                   suffixIcon: IconButton(
@@ -346,8 +399,8 @@ class _SignUpFormState extends State<SignUpForm> {
                   ),
                   hintText: AppLocalizations.of(context).password,
                   hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[400],
-                  ),
+                        color: Colors.grey[400],
+                      ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(16.0),
                     borderSide: BorderSide.none,
@@ -371,8 +424,8 @@ class _SignUpFormState extends State<SignUpForm> {
                 ),
                 validator: ValidationUtils.validatePassword,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isDark ? Colors.white : Colors.black,
-                ),
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
                 // Show API-specific errors
                 onChanged: (value) {
                   setState(() {
@@ -390,7 +443,8 @@ class _SignUpFormState extends State<SignUpForm> {
                     final bool isLoading = state is AuthLoading;
 
                     return ElevatedButton(
-                      onPressed: isLoading || !_isFormValid ? null : _handleSignUp,
+                      onPressed:
+                          isLoading || !_isFormValid ? null : _handleSignUp,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         backgroundColor: AppColors.orange,
@@ -398,22 +452,27 @@ class _SignUpFormState extends State<SignUpForm> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16.0),
                         ),
-                        disabledBackgroundColor: AppColors.orange.withValues(alpha: 0.5),
+                        disabledBackgroundColor:
+                            AppColors.orange.withValues(alpha: 0.5),
                       ),
                       child: isLoading
                           ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.0,
-                        ),
-                      )
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.0,
+                              ),
+                            )
                           : Text(
-                        AppLocalizations.of(context).signUp,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                            color: Colors.white, fontWeight: FontWeight.w600),
-                      ),
+                              AppLocalizations.of(context).signUp,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600),
+                            ),
                     );
                   },
                 ),
@@ -432,7 +491,7 @@ class TermsAndPrivacyText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    
+
     return Center(
       child: RichText(
         textAlign: TextAlign.center,
@@ -445,19 +504,19 @@ class TermsAndPrivacyText extends StatelessWidget {
             TextSpan(
               text: localizations.termsAndConditions,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppColors.orange,
-                fontWeight: AppFonts.semiBold,
-              ),
+                    color: AppColors.orange,
+                    fontWeight: AppFonts.semiBold,
+                  ),
             ),
             TextSpan(
-                text: ' ${localizations.and} ', 
+                text: ' ${localizations.and} ',
                 style: Theme.of(context).textTheme.labelLarge),
             TextSpan(
               text: localizations.privacyPolicy,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                color: AppColors.orange,
-                fontWeight: AppFonts.semiBold,
-              ),
+                    color: AppColors.orange,
+                    fontWeight: AppFonts.semiBold,
+                  ),
             ),
           ],
         ),

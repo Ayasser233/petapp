@@ -11,14 +11,14 @@ import 'package:petapp/features/auth/presentation/screens/signup/verifyemail.dar
 import 'package:petapp/features/location/screens/choose_location.dart';
 import 'package:petapp/features/location/screens/set_location.dart';
 import 'package:petapp/features/home/screens/home_screen.dart';
-import 'package:petapp/features/clinics/screens/clinic_detail_screen.dart';
-import 'package:petapp/features/home/screens/activity_screen.dart';
+import 'package:petapp/features/vets/screens/vet_detail_screen.dart';
+import 'package:petapp/features/appointments/screens/appointments_screen.dart';
 import 'package:petapp/features/profile/screens/profile_screen.dart';
 import 'package:petapp/features/profile/screens/account_details_screen.dart';
 import 'package:petapp/features/pet/screens/pet_3d_viewer/pet_3d_viewer_screen.dart';
 import 'package:petapp/features/pet/screens/pet_3d_viewer/pet_3d_model_selector.dart';
-import 'package:petapp/features/clinics/screens/hospital_booking_screen.dart';
-import 'package:petapp/features/clinics/screens/clinic_explorer_screen.dart';
+import 'package:petapp/features/vets/screens/vet_booking_screen.dart';
+import 'package:petapp/features/vets/screens/vet_explorer_screen.dart';
 // Add these imports for the pet-related screens
 import 'package:petapp/features/pet/screens/my_pets.dart';
 import 'package:petapp/features/pet/screens/add_pet.dart';
@@ -41,15 +41,15 @@ class AppRoutes {
   static const String chooseLocation = '/choose-location';
   static const String setLocation = '/set-location';
   static const String home = '/home';
-  static const String clinicDetail = '/clinic-detail';
+  static const String vetDetail = '/vet-detail';
   static const String serviceSelection = '/service-selection';
   static const String checkout = '/checkout';
-  static const String activity = '/activity';
+  static const String appointments = '/appointments';
   static const String profile = '/profile';
   static const String pet3DViewer = '/pet-3d-viewer-screen';
   static const String pet3DModelSelector = '/pet-3d-model-selector';
-  static const String hospitalBooking = '/hospital-booking';
-  static const String clinicExplorer = '/clinic-explorer';
+  static const String vetBooking = '/vet-booking';
+  static const String vetExplorer = '/vet-explorer';
   // Add these route constants here instead of inside the getPages list
   static const String myPets = '/my-pets';
   static const String addPet = '/add-pet';
@@ -80,10 +80,9 @@ class AppRoutes {
         GetPage(name: setLocation, page: () => const SetLocationScreen()),
         GetPage(name: home, page: () => const HomeScreen()),
         GetPage(
-            name: clinicDetail,
-            page: () => ClinicDetailScreen(clinic: Get.arguments)),
+            name: vetDetail, page: () => VetDetailScreen(vet: Get.arguments)),
         // GetPage(name: checkout, page: () => const CheckoutScreen()),
-        GetPage(name: activity, page: () => const ActivityScreen()),
+        GetPage(name: appointments, page: () => const AppointmentsScreen()),
         GetPage(name: profile, page: () => const ProfileScreen()),
         GetPage(
           name: pet3DViewer,
@@ -102,11 +101,11 @@ class AppRoutes {
         ),
         // Protected routes with middleware
         GetPage(
-            name: hospitalBooking,
-            page: () => const HospitalBookingScreen(),
-            middlewares: [AuthMiddleware()],
+          name: vetBooking,
+          page: () => const VetBookingScreen(),
+          middlewares: [AuthMiddleware()],
         ),
-        GetPage(name: clinicExplorer, page: () => const ClinicExplorerScreen()),
+        GetPage(name: vetExplorer, page: () => const VetExplorerScreen()),
         // Protected pet routes
         GetPage(
           name: myPets,

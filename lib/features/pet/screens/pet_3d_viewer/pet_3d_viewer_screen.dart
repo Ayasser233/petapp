@@ -1066,7 +1066,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
   // Method to navigate to vet finder (UPDATED - removed urgency)
   void _goToVetFinder(Map<String, dynamic> symptom) {
     Get.toNamed(
-      AppRoutes.clinicExplorer,
+      AppRoutes.vetExplorer,
       arguments: {
         'symptom': symptom['name'],
         'petType': widget.petType,

@@ -38,17 +38,17 @@ class LoginScreen extends StatelessWidget {
                 // Add your login form here
                 const LoginForm(),
                 // divider
-                DividerForm(dividerText: AppLocalizations.of(context).orContinueWith),
+                DividerForm(
+                    dividerText: AppLocalizations.of(context).orContinueWith),
                 const SizedBox(height: 16.0),
                 // footer
                 // Google & Apple Sign In Buttons - Vertical
                 const SocialBtns(),
 
                 SignUpText(
-                  text: AppLocalizations.of(context).dontHaveAccount, 
-                  signUpText: ' ${AppLocalizations.of(context).signUp}'
-                ),
-                
+                    text: AppLocalizations.of(context).dontHaveAccount,
+                    signUpText: ' ${AppLocalizations.of(context).signUp}'),
+
                 // Skip login button
                 const SkipLoginButton(),
               ],
@@ -85,9 +85,9 @@ class SignUpText extends StatelessWidget {
             child: Text(
               signUpText,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.orange,
-                fontWeight: FontWeight.bold,
-              ),
+                    color: AppColors.orange,
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
           )
         ],
@@ -151,8 +151,7 @@ class SocialBtns extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/icons/google.png',
-                    width: 20, height: 20),
+                Image.asset('assets/icons/google.png', width: 20, height: 20),
                 const SizedBox(width: 8),
                 Text(
                   AppLocalizations.of(context).signInWithGoogle,
@@ -266,7 +265,7 @@ class _LoginFormState extends State<LoginForm> {
       final prefs = await SharedPreferences.getInstance();
       final savedEmail = prefs.getString('remembered_email');
       final isRemembered = prefs.getBool('remember_me') ?? false;
-      
+
       if (savedEmail != null && isRemembered) {
         setState(() {
           _emailController.text = savedEmail;
@@ -283,7 +282,7 @@ class _LoginFormState extends State<LoginForm> {
   Future<void> _saveUserEmail() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      
+
       if (_rememberMe) {
         // Save the email and remember me preference
         await prefs.setString('remembered_email', _emailController.text.trim());
@@ -304,65 +303,65 @@ class _LoginFormState extends State<LoginForm> {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-    
+
     // Clear previous error
     setState(() {
       _errorMessage = null;
     });
-    
+
     // Save email preference before login attempt
     _saveUserEmail();
-    
+
     context.read<AuthCubit>().login(
-      _emailController.text.trim(), // This will be used as identifier (can be email or phone)
-      _passwordController.text
-    );
+        _emailController.text
+            .trim(), // This will be used as identifier (can be email or phone)
+        _passwordController.text);
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
-    
+
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) async {
         if (state is AuthLoginSuccess) {
           // Use TokenService directly
           final tokenService = Get.find<TokenService>();
           final authService = Get.find<AuthService>();
-          
+
           // Save token and mark as authenticated
           await tokenService.saveToken(state.accessToken);
-          
+
           // Set authenticated status
           authService.setAuthenticated();
-          
+
           // Clear guest mode if it was set
           await authService.clearGuestMode();
-          
+
           // Set login flag
           final prefs = await SharedPreferences.getInstance();
           await prefs.setBool('isLoggedIn', true);
-          
+
           // Navigate to home
           Get.offAllNamed(AppRoutes.home);
         } else if (state is AuthGoogleLoginSuccess) {
           // Handle Google login success
           final tokenService = Get.find<TokenService>();
           final authService = Get.find<AuthService>();
-          
+
           // Save token and mark as authenticated
           await tokenService.saveToken(state.accessToken);
-          
+
           // Set authenticated status
           authService.setAuthenticated();
-          
+
           // Clear guest mode if it was set
           await authService.clearGuestMode();
-          
+
           // Set login flag
           final prefs = await SharedPreferences.getInstance();
           await prefs.setBool('isLoggedIn', true);
-          
+
           // Navigate to home
           Get.offAllNamed(AppRoutes.home);
         } else if (state is AuthFailure) {
@@ -383,22 +382,22 @@ class _LoginFormState extends State<LoginForm> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Iconsax.user, color: AppColors.orange),
-                  suffixIcon: _emailController.text.isNotEmpty 
-                    ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.grey),
-                        onPressed: () {
-                          setState(() {
-                            _emailController.clear();
-                            // Uncheck remember me if email is cleared
-                            _rememberMe = false;
-                          });
-                        },
-                      )
-                    : null,
+                  suffixIcon: _emailController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear, color: Colors.grey),
+                          onPressed: () {
+                            setState(() {
+                              _emailController.clear();
+                              // Uncheck remember me if email is cleared
+                              _rememberMe = false;
+                            });
+                          },
+                        )
+                      : null,
                   hintText: AppLocalizations.of(context).email,
                   hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[400],
-                  ),
+                        color: Colors.grey[400],
+                      ),
                   filled: true,
                   fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
                   border: OutlineInputBorder(
@@ -415,17 +414,18 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                   focusedErrorBorder: focusedFieldStyle(),
                   focusedBorder: focusedFieldStyle(),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                   errorStyle: const TextStyle(height: 0.8),
                 ),
                 validator: ValidationUtils.validateEmail,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
+                autovalidateMode: AutovalidateMode.disabled,
                 keyboardType: TextInputType.emailAddress,
                 style: Theme.of(context).textTheme.bodyMedium,
                 onChanged: (value) => setState(() {}),
               ),
               const SizedBox(height: 16.0),
-              
+
               // Password field
               TextFormField(
                 controller: _passwordController,
@@ -444,8 +444,8 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                   hintText: AppLocalizations.of(context).password,
                   hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey[400],
-                  ),
+                        color: Colors.grey[400],
+                      ),
                   filled: true,
                   fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
                   border: OutlineInputBorder(
@@ -462,15 +462,16 @@ class _LoginFormState extends State<LoginForm> {
                   ),
                   focusedErrorBorder: focusedFieldStyle(),
                   focusedBorder: focusedFieldStyle(),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                   errorStyle: const TextStyle(height: 0.8),
                 ),
                 validator: ValidationUtils.validatePassword,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
+                autovalidateMode: AutovalidateMode.disabled,
                 obscureText: _obscurePassword,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              
+
               // Error message below password
               if (_errorMessage != null)
                 Padding(
@@ -487,9 +488,9 @@ class _LoginFormState extends State<LoginForm> {
                     ),
                   ),
                 ),
-              
+
               const SizedBox(height: 8),
-              
+
               // Remember me & forgot password row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -531,12 +532,13 @@ class _LoginFormState extends State<LoginForm> {
                       Text(
                         AppLocalizations.of(context).rememberMe,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isDark ? Colors.grey[300] : Colors.grey[700],
-                        ),
+                              color:
+                                  isDark ? Colors.grey[300] : Colors.grey[700],
+                            ),
                       ),
                     ],
                   ),
-                  
+
                   // forgot password button
                   TextButton(
                     onPressed: () {
@@ -548,22 +550,22 @@ class _LoginFormState extends State<LoginForm> {
                     child: Text(
                       AppLocalizations.of(context).forgotPassword,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.orange,
-                      ),
+                            fontWeight: FontWeight.w500,
+                            color: AppColors.orange,
+                          ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 32.0),
-              
+
               // Sign In button with loading state from BlocBuilder
               SizedBox(
                 width: double.infinity,
                 child: BlocBuilder<AuthCubit, AuthState>(
                   builder: (context, state) {
                     final bool isLoading = state is AuthLoading;
-                    
+
                     return ElevatedButton(
                       onPressed: isLoading ? null : _handleSignIn,
                       style: ElevatedButton.styleFrom(
@@ -574,24 +576,28 @@ class _LoginFormState extends State<LoginForm> {
                           borderRadius: BorderRadius.circular(12.0),
                         ),
                         elevation: 0,
-                        disabledBackgroundColor: AppColors.orange.withValues(alpha: 0.5),
+                        disabledBackgroundColor:
+                            AppColors.orange.withValues(alpha: 0.5),
                       ),
                       child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2.0,
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.0,
+                              ),
+                            )
+                          : Text(
+                              AppLocalizations.of(context).signIn,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
-                          )
-                        : Text(
-                            AppLocalizations.of(context).signIn,
-                            style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
                     );
                   },
                 ),

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/pet/models/pet_species_model.dart';
 import 'package:petapp/features/pet/data/repositories/pet_repository.dart';
+import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/di/service_locator.dart';
 
 class PetController extends GetxController {
@@ -51,7 +52,14 @@ class PetController extends GetxController {
     error.value = '';
 
     try {
-      print('🐾 Controller: Fetching pets (page: $page, limit: $limit)');
+      // Check authentication before fetching data
+      final authService = Get.find<AuthService>();
+      if (authService.authStatus != AuthStatus.authenticated) {
+        pets.clear();
+        error.value = '';
+        return;
+      }
+
 
       final fetchedPets = await _repository.getUserPets(
           page: page ?? currentPage.value, limit: limit ?? 20);
@@ -125,11 +133,24 @@ class PetController extends GetxController {
 
   /// Create a new pet
   Future<bool> createPet(Map<String, dynamic> petData) async {
+    // Check authentication before creating pet
+    final authService = Get.find<AuthService>();
+    if (authService.authStatus != AuthStatus.authenticated) {
+      print('🚫 Controller: User not authenticated, cannot create pet');
+      Get.snackbar(
+        'Login Required',
+        'You need to be logged in to add pets',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+
     isCreating.value = true;
     error.value = '';
 
     try {
-      print('🐾 Controller: Creating new pet');
 
       final newPet = await _repository.createPet(petData);
       pets.insert(0, newPet); // Add to beginning of list
@@ -142,11 +163,9 @@ class PetController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
 
-      print('✅ Controller: Pet created successfully');
       return true;
     } catch (e) {
       error.value = 'Failed to create pet: $e';
-      print('❌ Controller: Failed to create pet: $e');
 
       Get.snackbar(
         'Error',
@@ -164,23 +183,40 @@ class PetController extends GetxController {
 
   /// Get pet by ID and set as selected
   Future<void> getPetById(String id) async {
+    // Check authentication before fetching pet details
+    final authService = Get.find<AuthService>();
+    if (authService.authStatus != AuthStatus.authenticated) {
+      selectedPet.value = null;
+      return;
+    }
+
     try {
-      print('🐾 Controller: Fetching pet details for ID: $id');
 
       final pet = await _repository.getPetById(id);
       selectedPet.value = pet;
 
-      print('✅ Controller: Pet details fetched successfully');
     } catch (e) {
       error.value = 'Failed to load pet details: $e';
-      print('❌ Controller: Failed to fetch pet details: $e');
-
       _handleError(e, 'fetch pet details');
     }
   }
 
   /// Update pet
   Future<bool> updatePet(String id, Map<String, dynamic> petData) async {
+    // Check authentication before updating pet
+    final authService = Get.find<AuthService>();
+    if (authService.authStatus != AuthStatus.authenticated) {
+      print('🚫 Controller: User not authenticated, cannot update pet');
+      Get.snackbar(
+        'Login Required',
+        'You need to be logged in to update pets',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+
     isUpdating.value = true;
     error.value = '';
 
@@ -230,6 +266,20 @@ class PetController extends GetxController {
 
   /// Soft delete pet
   Future<bool> deletePet(String id) async {
+    // Check authentication before deleting pet
+    final authService = Get.find<AuthService>();
+    if (authService.authStatus != AuthStatus.authenticated) {
+      print('🚫 Controller: User not authenticated, cannot delete pet');
+      Get.snackbar(
+        'Login Required',
+        'You need to be logged in to delete pets',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+
     isDeleting.value = true;
     error.value = '';
 
@@ -276,6 +326,20 @@ class PetController extends GetxController {
 
   /// Restore soft-deleted pet
   Future<bool> restorePet(String id) async {
+    // Check authentication before restoring pet
+    final authService = Get.find<AuthService>();
+    if (authService.authStatus != AuthStatus.authenticated) {
+      print('🚫 Controller: User not authenticated, cannot restore pet');
+      Get.snackbar(
+        'Login Required',
+        'You need to be logged in to restore pets',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return false;
+    }
+
     isRestoring.value = true;
     error.value = '';
 
@@ -388,21 +452,12 @@ class PetController extends GetxController {
   void _handleError(dynamic error, String operation) {
     if (error.toString().contains('Authentication token not found') ||
         error.toString().contains('401') ||
-        error.toString().contains('unauthorized')) {
-      // Show authentication error message
-      Get.snackbar(
-        'Authentication Error',
-        'Please log in to continue',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 5),
-      );
-
-      // Redirect to login screen after a short delay
-      Future.delayed(const Duration(seconds: 2), () {
-        Get.offAllNamed('/auth');
-      });
+        error.toString().contains('unauthorized') ||
+        error.toString().contains('token') ||
+        error.toString().contains('Unauthorized')) {
+      // Handle token expiration through AuthService for consistency
+      final authService = Get.find<AuthService>();
+      authService.handleTokenExpiration();
     } else {
       // Show generic error
       Get.snackbar(

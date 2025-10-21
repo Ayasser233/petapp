@@ -3,7 +3,12 @@ class PetModel {
   final String name;
   final String species;
   final String? customSpecies;
+  final String? gender;
   final String dateOfBirth;
+  final List<String>? allergies;
+  final bool? spayNeuterStatus;
+  final double? weight;
+  final String? notes;
   final MedicalHistoryModel? medicalHistory;
   final String status;
   final int version;
@@ -16,7 +21,12 @@ class PetModel {
     required this.name,
     required this.species,
     this.customSpecies,
+    this.gender,
     required this.dateOfBirth,
+    this.allergies,
+    this.spayNeuterStatus,
+    this.weight,
+    this.notes,
     this.medicalHistory,
     required this.status,
     required this.version,
@@ -27,7 +37,7 @@ class PetModel {
     final Map<String, dynamic> data = {
       'id': id,
       'name': name,
-      'species': species.toUpperCase(), // API expects uppercase
+      'species': species.substring(0, 1).toUpperCase() + species.substring(1).toLowerCase(), // API expects "Dog" or "Cat"
       'dateOfBirth': dateOfBirth, // API expects camelCase
       'status': status,
       'version': version,
@@ -36,6 +46,26 @@ class PetModel {
 
     if (customSpecies != null) {
       data['customSpecies'] = customSpecies;
+    }
+
+    if (gender != null) {
+      data['gender'] = gender;
+    }
+
+    if (allergies != null && allergies!.isNotEmpty) {
+      data['allergies'] = allergies;
+    }
+
+    if (spayNeuterStatus != null) {
+      data['spayNeuterStatus'] = spayNeuterStatus;
+    }
+
+    if (weight != null) {
+      data['weight'] = weight;
+    }
+
+    if (notes != null && notes!.isNotEmpty) {
+      data['notes'] = notes;
     }
 
     if (medicalHistory != null) {
@@ -63,9 +93,18 @@ class PetModel {
           .toString()
           .toLowerCase(), // Convert to lowercase for UI consistency
       customSpecies: map['customSpecies'],
+      gender: map['gender'],
       dateOfBirth: map['dateOfBirth'] ??
           map['date_of_birth'] ??
           '', // Handle both formats
+      allergies: map['allergies'] != null 
+          ? List<String>.from(map['allergies']) 
+          : null,
+      spayNeuterStatus: map['spayNeuterStatus'],
+      weight: map['weight'] != null
+          ? double.tryParse(map['weight'].toString())
+          : null,
+      notes: map['notes'],
       medicalHistory: map['medicalHistory'] != null
           ? MedicalHistoryModel.fromMap(map['medicalHistory'])
           : null,

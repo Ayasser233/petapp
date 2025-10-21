@@ -1,4 +1,6 @@
+import 'package:get/get.dart';
 import 'package:petapp/features/profile/data/models/voucher_model.dart';
+import 'package:petapp/core/services/auth_service.dart';
 
 class VoucherRepository {
   // Static dummy vouchers data
@@ -57,7 +59,8 @@ class VoucherRepository {
       expiryDate: DateTime.now().add(const Duration(days: 45)),
       category: 'training',
       isUsed: true,
-      usedDate: DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
+      usedDate:
+          DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
     ),
   ];
 
@@ -68,29 +71,51 @@ class VoucherRepository {
 
   /// Get user vouchers (returns static dummy data)
   Future<List<VoucherModel>> getUserVouchers() async {
+    // Check authentication before returning vouchers
+    try {
+      final authService = Get.find<AuthService>();
+      if (authService.authStatus != AuthStatus.authenticated) {
+        print(
+            '🚫 VoucherRepository: User not authenticated, returning empty vouchers list');
+        return [];
+      }
+    } catch (e) {
+      // If AuthService is not available, return empty list
+      print(
+          '🚫 VoucherRepository: AuthService not available, returning empty vouchers list');
+      return [];
+    }
+
     // Simulate API delay
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     // Return copy of vouchers to prevent direct modification
     return List.from(_dummyVouchers);
   }
 
   /// Add/Redeem a voucher code
   Future<VoucherModel> addVoucher(String code) async {
+    // Check authentication before adding voucher
+    final authService = Get.find<AuthService>();
+    if (authService.authStatus != AuthStatus.authenticated) {
+      print('🚫 VoucherRepository: User not authenticated, cannot add voucher');
+      throw Exception('Authentication required to redeem vouchers');
+    }
+
     // Simulate API delay
     await Future.delayed(const Duration(milliseconds: 800));
-    
+
     // Check if code already exists in user's vouchers
     if (_userVouchers.any((v) => v.code == code)) {
       throw Exception('Voucher code already redeemed');
     }
-    
+
     // Find voucher by code in dummy data
     final availableVoucher = _dummyVouchers.firstWhere(
       (v) => v.code == code,
       orElse: () => throw Exception('Invalid voucher code'),
     );
-    
+
     // Create a copy for the user
     final newVoucher = VoucherModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -103,10 +128,10 @@ class VoucherRepository {
       category: availableVoucher.category,
       isUsed: false,
     );
-    
+
     // Add to user's vouchers
     _userVouchers.add(newVoucher);
-    
+
     return newVoucher;
   }
 
@@ -114,22 +139,22 @@ class VoucherRepository {
   Future<void> useVoucher(String voucherId) async {
     // Simulate API delay
     await Future.delayed(const Duration(milliseconds: 600));
-    
+
     // Find and mark voucher as used
     final voucherIndex = _userVouchers.indexWhere((v) => v.id == voucherId);
     if (voucherIndex == -1) {
       throw Exception('Voucher not found');
     }
-    
+
     final voucher = _userVouchers[voucherIndex];
     if (voucher.isUsed) {
       throw Exception('Voucher already used');
     }
-    
+
     if (voucher.expiryDate.isBefore(DateTime.now())) {
       throw Exception('Voucher has expired');
     }
-    
+
     // Mark as used
     _userVouchers[voucherIndex] = VoucherModel(
       id: voucher.id,
@@ -147,14 +172,43 @@ class VoucherRepository {
 
   /// Get voucher statistics (counts)
   Future<Map<String, int>> getVoucherStats() async {
+    // Check authentication before returning voucher statistics
+    try {
+      final authService = Get.find<AuthService>();
+      if (authService.authStatus != AuthStatus.authenticated) {
+        print(
+            '🚫 VoucherRepository: User not authenticated, returning empty stats');
+        return {
+          'total': 0,
+          'available': 0,
+          'used': 0,
+          'expired': 0,
+        };
+      }
+    } catch (e) {
+      // If AuthService is not available, return empty stats
+      print(
+          '🚫 VoucherRepository: AuthService not available, returning empty stats');
+      return {
+        'total': 0,
+        'available': 0,
+        'used': 0,
+        'expired': 0,
+      };
+    }
+
     // Simulate API delay
     await Future.delayed(const Duration(milliseconds: 400));
-    
+
     final now = DateTime.now();
-    final available = _userVouchers.where((v) => !v.isUsed && v.expiryDate.isAfter(now)).length;
+    final available = _userVouchers
+        .where((v) => !v.isUsed && v.expiryDate.isAfter(now))
+        .length;
     final used = _userVouchers.where((v) => v.isUsed).length;
-    final expired = _userVouchers.where((v) => !v.isUsed && v.expiryDate.isBefore(now)).length;
-    
+    final expired = _userVouchers
+        .where((v) => !v.isUsed && v.expiryDate.isBefore(now))
+        .length;
+
     return {
       'total': _userVouchers.length,
       'available': available,
@@ -165,13 +219,28 @@ class VoucherRepository {
 
   /// Validate voucher code (for preview before adding)
   Future<bool> validateVoucherCode(String code) async {
+    // Check authentication before validating voucher code
+    try {
+      final authService = Get.find<AuthService>();
+      if (authService.authStatus != AuthStatus.authenticated) {
+        print(
+            '🚫 VoucherRepository: User not authenticated, cannot validate voucher code');
+        return false;
+      }
+    } catch (e) {
+      // If AuthService is not available, deny validation
+      print(
+          '🚫 VoucherRepository: AuthService not available, cannot validate voucher code');
+      return false;
+    }
+
     // Simulate API delay
     await Future.delayed(const Duration(milliseconds: 300));
-    
+
     // Check if code exists in dummy vouchers and not already used by user
     final isValidCode = _dummyVouchers.any((v) => v.code == code);
     final alreadyRedeemed = _userVouchers.any((v) => v.code == code);
-    
+
     return isValidCode && !alreadyRedeemed;
   }
 

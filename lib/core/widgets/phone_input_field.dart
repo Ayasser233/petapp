@@ -11,14 +11,15 @@ class PhoneInputField extends StatefulWidget {
   final String? hintText;
   final bool isDark;
   final String? Function(String?)? validator;
-  
+
   const PhoneInputField({
     super.key,
     required this.controller,
     this.onChanged,
     this.hintText = 'Phone Number',
     required this.isDark,
-    this.validator, String? errorText,
+    this.validator,
+    String? errorText,
   });
 
   @override
@@ -33,7 +34,8 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
     return TextFormField(
       controller: widget.controller,
       keyboardType: TextInputType.phone,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
+      autovalidateMode:
+          AutovalidateMode.disabled, // Disable auto-validation initially
       inputFormatters: [
         FilteringTextInputFormatter.digitsOnly,
       ],
@@ -59,11 +61,15 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
         focusedBorder: focusedFieldStyle(),
         filled: true,
         fillColor: widget.isDark ? AppColors.lightblack : Colors.grey[100],
-        contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 16.0, horizontal: 16.0),
         errorStyle: const TextStyle(height: 0.8),
       ),
-      validator: widget.validator ?? 
-        (value) => ValidationUtils.validatePhone(value, countryCode: _selectedCountry.dialCode),
+      validator: widget.validator ??
+          (value) => ValidationUtils.validatePhone(
+                value,
+                countryCode: _selectedCountry.dialCode,
+              ),
       onChanged: (value) {
         if (widget.onChanged != null) {
           widget.onChanged!(value, _selectedCountry);
@@ -219,7 +225,7 @@ class _CountryCodePickerState extends State<_CountryCodePicker> {
               itemBuilder: (context, index) {
                 final country = _filteredCountries[index];
                 final isSelected = widget.selectedCountry.code == country.code;
-                
+
                 return ListTile(
                   leading: Text(
                     country.flag,
@@ -229,21 +235,23 @@ class _CountryCodePickerState extends State<_CountryCodePicker> {
                     country.name,
                     style: TextStyle(
                       color: textColor,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                   trailing: Text(
                     country.dialCode,
                     style: TextStyle(
                       color: isSelected ? AppColors.orange : subTextColor,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
                   onTap: () => widget.onCountrySelected(country),
                   selected: isSelected,
                   selectedColor: AppColors.orange.withValues(alpha: 0.1),
-                  selectedTileColor: widget.isDark 
-                      ? AppColors.orange.withValues(alpha: 0.1) 
+                  selectedTileColor: widget.isDark
+                      ? AppColors.orange.withValues(alpha: 0.1)
                       : AppColors.orange.withValues(alpha: 0.05),
                 );
               },

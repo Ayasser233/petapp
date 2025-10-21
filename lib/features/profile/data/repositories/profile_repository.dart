@@ -1,5 +1,7 @@
+import 'package:get/get.dart';
 import 'package:petapp/core/services/api_client.dart';
 import 'package:petapp/core/services/error_handler_service.dart';
+import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/features/auth/data/models/user_model.dart';
 
 class ProfileRepository {
@@ -7,8 +9,27 @@ class ProfileRepository {
 
   ProfileRepository({required ApiClient apiClient}) : _apiClient = apiClient;
 
+  /// Helper method to handle token expiration and authentication errors
+  Future<void> _handleAuthError(dynamic error) async {
+    if (error.toString().contains('401') ||
+        error.toString().contains('unauthorized') ||
+        error.toString().contains('token') ||
+        error.toString().contains('Unauthorized')) {
+      final authService = Get.find<AuthService>();
+      await authService.handleTokenExpiration();
+    }
+  }
+
   /// Get user profile data
   Future<UserModel> getUserProfile() async {
+    // Check authentication before making API call
+    final authService = Get.find<AuthService>();
+    if (authService.authStatus != AuthStatus.authenticated) {
+      print(
+          '🚫 ProfileRepository: User not authenticated, cannot fetch profile');
+      throw Exception('Authentication required to access profile data');
+    }
+
     try {
       final response = await _apiClient.getUserProfile();
       print('✅ ProfileRepository: Get profile API response: ${response.data}');
@@ -20,6 +41,7 @@ class ProfileRepository {
 
       return UserModel.fromJson(userData);
     } catch (error) {
+      await _handleAuthError(error);
       ErrorHandlerService.instance.handleError(error);
       rethrow;
     }
@@ -27,6 +49,14 @@ class ProfileRepository {
 
   /// Update user profile
   Future<UserModel> updateProfile(Map<String, dynamic> profileData) async {
+    // Check authentication before updating profile
+    final authService = Get.find<AuthService>();
+    if (authService.authStatus != AuthStatus.authenticated) {
+      print(
+          '🚫 ProfileRepository: User not authenticated, cannot update profile');
+      throw Exception('Authentication required to update profile');
+    }
+
     try {
       print(
           '🔄 ProfileRepository: Sending update request with data: $profileData');
@@ -43,6 +73,7 @@ class ProfileRepository {
       return userModel;
     } catch (error) {
       print('❌ ProfileRepository: Update profile error: $error');
+      await _handleAuthError(error);
       ErrorHandlerService.instance.handleError(error);
       rethrow;
     }

@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 class ApiConstants {
@@ -7,23 +6,21 @@ class ApiConstants {
     // Use 10.0.2.2 for Android emulators to access host's localhost
     if (Platform.isAndroid) {
       return 'http://10.0.2.2:3000/api/v1';
-      
     }
     // Default for physical devices and iOS simulators
     return 'http://localhost:3000/api/v1';
-    
   }
-  
+
   static const String fallbackApiBaseUrl = 'http://10.0.2.2:3000/api/v1';
-  
+
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 10);
   static const Duration receiveTimeout = Duration(seconds: 10);
   static const Duration sendTimeout = Duration(seconds: 10);
-  
+
   // API Health Check
   static const String healthEndpoint = '/health';
-  
+
   // Auth Endpoints
   static const String authEndpoint = '/auth';
   static const String registerEndpoint = '/auth/register';
@@ -38,7 +35,7 @@ class ApiConstants {
   static const String refreshTokenEndpoint = '/auth/refresh';
   static const String updateProfileEndpoint = '/auth/me';
   static const String googleLoginEndpoint = '/auth/google/login';
-  
+
   // Pet Endpoints
   static const String petsEndpoint = '/pets';
   static const String petSpeciesAllowedEndpoint = '/pets/species/allowed';
@@ -48,29 +45,39 @@ class ApiConstants {
   static String petRestoreEndpoint(String id) => '/pets/$id/restore';
   static String petHardDeleteEndpoint(String id) => '/pets/$id/hard';
   static String petAppointmentsEndpoint(String id) => '/pets/$id/appointments';
-  
+
   // Symptoms Endpoints
   static const String symptomsEndpoint = '/api/symptoms';
-  static String petTypeSymptomEndpoint(String petType) => '/api/symptoms/$petType';
-  
-  // Clinic/Vet Endpoints
-  static const String clinicsEndpoint = '/api/clinics';
-  static String clinicDetailEndpoint(String id) => '/api/clinics/$id';
-  static const String veterinariansEndpoint = '/api/veterinarians';
-  static String veterinarianDetailEndpoint(String id) => '/api/veterinarians/$id';
-  
+  static String petTypeSymptomEndpoint(String petType) =>
+      '/api/symptoms/$petType';
+
+  // Vet Endpoints
+  static const String vetsEndpoint = '/vets';
+  static String vetDetailEndpoint(String id) => '/vets/$id';
+  static String vetScheduleEndpoint(String id) => '/vets/$id/schedule';
+  static String vetReviewsEndpoint(String id) => '/appointments/reviews/$id';
+
   // Appointment Endpoints
-  static const String appointmentsEndpoint = '/api/appointments';
-  static String appointmentDetailEndpoint(String id) => '/api/appointments/$id';
-  
+  static const String appointmentsEndpoint = '/appointments';
+  static String appointmentDetailEndpoint(String id) => '/appointments/$id';
+  static String appointmentCancelEndpoint(String id) =>
+      '/appointments/$id/cancel';
+  static String appointmentCompleteEndpoint(String id) =>
+      '/appointments/$id/complete';
+  static String appointmentReviewEndpoint(String id) =>
+      '/appointments/$id/review';
+
+  // Points & Validation Endpoints
+  static const String pointsValidateEndpoint = '/points/validate';
+
   // Media Endpoints
   static const String uploadsEndpoint = '/api/uploads';
   static const String petModelsEndpoint = '/api/models';
-  
+
   // User Endpoints
   static const String usersEndpoint = '/api/users';
   static String userDetailEndpoint(String id) => '/api/users/$id';
-  
+
   // Cache durations
   static const Duration shortCacheDuration = Duration(minutes: 5);
   static const Duration mediumCacheDuration = Duration(hours: 1);

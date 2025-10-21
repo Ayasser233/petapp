@@ -1,20 +1,26 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:petapp/core/themes/app_theme.dart';
-import 'package:petapp/core/routes/routes.dart';
-import 'package:petapp/features/profile/controllers/profile_controller.dart';
-import 'package:provider/provider.dart';
-import 'package:petapp/core/providers/settings_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:petapp/core/localization/app_localizations.dart';
-import 'package:petapp/di/service_locator.dart';
-import 'package:petapp/core/services/location_service.dart';
-import 'package:petapp/core/services/connectivity_service.dart';
-import 'package:petapp/core/services/token_service.dart';
+import 'package:petapp/core/providers/settings_provider.dart';
+import 'package:petapp/core/routes/routes.dart';
+import 'package:petapp/core/services/api_client.dart';
 import 'package:petapp/core/services/auth_service.dart';
+import 'package:petapp/core/services/connectivity_service.dart';
 import 'package:petapp/core/services/error_handler_service.dart';
+import 'package:petapp/core/services/location_service.dart';
+import 'package:petapp/core/services/token_service.dart';
+import 'package:petapp/core/themes/app_theme.dart';
+import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
+import 'package:petapp/features/profile/controllers/profile_controller.dart';
+
+import 'firebase_options.dart';
 
 // Add this function to reset app state
 Future<void> resetAppState() async {
@@ -23,9 +29,31 @@ Future<void> resetAppState() async {
   await prefs.setBool('isOnboardingCompleted', false);
 }
 
+Future<void> setupPushNotifications() async {
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // Ask for permission (especially on iOS)
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  print('User granted permission: ${settings.authorizationStatus}');
+
+  // Get the FCM token for this device
+  String? token = await messaging.getToken();
+  print("FCM Token: $token");
+
+  // You can send this token to your backend to store it per user
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await resetAppState();  
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    
+  await setupPushNotifications();
 
   // Initialize dependencies
   await setupServiceLocator();
@@ -56,6 +84,9 @@ Future<void> initServices() async {
   
   // Register TokenService with GetX
   Get.put(sl<TokenService>());
+  
+  // Register ApiClient with GetX (needed for ClinicService and other services)
+  Get.put(sl<ApiClient>());
   
   // Initialize AuthService
   await Get.putAsync(() async => await sl<AuthService>().init());

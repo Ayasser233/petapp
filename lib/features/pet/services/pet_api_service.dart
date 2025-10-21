@@ -118,22 +118,66 @@ class PetApiService {
 
       print('✅ Species fetched successfully: ${response.data}');
 
-      // Handle different response structures
-      List<dynamic> speciesJson;
-      if (response.data is Map) {
-        speciesJson = response.data['species'] ??
-            response.data['data'] ??
-            response.data['items'] ??
-            [response.data];
-      } else {
-        speciesJson = response.data as List<dynamic>;
+      // Handle different response structures with better error handling
+      List<dynamic> speciesJson = [];
+
+      if (response.data == null) {
+        print('📝 API returned null response for species');
+        return [];
       }
 
-      return speciesJson.map((json) => PetSpecies.fromJson(json)).toList();
+      if (response.data is Map) {
+        final mapData = response.data as Map<String, dynamic>;
+
+        // Try to extract species list from common response patterns
+        if (mapData.containsKey('species') && mapData['species'] is List) {
+          speciesJson = mapData['species'] as List<dynamic>;
+        } else if (mapData.containsKey('data') && mapData['data'] is List) {
+          speciesJson = mapData['data'] as List<dynamic>;
+        } else if (mapData.containsKey('items') && mapData['items'] is List) {
+          speciesJson = mapData['items'] as List<dynamic>;
+        } else if (mapData.containsKey('id') && mapData.containsKey('name')) {
+          // Single species object wrapped in response
+          speciesJson = [mapData];
+        } else {
+          print(
+              '📝 Unexpected Map structure for species response: ${mapData.keys}');
+          return [];
+        }
+      } else if (response.data is List) {
+        speciesJson = response.data as List<dynamic>;
+      } else {
+        print(
+            '📝 Unexpected response type for species: ${response.data.runtimeType}');
+        return [];
+      }
+
+      // Filter and safely convert to PetSpecies objects
+      final result = <PetSpecies>[];
+      for (final json in speciesJson) {
+        try {
+          if (json is Map<String, dynamic>) {
+            result.add(PetSpecies.fromJson(json));
+          } else if (json is Map) {
+            // Convert Map to Map<String, dynamic>
+            final convertedMap = Map<String, dynamic>.from(json);
+            result.add(PetSpecies.fromJson(convertedMap));
+          } else {
+            print(
+                '📝 Skipping invalid species item: $json (type: ${json.runtimeType})');
+          }
+        } catch (e) {
+          print('📝 Failed to parse species item: $json, error: $e');
+          continue;
+        }
+      }
+
+      return result;
     } catch (error) {
       print('❌ Failed to fetch species: $error');
-      ErrorHandlerService.instance.handleError(error);
-      rethrow;
+      // Don't propagate error to avoid breaking the UI
+      // Return empty list and let repository handle fallback
+      return [];
     }
   }
 

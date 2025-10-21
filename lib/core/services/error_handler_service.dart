@@ -6,13 +6,54 @@ class ErrorHandlerService extends GetxService {
   static ErrorHandlerService get instance => Get.find<ErrorHandlerService>();
 
   /// Handle any error - server or client
-  void handleError(dynamic error) {
+  void handleError(dynamic error, {bool suppressUserNotification = false}) {
     String message = _getErrorMessage(error);
     String title = _getErrorTitle(error);
     Color color = _getErrorColor(error);
-    
+
+    // Check if this is a non-critical error that shouldn't be shown to users
+    if (_shouldSuppressError(error, message) || suppressUserNotification) {
+      // Only log the error without showing snackbar
+      _logError(error, message);
+      return;
+    }
+
     _showErrorSnackbar(title, message, color);
     _logError(error, message);
+  }
+
+  /// Check if error should be suppressed from user notification
+  bool _shouldSuppressError(dynamic error, String message) {
+    final lowerMessage = message.toLowerCase();
+
+    // Suppress 401 Unauthorized errors - handled by token refresh logic
+    if (error is DioException && error.response?.statusCode == 401) {
+      return true;
+    }
+
+    // Suppress species-related errors as they're not critical
+    if (lowerMessage.contains('species') ||
+        lowerMessage.contains('pet species') ||
+        lowerMessage.contains('allowed species')) {
+      return true;
+    }
+
+    // Suppress type conversion errors related to API data parsing
+    if (lowerMessage.contains('is not a subtype of type') &&
+        (lowerMessage.contains('map<string, dynamic>') ||
+            lowerMessage.contains('string'))) {
+      return true;
+    }
+
+    // If this is a DioException, check the request URL
+    if (error is DioException) {
+      final url = error.requestOptions.uri.toString().toLowerCase();
+      if (url.contains('species') || url.contains('/pets/species')) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   /// Extract error message from different error types - UPDATED
@@ -21,12 +62,12 @@ class ErrorHandlerService extends GetxService {
     if (error is DioException) {
       return _extractServerMessage(error);
     }
-    
+
     // Client errors
     if (error is Exception) {
       return error.toString().replaceAll('Exception: ', '');
     }
-    
+
     // Unknown errors
     return error.toString();
   }
@@ -38,18 +79,17 @@ class ErrorHandlerService extends GetxService {
     }
 
     final data = error.response!.data;
-    
+
     // Handle different JSON structures
     if (data is Map<String, dynamic>) {
       // First priority: Get the actual message from server
-      String? serverMessage = 
-        data['message'] ??           // Your API returns this
-        data['error'] ??             // Fallback
-        data['msg'] ??               // Fallback
-        data['detail'] ??            // Fallback
-        data['description'] ??       // Fallback
-        data['error_description'] ?? // OAuth errors
-        data['errorMessage'];        // Fallback
+      String? serverMessage = data['message'] ?? // Your API returns this
+          data['error'] ?? // Fallback
+          data['msg'] ?? // Fallback
+          data['detail'] ?? // Fallback
+          data['description'] ?? // Fallback
+          data['error_description'] ?? // OAuth errors
+          data['errorMessage']; // Fallback
 
       // If we found a server message, use it directly
       if (serverMessage != null && serverMessage.isNotEmpty) {
@@ -59,7 +99,7 @@ class ErrorHandlerService extends GetxService {
       // Check nested errorDetails (your API structure)
       if (data['errorDetails'] is Map<String, dynamic>) {
         final errorDetails = data['errorDetails'] as Map<String, dynamic>;
-        
+
         // Handle new validation format with array of field errors
         if (errorDetails['message'] is List) {
           final messages = errorDetails['message'] as List;
@@ -73,10 +113,12 @@ class ErrorHandlerService extends GetxService {
             return messages.first.toString();
           }
         }
-        
+
         // Fallback to simple message
         final nestedMessage = errorDetails['message'] ?? errorDetails['error'];
-        if (nestedMessage != null && nestedMessage.isNotEmpty && nestedMessage is! List) {
+        if (nestedMessage != null &&
+            nestedMessage.isNotEmpty &&
+            nestedMessage is! List) {
           return nestedMessage.toString();
         }
       }
@@ -103,7 +145,6 @@ class ErrorHandlerService extends GetxService {
     // Only use default message if no server message found
     return _getDefaultServerMessage(error.response?.statusCode);
   }
-
 
   /// Extract validation error messages
   String _extractValidationMessage(Map<String, dynamic> data) {
@@ -151,7 +192,9 @@ class ErrorHandlerService extends GetxService {
         case 504:
           return 'Server Unavailable';
         default:
-          return statusCode != null && statusCode >= 500 ? 'Server Error' : 'Network Error';
+          return statusCode != null && statusCode >= 500
+              ? 'Server Error'
+              : 'Network Error';
       }
     }
     return 'App Error';
@@ -164,20 +207,20 @@ class ErrorHandlerService extends GetxService {
       switch (statusCode) {
         case 400:
         case 422:
-          return Colors.orange[700]!;    // Validation/input errors
+          return Colors.orange[700]!; // Validation/input errors
         case 401:
-          return Colors.red[600]!;       // Authentication
+          return Colors.red[600]!; // Authentication
         case 403:
-          return Colors.red[700]!;       // Permission denied
+          return Colors.red[700]!; // Permission denied
         case 404:
-          return Colors.blue[700]!;      // Not found
+          return Colors.blue[700]!; // Not found
         case 429:
-          return Colors.purple[700]!;    // Rate limit
+          return Colors.purple[700]!; // Rate limit
         case 500:
         case 502:
         case 503:
         case 504:
-          return Colors.red[900]!;       // Server errors
+          return Colors.red[900]!; // Server errors
         default:
           return Colors.red;
       }
@@ -246,7 +289,7 @@ class ErrorHandlerService extends GetxService {
   /// Handle validation errors with detailed dialog
   void handleValidationError(Map<String, dynamic> errors) {
     final messages = <String>[];
-    
+
     errors.forEach((field, fieldErrors) {
       if (fieldErrors is List) {
         for (var error in fieldErrors) {
@@ -264,10 +307,12 @@ class ErrorHandlerService extends GetxService {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: messages.map((msg) => Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
-              child: Text('• $msg'),
-            )).toList(),
+            children: messages
+                .map((msg) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Text('• $msg'),
+                    ))
+                .toList(),
           ),
         ),
         actions: [

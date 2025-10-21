@@ -7,40 +7,56 @@ enum AuthStatus { authenticated, unauthenticated, guest }
 
 class AuthService extends GetxService {
   final TokenService _tokenService;
-  
+
   // Observable auth status
   final Rx<AuthStatus> _authStatus = AuthStatus.unauthenticated.obs;
-  
-  AuthService({required TokenService tokenService}) 
+
+  AuthService({required TokenService tokenService})
       : _tokenService = tokenService;
-  
+
   // Getter for auth status (reactive)
   AuthStatus get authStatus => _authStatus.value;
-  
+
   // Getter for reactive auth status
   Rx<AuthStatus> get authStatusRx => _authStatus;
-  
+
   // Stream to listen for auth changes
   Stream<AuthStatus> get authStateChanges => _authStatus.stream;
-  
+
   // Initialize the auth service
   Future<AuthService> init() async {
-    // Check if user has a token
-    if (await _tokenService.hasToken()) {
+    // Check if user has a valid session (access token or refresh token)
+    if (await hasValidSession()) {
       _authStatus.value = AuthStatus.authenticated;
+      print('✅ User has valid session');
     } else {
       // Check if user is in guest mode
       final prefs = await SharedPreferences.getInstance();
       final isGuest = prefs.getBool('isGuestMode') ?? false;
-      
-      _authStatus.value = isGuest 
-          ? AuthStatus.guest 
-          : AuthStatus.unauthenticated;
+
+      _authStatus.value =
+          isGuest ? AuthStatus.guest : AuthStatus.unauthenticated;
+      print('ℹ️ User status: ${_authStatus.value}');
     }
-    
+
+    // Set up listener for authentication status changes
+    _setupAuthStatusListener();
+
     return this;
   }
-  
+
+  // Set up listener to handle authentication status changes
+  void _setupAuthStatusListener() {
+    _authStatus.listen((status) {
+      if (status == AuthStatus.unauthenticated) {
+        // Delay the logout to avoid conflicts during initialization
+        Future.delayed(const Duration(milliseconds: 100), () {
+          _performAutomaticLogout();
+        });
+      }
+    });
+  }
+
   // Set guest mode
   Future<void> setGuestMode() async {
     final prefs = await SharedPreferences.getInstance();
@@ -49,64 +65,127 @@ class AuthService extends GetxService {
     await prefs.setBool('isOnboardingCompleted', true);
     _authStatus.value = AuthStatus.guest;
   }
-  
+
   // Clear guest mode (used when logging in)
   Future<void> clearGuestMode() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isGuestMode', false);
   }
-  
+
   // Set authenticated state
   void setAuthenticated() {
     _authStatus.value = AuthStatus.authenticated;
   }
-  
-  // Set unauthenticated state
+
+  // Set unauthenticated state (automatic logout handled by listener)
   Future<void> setUnauthenticated() async {
     await _tokenService.clearToken();
     _authStatus.value = AuthStatus.unauthenticated;
   }
-  
+
+  // Handle token expiration or invalid token
+  Future<void> handleTokenExpiration() async {
+    await setUnauthenticated();
+  }
+
+  // Try to refresh token and restore session
+  Future<bool> tryRefreshToken() async {
+    try {
+      final refreshToken = await _tokenService.getRefreshToken();
+      if (refreshToken == null || refreshToken.isEmpty) {
+        print('❌ No refresh token available');
+        return false;
+      }
+
+      print('🔄 Attempting to refresh token...');
+      // The actual refresh will be handled by ApiClient's interceptor
+      // This method just checks if we have a refresh token available
+      return true;
+    } catch (e) {
+      print('❌ Error checking refresh token: $e');
+      return false;
+    }
+  }
+
+  // Check if tokens are still valid
+  Future<bool> hasValidSession() async {
+    final hasAccessToken = await _tokenService.hasToken();
+    final hasRefreshToken = await _tokenService.hasRefreshToken();
+    return hasAccessToken || hasRefreshToken;
+  }
+
+  // Perform automatic logout when user becomes unauthenticated
+  Future<void> _performAutomaticLogout() async {
+    try {
+      // Clear all user data and preferences
+      await _tokenService.clearAllTokens();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', false);
+      await prefs.setBool('isGuestMode', false);
+
+      // Navigate to login page
+      if (Get.currentRoute != '/login' && Get.currentRoute != '/onboarding') {
+        // Show a message to inform user about automatic logout
+        Get.snackbar(
+          'Session Expired',
+          'You have been logged out. Please login again.',
+          backgroundColor: Get.theme.colorScheme.error,
+          colorText: Get.theme.colorScheme.onError,
+          duration: const Duration(seconds: 3),
+          snackPosition: SnackPosition.TOP,
+        );
+
+        // Navigate to login screen and clear all previous routes
+        Get.offAllNamed('/login');
+      }
+    } catch (e) {
+      print('❌ Error during automatic logout: $e');
+    }
+  }
+
   // Sign out user
   Future<void> signOut() async {
-    await _tokenService.clearToken();
+    await _tokenService
+        .clearAllTokens(); // Clear both access and refresh tokens
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', false);
     await prefs.setBool('isGuestMode', false);
     _authStatus.value = AuthStatus.unauthenticated;
   }
-  
+
   // Check if user can access protected features
   bool canAccessProtectedFeature() {
     return _authStatus.value == AuthStatus.authenticated;
   }
-  
+
   // Show login prompt dialog
   Future<bool> showLoginPrompt(BuildContext context) async {
     if (_authStatus.value == AuthStatus.authenticated) {
       return true;
     }
-    
+
     // Return the result of the dialog (true if user chooses to login)
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Login Required'),
-        content: const Text('You need to be logged in to use this feature.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Login Required'),
+            content:
+                const Text('You need to be logged in to use this feature.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                ),
+                child: const Text('Login'),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-            ),
-            child: const Text('Login'),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 }

@@ -21,12 +21,17 @@ class _AddPetScreenState extends State<AddPetScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _notesController = TextEditingController();
+  final _weightController = TextEditingController();
+  final _allergyController = TextEditingController();
 
   String _selectedSpecies = 'dog';
+  String _selectedGender = 'MALE';
   DateTime _selectedDate = DateTime.now().subtract(const Duration(days: 365));
   String _imagePath = 'assets/images/pet_placeholder.jpg';
   bool _isImageFromGallery = false;
   bool _isLoading = false;
+  bool _spayNeuterStatus = false;
+  List<String> _allergies = [];
 
   final AuthService _authService = sl<AuthService>();
   final PetController _petController = sl<PetController>();
@@ -88,6 +93,8 @@ class _AddPetScreenState extends State<AddPetScreen> {
   void dispose() {
     _nameController.dispose();
     _notesController.dispose();
+    _weightController.dispose();
+    _allergyController.dispose();
     super.dispose();
   }
 
@@ -261,18 +268,29 @@ class _AddPetScreenState extends State<AddPetScreen> {
       // Create pet data
       final petData = {
         'name': _nameController.text.trim(),
-        'species': _selectedSpecies.toUpperCase(), // Backend expects uppercase
+        'species': _selectedSpecies.substring(0, 1).toUpperCase() +
+            _selectedSpecies
+                .substring(1)
+                .toLowerCase(), // Backend expects "Dog" or "Cat" (capitalized)
+        'gender': _selectedGender, // MALE or FEMALE
         'dateOfBirth': _selectedDate
             .toIso8601String()
             .split('T')[0], // Backend expects camelCase
-        'image_url': imageToUse,
-        'notes': _notesController.text.trim(),
+        'allergies': _allergies,
+        'spayNeuterStatus': _spayNeuterStatus,
+        'weight': _weightController.text.trim().isNotEmpty
+            ? double.tryParse(_weightController.text.trim()) ?? 0.0
+            : null,
+        'notes': _notesController.text.trim().isNotEmpty
+            ? _notesController.text.trim()
+            : null,
       };
 
       final success = await _petController.createPet(petData);
 
       if (success) {
-        Get.back(result: true);
+        // Navigate to My Pets screen after successful addition
+        Get.offAllNamed('/my-pets');
         Get.snackbar(
           'Success!',
           '${_nameController.text} has been added successfully.',
@@ -467,6 +485,31 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     ),
                     const SizedBox(height: 20),
 
+                    // Gender
+                    Text(
+                      'Gender',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _buildGenderOption(
+                              'MALE', Icons.male, Colors.blue, isDark),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _buildGenderOption(
+                              'FEMALE', Icons.female, Colors.pink, isDark),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+
                     // Birthdate
                     Text(
                       'Birthdate',
@@ -511,9 +554,173 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     ),
                     const SizedBox(height: 20),
 
+                    // Weight
+                    Text(
+                      'Weight (kg)',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _weightController,
+                      style: TextStyle(color: textColor),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      decoration: InputDecoration(
+                        hintText: 'Enter pet weight',
+                        hintStyle: TextStyle(
+                          color: isDark ? Colors.grey[400] : Colors.grey[600],
+                        ),
+                        filled: true,
+                        fillColor: inputFillColor,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.monitor_weight,
+                          color: AppColors.orange,
+                        ),
+                        suffixText: 'kg',
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Allergies
+                    Text(
+                      'Allergies',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: inputFillColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _allergies.map((allergy) {
+                              return Chip(
+                                label: Text(allergy),
+                                deleteIcon: const Icon(Icons.close, size: 18),
+                                onDeleted: () {
+                                  setState(() {
+                                    _allergies.remove(allergy);
+                                  });
+                                },
+                                backgroundColor:
+                                    AppColors.orange.withValues(alpha: 0.2),
+                                labelStyle: TextStyle(color: textColor),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _allergyController,
+                                  style: TextStyle(color: textColor),
+                                  decoration: InputDecoration(
+                                    hintText:
+                                        'Add allergy (e.g., chicken, dairy)',
+                                    hintStyle: TextStyle(
+                                      color: isDark
+                                          ? Colors.grey[400]
+                                          : Colors.grey[600],
+                                    ),
+                                    border: InputBorder.none,
+                                    prefixIcon: const Icon(
+                                      Icons.warning_amber,
+                                      color: AppColors.orange,
+                                    ),
+                                  ),
+                                  onSubmitted: (value) {
+                                    if (value.trim().isNotEmpty &&
+                                        !_allergies.contains(value.trim())) {
+                                      setState(() {
+                                        _allergies.add(value.trim());
+                                        _allergyController.clear();
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add_circle,
+                                    color: AppColors.orange),
+                                onPressed: () {
+                                  final value = _allergyController.text.trim();
+                                  if (value.isNotEmpty &&
+                                      !_allergies.contains(value)) {
+                                    setState(() {
+                                      _allergies.add(value);
+                                      _allergyController.clear();
+                                    });
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Spay/Neuter Status
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: inputFillColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.medical_services,
+                            color: AppColors.orange,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              'Spayed/Neutered',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: textColor,
+                              ),
+                            ),
+                          ),
+                          Switch(
+                            value: _spayNeuterStatus,
+                            onChanged: (value) {
+                              setState(() {
+                                _spayNeuterStatus = value;
+                              });
+                            },
+                            activeThumbColor: AppColors.orange,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
                     // Notes
                     Text(
-                      'Special Needs or Notes',
+                      'Notes',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -525,8 +732,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       controller: _notesController,
                       style: TextStyle(color: textColor),
                       decoration: InputDecoration(
-                        hintText:
-                            'Any special needs, allergies, or notes about your pet',
+                        hintText: 'Any additional information about your pet',
                         hintStyle: TextStyle(
                           color: isDark ? Colors.grey[400] : Colors.grey[600],
                         ),
@@ -535,6 +741,10 @@ class _AddPetScreenState extends State<AddPetScreen> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
+                        ),
+                        prefixIcon: const Icon(
+                          Icons.note_alt,
+                          color: AppColors.orange,
                         ),
                         alignLabelWithHint: true,
                       ),
@@ -645,6 +855,57 @@ class _AddPetScreenState extends State<AddPetScreen> {
             const SizedBox(height: 8),
             Text(
               displayName,
+              style: TextStyle(
+                color: textColor,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGenderOption(
+      String gender, IconData icon, Color color, bool isDark) {
+    final bool isSelected = _selectedGender == gender;
+
+    final backgroundColor = isDark
+        ? (isSelected ? color.withValues(alpha: 0.2) : Colors.grey[800])
+        : (isSelected ? color.withValues(alpha: 0.1) : Colors.grey[100]);
+
+    final textColor = isDark
+        ? (isSelected ? color : Colors.grey[400])
+        : (isSelected ? color : Colors.grey[700]);
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedGender = gender;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? color : Colors.transparent,
+            width: 2,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: isSelected
+                  ? color
+                  : (isDark ? Colors.grey[400] : Colors.grey),
+              size: 28,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              gender == 'MALE' ? 'Male' : 'Female',
               style: TextStyle(
                 color: textColor,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,

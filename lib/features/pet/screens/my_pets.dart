@@ -320,7 +320,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            pet.customSpecies ?? pet.species,
+                            pet.species,
                             style: TextStyle(
                               color: petTypeColor,
                               fontSize: 12,

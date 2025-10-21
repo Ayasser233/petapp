@@ -120,8 +120,8 @@ class AppLocalizations {
   // Add more strings as needed
 
   // Add new getters for home screen
-  String get clinicVisit =>
-      _localizedValues[locale.languageCode]?['clinicVisit'] ?? 'Clinic Visit';
+  String get vetVisit =>
+      _localizedValues[locale.languageCode]?['vetVisit'] ?? 'vet Visit';
   String get animalView3D =>
       _localizedValues[locale.languageCode]?['animalView3D'] ??
       'Symptom Checker';
@@ -129,7 +129,7 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['virtualVet'] ?? 'Virtual Vet';
   String get searchPlaceholder =>
       _localizedValues[locale.languageCode]?['searchPlaceholder'] ??
-      'Search clinics, services...';
+      'Search Vets, services...';
   String get redeemAndSave =>
       _localizedValues[locale.languageCode]?['redeemAndSave'] ??
       'Redeem & Save';
@@ -228,7 +228,7 @@ class AppLocalizations {
       'No favorites yet';
   String get noFavoritesMessage =>
       _localizedValues[locale.languageCode]?['noFavoritesMessage'] ??
-      'When you find clinics you love, save them here for quick access.';
+      'When you find Vets you love, save them here for quick access.';
   String get openNow =>
       _localizedValues[locale.languageCode]?['openNow'] ?? 'Open Now';
   String get closed =>
@@ -239,9 +239,9 @@ class AppLocalizations {
   String get bookAppointment =>
       _localizedValues[locale.languageCode]?['bookAppointment'] ??
       'Book Appointment';
-  String get exploreMoreClinics =>
-      _localizedValues[locale.languageCode]?['exploreMoreClinics'] ??
-      'Explore More Clinics';
+  String get exploreMoreVets =>
+      _localizedValues[locale.languageCode]?['exploreMoreVets'] ??
+      'Explore More Vets';
   String get booked =>
       _localizedValues[locale.languageCode]?['booked'] ?? 'Booked';
   String get noSlotsAvailable =>
@@ -285,6 +285,10 @@ class AppLocalizations {
       'Fill in your details to create your account';
   String get fullName =>
       _localizedValues[locale.languageCode]?['fullName'] ?? 'Full Name';
+  String get firstName =>
+      _localizedValues[locale.languageCode]?['firstName'] ?? 'First Name';
+  String get lastName =>
+      _localizedValues[locale.languageCode]?['lastName'] ?? 'Last Name';
   String get phoneNumber =>
       _localizedValues[locale.languageCode]?['phoneNumber'] ?? 'Phone Number';
   String get alreadyHaveAccount =>
@@ -417,6 +421,10 @@ class AppLocalizations {
   // Add these getters to your AppLocalizations class
   String get upcoming =>
       _localizedValues[locale.languageCode]?['upcoming'] ?? 'Upcoming';
+  String get pending =>
+      _localizedValues[locale.languageCode]?['pending'] ?? 'Pending';
+  String get confirmed =>
+      _localizedValues[locale.languageCode]?['confirmed'] ?? 'Confirmed';
   String get completed =>
       _localizedValues[locale.languageCode]?['completed'] ?? 'Completed';
   String get cancelled =>
@@ -466,9 +474,8 @@ class AppLocalizations {
   String get contactVet =>
       _localizedValues[locale.languageCode]?['contactVet'] ?? 'Contact Vet';
   // Add these getters to your AppLocalizations class
-  String get clinicDetails =>
-      _localizedValues[locale.languageCode]?['clinicDetails'] ??
-      'Clinic Details';
+  String get vetDetails =>
+      _localizedValues[locale.languageCode]?['vetDetails'] ?? 'vet Details';
   String get report =>
       _localizedValues[locale.languageCode]?['report'] ?? 'Report';
   String get minutes =>
@@ -481,8 +488,8 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['yearsExp'] ?? 'Years exp.';
   String get description =>
       _localizedValues[locale.languageCode]?['description'] ?? 'Description';
-  String get defaultClinicDescription =>
-      _localizedValues[locale.languageCode]?['defaultClinicDescription'] ??
+  String get defaultvetDescription =>
+      _localizedValues[locale.languageCode]?['defaultvetDescription'] ??
       'BluePearl Pet Hospital is a network of specialized animal hospitals that offer emergency and specialist services. They focus on the care of pets that require specialized medical attention.';
   String get services =>
       _localizedValues[locale.languageCode]?['services'] ?? 'Services';
@@ -528,17 +535,17 @@ class AppLocalizations {
   String get consultation =>
       _localizedValues[locale.languageCode]?['consultation'] ?? 'Consultation';
   // Add these getters to your AppLocalizations class
-  String get findClinics =>
-      _localizedValues[locale.languageCode]?['findClinics'] ?? 'Find Clinics';
+  String get findVets =>
+      _localizedValues[locale.languageCode]?['findVets'] ?? 'Find Vets';
   String get refreshLocation =>
       _localizedValues[locale.languageCode]?['refreshLocation'] ??
       'Refresh Location';
   String get enableLocation =>
       _localizedValues[locale.languageCode]?['enableLocation'] ??
       'Enable Location';
-  String get searchClinicsHint =>
-      _localizedValues[locale.languageCode]?['searchClinicsHint'] ??
-      'Search clinics, services, locations...';
+  String get searchVetsHint =>
+      _localizedValues[locale.languageCode]?['searchVetsHint'] ??
+      'Search Vets, services, locations...';
   String get filters =>
       _localizedValues[locale.languageCode]?['filters'] ?? 'Filters';
   String get allCategory =>
@@ -562,9 +569,8 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['enable'] ?? 'Enable';
   String get searchResult =>
       _localizedValues[locale.languageCode]?['searchResult'] ?? 'Search Result';
-  String get noClinicsFound =>
-      _localizedValues[locale.languageCode]?['noClinicsFound'] ??
-      'No clinics found';
+  String get noVetsFound =>
+      _localizedValues[locale.languageCode]?['noVetsFound'] ?? 'No vets found';
   String get tryAdjustingFilters =>
       _localizedValues[locale.languageCode]?['tryAdjustingFilters'] ??
       'Try adjusting your search or filters';
@@ -572,11 +578,11 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['clearFilters'] ?? 'Clear Filters';
   String get viewDetails =>
       _localizedValues[locale.languageCode]?['viewDetails'] ?? 'View Details';
-  String get callClinic =>
-      _localizedValues[locale.languageCode]?['callClinic'] ?? 'Call Clinic';
-  String get failedToLoadClinics =>
-      _localizedValues[locale.languageCode]?['failedToLoadClinics'] ??
-      'Failed to load clinics. Please try again.';
+  String get callVet =>
+      _localizedValues[locale.languageCode]?['callVet'] ?? 'Call Vet';
+  String get failedToLoadVets =>
+      _localizedValues[locale.languageCode]?['failedToLoadVets'] ??
+      'Failed to load vets. Please try again.';
   String get errorApplyingFilters =>
       _localizedValues[locale.languageCode]?['errorApplyingFilters'] ??
       'Error applying filters. Please try again.';
@@ -620,16 +626,15 @@ class AppLocalizations {
   String get emergency =>
       _localizedValues[locale.languageCode]?['emergency'] ?? 'Emergency';
   // Add these getters to your AppLocalizations class
-  String get bookHospitalVisit =>
-      _localizedValues[locale.languageCode]?['bookHospitalVisit'] ??
-      'Book Hospital Visit';
+  String get bookVetVisit =>
+      _localizedValues[locale.languageCode]?['bookVetVisit'] ??
+      'Book Vet Visit';
   String get resetBooking =>
       _localizedValues[locale.languageCode]?['resetBooking'] ?? 'Reset Booking';
   String get bookingDetails =>
       _localizedValues[locale.languageCode]?['bookingDetails'] ??
       'Booking Details';
-  String get clinic =>
-      _localizedValues[locale.languageCode]?['clinic'] ?? 'Clinic';
+  String get vet => _localizedValues[locale.languageCode]?['vet'] ?? 'vet';
   String get price =>
       _localizedValues[locale.languageCode]?['price'] ?? 'Price';
   String get selectTimeSlot =>
@@ -673,9 +678,9 @@ class AppLocalizations {
   String get petsForThisVisit =>
       _localizedValues[locale.languageCode]?['petsForThisVisit'] ??
       'Pets for this visit:';
-  String get showQRCodeAtHospital =>
-      _localizedValues[locale.languageCode]?['showQRCodeAtHospital'] ??
-      'Show this QR code at the hospital';
+  String get showQRCodeAtVet =>
+      _localizedValues[locale.languageCode]?['showQRCodeAtVet'] ??
+      'Show this QR code at the vet';
   String get qrCodeError =>
       _localizedValues[locale.languageCode]?['qrCodeError'] ??
       'Something went wrong!';
@@ -1057,16 +1062,16 @@ class AppLocalizations {
   String get locationAccessDisabled =>
       _localizedValues[locale.languageCode]?['locationAccessDisabled'] ??
       'Location Access Disabled';
-  String get enableLocationToFindClinics =>
-      _localizedValues[locale.languageCode]?['enableLocationToFindClinics'] ??
-      'Enable location to find nearby clinics';
+  String get enableLocationToFindVets =>
+      _localizedValues[locale.languageCode]?['enableLocationToFindVets'] ??
+      'Enable location to find nearby Vets';
 
-  String get loadingClinics =>
-      _localizedValues[locale.languageCode]?['loadingClinics'] ??
-      'Loading clinics...';
-  String get noClinicsNearby =>
-      _localizedValues[locale.languageCode]?['noClinicsNearby'] ??
-      'No clinics found nearby';
+  String get loadingVets =>
+      _localizedValues[locale.languageCode]?['loadingVets'] ??
+      'Loading Vets...';
+  String get noVetsNearby =>
+      _localizedValues[locale.languageCode]?['noVetsNearby'] ??
+      'No Vets found nearby';
   String get tryEnablingLocation =>
       _localizedValues[locale.languageCode]?['tryEnablingLocation'] ??
       'Try enabling location or check back later';
@@ -1118,8 +1123,8 @@ class AppLocalizations {
         'Within ${distance}km';
   }
 
-  String clinicsFound(int count) {
-    return _localizedValues[locale.languageCode]?['clinicsFound']
+  String vetsFound(int count) {
+    return _localizedValues[locale.languageCode]?['vetsFound']
             ?.replaceAll('{count}', count.toString()) ??
         '$count found';
   }
@@ -1169,6 +1174,31 @@ class AppLocalizations {
             ?.replaceAll('{vetName}', vetName) ??
         'Would you like to reschedule your appointment with Dr. $vetName?';
   }
+
+  // Pet form field translations
+  String get petGender =>
+      _localizedValues[locale.languageCode]?['petGender'] ?? 'Gender';
+  String get male => _localizedValues[locale.languageCode]?['male'] ?? 'Male';
+  String get female =>
+      _localizedValues[locale.languageCode]?['female'] ?? 'Female';
+  String get petWeight =>
+      _localizedValues[locale.languageCode]?['petWeight'] ?? 'Weight (kg)';
+  String get enterPetWeight =>
+      _localizedValues[locale.languageCode]?['enterPetWeight'] ??
+      'Enter pet weight';
+  String get petAllergies =>
+      _localizedValues[locale.languageCode]?['petAllergies'] ?? 'Allergies';
+  String get addAllergy =>
+      _localizedValues[locale.languageCode]?['addAllergy'] ??
+      'Add allergy (e.g., chicken, dairy)';
+  String get spayedNeutered =>
+      _localizedValues[locale.languageCode]?['spayedNeutered'] ??
+      'Spayed/Neutered';
+  String get petNotes =>
+      _localizedValues[locale.languageCode]?['petNotes'] ?? 'Notes';
+  String get additionalPetInfo =>
+      _localizedValues[locale.languageCode]?['additionalPetInfo'] ??
+      'Any additional information about your pet';
 
   String? getSymptomName(String symptomName) {
     try {
@@ -1253,20 +1283,20 @@ class AppLocalizations {
       'refreshLocation': 'Refresh location',
       'enableLocation': 'Enable location',
       'locationAccessDisabled': 'Location Access Disabled',
-      'enableLocationToFindClinics': 'Enable location to find nearby clinics',
+      'enableLocationToFindVets': 'Enable location to find nearby Vets',
       'enable': 'Enable',
       'currentLocation': 'Current Location',
       'gettingLocation': 'Getting location...',
-      'loadingClinics': 'Loading clinics...',
-      'noClinicsNearby': 'No clinics found nearby',
+      'loadingVets': 'Loading Vets...',
+      'noVetsNearby': 'No Vets found nearby',
       'tryEnablingLocation': 'Try enabling location or check back later',
       'retry': 'Retry',
       'guestBrowsingMessage':
           'You\'re browsing as a guest. Some features require login.',
       'login': 'Login',
-      'clinicVisit': 'Clinic Visit',
+      'vetVisit': 'vet Visit',
       'animalView3D': '3D Animal View',
-      'searchPlaceholder': 'Search for clinics, doctors...',
+      'searchPlaceholder': 'Search for Vets, doctors...',
       'nearYou': 'Near You',
       'seeAll': 'See All',
       'virtualVet': 'Virtual Vet',
@@ -1315,11 +1345,11 @@ class AppLocalizations {
       'view': 'View',
       'noFavoritesYet': 'No favorites yet',
       'noFavoritesMessage':
-          'When you find clinics you love, save them here for quick access.',
+          'When you find Vets you love, save them here for quick access.',
       'openNow': 'Open Now',
       'closed': 'Closed',
       'bookAppointment': 'Book Appointment',
-      'exploreMoreClinics': 'Explore More Clinics',
+      'exploreMoreVets': 'Explore More Vets',
       'removedFromFavorites': 'removed from favorites',
       'loading': 'Loading...',
       'error': 'Error',
@@ -1338,6 +1368,8 @@ class AppLocalizations {
       'createAccount': 'Create Your Account',
       'accountCreationSubtitle': 'Fill in your details to create your account',
       'fullName': 'Full Name',
+      'firstName': 'First Name',
+      'lastName': 'Last Name',
       'phoneNumber': 'Phone Number',
       'alreadyHaveAccount': 'Already have an account?',
       'termsAndConditionsAgreement': 'By registering you agree to',
@@ -1381,16 +1413,18 @@ class AppLocalizations {
       'reviewFeatureComingSoon': 'Review feature coming soon!',
       'bookingFollowupAppointment': 'Booking follow-up appointment...',
       'upcoming': 'Upcoming',
+      'pending': 'Pending',
+      'confirmed': 'Confirmed',
       'completed': 'Completed',
       'cancelled': 'Cancelled',
-      'clinicDetails': 'Clinic Details',
+      'vetDetails': 'vet Details',
       'report': 'Report',
       'minutes': 'minutes',
       'reviews': 'Reviews',
       'patients': 'Patients',
       'yearsExp': 'Years exp.',
       'description': 'Description',
-      'defaultClinicDescription':
+      'defaultvetDescription':
           'BluePearl Pet Hospital is a network of specialized animal hospitals that offer emergency and specialist services. They focus on the care of pets that require specialized medical attention.',
       'services': 'Services',
       'generalWellnessExam': 'General wellness exam',
@@ -1409,8 +1443,8 @@ class AppLocalizations {
       'sunday': 'Sunday',
       'bookConsultation': 'Book Consultation',
       'consultation': 'Consultation',
-      'findClinics': 'Find Clinics',
-      'searchClinicsHint': 'Search clinics, services, locations...',
+      'findVets': 'Find Vets',
+      'searchVetsHint': 'Search Vets, services, locations...',
       'filters': 'Filters',
       'allCategory': 'All Category',
       'popular': 'Popular',
@@ -1418,15 +1452,15 @@ class AppLocalizations {
       'latest': 'Latest',
       'enableLocationForResults': 'Enable location for distance-based results',
       'searchResult': 'Search Result',
-      'noClinicsFound': 'No clinics found',
+      'noVetsFound': 'No Vets found',
       'tryAdjustingFilters': 'Try adjusting your search or filters',
       'clearFilters': 'Clear Filters',
       'viewDetails': 'View Details',
-      'callClinic': 'Call Clinic',
-      'failedToLoadClinics': 'Failed to load clinics. Please try again.',
+      'callvet': 'Call vet',
+      'failedToLoadVets': 'Failed to load Vets. Please try again.',
       'errorApplyingFilters': 'Error applying filters. Please try again.',
       'withinDistance': 'Within {distance}km',
-      'clinicsFound': '{count} found',
+      'VetsFound': '{count} found',
       'ratingWithReviews': '{rating} ({reviews})',
       'yearsExperience': '{years} years',
       'callingNumber': 'Calling {phone}',
@@ -1449,10 +1483,10 @@ class AppLocalizations {
       'checkup': 'Checkup',
       'grooming': 'Grooming',
       'emergency': 'Emergency',
-      'bookHospitalVisit': 'Book Hospital Visit',
+      'bookVetVisit': 'Book Vet Visit',
       'resetBooking': 'Reset Booking',
       'bookingDetails': 'Booking Details',
-      'clinic': 'Clinic',
+      'vet': 'Vet',
       'price': 'Price',
       'selectTimeSlot': 'Select Time Slot',
       'morning': 'Morning',
@@ -1470,7 +1504,7 @@ class AppLocalizations {
       'reference': 'Reference',
       'pets': 'Pets',
       'petsForThisVisit': 'Pets for this visit:',
-      'showQRCodeAtHospital': 'Show this QR code at the hospital',
+      'showQRCodeAtVet': 'Show this QR code at the vet',
       'qrCodeError': 'Something went wrong!',
       'pleaseSelectTimeSlot': 'Please select a time slot',
       'bookingFailed': 'Booking failed. Please try again.',
@@ -1772,6 +1806,18 @@ class AppLocalizations {
       'use3DModelToIdentifySymptoms':
           'Use the 3D model to identify symptoms and explore pet anatomy. Tap on different body parts to learn more.',
       'viewPetAnatomy': 'View {petType} Anatomy',
+
+      // Pet form fields
+      'petGender': 'Gender',
+      'male': 'Male',
+      'female': 'Female',
+      'petWeight': 'Weight (kg)',
+      'enterPetWeight': 'Enter pet weight',
+      'petAllergies': 'Allergies',
+      'addAllergy': 'Add allergy (e.g., chicken, dairy)',
+      'spayedNeutered': 'Spayed/Neutered',
+      'petNotes': 'Notes',
+      'additionalPetInfo': 'Any additional information about your pet',
     },
     'ar': {
       'appTitle': 'تطبيق الحيوانات الأليفة',
@@ -1828,6 +1874,8 @@ class AppLocalizations {
       'createAccount': 'إنشاء حسابك',
       'accountCreationSubtitle': 'املأ بياناتك لإنشاء حسابك',
       'fullName': 'الاسم الكامل',
+      'firstName': 'الاسم الأول',
+      'lastName': 'اسم العائلة',
       'phoneNumber': 'رقم الهاتف',
       'alreadyHaveAccount': 'هل لديك حساب بالفعل؟',
       'termsAndConditionsAgreement': 'بالتسجيل فإنك توافق على',
@@ -1838,7 +1886,7 @@ class AppLocalizations {
       'registrationFailed': 'فشل التسجيل',
       'confirmDeleteAccount':
           'هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.',
-      'clinicVisit': 'زيارة العيادة',
+      'vetVisit': 'زيارة العيادة',
       'animalView3D': 'مشخص الأعراض',
       'virtualVet': 'طبيب بيطري افتراضي',
       'searchPlaceholder': 'البحث عن عيادات، خدمات...',
@@ -1883,7 +1931,7 @@ class AppLocalizations {
       'openNow': 'مفتوح الآن',
       'closed': 'مغلق',
       'bookAppointment': 'حجز موعد',
-      'exploreMoreClinics': 'استكشف المزيد من العيادات',
+      'exploreMoreVets': 'استكشف المزيد من العيادات',
       'removedFromFavorites': 'تمت إزالته من المفضلات',
       'loading': 'جاري التحميل...',
       'error': 'خطأ',
@@ -1934,6 +1982,8 @@ class AppLocalizations {
       'reviewFeatureComingSoon': 'ميزة المراجعة قادمة قريبًا!',
       'bookingFollowupAppointment': 'حجز موعد متابعة...',
       'upcoming': 'قادم',
+      'pending': 'قيد الانتظار',
+      'confirmed': 'مؤكد',
       'completed': 'مكتمل',
       'cancelled': 'ملغي',
       'rescheduled': 'مُعاد جدولته',
@@ -1960,14 +2010,14 @@ class AppLocalizations {
       'duration': 'المدة',
       'fee': 'الرسوم',
       'contactVet': 'تواصل مع الطبيب',
-      'clinicDetails': 'تفاصيل العيادة',
+      'vetDetails': 'تفاصيل العيادة',
       'report': 'تبليغ',
       'minutes': 'دقائق',
       'reviews': 'التقييمات',
       'patients': 'المرضى',
       'yearsExp': 'سنوات الخبرة',
       'description': 'الوصف',
-      'defaultClinicDescription':
+      'defaultvetDescription':
           'مستشفى BluePearl للحيوانات الأليفة هو شبكة من المستشفيات المتخصصة التي تقدم خدمات الطوارئ والخدمات المتخصصة. يركزون على رعاية الحيوانات الأليفة التي تتطلب عناية طبية متخصصة.',
       'services': 'الخدمات',
       'generalWellnessExam': 'فحص الصحة العامة',
@@ -1986,10 +2036,10 @@ class AppLocalizations {
       'sunday': 'الأحد',
       'bookConsultation': 'احجز كشف',
       'consultation': 'استشارة',
-      'findClinics': 'البحث عن العيادات',
+      'findVets': 'البحث عن العيادات',
       'refreshLocation': 'تحديث الموقع',
       'enableLocation': 'تفعيل الموقع',
-      'searchClinicsHint': 'البحث عن العيادات، الخدمات، المواقع...',
+      'searchVetsHint': 'البحث عن العيادات، الخدمات، المواقع...',
       'filters': 'المرشحات',
       'allCategory': 'جميع الفئات',
       'popular': 'الأكثر شعبية',
@@ -2001,15 +2051,15 @@ class AppLocalizations {
           'فعل الموقع للحصول على نتائج بناءً على المسافة',
       'enable': 'تفعيل',
       'searchResult': 'نتائج البحث',
-      'noClinicsFound': 'لم يتم العثور على عيادات',
+      'noVetsFound': 'لم يتم العثور على عيادات',
       'tryAdjustingFilters': 'حاول تعديل البحث أو المرشحات',
       'clearFilters': 'مسح المرشحات',
       'viewDetails': 'عرض التفاصيل',
-      'callClinic': 'اتصال بالعيادة',
-      'failedToLoadClinics': 'فشل في تحميل العيادات. يرجى المحاولة مرة أخرى.',
+      'callvet': 'اتصال بالعيادة',
+      'failedToLoadVets': 'فشل في تحميل العيادات. يرجى المحاولة مرة أخرى.',
       'errorApplyingFilters': 'خطأ في تطبيق المرشحات. يرجى المحاولة مرة أخرى.',
       'withinDistance': 'ضمن {distance}كم',
-      'clinicsFound': 'تم العثور على {count}',
+      'VetsFound': 'تم العثور على {count}',
       'ratingWithReviews': '{rating} ({reviews})',
       'yearsExperience': '{years} سنة',
       'callingNumber': 'الاتصال بـ {phone}',
@@ -2032,10 +2082,10 @@ class AppLocalizations {
       'checkup': 'فحص',
       'grooming': 'تنظيف',
       'emergency': 'طوارئ',
-      'bookHospitalVisit': 'حجز زيارة العيادة',
+      'bookVetVisit': 'حجز زيارة العيادة',
       'resetBooking': 'إعادة تعيين الحجز',
       'bookingDetails': 'تفاصيل الحجز',
-      'clinic': 'العيادة',
+      'vet': 'العيادة',
       'price': 'السعر',
       'selectTimeSlot': 'اختر الوقت',
       'morning': 'الصباح',
@@ -2053,7 +2103,7 @@ class AppLocalizations {
       'reference': 'المرجع',
       'pets': 'الحيوانات الأليفة',
       'petsForThisVisit': 'الحيوانات الأليفة لهذه الزيارة:',
-      'showQRCodeAtHospital': 'اعرض رمز الاستجابة السريعة هذا في العيادة',
+      'showQRCodeAtVet': 'اعرض رمز الاستجابة السريعة هذا في العيادة',
       'qrCodeError': 'حدث خطأ ما!',
       'pleaseSelectTimeSlot': 'يرجى اختيار وقت',
       'bookingFailed': 'فشل الحجز. يرجى المحاولة مرة أخرى.',
@@ -3169,9 +3219,9 @@ class AppLocalizations {
       'viewPetAnatomy': 'عرض تشريح {petType}',
 
       'locationAccessDisabled': 'تم إلغاء الوصول للموقع',
-      'enableLocationToFindClinics': 'فعل الموقع للعثور على العيادات القريبة',
-      'loadingClinics': 'جاري تحميل العيادات...',
-      'noClinicsNearby': 'لا توجد عيادات قريبة',
+      'enableLocationToFindVets': 'فعل الموقع للعثور على العيادات القريبة',
+      'loadingVets': 'جاري تحميل العيادات...',
+      'noVetsNearby': 'لا توجد عيادات قريبة',
       'tryEnablingLocation': 'جرب تفعيل الموقع أو تحقق لاحقاً',
       'guestBrowsingMessage': 'أنت تتصفح كضيف. بعض الميزات تتطلب تسجيل الدخول.',
       'login': 'تسجيل الدخول',
@@ -3185,6 +3235,18 @@ class AppLocalizations {
       'cleanGently': 'نظّف بلُطف',
       'doNotTouch': 'متحاولش تلمس',
       'keepCalm': 'حاول تهدّي أليفك',
+
+      // Pet form fields
+      'petGender': 'الجنس',
+      'male': 'ذكر',
+      'female': 'أنثى',
+      'petWeight': 'الوزن (كجم)',
+      'enterPetWeight': 'أدخل وزن الحيوان الأليف',
+      'petAllergies': 'الحساسية',
+      'addAllergy': 'إضافة حساسية (مثل: دجاج، ألبان)',
+      'spayedNeutered': 'معقم/مخصي',
+      'petNotes': 'ملاحظات',
+      'additionalPetInfo': 'أي معلومات إضافية عن حيوانك الأليف',
     },
   };
 }

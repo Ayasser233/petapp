@@ -15,11 +15,11 @@ class LoginRequest {
       'identifier': identifier,
       'password': password,
     };
-    
+
     if (turnstileToken != null && turnstileToken!.isNotEmpty) {
       data['turnstileToken'] = turnstileToken;
     }
-    
+
     return data;
   }
 
@@ -34,9 +34,9 @@ class RegisterRequest {
   final String password;
   final String firstName;
   final String lastName;
-  final String username;
+  final String? username;
   final String mobile;
-  final String role;
+  final String? role;
   final String? turnstileToken;
 
   RegisterRequest({
@@ -44,9 +44,9 @@ class RegisterRequest {
     required this.password,
     required this.firstName,
     required this.lastName,
-    required this.username,
+    this.username,
     required this.mobile,
-    this.role = 'user',
+    this.role,
     this.turnstileToken,
   });
 
@@ -56,15 +56,24 @@ class RegisterRequest {
       'password': password,
       'firstName': firstName,
       'lastName': lastName,
-      'username': username,
       'mobile': mobile,
-      'role': role,
     };
-    
+
+    // Only include username if provided
+    if (username != null && username!.isNotEmpty) {
+      data['username'] = username;
+    }
+
+    // Only include role if provided
+    if (role != null && role!.isNotEmpty) {
+      data['role'] = role;
+    }
+
+    // Only include turnstileToken if provided
     if (turnstileToken != null && turnstileToken!.isNotEmpty) {
       data['turnstileToken'] = turnstileToken;
     }
-    
+
     return data;
   }
 
@@ -201,7 +210,7 @@ class UpdateProfileRequest {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
-    
+
     if (name != null) data['name'] = name;
     if (firstName != null) data['firstName'] = firstName;
     if (lastName != null) data['lastName'] = lastName;
@@ -210,7 +219,7 @@ class UpdateProfileRequest {
     if (address != null) data['address'] = address;
     if (dateOfBirth != null) data['dateOfBirth'] = dateOfBirth;
     if (username != null) data['username'] = username;
-    
+
     return data;
   }
 

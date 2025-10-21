@@ -54,7 +54,7 @@ class AuthMiddleware extends GetMiddleware {
       AppRoutes.addPet,
       AppRoutes.myPets,
       AppRoutes.petProfile,
-      AppRoutes.hospitalBooking,
+      AppRoutes.vetExplorer,
       AppRoutes.accountDetails,
       AppRoutes.pointsHistory,
       AppRoutes.vouchers,

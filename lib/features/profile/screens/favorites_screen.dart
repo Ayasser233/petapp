@@ -11,8 +11,8 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  // Sample favorited clinics data - in a real app, this would come from a controller or state manager
-  final List<Map<String, dynamic>> _favoriteClinics = [
+  // Sample favorited Vets data - in a real app, this would come from a controller or state manager
+  final List<Map<String, dynamic>> _favoriteVets = [
     {
       'name': 'Pet Care Center',
       'rating': 4.8,
@@ -62,9 +62,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         elevation: 0,
       ),
       body: SafeArea(
-        child: _favoriteClinics.isEmpty
+        child: _favoriteVets.isEmpty
             ? _buildEmptyState(isDark, textColor, localizations)
-            : _buildClinicsList(isDark, cardColor, textColor, subTextColor, localizations),
+            : _buildVetsList(isDark, cardColor, textColor, subTextColor, localizations),
       ),
     );
   }
@@ -104,7 +104,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop(); // Go back to previous screen
-              // In a real app, you might want to navigate to a screen where users can find clinics
+              // In a real app, you might want to navigate to a screen where users can find Vets
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.orange,
@@ -114,7 +114,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               ),
             ),
             child: Text(
-              localizations.exploreMoreClinics,
+              localizations.exploreMoreVets,
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -127,13 +127,13 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  Widget _buildClinicsList(bool isDark, Color cardColor, Color textColor, 
+  Widget _buildVetsList(bool isDark, Color cardColor, Color textColor, 
       Color subTextColor, AppLocalizations localizations) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _favoriteClinics.length,
+      itemCount: _favoriteVets.length,
       itemBuilder: (context, index) {
-        final clinic = _favoriteClinics[index];
+        final clinic = _favoriteVets[index];
         return _buildClinicCard(
           clinic: clinic,
           isDark: isDark,
@@ -147,7 +147,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           onRemove: () {
             // Logic to remove from favorites
             setState(() {
-              _favoriteClinics.remove(clinic);
+              _favoriteVets.remove(clinic);
             });
             
             ScaffoldMessenger.of(context).showSnackBar(
@@ -157,7 +157,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   label: 'Undo',
                   onPressed: () {
                     setState(() {
-                      _favoriteClinics.add(clinic);
+                      _favoriteVets.add(clinic);
                     });
                   },
                 ),

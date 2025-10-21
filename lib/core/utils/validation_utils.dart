@@ -4,9 +4,10 @@ class ValidationUtils {
     r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+',
   );
 
-  // Phone number validation regex (international format)
-  static final RegExp _phoneRegex = RegExp(
-    r'^\+?[0-9]{1,3}[0-9]{6,14}$',
+  // Phone number without country code - should not start with 0
+  // Must be 6-14 digits, starting with 1-9
+  static final RegExp _phoneWithoutCountryCodeRegex = RegExp(
+    r'^[1-9][0-9]{5,13}$',
   );
 
   // Name validation regex (at least 2 characters, letters and spaces only)
@@ -35,17 +36,17 @@ class ValidationUtils {
     if (value == null || value.isEmpty) {
       return 'Please enter your phone number';
     }
-    
-    // Add country code if it's not already in the value
-    final phoneWithCode = value.startsWith('+') 
-        ? value 
-        : countryCode != null 
-            ? '$countryCode$value' 
-            : value;
-            
-    if (!_phoneRegex.hasMatch(phoneWithCode)) {
-      return 'Please enter a valid phone number';
+
+    // Check if phone starts with 0
+    if (value.startsWith('0')) {
+      return 'Phone number cannot start with 0';
     }
+
+    // Validate the phone number format without country code
+    if (!_phoneWithoutCountryCodeRegex.hasMatch(value)) {
+      return 'Please enter a valid phone number (6-14 digits)';
+    }
+
     return null;
   }
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1017624066475",
+    "project_id": "aleefyapp-bb4fd",
+    "storage_bucket": "aleefyapp-bb4fd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1017624066475:android:76f598d7c3f872e63a3aee",
+        "android_client_info": {
+          "package_name": "com.example.petapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWCTJa9nt3p2I1cUdLagBLeOLQYZM2kDA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -240,9 +240,11 @@ class ProfileController extends GetxController {
     } catch (e) {
       // Error already handled by ErrorHandlerService
       if (e.toString().contains('401') ||
-          e.toString().contains('unauthorized')) {
-        final tokenService = Get.find<TokenService>();
-        await tokenService.clearToken();
+          e.toString().contains('unauthorized') ||
+          e.toString().contains('token') ||
+          e.toString().contains('Unauthorized')) {
+        final authService = Get.find<AuthService>();
+        await authService.handleTokenExpiration();
       }
 
       // Create fallback profile on error

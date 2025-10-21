@@ -62,7 +62,7 @@ class CommonBottomNavBar extends StatelessWidget {
                 Get.offAllNamed(AppRoutes.home);
                 break;
               case 1:
-                Get.offAllNamed(AppRoutes.activity);
+                Get.offAllNamed(AppRoutes.appointments);
                 break;
               case 2:
                 Get.offAllNamed(AppRoutes.profile);

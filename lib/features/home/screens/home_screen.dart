@@ -8,8 +8,8 @@ import 'package:petapp/core/widgets/custom_app_bar.dart';
 // import 'package:petapp/core/widgets/rewards_card.dart'; // TODO: Uncomment when APIs are ready
 import 'package:petapp/core/services/location_service.dart';
 import 'package:petapp/core/services/auth_service.dart';
-import 'package:petapp/features/clinics/models/clinic_model.dart';
-import 'package:petapp/features/clinics/services/clinic_service.dart';
+import 'package:petapp/features/vets/models/vet_model.dart';
+import 'package:petapp/features/vets/services/vet_service.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,12 +20,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final ClinicService _clinicService = ClinicService();
+  final VetService _vetService = VetService();
   late final LocationService _locationService;
   final AuthService _authService = Get.find<AuthService>();
-  
-  List<ClinicModel> nearbyClinics = [];
-  bool _isLoadingClinics = true;
+
+  List<VetModel> nearbyVets = [];
+  bool _isLoadingVets = true;
   bool _locationDialogShown = false;
   bool _isGuestUser = false;
 
@@ -37,50 +37,51 @@ class _HomeScreenState extends State<HomeScreen> {
     _initializeHomeScreen();
   }
 
-  /// Initialize home screen with location and clinics
+  /// Initialize home screen with location and vets
   Future<void> _initializeHomeScreen() async {
     try {
       // Wait a bit for the screen to settle
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       // Show location permission dialog on first launch
       if (_locationService.isFirstLaunch && !_locationDialogShown) {
         _locationDialogShown = true;
-        final shouldRequestLocation = await _locationService.showFirstTimeLocationDialog();
-        
+        final shouldRequestLocation =
+            await _locationService.showFirstTimeLocationDialog();
+
         if (shouldRequestLocation) {
           await _locationService.requestLocationPermission();
         }
       }
 
-      // Load nearby clinics
-      await _loadNearbyClinics();
+      // Load nearby vets
+      await _loadNearbyVets();
     } catch (e) {
       throw Exception('Error initializing home screen: $e');
     }
   }
 
-  /// Load nearby clinics
-  Future<void> _loadNearbyClinics() async {
+  /// Load nearby vets
+  Future<void> _loadNearbyVets() async {
     if (!mounted) return;
-    
+
     setState(() {
-      _isLoadingClinics = true;
+      _isLoadingVets = true;
     });
 
     try {
-      final clinics = await _clinicService.getNearByClinics();
+      final vets = await _vetService.getNearByVets();
       if (mounted) {
         setState(() {
-          nearbyClinics = clinics;
+          nearbyVets = vets;
         });
       }
     } catch (e) {
-      throw Exception('Error loading nearby clinics: $e');
+      throw Exception('Error loading nearby vets: $e');
     } finally {
       if (mounted) {
         setState(() {
-          _isLoadingClinics = false;
+          _isLoadingVets = false;
         });
       }
     }
@@ -89,16 +90,15 @@ class _HomeScreenState extends State<HomeScreen> {
   /// Handle refresh
   Future<void> _handleRefresh() async {
     await _locationService.refreshLocation();
-    await _loadNearbyClinics();
+    await _loadNearbyVets();
   }
 
-  void _navigateToClinicDetail(ClinicModel clinic) {
+  void _navigateToVetDetail(VetModel vet) {
     Get.toNamed(
-      AppRoutes.clinicDetail,
-      arguments: clinic.toMap(),
+      AppRoutes.vetDetail,
+      arguments: vet.toMap(),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -113,47 +113,47 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           // Location indicator button
           Obx(() => IconButton(
-            onPressed: () {
-              if (_locationService.isPermissionGranted) {
-                _handleRefresh();
-              } else {
-                _locationService.requestLocationPermission().then((_) {
+                onPressed: () {
                   if (_locationService.isPermissionGranted) {
-                    _loadNearbyClinics();
+                    _handleRefresh();
+                  } else {
+                    _locationService.requestLocationPermission().then((_) {
+                      if (_locationService.isPermissionGranted) {
+                        _loadNearbyVets();
+                      }
+                    });
                   }
-                });
-              }
-            },
-            icon: _locationService.isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(AppColors.orange),
-                    ),
-                  )
-                : Icon(
-                    _locationService.isPermissionGranted 
-                        ? Icons.location_on 
-                        : Icons.location_off,
-                    color: _locationService.isPermissionGranted 
-                        ? AppColors.orange 
-                        : Colors.grey,
-                  ),
-            tooltip: _locationService.isPermissionGranted 
-                ? 'Refresh location' 
-                : 'Enable location',
-          )),
+                },
+                icon: _locationService.isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(AppColors.orange),
+                        ),
+                      )
+                    : Icon(
+                        _locationService.isPermissionGranted
+                            ? Icons.location_on
+                            : Icons.location_off,
+                        color: _locationService.isPermissionGranted
+                            ? AppColors.orange
+                            : Colors.grey,
+                      ),
+                tooltip: _locationService.isPermissionGranted
+                    ? 'Refresh location'
+                    : 'Enable location',
+              )),
         ],
       ),
       body: SafeArea(
         child: Column(
           children: [
             // Guest user banner
-            if (_isGuestUser)
-              _buildGuestBanner(context),
-              
+            if (_isGuestUser) _buildGuestBanner(context),
+
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _handleRefresh,
@@ -166,7 +166,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Location header
-                        Obx(() => _buildLocationHeader(context, isDark, localizations)),
+                        Obx(() => _buildLocationHeader(
+                            context, isDark, localizations)),
 
                         const SizedBox(height: 16),
 
@@ -174,20 +175,17 @@ class _HomeScreenState extends State<HomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
+                            _buildServiceItem(context, localizations.vetVisit,
+                                'assets/icons/icons-01.png', isDark,
+                                onTap: () =>
+                                    Get.toNamed(AppRoutes.vetExplorer)),
                             _buildServiceItem(
-                              context, 
-                              localizations.clinicVisit,
-                              'assets/icons/icons-01.png',
-                              isDark,
-                              onTap: () => Get.toNamed(AppRoutes.clinicExplorer)
-                            ),
-                            _buildServiceItem(
-                              context, 
-                              localizations.animalView3D, 
-                              'assets/icons/icons-02.png',
-                              isDark,
-                              onTap: () => Get.toNamed(AppRoutes.pet3DModelSelector)
-                            ),
+                                context,
+                                localizations.animalView3D,
+                                'assets/icons/icons-02.png',
+                                isDark,
+                                onTap: () =>
+                                    Get.toNamed(AppRoutes.pet3DModelSelector)),
                           ],
                         ),
 
@@ -196,41 +194,51 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Search bar
                         GestureDetector(
                           onTap: () {
-                            Get.toNamed(AppRoutes.clinicExplorer, arguments: {'openSearch': true});
+                            Get.toNamed(AppRoutes.vetExplorer,
+                                arguments: {'openSearch': true});
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                              color: isDark ? AppColors.lightblack : Colors.grey.shade100,
+                              color: isDark
+                                  ? AppColors.lightblack
+                                  : Colors.grey.shade100,
                               borderRadius: BorderRadius.circular(30),
                             ),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 14),
                             child: Row(
                               children: [
                                 Icon(
                                   Icons.search,
-                                  color: isDark ? Colors.grey[400] : Colors.grey,
+                                  color:
+                                      isDark ? Colors.grey[400] : Colors.grey,
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
                                     localizations.searchPlaceholder,
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                      color: isDark ? Colors.grey[400] : Colors.grey,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          color: isDark
+                                              ? Colors.grey[400]
+                                              : Colors.grey,
+                                        ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: 24),
 
                         // Rewards Card - Only show for authenticated users
                         if (!_isGuestUser) ...[
                           // TODO: Uncomment when APIs are available
                           // _buildRewardsCard(),
-                          
+
                           // TEMPORARY: Comment out until APIs are ready
                           // The logic below will be used when user data APIs are available
                           /*
@@ -243,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   child: CircularProgressIndicator(color: AppColors.orange),
                                 );
                               }
-                              
+
                               if (snapshot.hasError) {
                                 return const SizedBox.shrink(); // Hide on error
                               }
@@ -259,14 +267,16 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                           ),
                           */
-                          
+
                           // Placeholder for authenticated users (remove when APIs are ready)
                           Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: AppColors.orange.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppColors.orange.withValues(alpha: 0.3)),
+                              border: Border.all(
+                                  color:
+                                      AppColors.orange.withValues(alpha: 0.3)),
                             ),
                             child: const Row(
                               children: [
@@ -296,20 +306,27 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             Text(
                               localizations.nearYou,
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: isDark ? Colors.white : Colors.black87,
+                                    color:
+                                        isDark ? Colors.white : Colors.black87,
                                   ),
                             ),
                             TextButton(
                               onPressed: () {
-                                Get.toNamed(AppRoutes.clinicExplorer);
+                                Get.toNamed(AppRoutes.vetExplorer);
                               },
                               child: Text(
                                 localizations.seeAll,
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.orange,
-                                ),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color: AppColors.orange,
+                                    ),
                               ),
                             ),
                           ],
@@ -319,24 +336,28 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Near You cards
                         SizedBox(
                           height: 220,
-                          child: _isLoadingClinics
-                              ? _buildLoadingClinics(isDark)
-                              : nearbyClinics.isEmpty
+                          child: _isLoadingVets
+                              ? _buildLoadingVets(isDark)
+                              : nearbyVets.isEmpty
                                   ? _buildEmptyState(context, isDark)
                                   : ListView.builder(
                                       scrollDirection: Axis.horizontal,
-                                      itemCount: nearbyClinics.length,
+                                      itemCount: nearbyVets.length,
                                       itemBuilder: (context, index) {
-                                        final clinic = nearbyClinics[index];
+                                        final vet = nearbyVets[index];
                                         return Padding(
                                           padding: EdgeInsets.only(
-                                            right: index == nearbyClinics.length - 1 ? 0 : 16.0,
+                                            right:
+                                                index == nearbyVets.length - 1
+                                                    ? 0
+                                                    : 16.0,
                                           ),
                                           child: _buildNearbyCard(
                                             context,
-                                            clinic: clinic,
+                                            vet: vet,
                                             isDark: isDark,
-                                            onTap: () => _navigateToClinicDetail(clinic),
+                                            onTap: () =>
+                                                _navigateToVetDetail(vet),
                                           ),
                                         );
                                       }),
@@ -355,7 +376,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   /// Build location header
-  Widget _buildLocationHeader(BuildContext context, bool isDark, AppLocalizations localizations) {
+  Widget _buildLocationHeader(
+      BuildContext context, bool isDark, AppLocalizations localizations) {
     if (!_locationService.isPermissionGranted) {
       return Container(
         padding: const EdgeInsets.all(12),
@@ -385,14 +407,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(
                     'Location Access Disabled',
-                    style:  TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
                       color: AppColors.lightorange,
                       fontSize: 14,
                     ),
                   ),
                   Text(
-                    'Enable location to find nearby clinics',
+                    'Enable location to find nearby vets',
                     style: TextStyle(
                       color: AppColors.lightorange,
                       fontSize: 12,
@@ -406,7 +428,8 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextButton.styleFrom(
                 backgroundColor: AppColors.orange,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(6),
                 ),
@@ -453,12 +476,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  _locationService.currentCity.isNotEmpty 
-                      ? _locationService.currentCity 
+                  _locationService.currentCity.isNotEmpty
+                      ? _locationService.currentCity
                       : 'Getting location...',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                        fontWeight: FontWeight.w600,
+                      ),
                 ),
               ],
             ),
@@ -485,8 +508,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  /// Build loading clinics widget
-  Widget _buildLoadingClinics(bool isDark) {
+  /// Build loading vets widget
+  Widget _buildLoadingVets(bool isDark) {
     return ListView.builder(
       scrollDirection: Axis.horizontal,
       itemCount: 3,
@@ -506,7 +529,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Loading clinics...',
+                'Loading vets...',
                 style: TextStyle(
                   color: isDark ? Colors.grey[400] : Colors.grey[600],
                   fontSize: 14,
@@ -537,17 +560,17 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            'No clinics found nearby',
+            'No vets found nearby',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: isDark ? Colors.grey[400] : Colors.grey[600],
-            ),
+                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                ),
           ),
           const SizedBox(height: 8),
           Text(
             'Try enabling location or check back later',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: isDark ? Colors.grey[500] : Colors.grey[500],
-            ),
+                  color: isDark ? Colors.grey[500] : Colors.grey[500],
+                ),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
@@ -566,12 +589,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildServiceItem(
-    BuildContext context, 
-    String title, 
-    String icon,
-    bool isDark,
-    {VoidCallback? onTap}
-  ) {
+      BuildContext context, String title, String icon, bool isDark,
+      {VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -580,23 +599,24 @@ class _HomeScreenState extends State<HomeScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           // Enhanced background for light theme
-          color: isDark 
-            ? AppColors.lightblack 
-            : Colors.white,
+          color: isDark ? AppColors.lightblack : Colors.white,
           borderRadius: BorderRadius.circular(16),
           // Enhanced shadow for light theme
           boxShadow: [
-            if (!isDark) BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.25), // More pronounced shadow
-              blurRadius: 12, // Larger blur
-              spreadRadius: 1, // Add spread
-              offset: const Offset(0, 4), // Deeper shadow
-            ),
+            if (!isDark)
+              BoxShadow(
+                color: Colors.grey
+                    .withValues(alpha: 0.25), // More pronounced shadow
+                blurRadius: 12, // Larger blur
+                spreadRadius: 1, // Add spread
+                offset: const Offset(0, 4), // Deeper shadow
+              ),
           ],
           // Add subtle border in light theme for extra definition
           border: !isDark
-            ? Border.all(color: Colors.grey.withValues(alpha: 0.1), width: 1.0)
-            : null,
+              ? Border.all(
+                  color: Colors.grey.withValues(alpha: 0.1), width: 1.0)
+              : null,
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -604,11 +624,13 @@ class _HomeScreenState extends State<HomeScreen> {
             // Image container with highlight effect
             Container(
               padding: const EdgeInsets.all(12),
-              decoration: !isDark ? BoxDecoration(
-                // Add a subtle circular background for the icon in light theme
-                shape: BoxShape.circle,
-                color: AppColors.orange.withValues(alpha: 0.1),
-              ) : null,
+              decoration: !isDark
+                  ? BoxDecoration(
+                      // Add a subtle circular background for the icon in light theme
+                      shape: BoxShape.circle,
+                      color: AppColors.orange.withValues(alpha: 0.1),
+                    )
+                  : null,
               child: Image.asset(
                 icon,
                 width: 70, // Slightly smaller for better proportions
@@ -622,10 +644,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Text(
                 title,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w700,
-                  color: isDark ? Colors.white : Colors.black87,
-                  letterSpacing: !isDark ? 0.3 : null,
-                ),
+                      fontWeight: FontWeight.w700,
+                      color: isDark ? Colors.white : Colors.black87,
+                      letterSpacing: !isDark ? 0.3 : null,
+                    ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -639,7 +661,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildNearbyCard(
     BuildContext context, {
-    required ClinicModel clinic,
+    required VetModel vet,
     required bool isDark,
     required VoidCallback onTap,
   }) {
@@ -652,9 +674,9 @@ class _HomeScreenState extends State<HomeScreen> {
           color: isDark ? AppColors.lightblack : Colors.white,
           boxShadow: [
             BoxShadow(
-              color: isDark 
-                ? Colors.black.withValues(alpha: 0.2) 
-                : Colors.grey.withValues(alpha: 0.15),
+              color: isDark
+                  ? Colors.black.withValues(alpha: 0.2)
+                  : Colors.grey.withValues(alpha: 0.15),
               spreadRadius: 1,
               blurRadius: 8,
               offset: const Offset(0, 3),
@@ -666,14 +688,16 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Stack(
               children: [
-                // Clinic image with rounded corners
+                // Vet image with rounded corners
                 ClipRRect(
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(16),
                     topRight: Radius.circular(16),
                   ),
                   child: Image.asset(
-                    clinic.image,
+                    vet.images.isNotEmpty
+                        ? vet.images[0]
+                        : 'assets/images/default_clinic.jpg',
                     height: 110,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -702,11 +726,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          clinic.distance,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          vet.distance,
+                          style:
+                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                         ),
                       ],
                     ),
@@ -719,9 +744,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Clinic name
+                  // Vet name
                   Text(
-                    clinic.name,
+                    vet.name,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: isDark ? Colors.white : Colors.black87,
@@ -741,10 +766,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          clinic.location,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: isDark ? Colors.grey[400] : Colors.grey[600],
-                          ),
+                          vet.location,
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: isDark
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
+                                  ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -762,17 +790,18 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        clinic.rating.toString(),
+                        vet.rating.toString(),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                              fontWeight: FontWeight.bold,
+                            ),
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        '(${clinic.reviews})',
+                        '(${vet.reviews})',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isDark ? Colors.grey[400] : Colors.grey[600],
-                        ),
+                              color:
+                                  isDark ? Colors.grey[400] : Colors.grey[600],
+                            ),
                       ),
                     ],
                   ),
