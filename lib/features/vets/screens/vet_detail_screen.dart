@@ -8,8 +8,11 @@ import '../widgets/vet_detail_screen_widgets/vet_description.dart';
 import '../widgets/vet_detail_screen_widgets/vet_services.dart';
 import '../widgets/vet_detail_screen_widgets/vet_consultation_fee.dart';
 import '../widgets/vet_detail_screen_widgets/vet_action_button.dart';
+import '../widgets/vet_detail_screen_widgets/vet_reviews.dart';
+import '../models/review_model.dart';
+import '../services/vet_service.dart';
 
-class VetDetailScreen extends StatelessWidget {
+class VetDetailScreen extends StatefulWidget {
   final Map<String, dynamic> vet;
 
   const VetDetailScreen({
@@ -18,13 +21,54 @@ class VetDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<VetDetailScreen> createState() => _VetDetailScreenState();
+}
+
+class _VetDetailScreenState extends State<VetDetailScreen> {
+  final VetService _vetService = VetService();
+  List<ReviewModel> _reviews = [];
+  bool _isLoadingReviews = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReviews();
+  }
+
+  Future<void> _loadReviews() async {
+    setState(() {
+      _isLoadingReviews = true;
+    });
+
+    try {
+      final vetId = widget.vet['id']?.toString();
+      if (vetId != null && vetId.isNotEmpty) {
+        final response = await _vetService.getVetReviews(vetId, limit: 20);
+        setState(() {
+          _reviews = response.reviews;
+          _isLoadingReviews = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingReviews = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading reviews: $e');
+      setState(() {
+        _isLoadingReviews = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black;
     final backgroundColor = isDark ? Colors.black : Colors.white;
 
     // Get consultation fee from clinic data or use default
-    final consultationFee = vet['consultationFee'];
+    final consultationFee = widget.vet['consultationFee'];
     final consultationPrice = consultationFee != null
         ? '${consultationFee.toString()} EGP'
         : '75.00 EGP';
@@ -38,27 +82,33 @@ class VetDetailScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              VetHeader(vet: vet),
+              VetHeader(vet: widget.vet),
               const SizedBox(height: 24),
-              VetStats(vet: vet),
+              VetStats(vet: widget.vet),
               const SizedBox(height: 24),
-              VetDescription(vet: vet),
+              VetDescription(vet: widget.vet),
               const SizedBox(height: 24),
               VetServices(
-                services: (vet['services'] as List<dynamic>?)
+                services: (widget.vet['services'] as List<dynamic>?)
                         ?.map((e) => e.toString())
                         .toList() ??
                     [],
               ),
               const SizedBox(height: 24),
               VetConsultationFee(price: consultationPrice),
+              const SizedBox(height: 24),
+              // Reviews Section
+              VetReviews(
+                reviews: _reviews,
+                isLoading: _isLoadingReviews,
+              ),
               const SizedBox(height: 80), // Space for bottom button
             ],
           ),
         ),
       ),
       bottomNavigationBar: VetActionButton(
-        vet: vet,
+        vet: widget.vet,
         price: consultationPrice,
       ),
     );

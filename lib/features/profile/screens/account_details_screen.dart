@@ -174,14 +174,16 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
 
         // Show success message
         if (mounted) {
+          final localizations = AppLocalizations.of(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
+            SnackBar(
               content: Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.white),
-                  SizedBox(width: 12),
+                  const Icon(Icons.check_circle, color: Colors.white),
+                  const SizedBox(width: 12),
                   Expanded(
-                    child: Text('Account details updated successfully!'),
+                    child:
+                        Text(localizations.accountDetailsUpdatedSuccessfully),
                   ),
                 ],
               ),
@@ -200,6 +202,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     } catch (e) {
       // Keep editing mode if save failed
       if (mounted) {
+        final localizations = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -207,7 +210,8 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                 const Icon(Icons.error, color: Colors.white),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text('Failed to update profile: ${e.toString()}'),
+                  child:
+                      Text(localizations.failedToUpdateProfile(e.toString())),
                 ),
               ],
             ),

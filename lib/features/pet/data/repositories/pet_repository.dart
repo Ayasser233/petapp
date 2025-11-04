@@ -42,7 +42,9 @@ class PetRepository {
       return await _apiService.createPet(petData);
     } catch (error) {
       await _handleAuthError(error);
-      ErrorHandlerService.instance.handleError(error);
+      // Suppress user notification - let the UI screen handle user feedback to avoid duplicates
+      ErrorHandlerService.instance
+          .handleError(error, suppressUserNotification: true);
       rethrow;
     }
   }
@@ -138,7 +140,9 @@ class PetRepository {
       return await _apiService.updatePet(id, petData);
     } catch (error) {
       await _handleAuthError(error);
-      ErrorHandlerService.instance.handleError(error);
+      // Suppress user notification - let the UI screen handle user feedback to avoid duplicates
+      ErrorHandlerService.instance
+          .handleError(error, suppressUserNotification: true);
       rethrow;
     }
   }
@@ -156,7 +160,9 @@ class PetRepository {
       await _apiService.deletePet(id);
     } catch (error) {
       await _handleAuthError(error);
-      ErrorHandlerService.instance.handleError(error);
+      // Suppress user notification - let the UI screen handle user feedback to avoid duplicates
+      ErrorHandlerService.instance
+          .handleError(error, suppressUserNotification: true);
       rethrow;
     }
   }

@@ -67,8 +67,21 @@ class ApiConstants {
   static String appointmentReviewEndpoint(String id) =>
       '/appointments/$id/review';
 
-  // Points & Validation Endpoints
+  // Points Endpoints
+  static const String pointsBalanceEndpoint = '/points/my/balance';
+  static const String pointsTransactionsEndpoint = '/points/my/transactions';
   static const String pointsValidateEndpoint = '/points/validate';
+
+  // Vaccination Endpoints
+  static const String vaccinationEligibleCategoriesEndpoint =
+      '/vaccination/eligible-categories';
+  static const String vaccinationSeriesEndpoint = '/vaccination/series';
+  static String vaccinationMarkDoseCompleteEndpoint(String seriesId) =>
+      '/vaccination/series/$seriesId/mark-dose-complete';
+  static String vaccinationMarkAnnualBoosterCompleteEndpoint(String seriesId) =>
+      '/vaccination/series/$seriesId/mark-annual-booster-complete';
+  static String vaccinationMedicalSheetEndpoint(String petId) =>
+      '/vaccination/schedules/pet/$petId/medical-sheet';
 
   // Media Endpoints
   static const String uploadsEndpoint = '/api/uploads';

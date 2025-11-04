@@ -13,8 +13,9 @@ class PetModel {
   final String status;
   final int version;
 
-  // Keep image for UI compatibility until backend provides images
+  // Image can be from API (URL), local file path, or asset path
   final String image;
+  final String? imageUrl; // Image URL from API
 
   PetModel({
     required this.id,
@@ -30,19 +31,25 @@ class PetModel {
     this.medicalHistory,
     required this.status,
     required this.version,
-    required this.image, // Temporary field for UI compatibility
+    required this.image, // Local file path or asset path for fallback
+    this.imageUrl, // Image URL from API
   });
 
   Map<String, dynamic> toMap() {
     final Map<String, dynamic> data = {
       'id': id,
       'name': name,
-      'species': species.substring(0, 1).toUpperCase() + species.substring(1).toLowerCase(), // API expects "Dog" or "Cat"
+      'species': species.substring(0, 1).toUpperCase() +
+          species.substring(1).toLowerCase(), // API expects "Dog" or "Cat"
       'dateOfBirth': dateOfBirth, // API expects camelCase
       'status': status,
       'version': version,
-      'image': image, // Temporary field for UI compatibility
     };
+
+    // Include imageUrl if available from API
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      data['imageUrl'] = imageUrl;
+    }
 
     if (customSpecies != null) {
       data['customSpecies'] = customSpecies;
@@ -76,7 +83,10 @@ class PetModel {
   }
 
   factory PetModel.fromMap(Map<String, dynamic> map) {
-    // Determine an appropriate image based on species
+    // Get image URL from API if available
+    String? apiImageUrl = map['imageUrl'] ?? map['image_url'] ?? map['image'];
+
+    // Determine fallback image based on species
     String imageAsset = 'assets/images/pet1.jpg'; // Default image
     if (map['species'] != null) {
       if (map['species'].toString().toLowerCase() == 'dog') {
@@ -97,9 +107,8 @@ class PetModel {
       dateOfBirth: map['dateOfBirth'] ??
           map['date_of_birth'] ??
           '', // Handle both formats
-      allergies: map['allergies'] != null 
-          ? List<String>.from(map['allergies']) 
-          : null,
+      allergies:
+          map['allergies'] != null ? List<String>.from(map['allergies']) : null,
       spayNeuterStatus: map['spayNeuterStatus'],
       weight: map['weight'] != null
           ? double.tryParse(map['weight'].toString())
@@ -110,7 +119,8 @@ class PetModel {
           : null,
       status: map['status'] ?? 'active',
       version: map['version'] ?? 1,
-      image: imageAsset, // Temporary field for UI compatibility
+      image: imageAsset, // Fallback image for UI compatibility
+      imageUrl: apiImageUrl, // Image URL from API
     );
   }
 }

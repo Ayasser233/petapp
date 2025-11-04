@@ -6,7 +6,6 @@ import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/pet/widgets/pet_3d_viewer.dart';
 import 'package:petapp/features/pet/data/pet_symptom_data.dart';
-import 'package:petapp/core/widgets/cached_asset_image.dart';
 
 class Pet3DViewerScreen extends StatefulWidget {
   final String petType;
@@ -26,8 +25,6 @@ class Pet3DViewerScreen extends StatefulWidget {
 
 class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     with SingleTickerProviderStateMixin {
-  String? _selectedSymptom;
-  bool _isSymptomsMenuOpen = false;
   late AnimationController _animController;
 
   @override
@@ -45,17 +42,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
   void dispose() {
     _animController.dispose();
     super.dispose();
-  }
-
-  void _toggleSymptomsMenu() {
-    setState(() {
-      _isSymptomsMenuOpen = !_isSymptomsMenuOpen;
-      if (_isSymptomsMenuOpen) {
-        _animController.forward();
-      } else {
-        _animController.reverse();
-      }
-    });
   }
 
   @override
@@ -81,40 +67,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           onPressed: () => Get.back(),
         ),
         actions: [
-          // Symptoms counter badge button
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              IconButton(
-                icon: Icon(Icons.medical_services_outlined, color: textColor),
-                onPressed: _toggleSymptomsMenu,
-              ),
-              if (_selectedSymptom != null)
-                Positioned(
-                  right: 8,
-                  top: 8,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: AppColors.orange,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    constraints: const BoxConstraints(
-                      minWidth: 16,
-                      minHeight: 16,
-                    ),
-                    child: Text(
-                      '1',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
-            ],
-          ),
+         
           IconButton(
             icon: Icon(Icons.help_outline, color: textColor),
             onPressed: () => _showHelpDialog(context),
@@ -130,9 +83,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             viewerHeight: MediaQuery.of(context).size.height * 0.4,
             backgroundColor: backgroundColor,
             onSymptomSelected: (symptom) {
-              setState(() {
-                _selectedSymptom = symptom;
-              });
+              // Removed symptom selection - view only mode
             },
           ),
 
@@ -147,57 +98,20 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                     localizations.skinAndCoat, isDark, textColor),
                 _buildBodyPartItem(localizations.pelvis, isDark, textColor),
                 _buildBodyPartItem(localizations.buttocks, isDark, textColor),
+                _buildBodyPartItem(
+                    localizations.neurologicalIssues, isDark, textColor),
+                _buildBodyPartItem(
+                    localizations.behavioralIssues, isDark, textColor),
+                _buildBodyPartItem(
+                    localizations.generalIssues, isDark, textColor),
+                _buildBodyPartItem(
+                    localizations.breathingProblems, isDark, textColor),
               ],
             ),
           ),
-
-          // Selected symptom display if needed
-          if (_selectedSymptom != null)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppColors.orange.withValues(alpha: 0.1),
-                border: Border(
-                  top: BorderSide(color: AppColors.orange.withValues(alpha: 0.3)),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: AppColors.orange),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      '${localizations.selected}: $_selectedSymptom',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => setState(() => _selectedSymptom = null),
-                    child: Text(
-                      localizations.clear,
-                      style: const TextStyle(color: AppColors.orange),
-                    ),
-                  ),
-                ],
-              ),
-            ),
         ],
       ),
     );
-  }
-
-  void _handleSymptomSelected(String symptom) {
-    setState(() {
-      // Simply replace the current symptom instead of adding to a list
-      _selectedSymptom = symptom;
-
-      // Open the symptoms menu when a new symptom is selected
-      if (!_isSymptomsMenuOpen) {
-        _toggleSymptomsMenu();
-      }
-    });
   }
 
   void _showHelpDialog(BuildContext context) {
@@ -335,6 +249,16 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
       mappedBodyPart = 'head';
     } else if (mappedBodyPart == localizations.legs.toLowerCase()) {
       mappedBodyPart = 'legs';
+    } else if (mappedBodyPart ==
+        localizations.neurologicalIssues.toLowerCase()) {
+      mappedBodyPart = 'neurological';
+    } else if (mappedBodyPart == localizations.behavioralIssues.toLowerCase()) {
+      mappedBodyPart = 'behavioral';
+    } else if (mappedBodyPart == localizations.generalIssues.toLowerCase()) {
+      mappedBodyPart = 'general';
+    } else if (mappedBodyPart ==
+        localizations.breathingProblems.toLowerCase()) {
+      mappedBodyPart = 'breathing';
     }
 
     // Create a user-friendly display title
@@ -881,7 +805,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Select Symptom button
+                // See Examples & Pictures button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -895,16 +819,12 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                       elevation: 0,
                     ),
                     onPressed: () {
-                      Navigator.pop(context);
-                      _handleSymptomSelected(
-                          '$bodyPart: $category - ${petSymptom.getLocalizedName(context)}');
-                      _showSymptomChoiceDialog(bodyPart, category, symptom);
+                      // Don't close symptom details - just show examples on top
+                      _showSymptomExamples(bodyPart, category, symptom);
                     },
-                    icon: const Icon(Icons.check_circle, size: 24),
+                    icon: const Icon(Icons.photo_library, size: 24),
                     label: Text(
-                      _selectedSymptom != null
-                          ? localizations.replaceSelectedSymptom
-                          : localizations.selectThisSymptom,
+                      localizations.seeExamplesAndPictures,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -915,7 +835,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
 
                 const SizedBox(height: 12),
 
-                // Emergency button
+                // Find Emergency Vet button
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -950,119 +870,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     );
   }
 
-  void _showSymptomChoiceDialog(
-      String bodyPart, String category, Map<String, dynamic> symptom) {
-    final isDark = THelperFunctions.isDarkMode(context);
-    final textColor = isDark ? Colors.white : Colors.black;
-    final bgColor = isDark ? Colors.grey[850] : Colors.white;
-    final localizations = AppLocalizations.of(context);
-
-    final petSymptom = PetSymptom(
-      name: symptom['name'],
-      description: symptom['description'],
-      causes: List<String>.from(symptom['causes']),
-      actions: List<String>.from(symptom['actions']),
-      imagePath: symptom['imagePath'],
-      emergencyLevel: symptom['emergencyLevel'],
-    );
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: bgColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Text(
-          localizations.whatWouldYouLikeToDo,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: textColor,
-              ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '${localizations.youHaveSelected}: ${petSymptom.getLocalizedName(context)}',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: textColor,
-                    fontWeight: FontWeight.w500,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-
-            // Go to Vet Option
-            Container(
-              width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 12),
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _goToVetFinder(symptom);
-                },
-                icon: const Icon(Icons.local_hospital, size: 24),
-                label: Text(
-                  localizations.findVetNearby,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ),
-            ),
-
-            // See Examples Option
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.orange,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                  _showSymptomExamples(bodyPart, category, symptom);
-                },
-                icon: const Icon(Icons.photo_library, size: 24),
-                label: Text(
-                  localizations.seeExamplesAndPictures,
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              localizations.cancel,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Colors.grey,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   // Method to navigate to vet finder (UPDATED - removed urgency)
   void _goToVetFinder(Map<String, dynamic> symptom) {
     Get.toNamed(
@@ -1083,8 +890,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     final localizations = AppLocalizations.of(context);
 
     // Sample images - replace with actual symptom images
-    final List<Map<String, String>> exampleImages =
-        _getSymptomImages(symptom['name']);
+    final List<String> exampleImages = _getSymptomImagePaths(symptom['name']);
 
     showDialog(
       context: context,
@@ -1127,9 +933,9 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                   ),
                   itemCount: exampleImages.length,
                   itemBuilder: (context, index) {
-                    final image = exampleImages[index];
+                    final imagePath = exampleImages[index];
                     return GestureDetector(
-                      onTap: () => _showFullScreenImage(image['url']!),
+                      onTap: () => _showFullScreenImage(imagePath),
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
@@ -1137,44 +943,35 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                             color:
                                 isDark ? Colors.grey[600]! : Colors.grey[300]!,
                           ),
+                          image: DecorationImage(
+                            image: AssetImage(imagePath),
+                            fit: BoxFit.cover,
+                            onError: (error, stackTrace) {},
+                          ),
                         ),
-                        child: Column(
-                          children: [
-                            Expanded(
-                              child: ClipRRect(
-                                borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(8),
-                                ),
-                                child: CachedAssetImage(
-                                  assetPath: image['url']!,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  errorWidget: Container(
-                                    color: Colors.grey[300],
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Icon(
-                                          Icons.image_not_supported,
-                                          color: Colors.grey,
-                                          size: 40,
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          'Image not found',
-                                          style: TextStyle(
-                                            color: Colors.grey[600],
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
+                        child: imagePath.isEmpty
+                            ? Container(
+                                color: Colors.grey[300],
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.image_not_supported,
+                                      color: Colors.grey[600],
+                                      size: 40,
                                     ),
-                                  ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Image not found',
+                                      style: TextStyle(
+                                        color: Colors.grey[600],
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
+                              )
+                            : null,
                       ),
                     );
                   },
@@ -1250,7 +1047,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     );
   }
 
-  void _showFullScreenImage(String imageUrl) {
+  void _showFullScreenImage(String imagePath) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
@@ -1267,15 +1064,17 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             ),
             Expanded(
               child: InteractiveViewer(
-                child: CachedAssetImage(
-                  assetPath: imageUrl,
+                child: Image.asset(
+                  imagePath,
                   fit: BoxFit.contain,
-                  errorWidget: Center(
-                    child: Text(
-                      AppLocalizations.of(context).imageNotAvailable,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
+                  errorBuilder: (context, error, stackTrace) {
+                    return Center(
+                      child: Text(
+                        AppLocalizations.of(context).imageNotAvailable,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                    );
+                  },
                 ),
               ),
             ),
@@ -1285,182 +1084,97 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     );
   }
 
-  List<Map<String, String>> _getSymptomImages(String symptomName) {
-    // Complete symptom image mapping based on your pet symptom data
-
-    final Map<String, List<Map<String, String>>> symptomImageMap = {
-      // Eye Problems (already included)
-      'Eye Redness': [
-        {'url': 'assets/images/symptoms/eye_redness_1.jpg'},
-      ],
+  List<String> _getSymptomImagePaths(String symptomName) {
+    // Map of symptom names to their image paths
+    final Map<String, List<String>> symptomImageMap = {
+      'Eye Redness': ['assets/images/symptoms/eye_redness_1.jpg'],
       'Eye Discharge (Goopy Stuff)': [
-        {'url': 'assets/images/symptoms/watery_eyes_1.jpg'},
+        'assets/images/symptoms/watery_eyes_1.jpg'
       ],
       'Cloudy Eye (Looks Foggy or Bluish)': [
-        {'url': 'assets/images/symptoms/cloudy_eye_1.jpg'},
-        {'url': 'assets/images/symptoms/cloudy_eye_2.jpg'},
+        'assets/images/symptoms/cloudy_eye_1.jpg',
+        'assets/images/symptoms/cloudy_eye_2.jpg',
       ],
       'Watery Eyes (Excessive Tearing)': [
-        {'url': 'assets/images/symptoms/watery_eyes_1.jpg'}
+        'assets/images/symptoms/watery_eyes_1.jpg'
       ],
       'Third Eyelid Showing': [
-        {'url': 'assets/images/symptoms/third_eyelid_showing_1.jpg'},
-        {'url': 'assets/images/symptoms/third_eyelid_showing_2.jpg'},
+        'assets/images/symptoms/third_eyelid_showing_1.jpg',
+        'assets/images/symptoms/third_eyelid_showing_2.jpg',
       ],
       'Squinting or Keeping Eye Closed': [
-        {'url': 'assets/images/symptoms/squinting_eye_closed_1.jpg'},
-        {'url': 'assets/images/symptoms/squinting_eye_closed_2.jpg'},
+        'assets/images/symptoms/squinting_eye_closed_1.jpg',
+        'assets/images/symptoms/squinting_eye_closed_2.jpg',
       ],
       'Swelling Around the Eye': [
-        {'url': 'assets/images/symptoms/swelling_around_eye_1.jpg'},
+        'assets/images/symptoms/swelling_around_eye_1.jpg'
       ],
       'Worms in the Eye': [
-        {'url': 'assets/images/symptoms/worms_in_eye_1.jpg'},
-        {'url': 'assets/images/symptoms/worms_in_eye_2.jpg'},
+        'assets/images/symptoms/worms_in_eye_1.jpg',
+        'assets/images/symptoms/worms_in_eye_2.jpg',
       ],
-
-      // Ear Problems (already included)
-      'Itchy Ears (Scratching or Head Shaking)': [],
       'Black Stuff in the Ear (Dark Wax or Debris)': [
-        {'url': 'assets/images/symptoms/black_stuff_in_ear_1.jpg'},
-        {'url': 'assets/images/symptoms/black_stuff_in_ear_2.jpg'},
+        'assets/images/symptoms/black_stuff_in_ear_1.jpg',
+        'assets/images/symptoms/black_stuff_in_ear_2.jpg',
       ],
       'Red or Swollen Ear': [
-        {'url': 'assets/images/symptoms/red_swollen_ear_1.jpg'},
-        {'url': 'assets/images/symptoms/red_swollen_ear_2.jpg'},
-        {'url': 'assets/images/symptoms/red_swollen_ear_3.jpg'},
+        'assets/images/symptoms/red_swollen_ear_1.jpg',
+        'assets/images/symptoms/red_swollen_ear_2.jpg',
+        'assets/images/symptoms/red_swollen_ear_3.jpg',
       ],
-      'Bad Smell from the Ear': [],
-      'Ear Discharge (Pus or Liquid Coming Out)': [],
       'Tilting Head to One Side': [
-        {'url': 'assets/images/symptoms/tilting_head_1.jpg'},
-        {'url': 'assets/images/symptoms/tilting_head_2.jpg'},
+        'assets/images/symptoms/tilting_head_1.jpg',
+        'assets/images/symptoms/tilting_head_2.jpg',
       ],
-      'Loss of Hearing or Not Responding to Sounds': [],
-
-      'Bad Breath (Smelly Mouth)': [],
-      'Excessive Drooling': [],
       'Red, Swollen Gums': [
-        {'url': 'assets/images/symptoms/red_swollen_gums_1.jpg'},
-        {'url': 'assets/images/symptoms/red_swollen_gums_2.jpg'},
+        'assets/images/symptoms/red_swollen_gums_1.jpg',
+        'assets/images/symptoms/red_swollen_gums_2.jpg',
       ],
-      'Loose or Missing Teeth': [],
-      'Trouble Eating or Dropping Food': [],
       'Bleeding from the Mouth': [
-        {'url': 'assets/images/symptoms/bleeding_from_mouth_1.jpg'},
-        {'url': 'assets/images/symptoms/bleeding_from_mouth_2.jpg'},
+        'assets/images/symptoms/bleeding_from_mouth_1.jpg',
+        'assets/images/symptoms/bleeding_from_mouth_2.jpg',
       ],
-      'White or Pale Gums': [],
-      'Locked Jaw (Mouth Won\'t Open or Close)': [],
       'Oral Ulcers (Sores in the Mouth)': [
-        {'url': 'assets/images/symptoms/oral_ulcers_1.jpg'},
+        'assets/images/symptoms/oral_ulcers_1.jpg'
       ],
       'Yellow or Brown Teeth (Tartar Buildup)': [
-        {'url': 'assets/images/symptoms/yellow_brown_teeth_1.jpg'},
-        {'url': 'assets/images/symptoms/yellow_brown_teeth_2.jpg'},
+        'assets/images/symptoms/yellow_brown_teeth_1.jpg',
+        'assets/images/symptoms/yellow_brown_teeth_2.jpg',
       ],
-
       'Tongue or Lip Swelling': [
-        {'url': 'assets/images/symptoms/tongue_lip_swelling_1.jpg'},
+        'assets/images/symptoms/tongue_lip_swelling_1.jpg'
       ],
-
-      // Skin & Coat Problems
-      'Hair Loss': [
-        {'url': 'assets/images/symptoms/bald_patches_1.jpg'},
-      ],
+      'Hair Loss': ['assets/images/symptoms/bald_patches_1.jpg'],
       'Bald Spots (Patches of Missing Hair)': [
-        {'url': 'assets/images/symptoms/bald_patches_1.jpg'},
-        {'url': 'assets/images/symptoms/bald_patches_2.jpg'},
+        'assets/images/symptoms/bald_patches_1.jpg',
+        'assets/images/symptoms/bald_patches_2.jpg',
       ],
       'Itchy Skin (Scratching a Lot)': [
-        {'url': 'assets/images/symptoms/inflamed_skin_1.jpg'},
+        'assets/images/symptoms/inflamed_skin_1.jpg'
       ],
-      'Constant Licking in One Spot': [
-      ],
-      'Red or Inflamed Skin': [
-        {'url': 'assets/images/symptoms/inflamed_skin_1.jpg'},
-      ],
-      'Dandruff (Flaky Skin)': [
-        {'url': 'assets/images/symptoms/dandruff_1.jpg'},
-      ],
+      'Red or Inflamed Skin': ['assets/images/symptoms/inflamed_skin_1.jpg'],
+      'Dandruff (Flaky Skin)': ['assets/images/symptoms/dandruff_1.jpg'],
       'Scabs or Crusty Skin': [
-        {'url': 'assets/images/symptoms/scabs_crusty_skin_1.jpg'},
-      ],
-      'Lumps or Bumps': [
-        {'url': 'assets/images/symptoms/swelling_around_eye_1.jpg'},
-        {'url': 'assets/images/symptoms/tongue_lip_swelling_1.jpg'},
+        'assets/images/symptoms/scabs_crusty_skin_1.jpg'
       ],
       'Dull or Greasy Coat': [
-        {'url': 'assets/images/symptoms/dull_greasy_coat_1.jpg'},
-        {'url': 'assets/images/symptoms/dull_greasy_coat_2.jpg'},
-        {'url': 'assets/images/symptoms/dull_greasy_coat_3.jpg'},
+        'assets/images/symptoms/dull_greasy_coat_1.jpg',
+        'assets/images/symptoms/dull_greasy_coat_2.jpg',
+        'assets/images/symptoms/dull_greasy_coat_3.jpg',
       ],
       'Skin Turning Darker (Hyperpigmentation)': [
-        {'url': 'assets/images/symptoms/hyperpigmentation_1.jpg'},
+        'assets/images/symptoms/hyperpigmentation_1.jpg'
       ],
-
-      // Movement & Limbs Issues
-      'Limping or Favoring One Leg': [
-      ],
-      'Stiffness or Trouble Standing Up': [
-      ],
-      'Sudden Weakness or Collapsing': [
-      ],
-      'Trembling or Shaking': [
-      ],
-      'Swollen or Painful Joints': [
-      ],
-
-      // Anus & Pooping Issues
       'Scooting or Dragging Butt on the Floor': [
-        {'url': 'assets/images/symptoms/scooting_dragging_butt_1.jpg'},
-        {'url': 'assets/images/symptoms/scooting_dragging_butt_2.jpg'},
+        'assets/images/symptoms/scooting_dragging_butt_1.jpg',
+        'assets/images/symptoms/scooting_dragging_butt_2.jpg',
       ],
       'Swelling or Redness Around the Anus': [
-        {'url': 'assets/images/symptoms/swelling_redness_anus_1.jpg'},
+        'assets/images/symptoms/swelling_redness_anus_1.jpg'
       ],
-      'Blood in Stool or Around the Anus': [
-      ],
-      'Straining to Poop or Constipation': [
-      ],
-      'Diarrhea': [
-      ],
-
-      // Male Genital Problems
-      'Swollen Testicles': [
-      ],
-      'Discharge from the Penis': [
-      ],
-      'Red, Swollen, or Hanging Out Penis': [
-      ],
-      'Lumps or Bleeding from the Genitals': [
-      ],
-
-      // Female Genital Problems
-      'Swollen Vulva': [
-      ],
-      'Discharge from the Vulva': [
-      ],
-      'Something Sticking Out from the Vulva': [
-      ],
-
-      // Urination Problems
-      'Peeing Too Much (Frequent Urination)': [
-      ],
-      'Straining to Pee (Difficulty Urinating)': [
-      ],
-      'Bloody Urine (Red or Pink Pee)': [
-      ],
-      'Not Peeing at All (Emergency!)': [
-      ],
-
     };
 
-    // Return specific images for the symptom, or default images if not found
-    return symptomImageMap[symptomName] ??
-        [
-          {'url': 'assets/images/symptoms/eye_redness_1.jpg'},
-          {'url': 'assets/images/symptoms/inflamed_skin_1.jpg'},
-        ];
+    // Return images for the symptom, or empty list if not found
+    return symptomImageMap[symptomName] ?? [];
   }
 }

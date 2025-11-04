@@ -121,6 +121,15 @@ class PetSymptomData {
             'Female Genital Problems';
       case 'Urination Problems':
         return localizations?.urinationProblems ?? 'Urination Problems';
+      case 'Neurological Issues':
+        return localizations?.neurologicalIssues ?? 'Neurological Issues';
+      case 'Behavioral Issues':
+        return localizations?.behavioralIssues ?? 'Behavioral Issues';
+      case 'General Issues':
+        return localizations?.generalIssues ?? 'General Issues';
+      case 'Breathing Problems':
+        return localizations?.breathingProblems ?? 'Breathing Problems';
+
       default:
         return category;
     }
@@ -898,13 +907,14 @@ class PetSymptomData {
             'Poop Stuck to Fur – Especially in long-haired pets'
           ],
           actions: [
-            'Clean the area gently with warm water',
+            'Check the area first — if something is stuck, gently clean it and see if the scooting stops',
+            'If scooting + licking the area → Could be full anal glands, vet can help',
             'Check for worms (look for small rice-like pieces near the butt)',
             'Make sure your pet is up to date on deworming',
             'If scooting continues or there\'s swelling → Vet check needed'
           ],
           imagePath: 'assets/images/symptoms/scooting.jpg',
-          emergencyLevel: 'mild',
+          emergencyLevel: 'normal',
         ),
         const PetSymptom(
           name: 'Swelling or Redness Around the Anus',
@@ -926,19 +936,18 @@ class PetSymptomData {
           emergencyLevel: 'urgent',
         ),
         const PetSymptom(
-          name: 'Blood in Stool or Around the Anus',
+          name: 'Bloody Poop (Red or Black Stools)',
           description:
-              'Noticed blood when your pet poops or around their butt?',
+              'If you see red or black in your pet\'s poop, don\'t ignore it!',
           causes: [
-            'Small Tear from Straining – Often from hard or dry poop',
-            'Worms or Parasites',
-            'Anal Gland Infection – Can cause bleeding if severe',
-            'More Serious Problems – Like colitis, tumors, or poisoning'
+            'Bright red blood → Could be from straining, stomach irritation, or a small injury near the anus',
+            'Black, sticky poop → Could be internal bleeding! (stomach or intestines)',
+            'Worms, infections, or serious diseases'
           ],
           actions: [
-            'If it\'s just a small streak of blood and your pet seems fine → Monitor closely and offer your pet fresh water',
-            'If blood is fresh and keeps appearing, or if your pet also has diarrhea → Vet check recommended soon',
-            'If there\'s a lot of blood, your pet is weak, vomiting, or not eating → Go to the vet immediately — emergency'
+            'If small streaks of red blood but your pet is acting normal → Monitor for 24 hours',
+            'If blood is a lot, keeps happening, or pet is weak → Vet visit ASAP!',
+            'If poop is black and sticky like old blood → Emergency! Internal bleeding needs immediate vet care!'
           ],
           imagePath: 'assets/images/symptoms/blood_stool.jpg',
           emergencyLevel: 'urgent',
@@ -956,29 +965,49 @@ class PetSymptomData {
           ],
           actions: [
             'Offer more water & add fiber (mashed boiled potatoes or carrots can help)',
-            'If straining lasts more than a day, or your pet seems in pain → Vet visit needed',
-            '⚠️ Important: Straining to poop can sometimes be confused with straining to pee, especially in male cats — which can be fatal'
+            'If constipation lasts more than 48 hours → Vet check needed to prevent serious blockage',
+            'If straining but no poop comes out at all → Could be a blockage, urgent vet visit!',
+            '⚠️ Important: Straining to poop can sometimes be confused with straining to pee, especially in male cats — which can be fatal. Go to "Straining to Pee" under Urination Problems for urgent guidance'
           ],
           imagePath: 'assets/images/symptoms/straining_poop.jpg',
-          emergencyLevel: 'moderate',
+          emergencyLevel: 'normal',
         ),
         const PetSymptom(
           name: 'Diarrhea',
           description:
               'Loose, watery poop? It might be something simple or more serious!',
           causes: [
-            'Diet Change or Eating Something Bad – Common cause of mild diarrhea',
-            'Worms or Infections',
-            'Stress or Anxiety – Can cause tummy issues',
-            'Serious Illness – If diarrhea is bloody or long-lasting'
+            'Ate something bad (trash, spoiled food, new food)',
+            'Worms or parasites',
+            'Infections (from bacteria or viruses)',
+            'Food allergies or change in diet',
+            'Stress or anxiety',
+            'More serious problems (like pancreas or liver issues)'
           ],
           actions: [
-            'Give bland food (boiled chicken & rice)',
-            'Keep your pet hydrated —dehydration is a major risk and can be life-threatening!',
-            'If diarrhea lasts more than two days, has blood, or pet is weak → Vet check needed'
+            'If diarrhea happens once or twice but your pet is acting normal → Try a bland diet (boiled chicken & rice) and watch for 24 hours',
+            'If diarrhea lasts more than two days, has blood, or comes with vomiting/lethargy → Vet visit needed! Could be serious',
+            'If your pet is very young or small breed → Don\'t wait! Diarrhea can cause dehydration fast'
           ],
           imagePath: 'assets/images/symptoms/diarrhea.jpg',
-          emergencyLevel: 'moderate',
+          emergencyLevel: 'normal',
+        ),
+        const PetSymptom(
+          name: 'No Pooping at All (Emergency!)',
+          description:
+              'If your pet hasn\'t pooped in more than 3 days, they could be blocked!',
+          causes: [
+            'Severe constipation or something blocking the intestines',
+            'Swallowed objects (toys, bones, hair, string)',
+            'Nerve issues affecting bowel movement (like spinal problems)'
+          ],
+          actions: [
+            'If no poop for over 3 days → Vet visit ASAP! Don\'t wait, it could be serious',
+            'If your pet is trying to poop but nothing comes out + shows pain → Emergency! Could be a blockage',
+            'If your pet may have swallowed something (string, fabric, bones) → Get to a vet right away!'
+          ],
+          imagePath: 'assets/images/symptoms/no_poop.jpg',
+          emergencyLevel: 'emergency',
         ),
       ],
     },
@@ -1183,6 +1212,514 @@ class PetSymptomData {
             'If no pee + recent illness or dehydration → Needs fluids and immediate vet attention'
           ],
           imagePath: 'assets/images/symptoms/no_urination.jpg',
+          emergencyLevel: 'emergency',
+        ),
+      ],
+    },
+    'neurological': {
+      'Neurological Issues': [
+        const PetSymptom(
+          name: 'Seizures',
+          description:
+              'If your pet suddenly starts shaking, drooling, or falling over, they might be having a seizure!',
+          causes: [
+            'Epilepsy (some pets are born with it)',
+            'Poisoning (chocolate, human meds)',
+            'Head injury',
+            'Liver or kidney problems',
+            'Low blood sugar',
+            'Brain tumors (rare)'
+          ],
+          actions: [
+            'Stay calm – Don\'t try to hold them down',
+            'Keep them safe – Move objects away so they don\'t get hurt',
+            'Don\'t feed or give water until your pet is fully back to normal',
+            'Time the seizure – If over 2 minutes → Emergency',
+            'Record a video if safe – Helps the vet with diagnosis',
+            'After the seizure – Keep your pet quiet and comfortable; once they\'re alert, offer water',
+            'Go to the vet if: The seizure lasts more than 2 minutes, They have more than one seizure in 24 hours, They don\'t recover quickly or seem very weak',
+            'Only go to the vet once the seizure has stopped (never try to move them mid-seizure)'
+          ],
+          imagePath: 'assets/images/symptoms/seizures.jpg',
+          emergencyLevel: 'emergency',
+        ),
+        const PetSymptom(
+          name: 'Head Tilt or Walking in Circles',
+          description:
+              'If your pet keeps tilting their head to one side or walks in circles, something might be wrong with their brain or inner ear!',
+          causes: [
+            'Ear infection – A common cause, especially if there\'s scratching or a bad smell',
+            'Balance problems in older pets',
+            'Toxins or certain medications',
+            'Brain issues (tumor or injury) – Less common'
+          ],
+          actions: [
+            'If it just started and your pet seems normal otherwise → Monitor closely for the next 24 hours',
+            'Check the ears – If there\'s redness, swelling, or a bad smell, it could be an ear infection → Vet visit needed',
+            'If no signs of an ear infection but symptoms continue → Could be neurological, see a vet',
+            'If the tilt continues or gets worse → Book a vet visit',
+            'If your pet is falling, walking in circles, or has trouble standing → Go to the vet immediately'
+          ],
+          imagePath: 'assets/images/symptoms/head_tilt.jpg',
+          emergencyLevel: 'urgent',
+        ),
+        const PetSymptom(
+          name: 'Loss of Balance',
+          description:
+              'If your pet suddenly stumbles, wobbles, or falls, it could be a sign of something serious!',
+          causes: [
+            'Poisoning – Chocolate, onions, human medicine',
+            'Ear Infection – Can affect balance and coordination',
+            'Balance Problems in Older Pets – Age-related changes',
+            'Spinal Injury – Trauma affecting nerves or movement',
+            'Stroke – Sudden loss of balance or weakness',
+            'Neurological Disease – Brain or nerve issues'
+          ],
+          actions: [
+            'If your pet is a little wobbly but still alert and walking → Monitor closely for a few hours',
+            'If your pet can\'t stand at all or keeps falling → Emergency vet visit immediately',
+            'If balance issues come with vomiting or head tilt → Vet check ASAP',
+            'If you suspect poisoning → Emergency vet immediately!'
+          ],
+          imagePath: 'assets/images/symptoms/loss_of_balance.jpg',
+          emergencyLevel: 'emergency',
+        ),
+        const PetSymptom(
+          name: 'Sudden Blindness',
+          description:
+              'If your pet suddenly starts bumping into walls, seems lost in familiar places, or their pupils stay very wide, they may have lost vision suddenly.',
+          causes: [
+            'High blood pressure – Very common in older cats',
+            'Retinal detachment – Can happen suddenly and cause blindness',
+            'Diabetes complications – May damage the eyes over time',
+            'Brain problems – Stroke or tumor (less common)',
+            'Eye disease – Glaucoma (painful pressure) or cataracts (cloudy lens)'
+          ],
+          actions: [
+            'If vision loss is gradual → Book a vet visit soon for an eye exam',
+            'If vision loss is sudden (bumping into walls, not recognizing people/objects) → Vet visit ASAP! Quick treatment (especially for high blood pressure) can sometimes save vision',
+            'If pupils are stuck wide open and don\'t react to light → Emergency vet visit immediately'
+          ],
+          imagePath: 'assets/images/symptoms/sudden_blindness.jpg',
+          emergencyLevel: 'emergency',
+        ),
+        const PetSymptom(
+          name: 'Sudden Collapse or Fainting',
+          description:
+              'If your pet suddenly falls down and seems unconscious, even if just for a moment, it\'s always a red flag.',
+          causes: [
+            'Heart disease – Can cause sudden fainting or collapse',
+            'Anemia – Low blood levels make pets weak and collapse easily',
+            'Low blood sugar – Common in small or diabetic pets',
+            'Heatstroke – Especially after being outside in hot weather',
+            'Poisoning – From toxic food, medications, or chemicals'
+          ],
+          actions: [
+            'If collapse happened but your pet got up quickly → Still see a vet soon to find the cause',
+            'If collapse + pale gums, weak pulse, or trouble breathing → Emergency vet immediately!',
+            'If they were outside in heat before collapsing → Move to a cool area, offer small sips of water, and get to the vet right away',
+            'If collapse happens more than once, or your pet doesn\'t recover quickly → Emergency vet ASAP'
+          ],
+          imagePath: 'assets/images/symptoms/sudden_collapse.jpg',
+          emergencyLevel: 'emergency',
+        ),
+        const PetSymptom(
+          name: 'Tremors',
+          description:
+              'If your pet is shaking or shivering while awake (not a seizure), there could be several reasons.',
+          causes: [
+            'Cold or fear – Cold weather, fear or stress can cause shaking',
+            'Pain – From injuries, arthritis, or discomfort',
+            'Low blood sugar – More likely in small dogs or sick pets',
+            'Poisoning – Chocolate, meds, or toxic products',
+            'Brain or nerve problems'
+          ],
+          actions: [
+            'If your pet is just cold or scared but otherwise normal → Warm them up and keep them calm',
+            'If shaking comes with vomiting, drooling, or weakness → Could be poisoning → Vet immediately',
+            'If shaking continues for no clear reason, or comes with pain → Vet visit recommended to check the cause'
+          ],
+          imagePath: 'assets/images/symptoms/tremors.jpg',
+          emergencyLevel: 'urgent',
+        ),
+      ],
+    },
+    'behavioral': {
+      'Behavioral Issues': [
+        const PetSymptom(
+          name: 'Aggression (Growling, Biting, Hissing, Snapping)',
+          description:
+              'If your pet suddenly becomes aggressive, they might be in pain, scared, or feeling unwell!',
+          causes: [
+            'Pain or illness (arthritis, injury, infections)',
+            'Fear or past trauma (especially in rescue pets)',
+            'Territorial behavior (protecting food, toys, or space)',
+            'Lack of socialization (not used to people or other animals)',
+            'Hormones (common in unneutered males)',
+            'Rabies or neurological issues (rare, but possible — especially if unvaccinated or bit by a stray)'
+          ],
+          actions: [
+            'Rule out pain – If aggression is new, check for injuries and see a vet',
+            'Avoid punishment – This can make it worse; use calm, positive reinforcement instead',
+            'Give space – Don\'t force interaction if your pet seems scared or anxious',
+            'Consider spaying/neutering – Can help reduce hormone-related aggression',
+            'If aggression is sudden and extreme, and your pet is unvaccinated, or has been bitten by a stray/wild animal → See a vet immediately to rule out serious causes like rabies'
+          ],
+          imagePath: 'assets/images/symptoms/aggression.jpg',
+          emergencyLevel: 'urgent',
+        ),
+        const PetSymptom(
+          name: 'Excessive Meowing / Barking / Howling',
+          description:
+              'If your pet is being unusually noisy, they may be hungry, stressed, or even unwell.',
+          causes: [
+            'Hunger or attention-seeking – Some breeds are naturally more vocal',
+            'Pain or discomfort – Crying out if something hurts',
+            'Anxiety or stress – Separation anxiety or changes at home',
+            'Mating behavior – Common in unneutered pets'
+          ],
+          actions: [
+            'Check the basics → Food, water, bathroom, or playtime',
+            'If the noise is new or unusual → Rule out pain with a vet check',
+            'If stress-related → Create a calm, stable environment',
+            'If linked to mating behavior → Talk to your vet about spaying/neutering'
+          ],
+          imagePath: 'assets/images/symptoms/barking.jpg',
+          emergencyLevel: 'normal',
+        ),
+        const PetSymptom(
+          name: 'Hiding or Avoiding People',
+          description:
+              'If your pet suddenly hides, it\'s their way of showing something isn\'t right.',
+          causes: [
+            'Illness or pain – A very common reason for sudden hiding',
+            'Fear or stress – New home, loud noises, visitors, or other pets',
+            'Past trauma – Especially in rescue or abused animals',
+            'Pregnancy (females) – Cats and dogs often hide before giving birth'
+          ],
+          actions: [
+            'If it\'s just occasional hiding → Give them space, don\'t force them out',
+            'If it happens with loud noises, visitors, or new changes → Likely stress; create a quiet, safe spot',
+            'If hiding is new and comes with less eating, grooming, or play → Vet check needed to rule out illness',
+            'If your female pet is unspayed and hiding with a swollen belly or nesting behavior → Could be pregnancy, monitor and prepare for birth, vet visit if unsure'
+          ],
+          imagePath: 'assets/images/symptoms/hiding.jpg',
+          emergencyLevel: 'normal',
+        ),
+        const PetSymptom(
+          name:
+              'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)',
+          description:
+              'If your pet keeps chewing or swallowing things that aren\'t food, it may point to an underlying problem.',
+          causes: [
+            'Nutritional deficiencies – Missing important vitamins or minerals',
+            'Boredom or stress – Pets may chew when frustrated or anxious',
+            'Teething – Puppies and kittens chew to ease gum discomfort'
+          ],
+          actions: [
+            'Check diet → Make sure your pet is getting balanced nutrition',
+            'Provide safe chew toys → Give them proper chew sticks or toys instead of random objects',
+            'Redirect gently → If you catch them chewing something unsafe, calmly replace it with a safe option',
+            'If they often eat non-food items, or swallow dangerous things → Vet check needed to rule out deficiencies or health problems'
+          ],
+          imagePath: 'assets/images/symptoms/chewing.jpg',
+          emergencyLevel: 'normal',
+        ),
+        const PetSymptom(
+          name: 'Excessive Licking or Tail-Chasing',
+          description:
+              'If your pet is constantly licking their paws or chasing their tail, it\'s usually more than just play.',
+          causes: [
+            'Allergies or skin irritation – A very common reason for nonstop licking',
+            'Pain – Arthritis or joint issues can make pets lick sore spots',
+            'Anxiety or compulsive habits – Especially in high-energy or bored pets',
+            'Parasites – Fleas, ticks, or skin mites can cause nonstop itching'
+          ],
+          actions: [
+            'Check for redness, sores, or swelling → Could be infection or allergy',
+            'Look for fleas or ticks in the fur → Treat if found',
+            'Increase play and exercise → Helps with boredom or stress',
+            'If licking or tail-chasing is nonstop to the point it causes skin wounds → Vet visit needed'
+          ],
+          imagePath: 'assets/images/symptoms/licking.jpg',
+          emergencyLevel: 'normal',
+        ),
+        const PetSymptom(
+          name: 'Loss of Interest in Playing or Interacting',
+          description:
+              'If your usually playful pet suddenly isn\'t interested in play or people, it could be a sign something\'s wrong.',
+          causes: [
+            'Pain or illness – Arthritis, dental problems, fever, or other hidden issues',
+            'Stress or depression – Big changes at home, loss of a companion',
+            'Aging – Pets often become less active and playful as they get older'
+          ],
+          actions: [
+            'Watch for illness signs → Weight loss, not eating, limping, or fever → Vet visit needed',
+            'Try new toys or gentle activities → Sometimes boredom or stress plays a role',
+            'For senior pets → Gentle exercise, easy play, and more rest help keep them comfortable'
+          ],
+          imagePath: 'assets/images/symptoms/no_interest.jpg',
+          emergencyLevel: 'normal',
+        ),
+      ],
+    },
+    'general': {
+      'General Issues': [
+        const PetSymptom(
+          name: 'Vomiting',
+          description:
+              'A single vomit isn\'t always bad, but frequent vomiting is a warning sign!',
+          causes: [
+            'Eating too fast or too much',
+            'Sudden diet change or spoiled food',
+            'Hairballs (especially in cats)',
+            'Parasites or stomach infections',
+            'Poisoning (From toxic food, medications, or chemicals)',
+            'Organ disease (liver, kidneys, stomach issues)',
+            'Infection (virus or bacteria)'
+          ],
+          actions: [
+            'One-time vomit & pet seems normal → Monitor closely, offer small portions of food and water later',
+            'Repeated vomiting (more than 2–3 times in 24 hrs) → Vet visit needed',
+            'Vomiting + diarrhea in a young pet → Emergency vet immediately',
+            'Vomiting + blood, weakness, or pale gums → Emergency vet immediately (possible poisoning or serious illness)',
+            'If caused by eating too fast → Offer smaller meals in portions instead of one big meal',
+            'If vomiting once daily but persists for several days → Book a vet check to rule out chronic issues'
+          ],
+          imagePath: 'assets/images/symptoms/vomiting.jpg',
+          emergencyLevel: 'urgent',
+        ),
+        const PetSymptom(
+          name: 'Regurgitation (Throwing Up Undigested Food)',
+          description:
+              'Vomiting and regurgitation aren\'t the same—regurgitation happens shortly after eating',
+          causes: [
+            'Eating too fast (common in greedy eaters)',
+            'Esophagus issues',
+            'Foreign object stuck'
+          ],
+          actions: [
+            'If it happens rarely → Try feeding smaller portions or raising the bowl slightly',
+            'If frequent or weight loss → Vet check-up needed',
+            'If choking or difficulty swallowing → Emergency vet visit!'
+          ],
+          imagePath: 'assets/images/symptoms/regurgitation.jpg',
+          emergencyLevel: 'normal',
+        ),
+        const PetSymptom(
+          name: 'Loss of Appetite',
+          description:
+              'Skipping one meal isn\'t alarming, but not eating at all for 24+ hours? That\'s serious!',
+          causes: [
+            'Stress or anxiety (new environment, new pet, loud noises)',
+            'Dental pain (bad teeth, infections)',
+            'Fever, illness, or pain anywhere in the body',
+            'Serious conditions (liver/kidney failure, cancer, infections)'
+          ],
+          actions: [
+            'If your pet skips one meal but eats later → Monitor, could be stress or minor stomach upset',
+            'Try offering warmed food, wet food, or their favorite treat → Sometimes this encourages eating',
+            'Check their mouth for broken teeth, red gums, or bad smell → Painful mouths make pets stop eating',
+            'If appetite loss continues for more than 24 hours, or comes with vomiting, weakness, or weight loss → Vet visit needed',
+            'If your pet refuses all food + water, or also has fever, collapse, or bloated belly → Emergency vet immediately'
+          ],
+          imagePath: 'assets/images/symptoms/loss_appetite.jpg',
+          emergencyLevel: 'urgent',
+        ),
+        const PetSymptom(
+          name: 'Sudden Weight Loss or Weight Gain',
+          description:
+              'If your pet\'s weight changes quickly without a change in diet or exercise, there may be an underlying reason.',
+          causes: [
+            'Weight Loss: Worms or parasites',
+            'Weight Loss: Diabetes or thyroid problems',
+            'Weight Loss: Chronic illness (kidney, liver, or cancer)',
+            'Weight Loss: Poor appetite or food not being absorbed properly',
+            'Weight Gain: Overfeeding or not enough exercise',
+            'Weight Gain: Hormonal disorders',
+            'Weight Gain: Fluid buildup (can be a sign of heart or liver disease)'
+          ],
+          actions: [
+            'If eating normally but losing weight → Book a routine vet check to rule out parasites, diabetes, or other illness',
+            'If appetite is poor and weight is dropping quickly → Vet visit soon, especially if it continues for more than a couple of days',
+            'If gradual weight gain with no other issues → Review food portions & exercise. Adjust diet if needed',
+            'If sudden weight gain or swollen belly → Vet check recommended (could be fluid or hormone-related)',
+            'Always check your pet\'s deworming and insect prevention dates — overdue treatments can cause weight and health changes'
+          ],
+          imagePath: 'assets/images/symptoms/weight_change.jpg',
+          emergencyLevel: 'normal',
+        ),
+        const PetSymptom(
+          name: 'Fever (Hot Ears, Nose, or Body)',
+          description: 'If your pet feels unusually hot, it could mean fever.',
+          causes: [
+            'Infections (bacterial, viral, or fungal)',
+            'Inflammation from injury or illness',
+            'Serious conditions (immune diseases, poisoning, cancer)'
+          ],
+          actions: [
+            'Look for other signs: low energy, loss of appetite, shivering, or warm ears',
+            'If mild warmth but your pet is eating, drinking, and active → Monitor closely',
+            'If very warm + tired, not eating, or shivering → Vet check needed',
+            'If your pet seems weak, vomiting, or breathing fast → Vet visit ASAP',
+            'Never give human fever meds — they are deadly for pets!'
+          ],
+          imagePath: 'assets/images/symptoms/fever.jpg',
+          emergencyLevel: 'urgent',
+        ),
+        const PetSymptom(
+          name: 'Lethargy (Weakness, Sleeping Too Much)',
+          description:
+              'If your normally active pet suddenly seems tired or weak, it could be anything from a lazy day to something more serious.',
+          causes: [
+            'Just having a lazy day (especially after lots of play or hot weather)',
+            'Pain or discomfort (arthritis, injuries, tummy upset)',
+            'Infections or fever',
+            'Serious conditions: poisoning, organ disease, or internal bleeding'
+          ],
+          actions: [
+            'If your pet is simply resting more than usual but still eats, drinks, and plays a bit → Probably just a lazy day, no need to worry',
+            'If lethargy comes with vomiting, diarrhea, limping, or not eating → Book a vet visit soon',
+            'If your pet is very weak, collapses, or refuses food & water → Emergency vet immediately'
+          ],
+          imagePath: 'assets/images/symptoms/lethargy.jpg',
+          emergencyLevel: 'normal',
+        ),
+      ],
+    },
+    'breathing': {
+      'Breathing Problems': [
+        const PetSymptom(
+          name: 'Heavy Panting',
+          description:
+              'Panting after play or heat is normal — but panting while resting, or for no reason, can be a red flag.',
+          causes: [
+            'Overheating / Heatstroke – Can happen in hot weather, inside cars, or after too much activity',
+            'Flat-Faced Breeds (Bulldogs, Pugs, Frenchies, etc.) – These dogs have narrow airways, making it harder to breathe and cool down, so they pant heavily even without heat',
+            'Pain or Stress – Pets may pant when they\'re uncomfortable or anxious',
+            'Heart or Lung Disease – Fluid or illness can make breathing difficult',
+            'Obesity – Extra weight makes it harder to cool down'
+          ],
+          actions: [
+            'If panting is from heat → Move them to a cool place and offer small amounts of water',
+            'If your dog is a flat-faced breed → Be extra cautious. Avoid hot weather, overexertion, and stressful play. If panting seems extreme, noisy, or happens even at rest → Book a vet visit',
+            'If your pet is panting at rest, or it comes with coughing, weakness, or restlessness → Vet visit needed',
+            'If panting + collapse, very pale/blue gums, or severe distress → Emergency vet immediately!'
+          ],
+          imagePath: 'assets/images/symptoms/panting.jpg',
+          emergencyLevel: 'urgent',
+        ),
+        const PetSymptom(
+          name: 'Coughing',
+          description:
+              'A little cough now and then is usually nothing, but frequent or harsh coughing can mean trouble!',
+          causes: [
+            'Mild throat irritation – From dust, pulling on the leash, or excitement',
+            'Infectious cough (kennel cough) – A contagious condition that spreads easily between dogs',
+            'Heart problems – Can cause nighttime coughing or coughing after exercise',
+            'Lung infection – often with fever or weakness',
+            'Allergies or asthma – Can cause ongoing coughing or wheezing',
+            'Collapsed airway – causes a honking cough'
+          ],
+          actions: [
+            'If the cough is rare and mild (like after running or pulling on leash) → Normal',
+            'If the cough keeps coming back for more than 2 days or gets worse → Vet visit needed',
+            'If coughing comes with fever, not eating, or low energy → Book a vet check soon',
+            'If your pet struggles to breathe, has blue gums, or collapses → Emergency vet immediately',
+            'If coughing happens right after eating or drinking → Could be a swallowing or airway issue → Vet check recommended'
+          ],
+          imagePath: 'assets/images/symptoms/coughing.jpg',
+          emergencyLevel: 'normal',
+        ),
+        const PetSymptom(
+          name: 'Wheezing or Noisy Breathing',
+          description:
+              'If your pet sounds like they\'re struggling for air, it could be from a blocked or narrowed airway.',
+          causes: [
+            'Mild respiratory infection (like cat flu or infectious cough in dogs)',
+            'Asthma (more common in cats)',
+            'Allergic reaction (swelling in the throat/airway)',
+            'Collapsed trachea (common in small dogs)',
+            'Something stuck in the throat (bone, toy, etc.)',
+            'Flat-faced breeds (pugs, bulldogs, etc.) → Some snorting is "normal," but sudden worsening is dangerous'
+          ],
+          actions: [
+            'If mild and pet otherwise acts normal → Likely an infection or breed-related noise; mention it to your vet',
+            'If noise suddenly worsens, especially with exercise or warm weather → Vet ASAP',
+            'If struggling to breathe, gums turning blue, or pet collapses → Emergency vet immediately',
+            'If choking on an object → Only try removing it if safe, otherwise rush to a vet'
+          ],
+          imagePath: 'assets/images/symptoms/wheezing.jpg',
+          emergencyLevel: 'urgent',
+        ),
+        const PetSymptom(
+          name: 'Sneezing & Nasal Discharge',
+          description:
+              'An occasional sneeze is normal, but constant sneezing or unusual nose discharge needs attention.',
+          causes: [
+            'Allergies – Dust, pollen, smoke, perfumes, or cleaning sprays',
+            'Respiratory infection',
+            'Foreign object in the nose – Grass, seeds, or dirt',
+            'Dental disease – Infections in the upper teeth can spread to the nose'
+          ],
+          actions: [
+            'A few sneezes, no discharge → Likely dust or irritation, nothing to worry about',
+            'Clear watery discharge that keeps happening → Could be allergies; try removing smoke, perfume, or sprays',
+            'Thick yellow/green discharge → Likely infection → Vet check needed',
+            'Sneezing fits + pawing at nose → Something stuck → Vet ASAP'
+          ],
+          imagePath: 'assets/images/symptoms/sneezing.jpg',
+          emergencyLevel: 'normal',
+        ),
+        const PetSymptom(
+          name: 'Open-Mouth Breathing in Cats',
+          description:
+              'Mouth breathing in cats can happen from stress or heat, but it can also mean breathing trouble.',
+          causes: [
+            'Heat or stress (after play, travel, or car rides)',
+            'Heart or lung problems',
+            'Asthma or airway issues',
+            'Fluid buildup in the chest'
+          ],
+          actions: [
+            'If it happens after play, heat, or travel → Let your cat rest in a cool, quiet spot and monitor',
+            'If it continues while resting, or your cat seems tired, drools, or breathes with effort → Vet check as soon as possible',
+            'If mouth breathing starts suddenly and doesn\'t stop → Emergency vet visit'
+          ],
+          imagePath: 'assets/images/symptoms/mouth_breathing.jpg',
+          emergencyLevel: 'urgent',
+        ),
+        const PetSymptom(
+          name: 'Gasping for Air / Struggling to Breathe',
+          description:
+              'If your pet can\'t breathe properly, it\'s an emergency. Don\'t wait!',
+          causes: [
+            'Severe allergic reaction (swollen throat!)',
+            'Choking on food or a foreign object',
+            'Collapsed lung or fluid in the chest',
+            'Heart diseases'
+          ],
+          actions: [
+            'Check their gums or tongue → if they look blue or pale → Emergency vet immediately!',
+            'If your pet is drooling, breathing heavily, or clearly struggling to get air → RUSH to the vet!'
+          ],
+          imagePath: 'assets/images/symptoms/gasping.jpg',
+          emergencyLevel: 'emergency',
+        ),
+        const PetSymptom(
+          name: 'Choking',
+          description:
+              'If your pet suddenly starts gagging, coughing, or pawing at their mouth, something might be stuck.',
+          causes: [
+            'Food or treats swallowed too fast',
+            'Toys, bones, or foreign objects',
+            'Hair or string stuck in the throat'
+          ],
+          actions: [
+            'If your pet is coughing or gagging but still breathing → Stay calm and observe — many pets clear it on their own',
+            'If your pet can\'t breathe or collapses → Emergency! Go to the vet immediately'
+          ],
+          imagePath: 'assets/images/symptoms/choking.jpg',
           emergencyLevel: 'emergency',
         ),
       ],

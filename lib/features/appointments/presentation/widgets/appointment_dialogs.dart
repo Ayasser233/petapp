@@ -10,7 +10,7 @@ class AppointmentDialogs {
     VoidCallback onConfirm,
   ) {
     final isDark = THelperFunctions.isDarkMode(context);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -26,7 +26,8 @@ class AppointmentDialogs {
           ),
         ),
         content: Text(
-          AppLocalizations.of(context).confirmCancelAppointmentWithDoctor(vetName),
+          AppLocalizations.of(context)
+              .confirmCancelAppointmentWithDoctor(vetName),
           style: TextStyle(
             color: isDark ? Colors.grey[300] : Colors.grey[700],
           ),
@@ -37,8 +38,8 @@ class AppointmentDialogs {
             child: Text(
               AppLocalizations.of(context).keepAppointment,
               style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                color: isDark ? Colors.grey[400] : Colors.grey[600],
-              ),
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  ),
             ),
           ),
           ElevatedButton(
@@ -66,28 +67,34 @@ class AppointmentDialogs {
         content: Row(
           children: [
             const Icon(
-              Icons.check_circle,
+              Icons.check_circle_outline,
               color: Colors.white,
-              size: 20,
+              size: 24,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
-            ),
             ),
           ],
         ),
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.green.shade600,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
         ),
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: 16,
+        ),
+        duration: const Duration(seconds: 3),
+        dismissDirection: DismissDirection.down,
       ),
     );
   }
@@ -98,28 +105,34 @@ class AppointmentDialogs {
         content: Row(
           children: [
             const Icon(
-              Icons.error,
+              Icons.error_outline,
               color: Colors.white,
-              size: 20,
+              size: 24,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
-            ),
             ),
           ],
         ),
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.red.shade600,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
         ),
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: 16,
+        ),
+        duration: const Duration(seconds: 4),
+        dismissDirection: DismissDirection.down,
       ),
     );
   }
@@ -130,18 +143,18 @@ class AppointmentDialogs {
         content: Row(
           children: [
             const Icon(
-              Icons.info,
+              Icons.info_outline,
               color: Colors.white,
-              size: 20,
+              size: 24,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Text(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500,
-                ),
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
               ),
             ),
           ],
@@ -149,9 +162,15 @@ class AppointmentDialogs {
         backgroundColor: AppColors.orange,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(12),
         ),
-        margin: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: 16,
+        ),
+        duration: const Duration(seconds: 3),
+        dismissDirection: DismissDirection.down,
       ),
     );
   }
@@ -162,7 +181,7 @@ class AppointmentDialogs {
     VoidCallback onConfirm,
   ) {
     final isDark = THelperFunctions.isDarkMode(context);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -172,16 +191,16 @@ class AppointmentDialogs {
         ),
         title: Text(
           AppLocalizations.of(context).rescheduleAppointment,
-          style:Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black,
-          ),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black,
+              ),
         ),
         content: Text(
           AppLocalizations.of(context).rescheduleAppointmentMessage(vetName),
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: isDark ? Colors.grey[300] : Colors.grey[700],
-          ),
+                color: isDark ? Colors.grey[300] : Colors.grey[700],
+              ),
         ),
         actions: [
           TextButton(
@@ -189,8 +208,8 @@ class AppointmentDialogs {
             child: Text(
               AppLocalizations.of(context).cancel,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isDark ? Colors.grey[400] : Colors.grey[600],
-              ),
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  ),
             ),
           ),
           ElevatedButton(
@@ -222,7 +241,7 @@ class AppointmentDialogs {
     Color? confirmColor,
   }) {
     final isDark = THelperFunctions.isDarkMode(context);
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -233,9 +252,9 @@ class AppointmentDialogs {
         title: Text(
           title,
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black,
-          ),
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black,
+              ),
         ),
         content: Text(
           message,
@@ -249,8 +268,8 @@ class AppointmentDialogs {
             child: Text(
               cancelText,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isDark ? Colors.grey[400] : Colors.grey[600],
-              ),
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  ),
             ),
           ),
           ElevatedButton(

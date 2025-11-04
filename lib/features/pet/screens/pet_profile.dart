@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
+import 'package:petapp/features/vaccination/presentation/cubit/vaccination_cubit.dart';
+import 'package:petapp/features/vaccination/presentation/cubit/vaccination_state.dart';
+import 'package:petapp/features/vaccination/presentation/screens/pet_vaccination_record_screen.dart';
+import 'package:petapp/features/vaccination/presentation/screens/add_vaccination_screen.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'dart:io';
 
@@ -31,6 +38,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     // Determine if dark theme is active
     final isDark = THelperFunctions.isDarkMode(context);
 
@@ -48,8 +56,6 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
     final Color cardBorderColor =
         isDark ? Colors.grey[800]! : Colors.grey[300]!;
     final Color notesBgColor = isDark ? Colors.grey[800]! : Colors.grey[100]!;
-    final Color emptyStateBgColor =
-        isDark ? Colors.grey[800]! : Colors.grey[100]!;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -69,7 +75,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                 icon: const Icon(Icons.edit, color: Colors.white),
                 onPressed: () async {
                   final result = await Get.toNamed(
-                    '/update-pet',
+                    AppRoutes.updatePet,
                     arguments: widget.pet,
                   );
                   if (result == true) {
@@ -90,16 +96,8 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Pet image
-                  widget.pet.image.startsWith('assets/')
-                      ? Image.asset(
-                          widget.pet.image,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.file(
-                          File(widget.pet.image),
-                          fit: BoxFit.cover,
-                        ),
+                  // Pet image - prioritize API image URL, then local file, then asset
+                  _buildPetImage(),
                   // Gradient overlay
                   Container(
                     decoration: BoxDecoration(
@@ -185,7 +183,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                     children: [
                       _buildInfoCard(
                         context,
-                        'Birthday',
+                        localizations.birthday,
                         _formatDate(widget.pet.dateOfBirth),
                         Icons.cake,
                         themeColor,
@@ -194,7 +192,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                       const SizedBox(width: 16),
                       _buildInfoCard(
                         context,
-                        'Species',
+                        localizations.species,
                         widget.pet.species.toUpperCase(),
                         widget.pet.species.toLowerCase() == 'dog'
                             ? Icons.pets
@@ -214,8 +212,10 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                         Expanded(
                           child: _buildInfoCard(
                             context,
-                            'Gender',
-                            widget.pet.gender == 'MALE' ? 'Male' : 'Female',
+                            localizations.gender,
+                            widget.pet.gender == 'MALE'
+                                ? localizations.male
+                                : localizations.female,
                             widget.pet.gender == 'MALE'
                                 ? Icons.male
                                 : Icons.female,
@@ -248,8 +248,8 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                           const SizedBox(width: 12),
                           Text(
                             widget.pet.spayNeuterStatus!
-                                ? 'Spayed/Neutered'
-                                : 'Not Spayed/Neutered',
+                                ? localizations.spayedNeutered
+                                : localizations.notSpayedNeutered,
                             style: TextStyle(
                               color: textColor,
                               fontSize: 16,
@@ -293,8 +293,8 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                   // Notes section
                   if (widget.pet.notes != null &&
                       widget.pet.notes!.isNotEmpty) ...[
-                    _buildSectionHeader(
-                        'Notes', Icons.note_alt, themeColor, textColor),
+                    _buildSectionHeader(localizations.notes, Icons.note_alt,
+                        themeColor, textColor),
                     const SizedBox(height: 8),
                     Container(
                       width: double.infinity,
@@ -320,27 +320,15 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                       themeColor, textColor),
                   const SizedBox(height: 8),
 
-                  if (widget.pet.medicalHistory?.vaccinations == null ||
-                      widget.pet.medicalHistory!.vaccinations!.isEmpty)
-                    _buildEmptyVaccinationsCard(
-                        emptyStateBgColor, subTextColor, cardBorderColor)
-                  else
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount:
-                          widget.pet.medicalHistory!.vaccinations!.length,
-                      itemBuilder: (context, index) {
-                        return _buildVaccinationCard(
-                          widget.pet.medicalHistory!.vaccinations![index],
-                          themeColor,
-                          cardColor,
-                          textColor,
-                          subTextColor,
-                          isDark,
-                        );
-                      },
-                    ),
+                  // Vaccination summary card with navigation
+                  _buildVaccinationSummaryCard(
+                    context,
+                    cardColor,
+                    textColor,
+                    subTextColor,
+                    cardBorderColor,
+                    isDark,
+                  ),
 
                   const SizedBox(height: 24),
 
@@ -363,7 +351,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                         // Show primary weight field
                         if (widget.pet.weight != null) ...[
                           _buildMedicalDetailRow(
-                              'Weight',
+                              localizations.weight,
                               '${widget.pet.weight} kg',
                               Icons.monitor_weight,
                               textColor,
@@ -373,8 +361,10 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                         // Show gender
                         if (widget.pet.gender != null) ...[
                           _buildMedicalDetailRow(
-                              'Gender',
-                              widget.pet.gender == 'MALE' ? 'Male' : 'Female',
+                              localizations.gender,
+                              widget.pet.gender == 'MALE'
+                                  ? localizations.male
+                                  : localizations.female,
                               widget.pet.gender == 'MALE'
                                   ? Icons.male
                                   : Icons.female,
@@ -385,7 +375,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                         // Show primary spay/neuter status
                         if (widget.pet.spayNeuterStatus != null) ...[
                           _buildMedicalDetailRow(
-                              'Spayed/Neutered',
+                              localizations.spayedNeuteredQuestion,
                               widget.pet.spayNeuterStatus! ? 'Yes' : 'No',
                               Icons.medical_services,
                               textColor,
@@ -396,7 +386,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                         if (widget.pet.allergies != null &&
                             widget.pet.allergies!.isNotEmpty) ...[
                           _buildMedicalDetailRow(
-                              'Allergies',
+                              localizations.allergies,
                               widget.pet.allergies!.join(', '),
                               Icons.warning_amber,
                               textColor,
@@ -407,7 +397,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                         if (widget.pet.medicalHistory?.lastVetVisit !=
                             null) ...[
                           _buildMedicalDetailRow(
-                              'Last Vet Visit',
+                              localizations.lastVetVisit,
                               _formatDate(
                                   widget.pet.medicalHistory!.lastVetVisit!),
                               Icons.event,
@@ -418,29 +408,6 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 24),
-
-                  // Add vaccination button
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // TODO: Implement add vaccination functionality
-                      },
-                      icon: const Icon(Icons.add, color: themeColor),
-                      label: const Text(
-                        'Add Vaccination',
-                        style: TextStyle(color: themeColor),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        side: const BorderSide(color: themeColor),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -593,6 +560,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
   }
 
   void _showDeleteConfirmation(BuildContext context, bool isDark) {
+    final localizations = AppLocalizations.of(context);
     final dialogBgColor = isDark ? Colors.grey[850] : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black;
     final subTextColor = isDark ? Colors.grey[400] : Colors.grey[600];
@@ -605,7 +573,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
           borderRadius: BorderRadius.circular(16),
         ),
         title: Text(
-          'Delete Pet',
+          localizations.confirmDelete,
           style: TextStyle(color: textColor),
         ),
         content: Column(
@@ -618,13 +586,13 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'Are you sure you want to delete ${widget.pet.name}?',
+              '${localizations.areYouSureDeletePet.replaceAll('this pet', widget.pet.name)}',
               textAlign: TextAlign.center,
               style: TextStyle(color: textColor),
             ),
             const SizedBox(height: 8),
             Text(
-              'This action cannot be undone.',
+              localizations.thisActionCannotBeUndone,
               style: TextStyle(
                 color: subTextColor,
                 fontSize: 12,
@@ -688,7 +656,9 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                     ),
                   )
                 : const Icon(Icons.delete_outline, size: 16),
-            label: Text(_isDeleting ? 'Deleting...' : 'Delete'),
+            label: Text(_isDeleting
+                ? AppLocalizations.of(context).deleting
+                : AppLocalizations.of(context).delete),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
@@ -699,122 +669,347 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
     );
   }
 
-  Widget _buildEmptyVaccinationsCard(
-      Color backgroundColor, Color textColor, Color borderColor) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20),
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: borderColor),
-      ),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.vaccines,
-            color: AppColors.orange,
-            size: 48,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'No vaccinations recorded yet',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: textColor,
+  Widget _buildVaccinationSummaryCard(
+    BuildContext context,
+    Color cardColor,
+    Color textColor,
+    Color subTextColor,
+    Color borderColor,
+    bool isDark,
+  ) {
+    return BlocProvider(
+      create: (context) => sl<VaccinationCubit>()..getMedicalSheet(widget.pet.id),
+      child: BlocBuilder<VaccinationCubit, VaccinationState>(
+        builder: (context, state) {
+          if (state is VaccinationLoading) {
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor),
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(color: AppColors.orange),
+              ),
+            );
+          }
+
+          if (state is MedicalSheetLoaded) {
+            final medicalSheet = state.medicalSheet;
+            final hasRecords = medicalSheet.vaccinationSeries.isNotEmpty ||
+                medicalSheet.annualBoosters.isNotEmpty;
+
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: cardColor,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: borderColor),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Summary statistics
+                  if (hasRecords) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        _buildVaccinationStat(
+                          'Completed',
+                          medicalSheet.completedDosesCount.toString(),
+                          Icons.check_circle,
+                          Colors.green,
+                          textColor,
+                        ),
+                        _buildVaccinationStat(
+                          'Upcoming',
+                          medicalSheet.totalUpcomingDoses.toString(),
+                          Icons.schedule,
+                          Colors.blue,
+                          textColor,
+                        ),
+                        _buildVaccinationStat(
+                          'Overdue',
+                          medicalSheet.totalAnnualBoosters.toString(),
+                          Icons.warning,
+                          Colors.red,
+                          textColor,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 12),
+                    
+                    // Vaccine categories list
+                    Text(
+                      'Vaccines',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    ...medicalSheet.vaccinationSeries.map((series) {
+                      final category = _getVaccineCategory(series.vaccineType);
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 6),
+                        child: Row(
+                          children: [
+                            Icon(
+                              series.isComplete
+                                  ? Icons.check_circle
+                                  : Icons.schedule,
+                              size: 16,
+                              color: series.isComplete
+                                  ? Colors.green
+                                  : AppColors.orange,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                category,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              '${series.completedDoses}/${series.totalDoses}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: subTextColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    const SizedBox(height: 16),
+                  ] else ...[
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.vaccines,
+                          color: AppColors.orange,
+                          size: 40,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'No vaccinations yet',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Keep your pet healthy',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: subTextColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Action buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () async {
+                            final cubit = context.read<VaccinationCubit>();
+                            final result = await Get.to(() => BlocProvider.value(
+                                  value: cubit,
+                                  child: AddVaccinationScreen(
+                                    petId: widget.pet.id,
+                                    petName: widget.pet.name,
+                                    petSpecies: widget.pet.species,
+                                  ),
+                                ));
+                            if (result == true && context.mounted) {
+                              cubit.getMedicalSheet(widget.pet.id);
+                            }
+                          },
+                          icon: const Icon(Icons.add, size: 18),
+                          label: const Text('Add Vaccine'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.orange,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ),
+                      if (hasRecords) ...[
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              Get.to(() => BlocProvider(
+                                    create: (context) => sl<VaccinationCubit>()
+                                      ..getMedicalSheet(widget.pet.id),
+                                    child: PetVaccinationRecordScreen(pet: widget.pet),
+                                  ));
+                            },
+                            icon: const Icon(Icons.medical_information, size: 18),
+                            label: const Text('View All'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.orange,
+                              side: const BorderSide(color: AppColors.orange),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // Error or initial state - show basic card with add button
+          return Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: cardColor,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: borderColor),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Add your pet\'s vaccinations to keep track of their health',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: textColor.withValues(alpha: 0.7),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.vaccines,
+                  color: AppColors.orange,
+                  size: 40,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Vaccination Records',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final cubit = sl<VaccinationCubit>();
+                      final result = await Get.to(() => BlocProvider.value(
+                            value: cubit,
+                            child: AddVaccinationScreen(
+                              petId: widget.pet.id,
+                              petName: widget.pet.name,
+                              petSpecies: widget.pet.species,
+                            ),
+                          ));
+                      if (result == true && mounted) {
+                        setState(() {});
+                      }
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add Vaccine'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
 
-  Widget _buildVaccinationCard(
-    VaccinationModel vaccination,
-    Color themeColor,
-    Color backgroundColor,
+  Widget _buildVaccinationStat(
+    String label,
+    String value,
+    IconData icon,
+    Color iconColor,
     Color textColor,
-    Color subTextColor,
-    bool isDark,
   ) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+    return Column(
+      children: [
+        Icon(icon, color: iconColor, size: 28),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: iconColor,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Vaccination header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: themeColor.withValues(alpha: isDark ? 0.2 : 0.1),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(12),
-                topRight: Radius.circular(12),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    vaccination.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: textColor,
-                    ),
-                  ),
-                ),
-                Text(
-                  _formatDate(vaccination.date),
-                  style: TextStyle(
-                    color: subTextColor,
-                  ),
-                ),
-              ],
-            ),
+        ),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            color: textColor.withValues(alpha: 0.7),
           ),
-          // Vaccination details
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (vaccination.expiresAt != null) ...[
-                  _buildMedicalDetailRow(
-                      'Expires',
-                      _formatDate(vaccination.expiresAt!),
-                      Icons.event_busy,
-                      textColor,
-                      subTextColor),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
+  }
+
+  String _getVaccineCategory(String vaccineType) {
+    final type = vaccineType.toUpperCase();
+    
+    // For virus vaccines, show the specific type
+    if (type.contains('MONOVALENT')) {
+      return 'Monovalent';
+    } else if (type.contains('BIVALENT')) {
+      return 'Bivalent';
+    } else if (type.contains('TRIVALENT')) {
+      return 'Trivalent';
+    } else if (type.contains('QUADRIVALENT')) {
+      return 'Quadrivalent';
+    } else if (type.contains('PENTAVALENT')) {
+      return 'Pentavalent';
+    } else if (type.contains('HEXAVALENT')) {
+      return 'Hexavalent';
+    } else if (type.contains('HEPTAVALENT')) {
+      return 'Heptavalent';
+    } else if (type.contains('OCTAVALENT')) {
+      return 'Octavalent';
+    } else if (type.contains('WORMS')) {
+      return 'Worms';
+    } else if (type.contains('INSECTS')) {
+      return 'Insects';
+    } else if (type.contains('RABIES')) {
+      return 'Rabies';
+    }
+    
+    return 'Vaccine'; // fallback
   }
 
   Widget _buildMedicalDetailRow(
@@ -856,6 +1051,69 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  /// Build pet image widget that handles API URL, local file, or asset
+  Widget _buildPetImage() {
+    // Priority: API imageUrl > local file path > asset fallback
+    if (widget.pet.imageUrl != null && widget.pet.imageUrl!.isNotEmpty) {
+      // Image from API
+      return Image.network(
+        widget.pet.imageUrl!,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          // Fallback to asset if network image fails
+          return _buildFallbackImage();
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            ),
+          );
+        },
+      );
+    } else if (!widget.pet.image.startsWith('assets/')) {
+      // Local file
+      return Image.file(
+        File(widget.pet.image),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildFallbackImage();
+        },
+      );
+    } else {
+      // Asset image
+      return _buildFallbackImage();
+    }
+  }
+
+  /// Build fallback asset image
+  Widget _buildFallbackImage() {
+    return Image.asset(
+      widget.pet.image,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        // Ultimate fallback - solid color with icon
+        return Container(
+          color: AppColors.orange.withValues(alpha: 0.3),
+          child: Center(
+            child: Icon(
+              widget.pet.species.toLowerCase() == 'dog'
+                  ? Icons.pets
+                  : Icons.pets,
+              size: 100,
+              color: Colors.white.withValues(alpha: 0.5),
+            ),
+          ),
+        );
+      },
     );
   }
 }

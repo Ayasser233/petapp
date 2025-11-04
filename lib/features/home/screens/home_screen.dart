@@ -5,12 +5,14 @@ import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/widgets/custom_app_bar.dart';
-// import 'package:petapp/core/widgets/rewards_card.dart'; // TODO: Uncomment when APIs are ready
+import 'package:petapp/core/widgets/rewards_card.dart';
 import 'package:petapp/core/services/location_service.dart';
 import 'package:petapp/core/services/auth_service.dart';
+import 'package:petapp/core/services/points_service.dart';
 import 'package:petapp/features/vets/models/vet_model.dart';
 import 'package:petapp/features/vets/services/vet_service.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/di/service_locator.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,6 +23,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final VetService _vetService = VetService();
+  final PointsService _pointsService = sl<PointsService>();
   late final LocationService _locationService;
   final AuthService _authService = Get.find<AuthService>();
 
@@ -171,21 +174,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         const SizedBox(height: 16),
 
-                        // Featured Services Row
+                        // Featured Services Row - All in one row
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            _buildServiceItem(context, localizations.vetVisit,
-                                'assets/icons/icons-01.png', isDark,
-                                onTap: () =>
-                                    Get.toNamed(AppRoutes.vetExplorer)),
-                            _buildServiceItem(
-                                context,
-                                localizations.animalView3D,
-                                'assets/icons/icons-02.png',
-                                isDark,
-                                onTap: () =>
-                                    Get.toNamed(AppRoutes.pet3DModelSelector)),
+                            _buildCompactServiceItem(
+                              context,
+                              localizations.vetVisit,
+                              'assets/icons/icons-01.png',
+                              isDark,
+                              onTap: () => Get.toNamed(AppRoutes.vetExplorer),
+                            ),
+                            _buildCompactServiceItem(
+                              context,
+                              localizations.animalView3D,
+                              'assets/icons/icons-02.png',
+                              isDark,
+                              onTap: () =>
+                                  Get.toNamed(AppRoutes.pet3DModelSelector),
+                            ),
+                            _buildCompactVaccinationServiceItem(
+                              context,
+                              'Vaccination',
+                              Icons.vaccines,
+                              isDark,
+                              onTap: () => Get.toNamed(
+                                  AppRoutes.selectPetForVaccination),
+                            ),
                           ],
                         ),
 
@@ -236,66 +251,69 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         // Rewards Card - Only show for authenticated users
                         if (!_isGuestUser) ...[
-                          // TODO: Uncomment when APIs are available
-                          // _buildRewardsCard(),
-
-                          // TEMPORARY: Comment out until APIs are ready
-                          // The logic below will be used when user data APIs are available
-                          /*
-                          // When APIs are ready, use this logic:
-                          FutureBuilder(
+                          FutureBuilder<Map<String, dynamic>>(
                             future: _loadUserRewardsData(),
                             builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const Center(
-                                  child: CircularProgressIndicator(color: AppColors.orange),
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Container(
+                                  height: 150,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        AppColors.orange,
+                                        Color(0xFFF5A623)
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(
+                                        color: Colors.white),
+                                  ),
                                 );
                               }
 
                               if (snapshot.hasError) {
-                                return const SizedBox.shrink(); // Hide on error
+                                return Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                        color:
+                                            Colors.red.withValues(alpha: 0.3)),
+                                  ),
+                                  child: const Row(
+                                    children: [
+                                      Icon(Icons.error_outline,
+                                          color: Colors.red),
+                                      SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          'Failed to load rewards data',
+                                          style: TextStyle(
+                                              color: Colors.red, fontSize: 14),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
                               }
-                              
-                              final userData = snapshot.data as Map<String, dynamic>?;
+
+                              final userData = snapshot.data;
                               return RewardsCard(
                                 points: userData?['points'] ?? 0,
-                                vouchers: userData?['vouchers'] ?? 0,
-                                onRedeemTap: () => Get.toNamed('/redeem'),
-                                onVouchersTap: () => Get.toNamed(AppRoutes.vouchers),
-                                onViewHistoryTap: () => Get.toNamed(AppRoutes.pointsHistory),
+                                vouchers: 0, // Removed vouchers feature
+                                onRedeemTap: () =>
+                                    Get.toNamed(AppRoutes.pointsHistory),
+                                onVouchersTap: null, // Removed vouchers feature
+                                onViewHistoryTap: () =>
+                                    Get.toNamed(AppRoutes.pointsHistory),
                               );
                             },
-                          ),
-                          */
-
-                          // Placeholder for authenticated users (remove when APIs are ready)
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: AppColors.orange.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                  color:
-                                      AppColors.orange.withValues(alpha: 0.3)),
-                            ),
-                            child: const Row(
-                              children: [
-                                Icon(
-                                  Icons.info_outline,
-                                  color: AppColors.orange,
-                                ),
-                                SizedBox(width: 12),
-                                Expanded(
-                                  child: Text(
-                                    'Rewards and vouchers will appear here once user data APIs are connected.',
-                                    style: TextStyle(
-                                      color: AppColors.orange,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
                           const SizedBox(height: 24),
                         ],
@@ -434,7 +452,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-              child: const Text('Enable', style: TextStyle(fontSize: 12)),
+              child: Text(localizations.enable,
+                  style: const TextStyle(fontSize: 12)),
             ),
           ],
         ),
@@ -544,6 +563,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Build empty state
   Widget _buildEmptyState(BuildContext context, bool isDark) {
+    final localizations = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -581,38 +601,36 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text('Retry', style: TextStyle(color: Colors.white)),
+            child: Text(localizations.retry,
+                style: const TextStyle(color: Colors.white)),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildServiceItem(
+  // Compact service item for horizontal layout
+  Widget _buildCompactServiceItem(
       BuildContext context, String title, String icon, bool isDark,
       {VoidCallback? onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 150,
-        height: 150,
-        margin: const EdgeInsets.symmetric(horizontal: 8),
+        width: 100,
+        height: 110,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          // Enhanced background for light theme
           color: isDark ? AppColors.lightblack : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          // Enhanced shadow for light theme
+          borderRadius: BorderRadius.circular(12),
           boxShadow: [
             if (!isDark)
               BoxShadow(
-                color: Colors.grey
-                    .withValues(alpha: 0.25), // More pronounced shadow
-                blurRadius: 12, // Larger blur
-                spreadRadius: 1, // Add spread
-                offset: const Offset(0, 4), // Deeper shadow
+                color: Colors.grey.withValues(alpha: 0.2),
+                blurRadius: 8,
+                spreadRadius: 1,
+                offset: const Offset(0, 2),
               ),
           ],
-          // Add subtle border in light theme for extra definition
           border: !isDark
               ? Border.all(
                   color: Colors.grey.withValues(alpha: 0.1), width: 1.0)
@@ -621,32 +639,98 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Image container with highlight effect
+            // Image container
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(8),
               decoration: !isDark
                   ? BoxDecoration(
-                      // Add a subtle circular background for the icon in light theme
                       shape: BoxShape.circle,
                       color: AppColors.orange.withValues(alpha: 0.1),
                     )
                   : null,
               child: Image.asset(
                 icon,
-                width: 70, // Slightly smaller for better proportions
-                height: 70,
+                width: 45,
+                height: 45,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             // Title text
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 6),
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
                       color: isDark ? Colors.white : Colors.black87,
-                      letterSpacing: !isDark ? 0.3 : null,
+                      fontSize: 11,
+                    ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Compact vaccination service item
+  Widget _buildCompactVaccinationServiceItem(
+      BuildContext context, String title, IconData icon, bool isDark,
+      {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 100,
+        height: 110,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.lightblack : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            if (!isDark)
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.2),
+                blurRadius: 8,
+                spreadRadius: 1,
+                offset: const Offset(0, 2),
+              ),
+          ],
+          border: !isDark
+              ? Border.all(
+                  color: Colors.grey.withValues(alpha: 0.1), width: 1.0)
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Icon container
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: !isDark
+                  ? BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.orange.withValues(alpha: 0.1),
+                    )
+                  : null,
+              child: Icon(
+                icon,
+                size: 45,
+                color: AppColors.orange,
+              ),
+            ),
+            const SizedBox(height: 6),
+            // Title text
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 11,
                     ),
                 textAlign: TextAlign.center,
                 maxLines: 2,
@@ -668,15 +752,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 200, // Slightly wider for better content display
+        width: 200, // Fixed width for horizontal scrolling
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           color: isDark ? AppColors.lightblack : Colors.white,
           boxShadow: [
             BoxShadow(
               color: isDark
-                  ? Colors.black.withValues(alpha: 0.2)
-                  : Colors.grey.withValues(alpha: 0.15),
+                  ? Colors.black.withValues(alpha: 0.3)
+                  : Colors.grey.withValues(alpha: 0.2),
               spreadRadius: 1,
               blurRadius: 8,
               offset: const Offset(0, 3),
@@ -686,24 +770,16 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Image
             Stack(
               children: [
-                // Vet image with rounded corners
                 ClipRRect(
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
                   ),
-                  child: Image.asset(
-                    vet.images.isNotEmpty
-                        ? vet.images[0]
-                        : 'assets/images/default_clinic.jpg',
-                    height: 110,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                  ),
+                  child: _buildVetImage(vet.primaryImage, 120),
                 ),
-                // Distance indicator
+                // Rating Badge
                 Positioned(
                   top: 8,
                   right: 8,
@@ -720,17 +796,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         const Icon(
-                          Icons.directions_car,
-                          color: Colors.white,
-                          size: 12,
+                          Icons.star,
+                          color: Colors.amber,
+                          size: 14,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          vet.distance,
+                          vet.rating.toString(),
                           style:
-                              Theme.of(context).textTheme.labelSmall?.copyWith(
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.bold,
                                   ),
                         ),
                       ],
@@ -739,15 +815,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
+            // Info Section
             Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(10.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Vet name
+                  // Name
                   Text(
                     vet.name,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: isDark ? Colors.white : Colors.black87,
                         ),
@@ -755,7 +832,29 @@ class _HomeScreenState extends State<HomeScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
-                  // Location
+                  // Specialization/Category
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      vet.category,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.orange,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 11,
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  // Address/Location
                   Row(
                     children: [
                       Icon(
@@ -772,36 +871,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     color: isDark
                                         ? Colors.grey[400]
                                         : Colors.grey[600],
+                                    fontSize: 11,
                                   ),
-                          maxLines: 1,
+                          maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  // Rating
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.star,
-                        size: 16,
-                        color: AppColors.orange,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        vet.rating.toString(),
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '(${vet.reviews})',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color:
-                                  isDark ? Colors.grey[400] : Colors.grey[600],
-                            ),
                       ),
                     ],
                   ),
@@ -812,6 +886,71 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildVetImage(String imagePath, double height) {
+    // Check if it's a network URL or local asset
+    final isNetworkImage = imagePath.startsWith('http://') ||
+        imagePath.startsWith('https://') ||
+        imagePath.startsWith('www.');
+
+    if (isNetworkImage) {
+      return Image.network(
+        imagePath,
+        width: double.infinity,
+        height: height,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            width: double.infinity,
+            height: height,
+            color: Colors.grey[300],
+            child: Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+                color: AppColors.orange,
+                strokeWidth: 2,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: double.infinity,
+            height: height,
+            color: Colors.grey[300],
+            child: const Icon(
+              Icons.local_hospital,
+              size: 40,
+              color: Colors.grey,
+            ),
+          );
+        },
+      );
+    } else {
+      return Image.asset(
+        imagePath,
+        width: double.infinity,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            width: double.infinity,
+            height: height,
+            color: Colors.grey[300],
+            child: const Icon(
+              Icons.local_hospital,
+              size: 40,
+              color: Colors.grey,
+            ),
+          );
+        },
+      );
+    }
   }
 
   /// Build guest user banner
@@ -859,6 +998,24 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
+  }
+
+  /// Load user rewards data from Points API
+  Future<Map<String, dynamic>> _loadUserRewardsData() async {
+    try {
+      final balance = await _pointsService.getPointsBalance();
+
+      return {
+        'points': balance['balance'] ?? balance['points'] ?? 0,
+        'history': balance['recent'] ?? [],
+      };
+    } catch (e) {
+      print('❌ Error loading user rewards data: $e');
+      return {
+        'points': 0,
+        'history': [],
+      };
+    }
   }
 
   // TODO: Uncomment and implement when APIs are ready
@@ -947,14 +1104,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Show dialog when user has no points
   void _showNoPointsDialog() {
+    final localizations = AppLocalizations.of(Get.context!);
     Get.dialog(
       AlertDialog(
-        title: const Text('No Points Available'),
-        content: const Text('You don\'t have any points to redeem yet. Start using our services to earn points!'),
+        title: Text(localizations.noPointsAvailable),
+        content: Text(localizations.noPointsMessage),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child: const Text('OK'),
+            child: Text(localizations.ok),
           ),
         ],
       ),

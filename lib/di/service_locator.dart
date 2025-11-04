@@ -4,6 +4,7 @@ import 'package:petapp/core/services/error_handler_service.dart';
 import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/core/services/connectivity_service.dart';
 import 'package:petapp/core/services/token_service.dart';
+import 'package:petapp/core/services/points_service.dart';
 import 'package:petapp/features/auth/data/repositories/auth_repository.dart';
 import 'package:petapp/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,29 @@ import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/profile/controllers/profile_controller.dart';
 import 'package:petapp/features/profile/data/repositories/profile_repository.dart';
 import 'package:petapp/features/profile/data/repositories/voucher_repository.dart';
+
+// Appointments - Clean Architecture
+import 'package:petapp/features/appointments/data/datasources/appointment_remote_datasource.dart';
+import 'package:petapp/features/appointments/data/repositories/appointment_repository_impl.dart';
+import 'package:petapp/features/appointments/domain/repositories/appointment_repository.dart';
+import 'package:petapp/features/appointments/domain/usecases/get_appointments_usecase.dart';
+import 'package:petapp/features/appointments/domain/usecases/get_filtered_appointments_usecase.dart';
+import 'package:petapp/features/appointments/domain/usecases/cancel_appointment_usecase.dart';
+import 'package:petapp/features/appointments/domain/usecases/create_appointment_usecase.dart';
+import 'package:petapp/features/appointments/domain/usecases/submit_review_usecase.dart';
+import 'package:petapp/features/appointments/domain/usecases/complete_appointment_by_qr_usecase.dart';
+import 'package:petapp/features/appointments/presentation/cubit/appointments_cubit.dart';
+
+// Vaccination - Clean Architecture
+import 'package:petapp/features/vaccination/data/services/vaccination_api_service.dart';
+import 'package:petapp/features/vaccination/data/repositories/vaccination_repository_impl.dart';
+import 'package:petapp/features/vaccination/domain/repositories/vaccination_repository.dart';
+import 'package:petapp/features/vaccination/domain/usecases/get_eligible_categories_usecase.dart';
+import 'package:petapp/features/vaccination/domain/usecases/create_vaccination_series_usecase.dart';
+import 'package:petapp/features/vaccination/domain/usecases/mark_dose_complete_usecase.dart';
+import 'package:petapp/features/vaccination/domain/usecases/mark_annual_booster_complete_usecase.dart';
+import 'package:petapp/features/vaccination/domain/usecases/get_medical_sheet_usecase.dart';
+import 'package:petapp/features/vaccination/presentation/cubit/vaccination_cubit.dart';
 
 final sl = GetIt.instance;
 
@@ -34,6 +58,13 @@ Future<void> setupServiceLocator() async {
         connectivityService: sl(),
       ));
 
+  // Points Service
+  sl.registerLazySingleton(() => PointsService(
+        errorHandler: sl(),
+        tokenService: sl(),
+        connectivityService: sl(),
+      ));
+
   // Repositories
   sl.registerLazySingleton(() => AuthRepository(
         apiClient: sl(),
@@ -42,7 +73,9 @@ Future<void> setupServiceLocator() async {
   // Pet Feature
   sl.registerLazySingleton(() => PetApiService(apiClient: sl()));
   sl.registerLazySingleton(() => PetRepository(apiService: sl()));
-  sl.registerFactory(() => PetController(repository: sl(),));
+  sl.registerFactory(() => PetController(
+        repository: sl(),
+      ));
 
   // Profile
   sl.registerLazySingleton<ProfileRepository>(
@@ -58,9 +91,63 @@ Future<void> setupServiceLocator() async {
     () => VoucherRepository(),
   );
 
+  // Appointments Feature - Clean Architecture
+  // Data sources
+  sl.registerLazySingleton<AppointmentRemoteDataSource>(
+    () => AppointmentRemoteDataSource(sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<AppointmentRepository>(
+    () => AppointmentRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetAppointmentsUseCase(sl()));
+  sl.registerLazySingleton(() => GetFilteredAppointmentsUseCase(sl()));
+  sl.registerLazySingleton(() => CancelAppointmentUseCase(sl()));
+  sl.registerLazySingleton(() => CreateAppointmentUseCase(sl()));
+  sl.registerLazySingleton(() => SubmitReviewUseCase(sl()));
+  sl.registerLazySingleton(() => CompleteAppointmentByQrUseCase(sl()));
+
+  // Vaccination Feature - Clean Architecture
+  // Services
+  sl.registerLazySingleton<VaccinationApiService>(
+    () => VaccinationApiService(apiClient: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<VaccinationRepository>(
+    () => VaccinationRepositoryImpl(apiService: sl()),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetEligibleCategoriesUsecase(sl()));
+  sl.registerLazySingleton(() => CreateVaccinationSeriesUsecase(sl()));
+  sl.registerLazySingleton(() => MarkDoseCompleteUsecase(sl()));
+  sl.registerLazySingleton(() => MarkAnnualBoosterCompleteUsecase(sl()));
+  sl.registerLazySingleton(() => GetMedicalSheetUsecase(sl()));
+
   // Cubits
   sl.registerFactory(() => AuthCubit(
         authRepository: sl(),
         tokenService: sl(),
+      ));
+
+  sl.registerFactory(() => AppointmentsCubit(
+        getAppointmentsUseCase: sl(),
+        getFilteredAppointmentsUseCase: sl(),
+        cancelAppointmentUseCase: sl(),
+        createAppointmentUseCase: sl(),
+        submitReviewUseCase: sl(),
+        completeAppointmentByQrUseCase: sl(),
+      ));
+
+  sl.registerFactory(() => VaccinationCubit(
+        getEligibleCategoriesUsecase: sl(),
+        createVaccinationSeriesUsecase: sl(),
+        markDoseCompleteUsecase: sl(),
+        markAnnualBoosterCompleteUsecase: sl(),
+        getMedicalSheetUsecase: sl(),
       ));
 }

@@ -1,5 +1,4 @@
 import 'package:petapp/core/services/api_client.dart';
-import 'package:petapp/core/services/error_handler_service.dart';
 import 'package:petapp/core/utils/api_constants.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/pet/models/pet_species_model.dart';
@@ -32,7 +31,7 @@ class PetApiService {
       return PetModel.fromMap(userData);
     } catch (error) {
       print('❌ Failed to create pet: $error');
-      ErrorHandlerService.instance.handleError(error);
+      // Don't call ErrorHandlerService here - let the repository handle it to avoid duplicate logging
       rethrow;
     }
   }
@@ -102,7 +101,7 @@ class PetApiService {
       }
 
       // For authentication errors, network errors, and other actual problems, still throw
-      ErrorHandlerService.instance.handleError(error);
+      // Don't call ErrorHandlerService here - let the repository handle it to avoid duplicate logging
       rethrow;
     }
   }
@@ -198,7 +197,7 @@ class PetApiService {
       return PetModel.fromMap(petData);
     } catch (error) {
       print('❌ Failed to fetch pet details: $error');
-      ErrorHandlerService.instance.handleError(error);
+      // Don't call ErrorHandlerService here - let the repository handle it to avoid duplicate logging
       rethrow;
     }
   }
@@ -212,7 +211,12 @@ class PetApiService {
         PetConstants.validateSpecies(species, operation: 'update pet');
       }
 
-      print('🐾 Updating pet $id with data: $petData');
+      print('🐾 Updating pet $id with data:');
+      print('   Request URL: ${ApiConstants.petUpdateEndpoint(id)}');
+      print('   Request Method: PATCH');
+      print('   Request Body: $petData');
+      print('   Body Keys: ${petData.keys.toList()}');
+      print('   Body Type: ${petData.runtimeType}');
 
       final response = await _apiClient.patch(
         ApiConstants.petUpdateEndpoint(id),
@@ -227,7 +231,7 @@ class PetApiService {
       return PetModel.fromMap(updatedPetData);
     } catch (error) {
       print('❌ Failed to update pet: $error');
-      ErrorHandlerService.instance.handleError(error);
+      // Don't call ErrorHandlerService here - let the repository handle it to avoid duplicate logging
       rethrow;
     }
   }
@@ -244,7 +248,7 @@ class PetApiService {
       print('✅ Pet soft deleted successfully');
     } catch (error) {
       print('❌ Failed to delete pet: $error');
-      ErrorHandlerService.instance.handleError(error);
+      // Don't call ErrorHandlerService here - let the repository handle it to avoid duplicate logging
       rethrow;
     }
   }
@@ -266,7 +270,7 @@ class PetApiService {
       return PetModel.fromMap(restoredPetData);
     } catch (error) {
       print('❌ Failed to restore pet: $error');
-      ErrorHandlerService.instance.handleError(error);
+      // Don't call ErrorHandlerService here - let the repository handle it to avoid duplicate logging
       rethrow;
     }
   }
@@ -283,7 +287,7 @@ class PetApiService {
       print('✅ Pet permanently deleted');
     } catch (error) {
       print('❌ Failed to permanently delete pet: $error');
-      ErrorHandlerService.instance.handleError(error);
+      // Don't call ErrorHandlerService here - let the repository handle it to avoid duplicate logging
       rethrow;
     }
   }
@@ -305,7 +309,7 @@ class PetApiService {
           : {'data': response.data};
     } catch (error) {
       print('❌ Failed to fetch pet with appointments: $error');
-      ErrorHandlerService.instance.handleError(error);
+      // Don't call ErrorHandlerService here - let the repository handle it to avoid duplicate logging
       rethrow;
     }
   }

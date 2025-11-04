@@ -7,6 +7,9 @@
 		<string>Aleefy App needs access to your location to find nearby veterinary clinics and provide personalized services.</string>
 		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 		<string>Aleefy App needs access to your location to find nearby veterinary clinics and provide personalized services.</string>
+		<!-- Camera permission for QR code scanning -->
+		<key>NSCameraUsageDescription</key>
+		<string>Aleefy App needs access to your camera to scan QR codes for completing appointments.</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>

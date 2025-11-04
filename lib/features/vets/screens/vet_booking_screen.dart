@@ -5,7 +5,8 @@ import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
-import 'package:petapp/features/appointments/services/appointment_service.dart';
+import 'package:petapp/features/appointments/domain/usecases/create_appointment_usecase.dart';
+import 'package:petapp/di/service_locator.dart';
 import '../models/time_slot_model.dart';
 import '../services/vet_service.dart';
 import '../widgets/vet_booking_screen_widgets/vet_booking_header.dart';
@@ -18,7 +19,8 @@ import '../widgets/vet_booking_screen_widgets/vet_booking_summary.dart';
 class VetBookingController extends GetxController {
   // Services
   final VetService _vetService = VetService();
-  final AppointmentService _appointmentService = AppointmentService();
+  final CreateAppointmentUseCase _createAppointmentUseCase =
+      sl<CreateAppointmentUseCase>();
 
   // Booking state
   final Rx<DateTime> selectedDay = DateTime.now().obs;
@@ -94,6 +96,9 @@ class VetBookingController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.withOpacity(0.8),
         colorText: Colors.white,
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        icon: const Icon(Icons.error_outline, color: Colors.white, size: 24),
+        duration: const Duration(seconds: 4),
       );
     } finally {
       isLoadingTimeSlots.value = false;
@@ -107,9 +112,14 @@ class VetBookingController extends GetxController {
     eveningSlots.clear();
 
     for (final slot in slots) {
-      print('🕐 Raw slot data: ID=${slot.id}, start=${slot.startTime}, end=${slot.endTime}, display=${slot.displayTime}, bookable=${slot.isBookable}');
-      
-      if (!slot.isBookable) continue; // Skip non-bookable slots
+      print(
+          '🕐 Raw slot data: ID=${slot.id}, start=${slot.startTime}, end=${slot.endTime}, display=${slot.displayTime}, bookable=${slot.isBookable}, expired=${slot.isExpired(selectedDay.value)}');
+
+      // Skip slots that are not bookable or have expired
+      if (!slot.isBookableForDate(selectedDay.value)) {
+        print('   ⏭️  Skipping slot - not bookable or expired');
+        continue;
+      }
 
       final timeOfDay = TimeSlotModel.getTimeOfDay(slot.startTime);
 
@@ -186,49 +196,61 @@ class VetBookingController extends GetxController {
       return;
     }
 
-    // Validate pet selection
-    if (selectedPets.isEmpty) {
-      Get.snackbar(
-        AppLocalizations.of(Get.context!).error,
-        'Please select at least one pet',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
+    // Pet selection is now optional - no validation needed
 
     try {
       isLoading.value = true;
 
-      // Create appointment through API
-      final appointment = await _appointmentService.createAppointment(
-        slotId: selectedTimeSlotId.value,
-        appointmentDate: selectedDay.value,
-        petId: selectedPets.first.id, // Use first selected pet
-        reasonForVisit: 'Regular checkup', // You can make this dynamic
-        // pointsToUse: 0, // Optional: if user wants to use points
-        // couponCode: '', // Optional: if user has a coupon
+      // Create appointment using Clean Architecture use case
+      final result = await _createAppointmentUseCase(
+        CreateAppointmentParams(
+          slotId: selectedTimeSlotId.value,
+          appointmentDate: selectedDay.value,
+          petId: selectedPets.isNotEmpty ? selectedPets.first.id : null,
+          reasonForVisit: 'Regular checkup', // You can make this dynamic
+          pointsToUse: null, // Don't send if not using points
+          couponCode: null, // Don't send if no coupon
+        ),
       );
 
-      // Store the appointment ID as booking reference
-      bookingReference.value = appointment.id;
-      isBookingConfirmed.value = true;
+      result.fold(
+        // Error case
+        (failure) {
+          Get.snackbar(
+            AppLocalizations.of(Get.context!).error,
+            failure.message,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red.withValues(alpha: 0.8),
+            colorText: Colors.white,
+            margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+            icon:
+                const Icon(Icons.error_outline, color: Colors.white, size: 24),
+            duration: const Duration(seconds: 4),
+          );
+        },
+        // Success case
+        (appointment) {
+          // Store the appointment ID as booking reference
+          bookingReference.value = appointment.id;
 
-      _showSuccessMessage();
+          _showSuccessMessage();
 
-      // Navigate to appointments screen after a delay
-      Future.delayed(const Duration(seconds: 2), () {
-        Get.offAllNamed('/appointments');
-      });
+          // Navigate to appointments screen immediately
+          Future.delayed(const Duration(milliseconds: 500), () {
+            Get.offAllNamed('/appointments');
+          });
+        },
+      );
     } catch (e) {
-      print('Booking error: $e');
       Get.snackbar(
         AppLocalizations.of(Get.context!).error,
         AppLocalizations.of(Get.context!).bookingFailed,
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.red.withValues(alpha: 0.8),
         colorText: Colors.white,
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        icon: const Icon(Icons.error_outline, color: Colors.white, size: 24),
+        duration: const Duration(seconds: 4),
       );
     } finally {
       isLoading.value = false;
@@ -240,10 +262,12 @@ class VetBookingController extends GetxController {
     Get.snackbar(
       AppLocalizations.of(Get.context!).success,
       AppLocalizations.of(Get.context!).bookingConfirmed,
-      snackPosition: SnackPosition.TOP,
-      backgroundColor: Colors.green,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.green.withValues(alpha: 0.8),
       colorText: Colors.white,
-      icon: const Icon(Icons.check_circle, color: Colors.white),
+      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+      icon:
+          const Icon(Icons.check_circle_outline, color: Colors.white, size: 24),
       duration: const Duration(seconds: 3),
     );
   }

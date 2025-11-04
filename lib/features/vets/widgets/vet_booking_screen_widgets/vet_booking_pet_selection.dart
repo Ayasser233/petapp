@@ -135,22 +135,26 @@ class VetBookingPetSelection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           Text(
             pet.name,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: textColor,
+                  fontSize: 13,
                 ),
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
+            maxLines: 1,
           ),
           Text(
             pet.species.capitalize!,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: subTextColor,
+                  fontSize: 12,
                 ),
             textAlign: TextAlign.center,
+            maxLines: 1,
           ),
         ],
       ),
@@ -162,7 +166,7 @@ class VetBookingPetSelection extends StatelessWidget {
     final isDark = THelperFunctions.isDarkMode(context);
     final backgroundColor = isDark ? Colors.grey[900] : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black;
-    
+
     controller.petController.fetchPets();
 
     showModalBottomSheet(
@@ -198,7 +202,7 @@ class VetBookingPetSelection extends StatelessWidget {
   /// Build modal header
   Widget _buildModalHeader(BuildContext context, Color textColor) {
     final isDark = THelperFunctions.isDarkMode(context);
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
@@ -263,7 +267,8 @@ class VetBookingPetSelection extends StatelessWidget {
         itemCount: controller.petController.pets.length,
         itemBuilder: (context, index) {
           final pet = controller.petController.pets[index];
-          return _buildPetCard(context, pet, setModalState, textColor, subTextColor);
+          return _buildPetCard(
+              context, pet, setModalState, textColor, subTextColor);
         },
       );
     });
@@ -326,10 +331,10 @@ class VetBookingPetSelection extends StatelessWidget {
     Color? subTextColor,
   ) {
     final isDark = THelperFunctions.isDarkMode(context);
-    
+
     return Obx(() {
       final isSelected = controller.isPetSelected(pet);
-      
+
       return Card(
         margin: const EdgeInsets.only(bottom: 12),
         color: isDark ? Colors.grey[850] : Colors.white,
@@ -363,10 +368,11 @@ class VetBookingPetSelection extends StatelessWidget {
                     children: [
                       Text(
                         pet.name,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: textColor,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: textColor,
+                                ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -375,13 +381,15 @@ class VetBookingPetSelection extends StatelessWidget {
                               color: subTextColor,
                             ),
                       ),
-                      if (pet.medicalHistory?.notes != null && pet.medicalHistory!.notes!.isNotEmpty) ...[
+                      if (pet.medicalHistory?.notes != null &&
+                          pet.medicalHistory!.notes!.isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Text(
                           pet.medicalHistory!.notes!,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: subTextColor,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: subTextColor,
+                                  ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -408,7 +416,7 @@ class VetBookingPetSelection extends StatelessWidget {
   /// Build modal footer
   Widget _buildModalFooter(BuildContext context, StateSetter setModalState) {
     final isDark = THelperFunctions.isDarkMode(context);
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -436,7 +444,8 @@ class VetBookingPetSelection extends StatelessWidget {
             ),
           ),
           child: Obx(() => Text(
-                AppLocalizations.of(context).confirmPets(controller.selectedPets.length),
+                AppLocalizations.of(context)
+                    .confirmPets(controller.selectedPets.length),
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,

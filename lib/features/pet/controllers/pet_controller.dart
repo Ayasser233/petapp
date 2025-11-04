@@ -60,7 +60,6 @@ class PetController extends GetxController {
         return;
       }
 
-
       final fetchedPets = await _repository.getUserPets(
           page: page ?? currentPage.value, limit: limit ?? 20);
 
@@ -151,29 +150,18 @@ class PetController extends GetxController {
     error.value = '';
 
     try {
-
       final newPet = await _repository.createPet(petData);
       pets.insert(0, newPet); // Add to beginning of list
 
-      Get.snackbar(
-        'Success',
-        'Pet created successfully',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Don't show snackbar here - let the UI screen handle user feedback
+      // to avoid duplicate messages
 
       return true;
     } catch (e) {
       error.value = 'Failed to create pet: $e';
 
-      Get.snackbar(
-        'Error',
-        'Failed to create pet: ${e.toString()}',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Don't show snackbar here - let the UI screen handle user feedback
+      // to avoid duplicate messages
 
       return false;
     } finally {
@@ -191,10 +179,8 @@ class PetController extends GetxController {
     }
 
     try {
-
       final pet = await _repository.getPetById(id);
       selectedPet.value = pet;
-
     } catch (e) {
       error.value = 'Failed to load pet details: $e';
       _handleError(e, 'fetch pet details');
@@ -236,13 +222,8 @@ class PetController extends GetxController {
         selectedPet.value = updatedPet;
       }
 
-      Get.snackbar(
-        'Success',
-        'Pet updated successfully',
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Don't show snackbar here - let the UI screen handle user feedback
+      // to avoid duplicate messages
 
       print('✅ Controller: Pet updated successfully');
       return true;
@@ -250,13 +231,8 @@ class PetController extends GetxController {
       error.value = 'Failed to update pet: $e';
       print('❌ Controller: Failed to update pet: $e');
 
-      Get.snackbar(
-        'Error',
-        'Failed to update pet: ${e.toString()}',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Don't show snackbar here - let the UI screen handle user feedback
+      // to avoid duplicate messages
 
       return false;
     } finally {
@@ -296,13 +272,8 @@ class PetController extends GetxController {
         selectedPet.value = null;
       }
 
-      Get.snackbar(
-        'Success',
-        'Pet deleted successfully',
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Don't show snackbar here - let the UI screen handle user feedback
+      // to avoid duplicate messages
 
       print('✅ Controller: Pet deleted successfully');
       return true;
@@ -310,13 +281,8 @@ class PetController extends GetxController {
       error.value = 'Failed to delete pet: $e';
       print('❌ Controller: Failed to delete pet: $e');
 
-      Get.snackbar(
-        'Error',
-        'Failed to delete pet: ${e.toString()}',
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      // Don't show snackbar here - let the UI screen handle user feedback
+      // to avoid duplicate messages
 
       return false;
     } finally {

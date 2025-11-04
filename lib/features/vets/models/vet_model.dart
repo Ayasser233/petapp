@@ -1,4 +1,5 @@
 import 'package:geolocator/geolocator.dart';
+import '../../../core/utils/api_constants.dart';
 
 class VetModel {
   final String id;
@@ -257,6 +258,13 @@ class VetModel {
 
   /// Create from JSON (API response)
   factory VetModel.fromJson(Map<String, dynamic> json) {
+    // Debug: Print the raw JSON to see what the API is sending
+    print('🔍 VetModel.fromJson - Raw JSON: $json');
+    print('🔍 VetModel.fromJson - reviews field: ${json['reviews']}');
+    print('🔍 VetModel.fromJson - patients field: ${json['patients']}');
+    print(
+        '🔍 VetModel.fromJson - yearsExperience field: ${json['yearsExperience']}');
+
     // Handle location object or string
     String locationString = '';
     double? lat;
@@ -284,16 +292,30 @@ class VetModel {
     // Handle images - support both array and single image
     List<String> imagesList = [];
     if (json['images'] != null && json['images'] is List) {
-      imagesList = List<String>.from(json['images']);
+      imagesList = (json['images'] as List)
+          .map((img) => _convertImagePath(img.toString()))
+          .toList();
+      print('🔍 VetModel - Images array found: $imagesList');
+    } else if (json['profileImage'] != null) {
+      // Check for profileImage field first
+      final singleImage = _convertImagePath(json['profileImage'].toString());
+      imagesList = [singleImage];
+      print('🔍 VetModel - ProfileImage found: $singleImage');
     } else {
-      // Fallback to single image fields
+      // Fallback to other single image fields
       final singleImage = json['image']?.toString() ??
           json['imageUrl']?.toString() ??
-          json['profileImage']?.toString();
+          json['photo']?.toString() ??
+          json['picture']?.toString();
       if (singleImage != null && singleImage.isNotEmpty) {
-        imagesList = [singleImage];
+        imagesList = [_convertImagePath(singleImage)];
+        print('🔍 VetModel - Single image found: ${imagesList.first}');
+      } else {
+        print('⚠️ VetModel - No images found in JSON');
       }
     }
+
+    print('🔍 VetModel - Final images list: $imagesList');
 
     return VetModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
@@ -316,15 +338,23 @@ class VetModel {
       rating: (json['rating'] is int)
           ? (json['rating'] as int).toDouble()
           : (json['rating'] ?? 0.0).toDouble(),
-      reviews:
-          json['reviews'] ?? json['reviewCount'] ?? json['totalReviews'] ?? 0,
-      patients: json['patients'] ??
-          json['patientCount'] ??
-          json['totalPatients'] ??
+      reviews: _parseInt(json['reviews']) ??
+          _parseInt(json['reviewCount']) ??
+          _parseInt(json['totalReviews']) ??
+          _parseInt(json['review_count']) ??
+          _parseInt(json['total_reviews']) ??
           0,
-      yearsExperience: json['yearsExperience'] ??
-          json['experience'] ??
-          json['years_experience'] ??
+      patients: _parseInt(json['patients']) ??
+          _parseInt(json['patientCount']) ??
+          _parseInt(json['totalPatients']) ??
+          _parseInt(json['patient_count']) ??
+          _parseInt(json['total_patients']) ??
+          0,
+      yearsExperience: _parseInt(json['yearsExperience']) ??
+          _parseInt(json['experience']) ??
+          _parseInt(json['years_experience']) ??
+          _parseInt(json['experienceYears']) ??
+          _parseInt(json['experience_years']) ??
           0,
       latitude:
           lat ?? _parseDouble(json['latitude']) ?? _parseDouble(json['lat']),
@@ -400,5 +430,39 @@ class VetModel {
     if (value is int) return value.toDouble();
     if (value is String) return double.tryParse(value);
     return null;
+  }
+
+  /// Helper method to parse int from dynamic value (handles string or number)
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  /// Helper method to convert relative image paths to full URLs
+  static String _convertImagePath(String imagePath) {
+    // If already a full URL or asset path, return as is
+    if (imagePath.startsWith('http://') ||
+        imagePath.startsWith('https://') ||
+        imagePath.startsWith('assets/')) {
+      return imagePath;
+    }
+
+    // If it's a relative API path, convert to full URL
+    if (imagePath.startsWith('/api/')) {
+      final baseUrl = ApiConstants.apiBaseUrl;
+      // Remove /api/v1 from baseUrl and the path since path already has it
+      final cleanBaseUrl = baseUrl.replaceAll('/api/v1', '');
+      return '$cleanBaseUrl$imagePath';
+    }
+
+    // If it starts with just /, assume it's relative to base URL
+    if (imagePath.startsWith('/')) {
+      return '${ApiConstants.apiBaseUrl}$imagePath';
+    }
+
+    return imagePath;
   }
 }

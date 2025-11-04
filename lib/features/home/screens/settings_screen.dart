@@ -10,10 +10,11 @@ class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   // Add the missing _buildSectionHeader method
-  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
+  Widget _buildSectionHeader(
+      BuildContext context, String title, IconData icon) {
     final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black87;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -43,7 +44,7 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   // Update the build method in the SettingsScreen class
   @override
   Widget build(BuildContext context) {
@@ -51,7 +52,7 @@ class SettingsScreen extends StatelessWidget {
     final cardColor = isDark ? const Color(0xFF2A2A2A) : Colors.white;
     final backgroundColor = isDark ? Colors.black : const Color(0xFFF5F5F5);
     final localizations = AppLocalizations.of(context); // Get localizations
-    
+
     return BaseScreen(
       navBarIndex: 2, // This is accessed from the profile screen
       appBar: AppBar(
@@ -67,38 +68,43 @@ class SettingsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Theme Section
-              _buildSectionHeader(context, localizations.appearance, Icons.palette_outlined),
+              _buildSectionHeader(
+                  context, localizations.appearance, Icons.palette_outlined),
               const SizedBox(height: 8),
               _buildThemeSettings(context, cardColor),
-              
+
               const SizedBox(height: 24),
-              
+
               // Language Section
-              _buildSectionHeader(context, localizations.language, Icons.language),
+              _buildSectionHeader(
+                  context, localizations.language, Icons.language),
               const SizedBox(height: 8),
               _buildLanguageSettings(context, cardColor),
-              
+
               const SizedBox(height: 24),
-              
+
               // Notifications Section
-              _buildSectionHeader(context, localizations.notifications, Icons.notifications_outlined),
+              _buildSectionHeader(context, localizations.notifications,
+                  Icons.notifications_outlined),
               const SizedBox(height: 8),
               _buildNotificationSettings(context, cardColor),
-              
+
               const SizedBox(height: 24),
-              
+
               // Privacy Section
-              _buildSectionHeader(context, localizations.privacySecurity, Icons.security_outlined),
+              _buildSectionHeader(context, localizations.privacySecurity,
+                  Icons.security_outlined),
               const SizedBox(height: 8),
               _buildPrivacySettings(context, cardColor),
-              
+
               const SizedBox(height: 24),
-              
+
               // About Section
-              _buildSectionHeader(context, localizations.about, Icons.info_outline),
+              _buildSectionHeader(
+                  context, localizations.about, Icons.info_outline),
               const SizedBox(height: 8),
               _buildAboutSettings(context, cardColor),
-              
+
               const SizedBox(height: 110),
             ],
           ),
@@ -111,7 +117,7 @@ class SettingsScreen extends StatelessWidget {
   Widget _buildThemeSettings(BuildContext context, Color cardColor) {
     final settingsProvider = Provider.of<SettingsProvider>(context);
     final localizations = AppLocalizations.of(context); // Get localizations
-    
+
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
@@ -176,7 +182,7 @@ class SettingsScreen extends StatelessWidget {
   Widget _buildLanguageSettings(BuildContext context, Color cardColor) {
     final settingsProvider = Provider.of<SettingsProvider>(context);
     final localizations = AppLocalizations.of(context); // Get localizations
-    
+
     return Container(
       decoration: BoxDecoration(
         color: cardColor,
@@ -222,11 +228,11 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildNotificationSettings(BuildContext context, Color cardColor) {
     final settingsProvider = Provider.of<SettingsProvider>(context);
     final localizations = AppLocalizations.of(context); // Get localizations
-    
+
     return Container(
       // Replace your current container decoration with this enhanced version
       decoration: BoxDecoration(
@@ -284,7 +290,7 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildPrivacySettings(BuildContext context, Color cardColor) {
     final localizations = AppLocalizations.of(context); // Get localizations
 
@@ -337,7 +343,7 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildAboutSettings(BuildContext context, Color cardColor) {
     AppLocalizations.of(context); // Get localizations
 
@@ -387,12 +393,19 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildRadioTile<T>({required BuildContext context, required String title, required String subtitle, required T value, required T groupValue, required void Function(T?)? onChanged, required IconData icon}) {
+
+  Widget _buildRadioTile<T>(
+      {required BuildContext context,
+      required String title,
+      required String subtitle,
+      required T value,
+      required T groupValue,
+      required void Function(T?)? onChanged,
+      required IconData icon}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
     final subTextColor = isDark ? Colors.white70 : Colors.black54;
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -447,9 +460,13 @@ class SettingsScreen extends StatelessWidget {
                 height: 24,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: value == groupValue ? AppColors.orange : Colors.transparent,
+                  color: value == groupValue
+                      ? AppColors.orange
+                      : Colors.transparent,
                   border: Border.all(
-                    color: value == groupValue ? AppColors.orange : Colors.grey.shade400,
+                    color: value == groupValue
+                        ? AppColors.orange
+                        : Colors.grey.shade400,
                     width: 2,
                   ),
                 ),
@@ -469,12 +486,18 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildSwitchTile({required BuildContext context, required String title, required String subtitle, required bool value, required void Function(bool) onChanged, required IconData icon}) {
+
+  Widget _buildSwitchTile(
+      {required BuildContext context,
+      required String title,
+      required String subtitle,
+      required bool value,
+      required void Function(bool) onChanged,
+      required IconData icon}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
     final subTextColor = isDark ? Colors.white70 : Colors.black54;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Row(
@@ -527,12 +550,22 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildActionTile({required BuildContext context, required String title, required String subtitle, required VoidCallback onTap, required IconData icon, bool showArrow = true, bool isDestructive = false}) {
+
+  Widget _buildActionTile(
+      {required BuildContext context,
+      required String title,
+      required String subtitle,
+      required VoidCallback onTap,
+      required IconData icon,
+      bool showArrow = true,
+      bool isDestructive = false}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDestructive ? Colors.red : (isDark ? Colors.white : Colors.black87);
-    final subTextColor = isDestructive ? Colors.red.withValues(alpha: 0.7) : (isDark ? Colors.white70 : Colors.black54);
-    
+    final textColor =
+        isDestructive ? Colors.red : (isDark ? Colors.white : Colors.black87);
+    final subTextColor = isDestructive
+        ? Colors.red.withValues(alpha: 0.7)
+        : (isDark ? Colors.white70 : Colors.black54);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -545,8 +578,8 @@ class SettingsScreen extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isDestructive 
-                      ? Colors.red.withValues(alpha: 0.2) 
+                  color: isDestructive
+                      ? Colors.red.withValues(alpha: 0.2)
                       : AppColors.lightorange.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -591,7 +624,7 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Widget _buildDivider() {
     return Container(
       height: 1,
@@ -611,28 +644,27 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   void _showDeleteAccountDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
-        content: const Text(
-          'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost.',
-        ),
+        title: Text(localizations.deleteAccount),
+        content: Text(localizations.deleteAccountConfirmation),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(localizations.cancel),
           ),
           TextButton(
             onPressed: () {
               // Implement account deletion logic
               Navigator.of(context).pop();
             },
-            child: const Text(
-              'Delete',
-              style: TextStyle(color: Colors.red),
+            child: Text(
+              localizations.delete,
+              style: const TextStyle(color: Colors.red),
             ),
           ),
         ],

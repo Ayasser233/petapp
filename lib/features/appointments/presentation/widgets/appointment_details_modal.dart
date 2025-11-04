@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
-import 'package:petapp/features/appointments/models/appointment_model.dart';
+import 'package:petapp/features/appointments/domain/entities/appointment_entity.dart';
+import 'package:petapp/features/appointments/domain/entities/appointment_entity_extensions.dart';
 import 'package:petapp/features/appointments/utils/appointment_utils.dart';
 
 class AppointmentDetailsModal extends StatelessWidget {
-  final AppointmentModel appointment;
+  final AppointmentEntity appointment;
 
   const AppointmentDetailsModal({
     super.key,
     required this.appointment,
   });
 
-  static void show(BuildContext context, AppointmentModel appointment) {
+  static void show(BuildContext context, AppointmentEntity appointment) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -72,15 +73,18 @@ class AppointmentDetailsModal extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context, bool isDark) {
+    // Use effective status to handle expired appointments
+    final effectiveStatus = appointment.effectiveStatus;
+
     return Row(
       children: [
         CircleAvatar(
           radius: 30,
-          backgroundColor: AppointmentUtils.getStatusColor(appointment.status)
+          backgroundColor: AppointmentUtils.getStatusColor(effectiveStatus)
               .withValues(alpha: 0.2),
           child: Icon(
             AppointmentUtils.getAppointmentIcon(),
-            color: AppointmentUtils.getStatusColor(appointment.status),
+            color: AppointmentUtils.getStatusColor(effectiveStatus),
             size: 30,
           ),
         ),
@@ -112,6 +116,12 @@ class AppointmentDetailsModal extends StatelessWidget {
 
   Widget _buildDetails(
       BuildContext context, ScrollController scrollController, bool isDark) {
+    // Use effective status to handle expired appointments
+    final effectiveStatus = appointment.effectiveStatus;
+    final statusText = appointment.isExpired
+        ? 'Cancelled (Expired)'
+        : _getLocalizedStatus(context, effectiveStatus);
+
     return SingleChildScrollView(
       controller: scrollController,
       child: Column(
@@ -120,7 +130,7 @@ class AppointmentDetailsModal extends StatelessWidget {
           _buildDetailRow(
             context,
             AppLocalizations.of(context).status,
-            _getLocalizedStatus(context, appointment.status),
+            statusText,
             isDark,
           ),
           _buildDetailRow(
@@ -152,7 +162,7 @@ class AppointmentDetailsModal extends StatelessWidget {
           _buildDetailRow(
             context,
             'Duration',
-            '${appointment.endTime.difference(appointment.startTime).inMinutes} mins',
+            '${(appointment.endTime.difference(appointment.startTime).inMinutes / 2).round()} mins',
             isDark,
           ),
           _buildDetailRow(
@@ -161,6 +171,20 @@ class AppointmentDetailsModal extends StatelessWidget {
             AppointmentUtils.formatCurrency(appointment.finalAmount),
             isDark,
           ),
+          if (appointment.pointsUsed > 0)
+            _buildDetailRow(
+              context,
+              'Points Redeemed',
+              '${appointment.pointsUsed} points',
+              isDark,
+            ),
+          if (appointment.pointsEarned > 0)
+            _buildDetailRow(
+              context,
+              'Points Earned',
+              '${appointment.pointsEarned} points',
+              isDark,
+            ),
           if (appointment.reasonForVisit != null &&
               appointment.reasonForVisit!.isNotEmpty) ...[
             const SizedBox(height: 16),

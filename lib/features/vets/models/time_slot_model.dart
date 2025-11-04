@@ -66,9 +66,50 @@ class TimeSlotModel {
     return isCurrentWeek ? isAvailableCurrentWeek : isAvailableNextWeek;
   }
 
+  /// Check if the time slot has expired (for today's date only)
+  bool isExpired(DateTime selectedDate) {
+    // Only check expiration for today's date
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final selected =
+        DateTime(selectedDate.year, selectedDate.month, selectedDate.day);
+
+    // If selected date is not today, slot is not expired
+    if (!selected.isAtSameMomentAs(today)) {
+      return false;
+    }
+
+    // Parse start time and check if it has passed
+    try {
+      final parts = startTime.split(':');
+      if (parts.isEmpty) return false;
+
+      final hour = int.tryParse(parts[0]) ?? 0;
+      final minute = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
+
+      final slotDateTime = DateTime(
+        now.year,
+        now.month,
+        now.day,
+        hour,
+        minute,
+      );
+
+      // Slot is expired if start time has passed
+      return now.isAfter(slotDateTime);
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Check if slot can be booked
   bool get isBookable {
     return isActive && !isFull && availableSpots > 0;
+  }
+
+  /// Check if slot can be booked for a specific date (includes time expiration check)
+  bool isBookableForDate(DateTime selectedDate) {
+    return isBookable && !isExpired(selectedDate);
   }
 
   /// Convert 24-hour time to 12-hour format with AM/PM

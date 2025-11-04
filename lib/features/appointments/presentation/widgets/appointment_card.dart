@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
-import 'package:petapp/features/appointments/models/appointment_model.dart';
+import 'package:petapp/features/appointments/domain/entities/appointment_entity.dart';
+import 'package:petapp/features/appointments/domain/entities/appointment_entity_extensions.dart';
 import 'package:petapp/features/appointments/utils/appointment_utils.dart';
 import 'appointment_actions.dart';
 
 class AppointmentCard extends StatelessWidget {
-  final AppointmentModel appointment;
+  final AppointmentEntity appointment;
   final VoidCallback onTap;
-  final Function(AppointmentModel) onCancel;
-  final Function(AppointmentModel) onReschedule;
-  final Function(AppointmentModel) onReview;
-  final Function(AppointmentModel) onBookAgain;
+  final Function(AppointmentEntity) onCancel;
+  final Function(AppointmentEntity) onReschedule;
+  final Function(AppointmentEntity) onReview;
+  final Function(AppointmentEntity) onBookAgain;
+  final Function(AppointmentEntity)? onScanQr;
 
   const AppointmentCard({
     super.key,
@@ -22,6 +24,7 @@ class AppointmentCard extends StatelessWidget {
     required this.onReschedule,
     required this.onReview,
     required this.onBookAgain,
+    this.onScanQr,
   });
 
   @override
@@ -57,6 +60,7 @@ class AppointmentCard extends StatelessWidget {
                 onReschedule: onReschedule,
                 onReview: onReview,
                 onBookAgain: onBookAgain,
+                onScanQr: onScanQr,
               ),
             ],
           ),
@@ -66,15 +70,18 @@ class AppointmentCard extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context, bool isDark) {
+    // Use effective status to handle expired appointments
+    final effectiveStatus = appointment.effectiveStatus;
+
     return Row(
       children: [
         CircleAvatar(
           radius: 25,
-          backgroundColor: AppointmentUtils.getStatusColor(appointment.status)
+          backgroundColor: AppointmentUtils.getStatusColor(effectiveStatus)
               .withValues(alpha: 0.2),
           child: Icon(
             AppointmentUtils.getAppointmentIcon(),
-            color: AppointmentUtils.getStatusColor(appointment.status),
+            color: AppointmentUtils.getStatusColor(effectiveStatus),
             size: 24,
           ),
         ),
@@ -105,18 +112,20 @@ class AppointmentCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: AppointmentUtils.getStatusColor(appointment.status)
+            color: AppointmentUtils.getStatusColor(effectiveStatus)
                 .withValues(alpha: isDark ? 0.2 : 0.1),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: AppointmentUtils.getStatusColor(appointment.status)
+              color: AppointmentUtils.getStatusColor(effectiveStatus)
                   .withValues(alpha: isDark ? 0.5 : 0.3),
             ),
           ),
           child: Text(
-            _getLocalizedStatus(context, appointment.status),
+            appointment.isExpired
+                ? 'Cancelled (Expired)'
+                : _getLocalizedStatus(context, effectiveStatus),
             style: TextStyle(
-              color: AppointmentUtils.getStatusColor(appointment.status),
+              color: AppointmentUtils.getStatusColor(effectiveStatus),
               fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
@@ -180,7 +189,36 @@ class AppointmentCard extends StatelessWidget {
                 ),
           ),
         ),
-        if (appointment.pet != null)
+        if (appointment.pointsUsed > 0) ...[
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.green.withValues(alpha: isDark ? 0.2 : 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.star,
+                  size: 14,
+                  color: Colors.green[700],
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  '${appointment.pointsUsed}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.green[700],
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+        if (appointment.pet != null) ...[
+          const SizedBox(width: 8),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
@@ -195,6 +233,7 @@ class AppointmentCard extends StatelessWidget {
                   ),
             ),
           ),
+        ],
       ],
     );
   }

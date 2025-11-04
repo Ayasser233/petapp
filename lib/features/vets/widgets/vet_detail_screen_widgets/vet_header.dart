@@ -30,16 +30,102 @@ class _ClinicHeaderState extends State<VetHeader> {
   List<String> _getVetImages() {
     // Get images from vet data or use default images
     final images = widget.vet['images'];
+
+    // Debug: Print to see what images we're getting
+    print('🔍 VetHeader - Images from vet data: $images');
+    print('🔍 VetHeader - Images type: ${images.runtimeType}');
+
     if (images != null && images is List && images.isNotEmpty) {
       return List<String>.from(images);
     }
 
+    // Check for single image field
+    if (widget.vet['image'] != null &&
+        widget.vet['image'].toString().isNotEmpty) {
+      return [widget.vet['image'].toString()];
+    }
+
     // Default fallback images
     return [
-      widget.vet['image'] ?? 'assets/images/pet_hospital.jpg',
+      'assets/images/pet_hospital.jpg',
       'assets/images/pet_hospital2.jpg',
       'assets/images/pet_hospital3.jpg',
     ];
+  }
+
+  Widget _buildImage(String imagePath) {
+    // Check if it's a network URL or local asset
+    final isNetworkImage = imagePath.startsWith('http://') ||
+        imagePath.startsWith('https://') ||
+        imagePath.startsWith('www.');
+
+    print('🔍 VetHeader - Image path: $imagePath, isNetwork: $isNetworkImage');
+
+    if (isNetworkImage) {
+      // Load network image
+      return Image.network(
+        imagePath,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            width: double.infinity,
+            color: Colors.grey[300],
+            child: Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+                color: AppColors.orange,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          print('❌ Error loading network image: $error');
+          return Container(
+            width: double.infinity,
+            color: Colors.grey[300],
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.local_hospital,
+                  size: 50,
+                  color: Colors.grey,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Image not available',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    } else {
+      // Load local asset image
+      return Image.asset(
+        imagePath,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          print('❌ Error loading asset image: $error');
+          return Container(
+            width: double.infinity,
+            color: Colors.grey[300],
+            child: const Icon(
+              Icons.local_hospital,
+              size: 50,
+              color: Colors.grey,
+            ),
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -68,22 +154,7 @@ class _ClinicHeaderState extends State<VetHeader> {
                   },
                   itemCount: vetImages.length,
                   itemBuilder: (context, index) {
-                    return Image.asset(
-                      vetImages[index],
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: double.infinity,
-                          color: Colors.grey[300],
-                          child: const Icon(
-                            Icons.local_hospital,
-                            size: 50,
-                            color: Colors.grey,
-                          ),
-                        );
-                      },
-                    );
+                    return _buildImage(vetImages[index]);
                   },
                 ),
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/pet/screens/add_pet.dart';
@@ -31,7 +32,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(
-          'My Pets',
+          AppLocalizations.of(context).myPets,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: textColor,
@@ -44,7 +45,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
           IconButton(
             icon: Icon(Icons.refresh, color: textColor),
             onPressed: () => _petController.fetchPets(),
-            tooltip: 'Refresh pets',
+            tooltip: AppLocalizations.of(context).refreshPets,
           ),
         ],
       ),
@@ -64,7 +65,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                 const Icon(Icons.error_outline, color: Colors.red, size: 60),
                 const SizedBox(height: 16),
                 Text(
-                  'Error loading pets',
+                  AppLocalizations.of(context).errorLoadingPets,
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -86,7 +87,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                     backgroundColor: AppColors.orange,
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text('Retry'),
+                  child: Text(AppLocalizations.of(context).retry),
                 ),
               ],
             ),
@@ -119,7 +120,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                 ],
               ),
               child: Text(
-                '${_petController.pets.length} ${_petController.pets.length == 1 ? 'Pet' : 'Pets'}',
+                '${_petController.pets.length} ${_petController.pets.length == 1 ? AppLocalizations.of(context).pet : AppLocalizations.of(context).pets}',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -154,7 +155,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
         backgroundColor: AppColors.orange,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
-        label: const Text('Add Pet'),
+        label: Text(AppLocalizations.of(context).addPet),
       ),
     );
   }
@@ -179,7 +180,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
           ),
           const SizedBox(height: 24),
           Text(
-            'No pets added yet',
+            AppLocalizations.of(context).noPetsAddedYet,
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -190,7 +191,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'Add your furry friends to keep track of their health and appointments',
+              AppLocalizations.of(context).addYourFurryFriends,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: subTextColor,
@@ -208,7 +209,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
               }
             },
             icon: const Icon(Icons.add),
-            label: const Text('Add Your First Pet'),
+            label: Text(AppLocalizations.of(context).addYourFirstPet),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.orange,
               foregroundColor: Colors.white,
@@ -415,9 +416,13 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
     }
 
     if (years > 0) {
-      return years == 1 ? '1 year old' : '$years years old';
+      return years == 1
+          ? '1 ${AppLocalizations.of(context).yearOld}'
+          : '$years ${AppLocalizations.of(context).yearsOld}';
     } else {
-      return months == 1 ? '1 month old' : '$months months old';
+      return months == 1
+          ? '1 ${AppLocalizations.of(context).monthOld}'
+          : '$months ${AppLocalizations.of(context).monthsOld}';
     }
   }
 }

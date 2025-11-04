@@ -4,6 +4,7 @@ import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/core/routes/routes.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/pet/utils/pet_constants.dart';
@@ -26,7 +27,8 @@ class _AddPetScreenState extends State<AddPetScreen> {
 
   String _selectedSpecies = 'dog';
   String _selectedGender = 'MALE';
-  DateTime _selectedDate = DateTime.now().subtract(const Duration(days: 365));
+  int _selectedMonth = DateTime.now().month;
+  int _selectedYear = DateTime.now().year - 1; // Default to 1 year ago
   String _imagePath = 'assets/images/pet_placeholder.jpg';
   bool _isImageFromGallery = false;
   bool _isLoading = false;
@@ -60,19 +62,20 @@ class _AddPetScreenState extends State<AddPetScreen> {
   }
 
   void _showLoginRequiredDialog() {
+    final localizations = AppLocalizations.of(context);
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Login Required'),
-        content: const Text('You need to be logged in to add pets.'),
+        title: Text(localizations.loginRequired),
+        content: Text(localizations.loginRequiredToAddPets),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
               Get.back(); // Go back to previous screen
             },
-            child: const Text('Cancel'),
+            child: Text(localizations.cancel),
           ),
           ElevatedButton(
             onPressed: () {
@@ -82,7 +85,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.orange,
             ),
-            child: const Text('Login'),
+            child: Text(localizations.login),
           ),
         ],
       ),
@@ -108,18 +111,19 @@ class _AddPetScreenState extends State<AddPetScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       backgroundColor: Theme.of(context).cardColor,
-      builder: (context) {
+      builder: (dialogContext) {
+        final dialogLocalizations = AppLocalizations.of(dialogContext);
         return Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Choose Photo',
+                dialogLocalizations.choosePhoto,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: Theme.of(context).textTheme.titleLarge?.color,
+                  color: Theme.of(dialogContext).textTheme.titleLarge?.color,
                 ),
               ),
               const SizedBox(height: 20),
@@ -128,7 +132,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                 children: [
                   _buildImageSourceOption(
                     icon: Icons.camera_alt,
-                    label: 'Camera',
+                    label: dialogLocalizations.camera,
                     onTap: () async {
                       Navigator.pop(context);
                       final XFile? image =
@@ -143,7 +147,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                   ),
                   _buildImageSourceOption(
                     icon: Icons.photo_library,
-                    label: 'Gallery',
+                    label: dialogLocalizations.gallery,
                     onTap: () async {
                       Navigator.pop(context);
                       final XFile? image =
@@ -201,54 +205,178 @@ class _AddPetScreenState extends State<AddPetScreen> {
     );
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime(2010),
-      lastDate: DateTime.now(),
-      builder: (context, child) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
+  String _formatMonthYear(int month, int year) {
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December'
+    ];
+    return '${monthNames[month - 1]} $year';
+  }
 
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: AppColors.orange,
-              onPrimary: Colors.white,
-              onSurface: isDark ? Colors.white : Colors.black,
-              surface: isDark ? Colors.grey[850]! : Colors.white,
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.orange,
+  Future<void> _selectDate(BuildContext context) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final localizations = AppLocalizations.of(context);
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        int tempMonth = _selectedMonth;
+        int tempYear = _selectedYear;
+
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: isDark ? Colors.grey[900] : Colors.white,
+              title: Text(
+                'Select Birth Month & Year',
+                style: TextStyle(
+                  color: isDark ? Colors.white : Colors.black,
+                ),
               ),
-            ),
-            dialogTheme: DialogThemeData(
-                backgroundColor: isDark ? Colors.grey[900] : Colors.white),
-          ),
-          child: child!,
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Month picker
+                  DropdownButtonFormField<int>(
+                    initialValue: tempMonth,
+                    decoration: InputDecoration(
+                      labelText: 'Month',
+                      labelStyle: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                        ),
+                      ),
+                    ),
+                    dropdownColor: isDark ? Colors.grey[850] : Colors.white,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                    items: List.generate(12, (index) {
+                      final monthNum = index + 1;
+                      final monthNames = [
+                        'January',
+                        'February',
+                        'March',
+                        'April',
+                        'May',
+                        'June',
+                        'July',
+                        'August',
+                        'September',
+                        'October',
+                        'November',
+                        'December'
+                      ];
+                      return DropdownMenuItem(
+                        value: monthNum,
+                        child: Text(monthNames[index]),
+                      );
+                    }),
+                    onChanged: (value) {
+                      setState(() {
+                        tempMonth = value!;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  // Year picker
+                  DropdownButtonFormField<int>(
+                    initialValue: tempYear,
+                    decoration: InputDecoration(
+                      labelText: 'Year',
+                      labelStyle: TextStyle(
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                        ),
+                      ),
+                    ),
+                    dropdownColor: isDark ? Colors.grey[850] : Colors.white,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                    items: List.generate(
+                      DateTime.now().year - 2000 + 1,
+                      (index) {
+                        final year = 2000 + index;
+                        return DropdownMenuItem(
+                          value: year,
+                          child: Text(year.toString()),
+                        );
+                      },
+                    ).reversed.toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        tempYear = value!;
+                      });
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    localizations.cancel,
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    this.setState(() {
+                      _selectedMonth = tempMonth;
+                      _selectedYear = tempYear;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    localizations.ok,
+                    style: const TextStyle(color: AppColors.orange),
+                  ),
+                ),
+              ],
+            );
+          },
         );
       },
     );
-
-    if (picked != null && picked != _selectedDate) {
-      setState(() {
-        _selectedDate = picked;
-      });
-    }
   }
 
   Future<void> _savePet() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final localizations = AppLocalizations.of(context);
     setState(() => _isLoading = true);
 
     try {
       // Validate species
       if (!PetConstants.isValidSpecies(_selectedSpecies)) {
         Get.snackbar(
-          'Invalid Species',
-          'Only cats and dogs are allowed.',
+          localizations.invalidSpecies,
+          localizations.onlyCatsAndDogsAllowed,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red[100],
           colorText: Colors.red[800],
@@ -265,6 +393,10 @@ class _AddPetScreenState extends State<AddPetScreen> {
                   ? 'assets/images/cat_silhouette.png'
                   : 'assets/images/pet_placeholder.jpg';
 
+      // Create date with first day of selected month and year
+      final birthDate = DateTime(_selectedYear, _selectedMonth, 1);
+      final dateString = birthDate.toIso8601String().split('T')[0];
+
       // Create pet data
       final petData = {
         'name': _nameController.text.trim(),
@@ -273,9 +405,8 @@ class _AddPetScreenState extends State<AddPetScreen> {
                 .substring(1)
                 .toLowerCase(), // Backend expects "Dog" or "Cat" (capitalized)
         'gender': _selectedGender, // MALE or FEMALE
-        'dateOfBirth': _selectedDate
-            .toIso8601String()
-            .split('T')[0], // Backend expects camelCase
+        'dateOfBirth':
+            dateString, // Backend expects YYYY-MM-DD format with 1st day of month
         'allergies': _allergies,
         'spayNeuterStatus': _spayNeuterStatus,
         'weight': _weightController.text.trim().isNotEmpty
@@ -289,11 +420,12 @@ class _AddPetScreenState extends State<AddPetScreen> {
       final success = await _petController.createPet(petData);
 
       if (success) {
-        // Navigate to My Pets screen after successful addition
-        Get.offAllNamed('/my-pets');
+        // Go back to My Pets screen after successful addition
+        Get.back();
         Get.snackbar(
-          'Success!',
-          '${_nameController.text} has been added successfully.',
+          localizations.success,
+          localizations.petAddedSuccessfully
+              .replaceAll('{name}', _nameController.text),
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green[100],
           colorText: Colors.green[800],
@@ -301,8 +433,8 @@ class _AddPetScreenState extends State<AddPetScreen> {
       }
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Failed to add pet. Please try again.',
+        localizations.error,
+        localizations.failedToAddPet,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red[100],
         colorText: Colors.red[800],
@@ -314,6 +446,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context);
     final isDark = THelperFunctions.isDarkMode(context);
     final backgroundColor = isDark ? Colors.grey[900] : Colors.white;
     final textColor = isDark ? Colors.white : Colors.black87;
@@ -323,7 +456,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(
-          'Add New Pet',
+          localizations.addNewPet,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: isDark ? Colors.white : Colors.black87,
@@ -428,7 +561,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                   children: [
                     // Pet name
                     Text(
-                      'Pet Name',
+                      localizations.petName,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -440,7 +573,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       controller: _nameController,
                       style: TextStyle(color: textColor),
                       decoration: InputDecoration(
-                        hintText: 'Enter your pet\'s name',
+                        hintText: localizations.enterPetName,
                         hintStyle: TextStyle(
                           color: isDark ? Colors.grey[400] : Colors.grey[600],
                         ),
@@ -457,7 +590,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your pet\'s name';
+                          return localizations.pleaseEnterPetName;
                         }
                         return null;
                       },
@@ -465,7 +598,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     const SizedBox(height: 20),
                     // Pet type
                     Text(
-                      'Pet Type',
+                      localizations.petType,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -487,7 +620,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
 
                     // Gender
                     Text(
-                      'Gender',
+                      localizations.gender,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -512,7 +645,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
 
                     // Birthdate
                     Text(
-                      'Birthdate',
+                      localizations.birthdate,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -537,7 +670,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                             ),
                             const SizedBox(width: 12),
                             Text(
-                              '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                              _formatMonthYear(_selectedMonth, _selectedYear),
                               style: TextStyle(
                                 fontSize: 16,
                                 color: textColor,
@@ -556,7 +689,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
 
                     // Weight
                     Text(
-                      'Weight (kg)',
+                      localizations.weightKg,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -570,7 +703,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
                       decoration: InputDecoration(
-                        hintText: 'Enter pet weight',
+                        hintText: localizations.enterPetWeight,
                         hintStyle: TextStyle(
                           color: isDark ? Colors.grey[400] : Colors.grey[600],
                         ),
@@ -584,14 +717,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
                           Icons.monitor_weight,
                           color: AppColors.orange,
                         ),
-                        suffixText: 'kg',
+                        suffixText: localizations.kg,
                       ),
                     ),
                     const SizedBox(height: 20),
 
                     // Allergies
                     Text(
-                      'Allergies',
+                      localizations.allergies,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -634,8 +767,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                                   controller: _allergyController,
                                   style: TextStyle(color: textColor),
                                   decoration: InputDecoration(
-                                    hintText:
-                                        'Add allergy (e.g., chicken, dairy)',
+                                    hintText: localizations.addAllergy,
                                     hintStyle: TextStyle(
                                       color: isDark
                                           ? Colors.grey[400]
@@ -696,7 +828,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
-                              'Spayed/Neutered',
+                              localizations.spayedNeuteredQuestion,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -720,7 +852,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
 
                     // Notes
                     Text(
-                      'Notes',
+                      localizations.notes,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -732,7 +864,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       controller: _notesController,
                       style: TextStyle(color: textColor),
                       decoration: InputDecoration(
-                        hintText: 'Any additional information about your pet',
+                        hintText: localizations.addNotes,
                         hintStyle: TextStyle(
                           color: isDark ? Colors.grey[400] : Colors.grey[600],
                         ),
@@ -775,9 +907,9 @@ class _AddPetScreenState extends State<AddPetScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text(
-                                'Save Pet',
-                                style: TextStyle(
+                            : Text(
+                                localizations.savePet,
+                                style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),

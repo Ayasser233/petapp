@@ -1,0 +1,322 @@
+import 'package:dio/dio.dart';
+import 'package:petapp/core/errors/exceptions.dart';
+import 'package:petapp/core/services/api_client.dart';
+import 'package:petapp/core/utils/api_constants.dart';
+
+/// Remote data source for appointment operations
+///
+/// Handles all API calls related to appointments
+/// Throws exceptions on errors (converted to failures in repository)
+class AppointmentRemoteDataSource {
+  final ApiClient apiClient;
+
+  AppointmentRemoteDataSource(this.apiClient);
+
+  /// Fetch appointments from API
+  Future<Map<String, dynamic>> getAppointments({
+    int page = 1,
+    int limit = 10,
+    String? status,
+  }) async {
+    try {
+      final queryParams = {
+        'page': page,
+        'limit': limit,
+        if (status != null) 'status': status,
+      };
+
+      final response = await apiClient.get(
+        ApiConstants.appointmentsEndpoint,
+        queryParameters: queryParams,
+      );
+
+      if (response.data['success'] == true) {
+        return {
+          'data': response.data['data'] ?? [],
+          'hasNextPage': response.data['hasNextPage'] ?? false,
+        };
+      } else {
+        throw ServerException(
+          message: response.data['message'] ?? 'Failed to load appointments',
+        );
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(message: _extractErrorMessage(e));
+    }
+  }
+
+  /// Get specific appointment details
+  Future<Map<String, dynamic>?> getAppointmentDetails(
+    String appointmentId,
+  ) async {
+    try {
+      final response = await apiClient.get(
+        ApiConstants.appointmentDetailEndpoint(appointmentId),
+      );
+
+      if (response.data['success'] == true && response.data['data'] != null) {
+        return response.data['data'] as Map<String, dynamic>;
+      }
+      return null;
+    } catch (e) {
+      throw ServerException(message: _extractErrorMessage(e));
+    }
+  }
+
+  /// Create new appointment
+  Future<Map<String, dynamic>> createAppointment({
+    required String slotId,
+    required DateTime appointmentDate,
+    String? petId,
+    String? reasonForVisit,
+    int? pointsToUse,
+    String? couponCode,
+  }) async {
+    try {
+      // Format date as YYYY-MM-DD
+      final dateOnly =
+          '${appointmentDate.year}-${appointmentDate.month.toString().padLeft(2, '0')}-${appointmentDate.day.toString().padLeft(2, '0')}';
+
+      final requestBody = {
+        'slotId': slotId,
+        'appointmentDate': dateOnly,
+        if (petId != null) 'petId': petId,
+        if (reasonForVisit != null) 'reasonForVisit': reasonForVisit,
+        if (pointsToUse != null) 'pointsToUse': pointsToUse,
+        if (couponCode != null) 'couponCode': couponCode,
+      };
+
+      print('📤 Creating appointment: $requestBody');
+
+      final response = await apiClient.post(
+        ApiConstants.appointmentsEndpoint,
+        data: requestBody,
+      );
+
+      if (response.data['success'] == true && response.data['data'] != null) {
+        print('✅ Appointment created successfully');
+        return response.data['data'] as Map<String, dynamic>;
+      } else {
+        throw ServerException(
+          message: response.data['message'] ?? 'Failed to create appointment',
+        );
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(message: _extractErrorMessage(e));
+    }
+  }
+
+  /// Cancel an appointment
+  Future<bool> cancelAppointment(String appointmentId) async {
+    try {
+      print('📤 Cancelling appointment: $appointmentId');
+
+      final response = await apiClient.patch(
+        ApiConstants.appointmentCancelEndpoint(appointmentId),
+      );
+
+      if (response.data['success'] == true) {
+        print('✅ Appointment cancelled successfully');
+        return true;
+      } else {
+        final errorMessage =
+            response.data['message'] ?? 'Cannot cancel appointment';
+        print('❌ Failed to cancel appointment: $errorMessage');
+        throw AppointmentException(errorMessage);
+      }
+    } catch (e) {
+      if (e is AppointmentException) rethrow;
+      throw AppointmentException(_extractErrorMessage(e));
+    }
+  }
+
+  /// Complete an appointment
+  Future<bool> completeAppointment(String appointmentId) async {
+    try {
+      print('📤 Completing appointment: $appointmentId');
+
+      final response = await apiClient.patch(
+        ApiConstants.appointmentCompleteEndpoint(appointmentId),
+      );
+
+      if (response.data['success'] == true) {
+        print('✅ Appointment completed successfully');
+        return true;
+      }
+      return false;
+    } catch (e) {
+      throw ServerException(message: _extractErrorMessage(e));
+    }
+  }
+
+  /// Complete appointment by scanning vet's QR code
+  Future<void> completeAppointmentByQr({
+    required String appointmentId,
+    required String qrCode,
+  }) async {
+    try {
+      print(
+          '📤 Completing appointment by QR: $appointmentId with code: $qrCode');
+
+      final requestBody = {
+        'qrCode': qrCode,
+      };
+
+      final response = await apiClient.patch(
+        '${ApiConstants.appointmentsEndpoint}/$appointmentId/complete-qr',
+        data: requestBody,
+      );
+
+      if (response.data['success'] == true) {
+        print('✅ Appointment completed by QR successfully');
+        return;
+      } else {
+        throw ServerException(
+          message: response.data['message'] ?? 'Failed to complete appointment',
+        );
+      }
+    } catch (e) {
+      if (e is ServerException) rethrow;
+      throw ServerException(message: _extractErrorMessage(e));
+    }
+  }
+
+  /// Submit review for appointment
+  Future<bool> submitReview({
+    required String appointmentId,
+    required int rating,
+    String? comment,
+  }) async {
+    try {
+      if (rating < 1 || rating > 5) {
+        throw ValidationException(message: 'Rating must be between 1 and 5');
+      }
+
+      final requestBody = {
+        'rating': rating,
+        if (comment != null && comment.isNotEmpty) 'comment': comment,
+      };
+
+      print(
+          '📤 Submitting review for appointment $appointmentId: $requestBody');
+
+      final response = await apiClient.patch(
+        ApiConstants.appointmentReviewEndpoint(appointmentId),
+        data: requestBody,
+      );
+
+      if (response.data['success'] == true) {
+        print('✅ Review submitted successfully');
+        return true;
+      }
+      return false;
+    } catch (e) {
+      if (e is ValidationException) rethrow;
+      throw ServerException(message: _extractErrorMessage(e));
+    }
+  }
+
+  /// Validate coupon code
+  Future<Map<String, dynamic>> validateCoupon(String couponCode) async {
+    print('📤 Validating coupon: $couponCode');
+
+    final response = await apiClient.post(
+      ApiConstants.pointsValidateEndpoint,
+      data: {'couponCode': couponCode},
+    );
+
+    if (response.data['success'] == true) {
+      print('✅ Coupon validated successfully');
+      return {
+        'valid': true,
+        'discount': (response.data['data']['discount'] ?? 0).toDouble(),
+        'message': response.data['message'] ?? 'Coupon is valid',
+      };
+    } else {
+      return {
+        'valid': false,
+        'discount': 0.0,
+        'message': response.data['message'] ?? 'Invalid coupon',
+      };
+    }
+  }
+
+  /// Validate points
+  Future<Map<String, dynamic>> validatePoints(int points) async {
+    print('📤 Validating points: $points');
+
+    final response = await apiClient.post(
+      ApiConstants.pointsValidateEndpoint,
+      data: {'points': points},
+    );
+
+    if (response.data['success'] == true) {
+      print('✅ Points validated successfully');
+      return {
+        'valid': true,
+        'discount': (response.data['data']['discount'] ?? 0).toDouble(),
+        'availablePoints': response.data['data']['availablePoints'] ?? 0,
+        'message': response.data['message'] ?? 'Points are valid',
+      };
+    } else {
+      return {
+        'valid': false,
+        'discount': 0.0,
+        'availablePoints': 0,
+        'message': response.data['message'] ?? 'Invalid points',
+      };
+    }
+  }
+
+  /// Extract error message from DioException
+  String _extractErrorMessage(dynamic error) {
+    if (error is DioException) {
+      final response = error.response;
+      if (response?.data != null && response!.data is Map<String, dynamic>) {
+        final data = response.data as Map<String, dynamic>;
+
+        // Try to get message from API response
+        String? message = data['message'];
+
+        // Check nested errorDetails
+        if (data['errorDetails'] is Map<String, dynamic>) {
+          final errorDetails = data['errorDetails'] as Map<String, dynamic>;
+
+          // Handle validation errors with array format
+          if (errorDetails['message'] is List) {
+            final messages = errorDetails['message'] as List;
+            if (messages.isNotEmpty) {
+              if (messages.first is Map) {
+                final firstError = messages.first as Map;
+                return firstError.values.first.toString();
+              }
+              return messages.first.toString();
+            }
+          }
+
+          // Handle simple message
+          if (errorDetails['message'] != null) {
+            message = errorDetails['message'].toString();
+          }
+        }
+
+        if (message != null && message.isNotEmpty) {
+          return message;
+        }
+      }
+
+      // Fallback to error type message
+      if (error.type == DioExceptionType.connectionTimeout) {
+        return 'Connection timeout. Please try again.';
+      } else if (error.type == DioExceptionType.connectionError) {
+        return 'No internet connection. Please check your network.';
+      } else if (error.response?.statusCode != null) {
+        return 'Error ${error.response!.statusCode}: ${error.response!.statusMessage ?? "Unknown error"}';
+      }
+    }
+
+    return error.toString();
+  }
+}

@@ -78,14 +78,7 @@ class RewardsCard extends StatelessWidget {
               Expanded(
                 child: _buildPointsSection(context, localizations),
               ),
-              Container(
-                height: 100,
-                width: 1,
-                color: Colors.white.withValues(alpha: 0.3),
-                margin: const EdgeInsets.symmetric(horizontal: 16),
-              ),
-              // Vouchers section (only available vouchers)
-              _buildVouchersSection(context, localizations),
+              // Remove vouchers section divider and content
             ],
           ),
         ),
@@ -93,7 +86,8 @@ class RewardsCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPointsSection(BuildContext context, AppLocalizations localizations) {
+  Widget _buildPointsSection(
+      BuildContext context, AppLocalizations localizations) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -160,91 +154,6 @@ class RewardsCard extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildVouchersSection(BuildContext context, AppLocalizations localizations) {
-    return GestureDetector(
-      onTap: onVouchersTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: vouchers > 0 ? Colors.white : Colors.white.withValues(alpha: 0.7),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                Icon(
-                  Icons.confirmation_number_outlined,
-                  color: vouchers > 0 ? AppColors.orange : AppColors.orange.withValues(alpha: 0.5),
-                  size: 24,
-                ),
-                if (vouchers > 0)
-                  Positioned(
-                    top: -2,
-                    right: -2,
-                    child: Container(
-                      padding: const EdgeInsets.all(2),
-                      decoration: const BoxDecoration(
-                        color: Colors.red,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        vouchers > 9 ? '9+' : vouchers.toString(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            vouchers.toString(),
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-          ),
-          Text(
-            'Available', // Changed from 'vouchers' to be more specific
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white,
-                ),
-          ),
-          if (vouchers > 0) ...[
-            const SizedBox(height: 4),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                'Tap to view',
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.white,
-                      fontSize: 10,
-                    ),
-              ),
-            ),
-          ],
-        ],
-      ),
     );
   }
 

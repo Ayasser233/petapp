@@ -382,6 +382,188 @@ class AppLocalizations {
   String get pointsSummary =>
       _localizedValues[locale.languageCode]?['pointsSummary'] ??
       'Total earned: {earned} • Total redeemed: {redeemed}';
+
+  // Additional Points Screen Translations
+  String get errorLoadingPoints =>
+      _localizedValues[locale.languageCode]?['errorLoadingPoints'] ??
+      'Error loading points';
+  String get currentBalance =>
+      _localizedValues[locale.languageCode]?['currentBalance'] ??
+      'Current Balance';
+  String get totalEarned =>
+      _localizedValues[locale.languageCode]?['totalEarned'] ?? 'Total Earned';
+  String get totalSpent =>
+      _localizedValues[locale.languageCode]?['totalSpent'] ?? 'Total Spent';
+  String get transactionHistory =>
+      _localizedValues[locale.languageCode]?['transactionHistory'] ??
+      'Transaction History';
+  String get noTransactions =>
+      _localizedValues[locale.languageCode]?['noTransactions'] ??
+      'No transactions yet';
+  String get noPointsAvailable =>
+      _localizedValues[locale.languageCode]?['noPointsAvailable'] ??
+      'No Points Available';
+  String get noPointsMessage =>
+      _localizedValues[locale.languageCode]?['noPointsMessage'] ??
+      'You don\'t have any points to redeem yet. Start using our services to earn points!';
+
+  String get loginRequired =>
+      _localizedValues[locale.languageCode]?['loginRequired'] ??
+      'Login Required';
+  String get loginRequiredMessage =>
+      _localizedValues[locale.languageCode]?['loginRequiredMessage'] ??
+      'You need to be logged in to access this feature.';
+  String get leaveAReview =>
+      _localizedValues[locale.languageCode]?['leaveAReview'] ??
+      'Leave a Review';
+  String get deleteAccountConfirmation =>
+      _localizedValues[locale.languageCode]?['deleteAccountConfirmation'] ??
+      'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost.';
+  String get accountDetailsUpdatedSuccessfully =>
+      _localizedValues[locale.languageCode]
+          ?['accountDetailsUpdatedSuccessfully'] ??
+      'Account details updated successfully!';
+  String failedToUpdateProfile(String error) =>
+      _localizedValues[locale.languageCode]?['failedToUpdateProfile']
+          ?.replaceAll('{error}', error) ??
+      'Failed to update profile: $error';
+  String voucherCodeCopied(String code) =>
+      _localizedValues[locale.languageCode]?['voucherCodeCopied']
+          ?.replaceAll('{code}', code) ??
+      'Voucher code "$code" copied to clipboard';
+
+  // Pet-related translations
+  String get loginRequiredToAddPets =>
+      _localizedValues[locale.languageCode]?['loginRequiredToAddPets'] ??
+      'You need to be logged in to add pets.';
+  String get loginRequiredToUpdatePets =>
+      _localizedValues[locale.languageCode]?['loginRequiredToUpdatePets'] ??
+      'You need to be logged in to update pets.';
+  String get chooseFromGallery =>
+      _localizedValues[locale.languageCode]?['chooseFromGallery'] ??
+      'Choose from Gallery';
+  String get takeAPhoto =>
+      _localizedValues[locale.languageCode]?['takeAPhoto'] ?? 'Take a Photo';
+  String get addYourFirstPet =>
+      _localizedValues[locale.languageCode]?['addYourFirstPet'] ??
+      'Add Your First Pet';
+  String get deleting =>
+      _localizedValues[locale.languageCode]?['deleting'] ?? 'Deleting...';
+  String get refreshPets =>
+      _localizedValues[locale.languageCode]?['refreshPets'] ?? 'Refresh pets';
+  String get errorLoadingPets =>
+      _localizedValues[locale.languageCode]?['errorLoadingPets'] ??
+      'Error loading pets';
+  String get noPetsAddedYet =>
+      _localizedValues[locale.languageCode]?['noPetsAddedYet'] ??
+      'No pets added yet';
+  String get addYourFurryFriends =>
+      _localizedValues[locale.languageCode]?['addYourFurryFriends'] ??
+      'Add your furry friends to keep track of their health and appointments';
+  String get yearOld =>
+      _localizedValues[locale.languageCode]?['yearOld'] ?? 'year old';
+  String get yearsOld =>
+      _localizedValues[locale.languageCode]?['yearsOld'] ?? 'years old';
+  String get monthOld =>
+      _localizedValues[locale.languageCode]?['monthOld'] ?? 'month old';
+  String get monthsOld =>
+      _localizedValues[locale.languageCode]?['monthsOld'] ?? 'months old';
+
+  // Additional pet screen translations
+  String get choosePhoto =>
+      _localizedValues[locale.languageCode]?['choosePhoto'] ?? 'Choose Photo';
+  String get camera =>
+      _localizedValues[locale.languageCode]?['camera'] ?? 'Camera';
+  String get gallery =>
+      _localizedValues[locale.languageCode]?['gallery'] ?? 'Gallery';
+  String get invalidSpecies =>
+      _localizedValues[locale.languageCode]?['invalidSpecies'] ??
+      'Invalid Species';
+  String get onlyCatsAndDogsAllowed =>
+      _localizedValues[locale.languageCode]?['onlyCatsAndDogsAllowed'] ??
+      'Only cats and dogs are allowed.';
+  String get failedToUpdatePet =>
+      _localizedValues[locale.languageCode]?['failedToUpdatePet'] ??
+      'Failed to update pet. Please try again.';
+
+  String get birthday =>
+      _localizedValues[locale.languageCode]?['birthday'] ?? 'Birthday';
+  String get species =>
+      _localizedValues[locale.languageCode]?['species'] ?? 'Species';
+  String get gender =>
+      _localizedValues[locale.languageCode]?['gender'] ?? 'Gender';
+  String get notSpayedNeutered =>
+      _localizedValues[locale.languageCode]?['notSpayedNeutered'] ??
+      'Not Spayed/Neutered';
+
+  // Add Pet screen strings
+  String get addNewPet =>
+      _localizedValues[locale.languageCode]?['addNewPet'] ?? 'Add New Pet';
+  String get petName =>
+      _localizedValues[locale.languageCode]?['petName'] ?? 'Pet Name';
+  String get enterPetName =>
+      _localizedValues[locale.languageCode]?['enterPetName'] ??
+      'Enter your pet\'s name';
+  String get pleaseEnterPetName =>
+      _localizedValues[locale.languageCode]?['pleaseEnterPetName'] ??
+      'Please enter your pet\'s name';
+  String get petType =>
+      _localizedValues[locale.languageCode]?['petType'] ?? 'Pet Type';
+  String get birthdate =>
+      _localizedValues[locale.languageCode]?['birthdate'] ?? 'Birthdate';
+  String get weightKg =>
+      _localizedValues[locale.languageCode]?['weightKg'] ?? 'Weight (kg)';
+  String get kg => _localizedValues[locale.languageCode]?['kg'] ?? 'kg';
+  String get allergies =>
+      _localizedValues[locale.languageCode]?['allergies'] ?? 'Allergies';
+  String get addNotes =>
+      _localizedValues[locale.languageCode]?['addNotes'] ??
+      'Any additional information about your pet';
+  String get spayedNeuteredQuestion =>
+      _localizedValues[locale.languageCode]?['spayedNeuteredQuestion'] ??
+      'Spayed/Neutered?';
+  String get savePet =>
+      _localizedValues[locale.languageCode]?['savePet'] ?? 'Save Pet';
+  String get petAddedSuccessfully =>
+      _localizedValues[locale.languageCode]?['petAddedSuccessfully'] ??
+      '{name} has been added successfully.';
+  String get failedToAddPet =>
+      _localizedValues[locale.languageCode]?['failedToAddPet'] ??
+      'Failed to add pet. Please try again.';
+
+  // Pet Profile screen strings
+  String get petProfile =>
+      _localizedValues[locale.languageCode]?['petProfile'] ?? 'Pet Profile';
+  String get editPet =>
+      _localizedValues[locale.languageCode]?['editPet'] ?? 'Edit Pet';
+  String get confirmDelete =>
+      _localizedValues[locale.languageCode]?['confirmDelete'] ??
+      'Confirm Delete';
+  String get areYouSureDeletePet =>
+      _localizedValues[locale.languageCode]?['areYouSureDeletePet'] ??
+      'Are you sure you want to delete this pet?';
+  String get thisActionCannotBeUndone =>
+      _localizedValues[locale.languageCode]?['thisActionCannotBeUndone'] ??
+      'This action cannot be undone.';
+
+  String get updatePet =>
+      _localizedValues[locale.languageCode]?['updatePet'] ?? 'Update Pet';
+  String get weight =>
+      _localizedValues[locale.languageCode]?['weight'] ?? 'Weight';
+  String get lastVetVisit =>
+      _localizedValues[locale.languageCode]?['lastVetVisit'] ??
+      'Last Vet Visit';
+  String get addVaccination =>
+      _localizedValues[locale.languageCode]?['addVaccination'] ??
+      'Add Vaccination';
+  String get petUpdatedSuccessfully =>
+      _localizedValues[locale.languageCode]?['petUpdatedSuccessfully'] ??
+      '{name} has been updated successfully.';
+  String get info => _localizedValues[locale.languageCode]?['info'] ?? 'Info';
+  String get noChangesToUpdate =>
+      _localizedValues[locale.languageCode]?['noChangesToUpdate'] ??
+      'No changes to update';
+
   String get dateToday =>
       _localizedValues[locale.languageCode]?['dateToday'] ?? 'Today';
   String get dateYesterday =>
@@ -444,6 +626,13 @@ class AppLocalizations {
   String get keepAppointment =>
       _localizedValues[locale.languageCode]?['keepAppointment'] ??
       'Keep Appointment';
+  String get confirmCancelAppointmentMessage =>
+      _localizedValues[locale.languageCode]
+          ?['confirmCancelAppointmentMessage'] ??
+      'Are you sure you want to cancel this appointment?';
+  String get yesCancelAppointment =>
+      _localizedValues[locale.languageCode]?['yesCancelAppointment'] ??
+      'Yes, Cancel';
   String get appointmentDetails =>
       _localizedValues[locale.languageCode]?['appointmentDetails'] ??
       'Appointment Details';
@@ -462,6 +651,21 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['close'] ?? 'Close';
   String get leaveReview =>
       _localizedValues[locale.languageCode]?['leaveReview'] ?? 'Leave Review';
+  String get scanQrCode =>
+      _localizedValues[locale.languageCode]?['scanQrCode'] ?? 'Scan QR Code';
+  String get scanVetQrCodeToComplete =>
+      _localizedValues[locale.languageCode]?['scanVetQrCodeToComplete'] ??
+      'Scan Vet QR Code to Complete';
+  String get pointCameraAtQrCode =>
+      _localizedValues[locale.languageCode]?['pointCameraAtQrCode'] ??
+      'Point your camera at the QR code';
+  String get appointmentCompletedSuccessfully =>
+      _localizedValues[locale.languageCode]
+          ?['appointmentCompletedSuccessfully'] ??
+      'Appointment completed successfully';
+  String get scanQrToComplete =>
+      _localizedValues[locale.languageCode]?['scanQrToComplete'] ??
+      'Scan QR to Complete';
   // Add these getters to your AppLocalizations class
   String get date => _localizedValues[locale.languageCode]?['date'] ?? 'Date';
   String get time => _localizedValues[locale.languageCode]?['time'] ?? 'Time';
@@ -482,6 +686,11 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['minutes'] ?? 'minutes';
   String get reviews =>
       _localizedValues[locale.languageCode]?['reviews'] ?? 'Reviews';
+  String get review =>
+      _localizedValues[locale.languageCode]?['review'] ?? 'Review';
+  String get noReviewsYet =>
+      _localizedValues[locale.languageCode]?['noReviewsYet'] ??
+      'No reviews yet';
   String get patients =>
       _localizedValues[locale.languageCode]?['patients'] ?? 'Patients';
   String get yearsExp =>
@@ -721,9 +930,10 @@ class AppLocalizations {
   String get skinAndCoat =>
       _localizedValues[locale.languageCode]?['skinAndCoat'] ?? 'Skin & Coat';
   String get pelvis =>
-      _localizedValues[locale.languageCode]?['pelvis'] ?? 'Pelvis';
+      _localizedValues[locale.languageCode]?['pelvis'] ??
+      'Urinary & Reproductive';
   String get buttocks =>
-      _localizedValues[locale.languageCode]?['buttocks'] ?? 'Buttocks';
+      _localizedValues[locale.languageCode]?['buttocks'] ?? 'Anus & Pooping';
   String get selected =>
       _localizedValues[locale.languageCode]?['selected'] ?? 'Selected';
   String get howToUse =>
@@ -837,6 +1047,18 @@ class AppLocalizations {
   String get urinationProblems =>
       _localizedValues[locale.languageCode]?['urinationProblems'] ??
       'Urination Problems';
+  String get neurologicalIssues =>
+      _localizedValues[locale.languageCode]?['neurologicalIssues'] ??
+      'Neurological Issues';
+  String get behavioralIssues =>
+      _localizedValues[locale.languageCode]?['behavioralIssues'] ??
+      'Behavioral Issues';
+  String get generalIssues =>
+      _localizedValues[locale.languageCode]?['generalIssues'] ??
+      'General Issues';
+  String get breathingProblems =>
+      _localizedValues[locale.languageCode]?['breathingProblems'] ??
+      'Breathing Problems';
 
 // Eye Symptoms
   String get eyeRedness =>
@@ -1343,6 +1565,83 @@ class AppLocalizations {
       'errorOpeningAccountDetails': 'Error opening account details',
       'aleefyPoints': 'Aleefy Points',
       'view': 'View',
+      'pointsHistory': 'Points History',
+
+      // Additional Points Translations
+      'errorLoadingPoints': 'Error loading points',
+      'currentBalance': 'Current Balance',
+      'totalEarned': 'Total Earned',
+      'totalSpent': 'Total Spent',
+      'transactionHistory': 'Transaction History',
+      'noTransactions': 'No transactions yet',
+      'noPointsAvailable': 'No Points Available',
+      'noPointsMessage':
+          'You don\'t have any points to redeem yet. Start using our services to earn points!',
+
+      'loginRequired': 'Login Required',
+      'loginRequiredMessage':
+          'You need to be logged in to access this feature.',
+      'leaveAReview': 'Leave a Review',
+      'deleteAccountConfirmation':
+          'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost.',
+      'accountDetailsUpdatedSuccessfully':
+          'Account details updated successfully!',
+      'failedToUpdateProfile': 'Failed to update profile: {error}',
+      'voucherCodeCopied': 'Voucher code "{code}" copied to clipboard',
+
+      // Pet-related translations
+      'loginRequiredToAddPets': 'You need to be logged in to add pets.',
+      'loginRequiredToUpdatePets': 'You need to be logged in to update pets.',
+      'chooseFromGallery': 'Choose from Gallery',
+      'takeAPhoto': 'Take a Photo',
+      'addYourFirstPet': 'Add Your First Pet',
+      'deleting': 'Deleting...',
+      'refreshPets': 'Refresh pets',
+      'errorLoadingPets': 'Error loading pets',
+      'noPetsAddedYet': 'No pets added yet',
+      'addYourFurryFriends':
+          'Add your furry friends to keep track of their health and appointments',
+      'yearOld': 'year old',
+      'yearsOld': 'years old',
+      'monthOld': 'month old',
+      'monthsOld': 'months old',
+      'choosePhoto': 'Choose Photo',
+      'camera': 'Camera',
+      'gallery': 'Gallery',
+      'invalidSpecies': 'Invalid Species',
+      'onlyCatsAndDogsAllowed': 'Only cats and dogs are allowed.',
+      'failedToUpdatePet': 'Failed to update pet. Please try again.',
+      'birthday': 'Birthday',
+      'species': 'Species',
+      'gender': 'Gender',
+      'notSpayedNeutered': 'Not Spayed/Neutered',
+      'addNewPet': 'Add New Pet',
+      'petName': 'Pet Name',
+      'enterPetName': 'Enter your pet\'s name',
+      'pleaseEnterPetName': 'Please enter your pet\'s name',
+      'petType': 'Pet Type',
+      'birthdate': 'Birthdate',
+      'weightKg': 'Weight (kg)',
+      'kg': 'kg',
+      'allergies': 'Allergies',
+      'addNotes': 'Any additional information about your pet',
+      'spayedNeuteredQuestion': 'Spayed/Neutered?',
+      'savePet': 'Save Pet',
+      'petAddedSuccessfully': '{name} has been added successfully.',
+      'failedToAddPet': 'Failed to add pet. Please try again.',
+      'petProfile': 'Pet Profile',
+      'editPet': 'Edit Pet',
+      'confirmDelete': 'Confirm Delete',
+      'areYouSureDeletePet': 'Are you sure you want to delete this pet?',
+      'thisActionCannotBeUndone': 'This action cannot be undone.',
+      'updatePet': 'Update Pet',
+      'weight': 'Weight',
+      'lastVetVisit': 'Last Vet Visit',
+      'addVaccination': 'Add Vaccination',
+      'petUpdatedSuccessfully': '{name} has been updated successfully.',
+      'info': 'Info',
+      'noChangesToUpdate': 'No changes to update',
+
       'noFavoritesYet': 'No favorites yet',
       'noFavoritesMessage':
           'When you find Vets you love, save them here for quick access.',
@@ -1409,6 +1708,9 @@ class AppLocalizations {
           'Activities matching filter will appear here',
       'appointmentCancelledSuccessfully': 'Appointment cancelled successfully',
       'failedToCancelAppointment': 'Failed to cancel appointment',
+      'confirmCancelAppointmentMessage':
+          'Are you sure you want to cancel this appointment?',
+      'yesCancelAppointment': 'Yes, Cancel',
       'rescheduleFeatureComingSoon': 'Reschedule feature coming soon!',
       'reviewFeatureComingSoon': 'Review feature coming soon!',
       'bookingFollowupAppointment': 'Booking follow-up appointment...',
@@ -1421,6 +1723,8 @@ class AppLocalizations {
       'report': 'Report',
       'minutes': 'minutes',
       'reviews': 'Reviews',
+      'review': 'Review',
+      'noReviewsYet': 'No reviews yet',
       'patients': 'Patients',
       'yearsExp': 'Years exp.',
       'description': 'Description',
@@ -1533,6 +1837,7 @@ class AppLocalizations {
       'maleGenitalProblems': 'Male Genital Problems',
       'femaleGenitalProblems': 'Female Genital Problems',
       'urinationProblems': 'Urination Problems',
+      'neurologicalIssues': 'Neurological Issues',
 
       // Eye Symptoms
       'eyeRedness': 'Eye Redness',
@@ -1773,6 +2078,527 @@ class AppLocalizations {
       'noUrinationDescription':
           'If your pet hasn\'t peed in over 24 hours, it\'s a life-threatening emergency!',
 
+      // Neurological Issues
+      'Seizures':
+          'Seizures (Twitching, Shaking, Collapsing, Uncontrollable Movements)',
+      'Seizures_description':
+          'If your pet suddenly starts shaking, drooling, or falling over, they might be having a seizure!',
+      'Seizures_cause_0': 'Epilepsy (some pets are born with it)',
+      'Seizures_cause_1': 'Poisoning (chocolate, human meds)',
+      'Seizures_cause_2': 'Head injury',
+      'Seizures_cause_3': 'Liver or kidney problems',
+      'Seizures_cause_4': 'Low blood sugar',
+      'Seizures_cause_5': 'Brain tumors (rare)',
+      'Seizures_action_0': 'Stay calm – Don\'t try to hold them down',
+      'Seizures_action_1':
+          'Keep them safe – Move objects away so they don\'t get hurt',
+      'Seizures_action_2':
+          'Don\'t feed or give water until your pet is fully back to normal',
+      'Seizures_action_3': 'Time the seizure – If over 2 minutes → Emergency',
+      'Seizures_action_4':
+          'Record a video if safe – Helps the vet with diagnosis',
+      'Seizures_action_5':
+          'After the seizure – Keep your pet quiet and comfortable; once they\'re alert, offer water',
+      'Seizures_action_6':
+          'Go to the vet if: The seizure lasts more than 2 minutes, They have more than one seizure in 24 hours, They don\'t recover quickly or seem very weak',
+      'Seizures_action_7':
+          'Only go to the vet once the seizure has stopped (never try to move them mid-seizure)',
+
+      'Head Tilt or Walking in Circles': 'Head Tilt or Walking in Circles',
+      'Head Tilt or Walking in Circles_description':
+          'If your pet keeps tilting their head to one side or walks in circles, something might be wrong with their brain or inner ear!',
+      'Head Tilt or Walking in Circles_cause_0':
+          'Ear infection – A common cause, especially if there\'s scratching or a bad smell',
+      'Head Tilt or Walking in Circles_cause_1':
+          'Balance problems in older pets',
+      'Head Tilt or Walking in Circles_cause_2':
+          'Toxins or certain medications',
+      'Head Tilt or Walking in Circles_cause_3':
+          'Brain issues (tumor or injury) – Less common',
+      'Head Tilt or Walking in Circles_action_0':
+          'If it just started and your pet seems normal otherwise → Monitor closely for the next 24 hours',
+      'Head Tilt or Walking in Circles_action_1':
+          'Check the ears – If there\'s redness, swelling, or a bad smell, it could be an ear infection → Vet visit needed',
+      'Head Tilt or Walking in Circles_action_2':
+          'If no signs of an ear infection but symptoms continue → Could be neurological, see a vet',
+      'Head Tilt or Walking in Circles_action_3':
+          'If the tilt continues or gets worse → Book a vet visit',
+      'Head Tilt or Walking in Circles_action_4':
+          'If your pet is falling, walking in circles, or has trouble standing → Go to the vet immediately',
+
+      'Loss of Balance':
+          'Loss of Balance (Stumbling, Falling Over, Weakness in Legs)',
+      'Loss of Balance_description':
+          'If your pet suddenly stumbles, wobbles, or falls, it could be a sign of something serious!',
+      'Loss of Balance_cause_0':
+          'Poisoning – Chocolate, onions, human medicine',
+      'Loss of Balance_cause_1':
+          'Ear Infection – Can affect balance and coordination',
+      'Loss of Balance_cause_2':
+          'Balance Problems in Older Pets – Age-related changes',
+      'Loss of Balance_cause_3':
+          'Spinal Injury – Trauma affecting nerves or movement',
+      'Loss of Balance_cause_4': 'Stroke – Sudden loss of balance or weakness',
+      'Loss of Balance_cause_5': 'Neurological Disease – Brain or nerve issues',
+      'Loss of Balance_action_0':
+          'If your pet is a little wobbly but still alert and walking → Monitor closely for a few hours',
+      'Loss of Balance_action_1':
+          'If your pet can\'t stand at all or keeps falling → Emergency vet visit immediately',
+      'Loss of Balance_action_2':
+          'If balance issues come with vomiting or head tilt → Vet check ASAP',
+      'Loss of Balance_action_3':
+          'If you suspect poisoning → Emergency vet immediately!',
+
+      'Sudden Blindness':
+          'Sudden Blindness (Bumping Into Things, Wide Pupils, Confusion)',
+      'Sudden Blindness_description':
+          'If your pet suddenly starts bumping into walls, seems lost in familiar places, or their pupils stay very wide, they may have lost vision suddenly.',
+      'Sudden Blindness_cause_0':
+          'High blood pressure – Very common in older cats',
+      'Sudden Blindness_cause_1':
+          'Retinal detachment – Can happen suddenly and cause blindness',
+      'Sudden Blindness_cause_2':
+          'Diabetes complications – May damage the eyes over time',
+      'Sudden Blindness_cause_3':
+          'Brain problems – Stroke or tumor (less common)',
+      'Sudden Blindness_cause_4':
+          'Eye disease – Glaucoma (painful pressure) or cataracts (cloudy lens)',
+      'Sudden Blindness_action_0':
+          'If vision loss is gradual → Book a vet visit soon for an eye exam',
+      'Sudden Blindness_action_1':
+          'If vision loss is sudden (bumping into walls, not recognizing people/objects) → Vet visit ASAP! Quick treatment (especially for high blood pressure) can sometimes save vision',
+      'Sudden Blindness_action_2':
+          'If pupils are stuck wide open and don\'t react to light → Emergency vet visit immediately',
+
+      'Sudden Collapse or Fainting': 'Sudden Collapse or Fainting',
+      'Sudden Collapse or Fainting_description':
+          'If your pet suddenly falls down and seems unconscious, even if just for a moment, it\'s always a red flag.',
+      'Sudden Collapse or Fainting_cause_0':
+          'Heart disease – Can cause sudden fainting or collapse',
+      'Sudden Collapse or Fainting_cause_1':
+          'Anemia – Low blood levels make pets weak and collapse easily',
+      'Sudden Collapse or Fainting_cause_2':
+          'Low blood sugar – Common in small or diabetic pets',
+      'Sudden Collapse or Fainting_cause_3':
+          'Heatstroke – Especially after being outside in hot weather',
+      'Sudden Collapse or Fainting_cause_4':
+          'Poisoning – From toxic food, medications, or chemicals',
+      'Sudden Collapse or Fainting_action_0':
+          'If collapse happened but your pet got up quickly → Still see a vet soon to find the cause',
+      'Sudden Collapse or Fainting_action_1':
+          'If collapse + pale gums, weak pulse, or trouble breathing → Emergency vet immediately!',
+      'Sudden Collapse or Fainting_action_2':
+          'If they were outside in heat before collapsing → Move to a cool area, offer small sips of water, and get to the vet right away',
+      'Sudden Collapse or Fainting_action_3':
+          'If collapse happens more than once, or your pet doesn\'t recover quickly → Emergency vet ASAP',
+
+      'Tremors': 'Tremors (Shaking or Shivering While Awake, Not a Seizure)',
+      'Tremors_description':
+          'If your pet is shaking or shivering while awake (not a seizure), there could be several reasons.',
+      'Tremors_cause_0':
+          'Cold or fear – Cold weather, fear or stress can cause shaking',
+      'Tremors_cause_1': 'Pain – From injuries, arthritis, or discomfort',
+      'Tremors_cause_2':
+          'Low blood sugar – More likely in small dogs or sick pets',
+      'Tremors_cause_3': 'Poisoning – Chocolate, meds, or toxic products',
+      'Tremors_cause_4': 'Brain or nerve problems',
+      'Tremors_action_0':
+          'If your pet is just cold or scared but otherwise normal → Warm them up and keep them calm',
+      'Tremors_action_1':
+          'If shaking comes with vomiting, drooling, or weakness → Could be poisoning → Vet immediately',
+      'Tremors_action_2':
+          'If shaking continues for no clear reason, or comes with pain → Vet visit recommended to check the cause',
+
+      // Behavioral Issues
+      'behavioralIssues': 'Behavioral Issues',
+
+      'Aggression (Growling, Biting, Hissing, Snapping)':
+          'Aggression (Growling, Biting, Hissing, Snapping)',
+      'Aggression (Growling, Biting, Hissing, Snapping)_description':
+          'If your pet suddenly becomes aggressive, they might be in pain, scared, or feeling unwell!',
+      'Aggression (Growling, Biting, Hissing, Snapping)_cause_0':
+          'Pain or illness (arthritis, injury, infections)',
+      'Aggression (Growling, Biting, Hissing, Snapping)_cause_1':
+          'Fear or past trauma (especially in rescue pets)',
+      'Aggression (Growling, Biting, Hissing, Snapping)_cause_2':
+          'Territorial behavior (protecting food, toys, or space)',
+      'Aggression (Growling, Biting, Hissing, Snapping)_cause_3':
+          'Lack of socialization (not used to people or other animals)',
+      'Aggression (Growling, Biting, Hissing, Snapping)_cause_4':
+          'Hormones (common in unneutered males)',
+      'Aggression (Growling, Biting, Hissing, Snapping)_cause_5':
+          'Rabies or neurological issues (rare, but possible — especially if unvaccinated or bit by a stray)',
+      'Aggression (Growling, Biting, Hissing, Snapping)_action_0':
+          'Rule out pain – If aggression is new, check for injuries and see a vet',
+      'Aggression (Growling, Biting, Hissing, Snapping)_action_1':
+          'Avoid punishment – This can make it worse; use calm, positive reinforcement instead',
+      'Aggression (Growling, Biting, Hissing, Snapping)_action_2':
+          'Give space – Don\'t force interaction if your pet seems scared or anxious',
+      'Aggression (Growling, Biting, Hissing, Snapping)_action_3':
+          'Consider spaying/neutering – Can help reduce hormone-related aggression',
+      'Aggression (Growling, Biting, Hissing, Snapping)_action_4':
+          'If aggression is sudden and extreme, and your pet is unvaccinated, or has been bitten by a stray/wild animal → See a vet immediately to rule out serious causes like rabies',
+
+      'Excessive Meowing / Barking / Howling':
+          'Excessive Meowing / Barking / Howling',
+      'Excessive Meowing / Barking / Howling_description':
+          'If your pet is being unusually noisy, they may be hungry, stressed, or even unwell.',
+      'Excessive Meowing / Barking / Howling_cause_0':
+          'Hunger or attention-seeking – Some breeds are naturally more vocal',
+      'Excessive Meowing / Barking / Howling_cause_1':
+          'Pain or discomfort – Crying out if something hurts',
+      'Excessive Meowing / Barking / Howling_cause_2':
+          'Anxiety or stress – Separation anxiety or changes at home',
+      'Excessive Meowing / Barking / Howling_cause_3':
+          'Mating behavior – Common in unneutered pets',
+      'Excessive Meowing / Barking / Howling_action_0':
+          'Check the basics → Food, water, bathroom, or playtime',
+      'Excessive Meowing / Barking / Howling_action_1':
+          'If the noise is new or unusual → Rule out pain with a vet check',
+      'Excessive Meowing / Barking / Howling_action_2':
+          'If stress-related → Create a calm, stable environment',
+      'Excessive Meowing / Barking / Howling_action_3':
+          'If linked to mating behavior → Talk to your vet about spaying/neutering',
+
+      'Hiding or Avoiding People': 'Hiding or Avoiding People',
+      'Hiding or Avoiding People_description':
+          'If your pet suddenly hides, it\'s their way of showing something isn\'t right.',
+      'Hiding or Avoiding People_cause_0':
+          'Illness or pain – A very common reason for sudden hiding',
+      'Hiding or Avoiding People_cause_1':
+          'Fear or stress – New home, loud noises, visitors, or other pets',
+      'Hiding or Avoiding People_cause_2':
+          'Past trauma – Especially in rescue or abused animals',
+      'Hiding or Avoiding People_cause_3':
+          'Pregnancy (females) – Cats and dogs often hide before giving birth',
+      'Hiding or Avoiding People_action_0':
+          'If it\'s just occasional hiding → Give them space, don\'t force them out',
+      'Hiding or Avoiding People_action_1':
+          'If it happens with loud noises, visitors, or new changes → Likely stress; create a quiet, safe spot',
+      'Hiding or Avoiding People_action_2':
+          'If hiding is new and comes with less eating, grooming, or play → Vet check needed to rule out illness',
+      'Hiding or Avoiding People_action_3':
+          'If your female pet is unspayed and hiding with a swollen belly or nesting behavior → Could be pregnancy, monitor and prepare for birth, vet visit if unsure',
+
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)':
+          'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_description':
+          'If your pet keeps chewing or swallowing things that aren\'t food, it may point to an underlying problem.',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_cause_0':
+          'Nutritional deficiencies – Missing important vitamins or minerals',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_cause_1':
+          'Boredom or stress – Pets may chew when frustrated or anxious',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_cause_2':
+          'Teething – Puppies and kittens chew to ease gum discomfort',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_action_0':
+          'Check diet → Make sure your pet is getting balanced nutrition',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_action_1':
+          'Provide safe chew toys → Give them proper chew sticks or toys instead of random objects',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_action_2':
+          'Redirect gently → If you catch them chewing something unsafe, calmly replace it with a safe option',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_action_3':
+          'If they often eat non-food items, or swallow dangerous things → Vet check needed to rule out deficiencies or health problems',
+
+      'Excessive Licking or Tail-Chasing': 'Excessive Licking or Tail-Chasing',
+      'Excessive Licking or Tail-Chasing_description':
+          'If your pet is constantly licking their paws or chasing their tail, it\'s usually more than just play.',
+      'Excessive Licking or Tail-Chasing_cause_0':
+          'Allergies or skin irritation – A very common reason for nonstop licking',
+      'Excessive Licking or Tail-Chasing_cause_1':
+          'Pain – Arthritis or joint issues can make pets lick sore spots',
+      'Excessive Licking or Tail-Chasing_cause_2':
+          'Anxiety or compulsive habits – Especially in high-energy or bored pets',
+      'Excessive Licking or Tail-Chasing_cause_3':
+          'Parasites – Fleas, ticks, or skin mites can cause nonstop itching',
+      'Excessive Licking or Tail-Chasing_action_0':
+          'Check for redness, sores, or swelling → Could be infection or allergy',
+      'Excessive Licking or Tail-Chasing_action_1':
+          'Look for fleas or ticks in the fur → Treat if found',
+      'Excessive Licking or Tail-Chasing_action_2':
+          'Increase play and exercise → Helps with boredom or stress',
+      'Excessive Licking or Tail-Chasing_action_3':
+          'If licking or tail-chasing is nonstop to the point it causes skin wounds → Vet visit needed',
+
+      'Loss of Interest in Playing or Interacting':
+          'Loss of Interest in Playing or Interacting',
+      'Loss of Interest in Playing or Interacting_description':
+          'If your usually playful pet suddenly isn\'t interested in play or people, it could be a sign something\'s wrong.',
+      'Loss of Interest in Playing or Interacting_cause_0':
+          'Pain or illness – Arthritis, dental problems, fever, or other hidden issues',
+      'Loss of Interest in Playing or Interacting_cause_1':
+          'Stress or depression – Big changes at home, loss of a companion',
+      'Loss of Interest in Playing or Interacting_cause_2':
+          'Aging – Pets often become less active and playful as they get older',
+      'Loss of Interest in Playing or Interacting_action_0':
+          'Watch for illness signs → Weight loss, not eating, limping, or fever → Vet visit needed',
+      'Loss of Interest in Playing or Interacting_action_1':
+          'Try new toys or gentle activities → Sometimes boredom or stress plays a role',
+      'Loss of Interest in Playing or Interacting_action_2':
+          'For senior pets → Gentle exercise, easy play, and more rest help keep them comfortable',
+
+      // General Issues
+      'generalIssues': 'General Issues',
+
+      'Vomiting': 'Vomiting',
+      'Vomiting_description':
+          'A single vomit isn\'t always bad, but frequent vomiting is a warning sign!',
+      'Vomiting_cause_0': 'Eating too fast or too much',
+      'Vomiting_cause_1': 'Sudden diet change or spoiled food',
+      'Vomiting_cause_2': 'Hairballs (especially in cats)',
+      'Vomiting_cause_3': 'Parasites or stomach infections',
+      'Vomiting_cause_4':
+          'Poisoning (From toxic food, medications, or chemicals)',
+      'Vomiting_cause_5': 'Organ disease (liver, kidneys, stomach issues)',
+      'Vomiting_cause_6': 'Infection (virus or bacteria)',
+      'Vomiting_action_0':
+          'One-time vomit & pet seems normal → Monitor closely, offer small portions of food and water later',
+      'Vomiting_action_1':
+          'Repeated vomiting (more than 2–3 times in 24 hrs) → Vet visit needed',
+      'Vomiting_action_2':
+          'Vomiting + diarrhea in a young pet → Emergency vet immediately',
+      'Vomiting_action_3':
+          'Vomiting + blood, weakness, or pale gums → Emergency vet immediately (possible poisoning or serious illness)',
+      'Vomiting_action_4':
+          'If caused by eating too fast → Offer smaller meals in portions instead of one big meal',
+      'Vomiting_action_5':
+          'If vomiting once daily but persists for several days → Book a vet check to rule out chronic issues',
+
+      'Regurgitation (Throwing Up Undigested Food)':
+          'Regurgitation (Throwing Up Undigested Food)',
+      'Regurgitation (Throwing Up Undigested Food)_description':
+          'Vomiting and regurgitation aren\'t the same—regurgitation happens shortly after eating',
+      'Regurgitation (Throwing Up Undigested Food)_cause_0':
+          'Eating too fast (common in greedy eaters)',
+      'Regurgitation (Throwing Up Undigested Food)_cause_1': 'Esophagus issues',
+      'Regurgitation (Throwing Up Undigested Food)_cause_2':
+          'Foreign object stuck',
+      'Regurgitation (Throwing Up Undigested Food)_action_0':
+          'If it happens rarely → Try feeding smaller portions or raising the bowl slightly',
+      'Regurgitation (Throwing Up Undigested Food)_action_1':
+          'If frequent or weight loss → Vet check-up needed',
+      'Regurgitation (Throwing Up Undigested Food)_action_2':
+          'If choking or difficulty swallowing → Emergency vet visit!',
+
+      'Loss of Appetite': 'Loss of Appetite',
+      'Loss of Appetite_description':
+          'Skipping one meal isn\'t alarming, but not eating at all for 24+ hours? That\'s serious!',
+      'Loss of Appetite_cause_0':
+          'Stress or anxiety (new environment, new pet, loud noises)',
+      'Loss of Appetite_cause_1': 'Dental pain (bad teeth, infections)',
+      'Loss of Appetite_cause_2':
+          'Fever, illness, or pain anywhere in the body',
+      'Loss of Appetite_cause_3':
+          'Serious conditions (liver/kidney failure, cancer, infections)',
+      'Loss of Appetite_action_0':
+          'If your pet skips one meal but eats later → Monitor, could be stress or minor stomach upset',
+      'Loss of Appetite_action_1':
+          'Try offering warmed food, wet food, or their favorite treat → Sometimes this encourages eating',
+      'Loss of Appetite_action_2':
+          'Check their mouth for broken teeth, red gums, or bad smell → Painful mouths make pets stop eating',
+      'Loss of Appetite_action_3':
+          'If appetite loss continues for more than 24 hours, or comes with vomiting, weakness, or weight loss → Vet visit needed',
+      'Loss of Appetite_action_4':
+          'If your pet refuses all food + water, or also has fever, collapse, or bloated belly → Emergency vet immediately',
+
+      'Sudden Weight Loss or Weight Gain': 'Sudden Weight Loss or Weight Gain',
+      'Sudden Weight Loss or Weight Gain_description':
+          'If your pet\'s weight changes quickly without a change in diet or exercise, there may be an underlying reason.',
+      'Sudden Weight Loss or Weight Gain_cause_0':
+          'Weight Loss: Worms or parasites',
+      'Sudden Weight Loss or Weight Gain_cause_1':
+          'Weight Loss: Diabetes or thyroid problems',
+      'Sudden Weight Loss or Weight Gain_cause_2':
+          'Weight Loss: Chronic illness (kidney, liver, or cancer)',
+      'Sudden Weight Loss or Weight Gain_cause_3':
+          'Weight Loss: Poor appetite or food not being absorbed properly',
+      'Sudden Weight Loss or Weight Gain_cause_4':
+          'Weight Gain: Overfeeding or not enough exercise',
+      'Sudden Weight Loss or Weight Gain_cause_5':
+          'Weight Gain: Hormonal disorders',
+      'Sudden Weight Loss or Weight Gain_cause_6':
+          'Weight Gain: Fluid buildup (can be a sign of heart or liver disease)',
+      'Sudden Weight Loss or Weight Gain_action_0':
+          'If eating normally but losing weight → Book a routine vet check to rule out parasites, diabetes, or other illness',
+      'Sudden Weight Loss or Weight Gain_action_1':
+          'If appetite is poor and weight is dropping quickly → Vet visit soon, especially if it continues for more than a couple of days',
+      'Sudden Weight Loss or Weight Gain_action_2':
+          'If gradual weight gain with no other issues → Review food portions & exercise. Adjust diet if needed',
+      'Sudden Weight Loss or Weight Gain_action_3':
+          'If sudden weight gain or swollen belly → Vet check recommended (could be fluid or hormone-related)',
+      'Sudden Weight Loss or Weight Gain_action_4':
+          'Always check your pet\'s deworming and insect prevention dates — overdue treatments can cause weight and health changes',
+
+      'Fever (Hot Ears, Nose, or Body)': 'Fever (Hot Ears, Nose, or Body)',
+      'Fever (Hot Ears, Nose, or Body)_description':
+          'If your pet feels unusually hot, it could mean fever.',
+      'Fever (Hot Ears, Nose, or Body)_cause_0':
+          'Infections (bacterial, viral, or fungal)',
+      'Fever (Hot Ears, Nose, or Body)_cause_1':
+          'Inflammation from injury or illness',
+      'Fever (Hot Ears, Nose, or Body)_cause_2':
+          'Serious conditions (immune diseases, poisoning, cancer)',
+      'Fever (Hot Ears, Nose, or Body)_action_0':
+          'Look for other signs: low energy, loss of appetite, shivering, or warm ears',
+      'Fever (Hot Ears, Nose, or Body)_action_1':
+          'If mild warmth but your pet is eating, drinking, and active → Monitor closely',
+      'Fever (Hot Ears, Nose, or Body)_action_2':
+          'If very warm + tired, not eating, or shivering → Vet check needed',
+      'Fever (Hot Ears, Nose, or Body)_action_3':
+          'If your pet seems weak, vomiting, or breathing fast → Vet visit ASAP',
+      'Fever (Hot Ears, Nose, or Body)_action_4':
+          'Never give human fever meds — they are deadly for pets!',
+
+      'Lethargy (Weakness, Sleeping Too Much)':
+          'Lethargy (Weakness, Sleeping Too Much)',
+      'Lethargy (Weakness, Sleeping Too Much)_description':
+          'If your normally active pet suddenly seems tired or weak, it could be anything from a lazy day to something more serious.',
+      'Lethargy (Weakness, Sleeping Too Much)_cause_0':
+          'Just having a lazy day (especially after lots of play or hot weather)',
+      'Lethargy (Weakness, Sleeping Too Much)_cause_1':
+          'Pain or discomfort (arthritis, injuries, tummy upset)',
+      'Lethargy (Weakness, Sleeping Too Much)_cause_2': 'Infections or fever',
+      'Lethargy (Weakness, Sleeping Too Much)_cause_3':
+          'Serious conditions: poisoning, organ disease, or internal bleeding',
+      'Lethargy (Weakness, Sleeping Too Much)_action_0':
+          'If your pet is simply resting more than usual but still eats, drinks, and plays a bit → Probably just a lazy day, no need to worry',
+      'Lethargy (Weakness, Sleeping Too Much)_action_1':
+          'If lethargy comes with vomiting, diarrhea, limping, or not eating → Book a vet visit soon',
+      'Lethargy (Weakness, Sleeping Too Much)_action_2':
+          'If your pet is very weak, collapses, or refuses food & water → Emergency vet immediately',
+
+      // Breathing Problems
+      'breathingProblems': 'Breathing Problems',
+
+      'Heavy Panting': 'Heavy Panting',
+      'Heavy Panting_description':
+          'Panting after play or heat is normal — but panting while resting, or for no reason, can be a red flag.',
+      'Heavy Panting_cause_0':
+          'Overheating / Heatstroke – Can happen in hot weather, inside cars, or after too much activity',
+      'Heavy Panting_cause_1':
+          'Flat-Faced Breeds (Bulldogs, Pugs, Frenchies, etc.) – These dogs have narrow airways, making it harder to breathe and cool down, so they pant heavily even without heat',
+      'Heavy Panting_cause_2':
+          'Pain or Stress – Pets may pant when they\'re uncomfortable or anxious',
+      'Heavy Panting_cause_3':
+          'Heart or Lung Disease – Fluid or illness can make breathing difficult',
+      'Heavy Panting_cause_4':
+          'Obesity – Extra weight makes it harder to cool down',
+      'Heavy Panting_action_0':
+          'If panting is from heat → Move them to a cool place and offer small amounts of water',
+      'Heavy Panting_action_1':
+          'If your dog is a flat-faced breed → Be extra cautious. Avoid hot weather, overexertion, and stressful play. If panting seems extreme, noisy, or happens even at rest → Book a vet visit',
+      'Heavy Panting_action_2':
+          'If your pet is panting at rest, or it comes with coughing, weakness, or restlessness → Vet visit needed',
+      'Heavy Panting_action_3':
+          'If panting + collapse, very pale/blue gums, or severe distress → Emergency vet immediately!',
+
+      'Coughing': 'Coughing',
+      'Coughing_description':
+          'A little cough now and then is usually nothing, but frequent or harsh coughing can mean trouble!',
+      'Coughing_cause_0':
+          'Mild throat irritation – From dust, pulling on the leash, or excitement',
+      'Coughing_cause_1':
+          'Infectious cough (kennel cough) – A contagious condition that spreads easily between dogs',
+      'Coughing_cause_2':
+          'Heart problems – Can cause nighttime coughing or coughing after exercise',
+      'Coughing_cause_3': 'Lung infection – often with fever or weakness',
+      'Coughing_cause_4':
+          'Allergies or asthma – Can cause ongoing coughing or wheezing',
+      'Coughing_cause_5': 'Collapsed airway – causes a honking cough',
+      'Coughing_action_0':
+          'If the cough is rare and mild (like after running or pulling on leash) → Normal',
+      'Coughing_action_1':
+          'If the cough keeps coming back for more than 2 days or gets worse → Vet visit needed',
+      'Coughing_action_2':
+          'If coughing comes with fever, not eating, or low energy → Book a vet check soon',
+      'Coughing_action_3':
+          'If your pet struggles to breathe, has blue gums, or collapses → Emergency vet immediately',
+      'Coughing_action_4':
+          'If coughing happens right after eating or drinking → Could be a swallowing or airway issue → Vet check recommended',
+
+      'Wheezing or Noisy Breathing': 'Wheezing or Noisy Breathing',
+      'Wheezing or Noisy Breathing_description':
+          'If your pet sounds like they\'re struggling for air, it could be from a blocked or narrowed airway.',
+      'Wheezing or Noisy Breathing_cause_0':
+          'Mild respiratory infection (like cat flu or infectious cough in dogs)',
+      'Wheezing or Noisy Breathing_cause_1': 'Asthma (more common in cats)',
+      'Wheezing or Noisy Breathing_cause_2':
+          'Allergic reaction (swelling in the throat/airway)',
+      'Wheezing or Noisy Breathing_cause_3':
+          'Collapsed trachea (common in small dogs)',
+      'Wheezing or Noisy Breathing_cause_4':
+          'Something stuck in the throat (bone, toy, etc.)',
+      'Wheezing or Noisy Breathing_cause_5':
+          'Flat-faced breeds (pugs, bulldogs, etc.) → Some snorting is "normal," but sudden worsening is dangerous',
+      'Wheezing or Noisy Breathing_action_0':
+          'If mild and pet otherwise acts normal → Likely an infection or breed-related noise; mention it to your vet',
+      'Wheezing or Noisy Breathing_action_1':
+          'If noise suddenly worsens, especially with exercise or warm weather → Vet ASAP',
+      'Wheezing or Noisy Breathing_action_2':
+          'If struggling to breathe, gums turning blue, or pet collapses → Emergency vet immediately',
+      'Wheezing or Noisy Breathing_action_3':
+          'If choking on an object → Only try removing it if safe, otherwise rush to a vet',
+
+      'Sneezing & Nasal Discharge': 'Sneezing & Nasal Discharge',
+      'Sneezing & Nasal Discharge_description':
+          'An occasional sneeze is normal, but constant sneezing or unusual nose discharge needs attention.',
+      'Sneezing & Nasal Discharge_cause_0':
+          'Allergies – Dust, pollen, smoke, perfumes, or cleaning sprays',
+      'Sneezing & Nasal Discharge_cause_1': 'Respiratory infection',
+      'Sneezing & Nasal Discharge_cause_2':
+          'Foreign object in the nose – Grass, seeds, or dirt',
+      'Sneezing & Nasal Discharge_cause_3':
+          'Dental disease – Infections in the upper teeth can spread to the nose',
+      'Sneezing & Nasal Discharge_action_0':
+          'A few sneezes, no discharge → Likely dust or irritation, nothing to worry about',
+      'Sneezing & Nasal Discharge_action_1':
+          'Clear watery discharge that keeps happening → Could be allergies; try removing smoke, perfume, or sprays',
+      'Sneezing & Nasal Discharge_action_2':
+          'Thick yellow/green discharge → Likely infection → Vet check needed',
+      'Sneezing & Nasal Discharge_action_3':
+          'Sneezing fits + pawing at nose → Something stuck → Vet ASAP',
+
+      'Open-Mouth Breathing in Cats': 'Open-Mouth Breathing in Cats',
+      'Open-Mouth Breathing in Cats_description':
+          'Mouth breathing in cats can happen from stress or heat, but it can also mean breathing trouble.',
+      'Open-Mouth Breathing in Cats_cause_0':
+          'Heat or stress (after play, travel, or car rides)',
+      'Open-Mouth Breathing in Cats_cause_1': 'Heart or lung problems',
+      'Open-Mouth Breathing in Cats_cause_2': 'Asthma or airway issues',
+      'Open-Mouth Breathing in Cats_cause_3': 'Fluid buildup in the chest',
+      'Open-Mouth Breathing in Cats_action_0':
+          'If it happens after play, heat, or travel → Let your cat rest in a cool, quiet spot and monitor',
+      'Open-Mouth Breathing in Cats_action_1':
+          'If it continues while resting, or your cat seems tired, drools, or breathes with effort → Vet check as soon as possible',
+      'Open-Mouth Breathing in Cats_action_2':
+          'If mouth breathing starts suddenly and doesn\'t stop → Emergency vet visit',
+
+      'Gasping for Air / Struggling to Breathe':
+          'Gasping for Air / Struggling to Breathe',
+      'Gasping for Air / Struggling to Breathe_description':
+          'If your pet can\'t breathe properly, it\'s an emergency. Don\'t wait!',
+      'Gasping for Air / Struggling to Breathe_cause_0':
+          'Severe allergic reaction (swollen throat!)',
+      'Gasping for Air / Struggling to Breathe_cause_1':
+          'Choking on food or a foreign object',
+      'Gasping for Air / Struggling to Breathe_cause_2':
+          'Collapsed lung or fluid in the chest',
+      'Gasping for Air / Struggling to Breathe_cause_3': 'Heart diseases',
+      'Gasping for Air / Struggling to Breathe_action_0':
+          'Check their gums or tongue → if they look blue or pale → Emergency vet immediately!',
+      'Gasping for Air / Struggling to Breathe_action_1':
+          'If your pet is drooling, breathing heavily, or clearly struggling to get air → RUSH to the vet!',
+
+      'Choking': 'Choking',
+      'Choking_description':
+          'If your pet suddenly starts gagging, coughing, or pawing at their mouth, something might be stuck.',
+      'Choking_cause_0': 'Food or treats swallowed too fast',
+      'Choking_cause_1': 'Toys, bones, or foreign objects',
+      'Choking_cause_2': 'Hair or string stuck in the throat',
+      'Choking_action_0':
+          'If your pet is coughing or gagging but still breathing → Stay calm and observe — many pets clear it on their own',
+      'Choking_action_1':
+          'If your pet can\'t breathe or collapses → Emergency! Go to the vet immediately',
+
       // Emergency levels
       'urgent': 'Urgent',
       'moderate': 'Moderate',
@@ -1818,6 +2644,13 @@ class AppLocalizations {
       'spayedNeutered': 'Spayed/Neutered',
       'petNotes': 'Notes',
       'additionalPetInfo': 'Any additional information about your pet',
+
+      // QR Code scanning
+      'scanQrCode': 'Scan QR Code',
+      'scanVetQrCodeToComplete': 'Scan Vet QR Code to Complete',
+      'pointCameraAtQrCode': 'Point your camera at the QR code',
+      'appointmentCompletedSuccessfully': 'Appointment completed successfully',
+      'scanQrToComplete': 'Scan QR to Complete',
     },
     'ar': {
       'appTitle': 'تطبيق الحيوانات الأليفة',
@@ -1925,6 +2758,81 @@ class AppLocalizations {
       'aleefyPoints': 'نقاط أليفي',
       'retry': 'إعادة المحاولة',
       'view': 'عرض',
+      'pointsHistory': 'سجل النقاط',
+
+      // Additional Points Translations
+      'errorLoadingPoints': 'خطأ في تحميل النقاط',
+      'currentBalance': 'الرصيد الحالي',
+      'totalEarned': 'إجمالي المكتسب',
+      'totalSpent': 'إجمالي المصروف',
+      'transactionHistory': 'سجل المعاملات',
+      'noTransactions': 'لا توجد معاملات بعد',
+      'noPointsAvailable': 'لا توجد نقاط متاحة',
+      'noPointsMessage':
+          'ليس لديك أي نقاط للاستخدام حتى الآن. ابدأ باستخدام خدماتنا لكسب النقاط!',
+
+      'loginRequired': 'تسجيل الدخول مطلوب',
+      'loginRequiredMessage': 'يجب تسجيل الدخول للوصول إلى هذه الميزة.',
+      'leaveAReview': 'اترك تقييماً',
+      'deleteAccountConfirmation':
+          'هل أنت متأكد من حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء وسيتم فقدان جميع بياناتك بشكل دائم.',
+      'accountDetailsUpdatedSuccessfully': 'تم تحديث تفاصيل الحساب بنجاح!',
+      'failedToUpdateProfile': 'فشل تحديث الملف الشخصي: {error}',
+      'voucherCodeCopied': 'تم نسخ رمز القسيمة "{code}" إلى الحافظة',
+
+      // Pet-related translations
+      'loginRequiredToAddPets': 'يجب تسجيل الدخول لإضافة الحيوانات الأليفة.',
+      'loginRequiredToUpdatePets': 'يجب تسجيل الدخول لتحديث الحيوانات الأليفة.',
+      'chooseFromGallery': 'اختر من المعرض',
+      'takeAPhoto': 'التقط صورة',
+      'addYourFirstPet': 'أضف حيوانك الأليف الأول',
+      'deleting': 'جاري الحذف...',
+      'refreshPets': 'تحديث الحيوانات الأليفة',
+      'errorLoadingPets': 'خطأ في تحميل الحيوانات الأليفة',
+      'noPetsAddedYet': 'لم تتم إضافة حيوانات أليفة بعد',
+      'addYourFurryFriends':
+          'أضف أصدقاءك من الحيوانات الأليفة لتتبع صحتهم ومواعيدهم',
+      'yearOld': 'سنة',
+      'yearsOld': 'سنوات',
+      'monthOld': 'شهر',
+      'monthsOld': 'أشهر',
+      'choosePhoto': 'اختر صورة',
+      'camera': 'الكاميرا',
+      'gallery': 'المعرض',
+      'invalidSpecies': 'نوع غير صالح',
+      'onlyCatsAndDogsAllowed': 'يُسمح فقط بالقطط والكلاب.',
+      'failedToUpdatePet': 'فشل تحديث الحيوان الأليف. يرجى المحاولة مرة أخرى.',
+      'birthday': 'تاريخ الميلاد',
+      'species': 'النوع',
+      'gender': 'الجنس',
+      'notSpayedNeutered': 'غير مخصي/معقم',
+      'addNewPet': 'إضافة حيوان أليف جديد',
+      'petName': 'اسم الحيوان الأليف',
+      'enterPetName': 'أدخل اسم حيوانك الأليف',
+      'pleaseEnterPetName': 'يرجى إدخال اسم حيوانك الأليف',
+      'petType': 'نوع الحيوان الأليف',
+      'birthdate': 'تاريخ الميلاد',
+      'weightKg': 'الوزن (كجم)',
+      'kg': 'كجم',
+      'allergies': 'الحساسية',
+      'addNotes': 'أي معلومات إضافية عن حيوانك الأليف',
+      'spayedNeuteredQuestion': 'مخصي/معقم؟',
+      'savePet': 'حفظ الحيوان الأليف',
+      'petAddedSuccessfully': 'تمت إضافة {name} بنجاح.',
+      'failedToAddPet': 'فشل إضافة الحيوان الأليف. يرجى المحاولة مرة أخرى.',
+      'petProfile': 'ملف الحيوان الأليف',
+      'editPet': 'تعديل الحيوان الأليف',
+      'confirmDelete': 'تأكيد الحذف',
+      'areYouSureDeletePet': 'هل أنت متأكد أنك تريد حذف هذا الحيوان الأليف؟',
+      'thisActionCannotBeUndone': 'لا يمكن التراجع عن هذا الإجراء.',
+      'updatePet': 'تحديث الحيوان الأليف',
+      'weight': 'الوزن',
+      'lastVetVisit': 'آخر زيارة للطبيب البيطري',
+      'addVaccination': 'إضافة تطعيم',
+      'petUpdatedSuccessfully': 'تم تحديث {name} بنجاح.',
+      'info': 'معلومات',
+      'noChangesToUpdate': 'لا توجد تغييرات للتحديث',
+
       'noFavoritesYet': 'لا توجد مفضلات بعد',
       'noFavoritesMessage':
           'عندما تجد عيادات تحبها، احفظها هنا للوصول إليها بسرعة.',
@@ -1978,6 +2886,9 @@ class AppLocalizations {
           'الأنشطة المطابقة للتصفية ستظهر هنا',
       'appointmentCancelledSuccessfully': 'تم إلغاء الموعد بنجاح',
       'failedToCancelAppointment': 'فشل في إلغاء الموعد',
+      'confirmCancelAppointmentMessage':
+          'هل أنت متأكد من أنك تريد إلغاء هذا الموعد؟',
+      'yesCancelAppointment': 'نعم، إلغاء',
       'rescheduleFeatureComingSoon': 'ميزة إعادة الجدولة قادمة قريبًا!',
       'reviewFeatureComingSoon': 'ميزة المراجعة قادمة قريبًا!',
       'bookingFollowupAppointment': 'حجز موعد متابعة...',
@@ -2014,6 +2925,8 @@ class AppLocalizations {
       'report': 'تبليغ',
       'minutes': 'دقائق',
       'reviews': 'التقييمات',
+      'review': 'تقييم',
+      'noReviewsYet': 'لا توجد تقييمات بعد',
       'patients': 'المرضى',
       'yearsExp': 'سنوات الخبرة',
       'description': 'الوصف',
@@ -2125,8 +3038,8 @@ class AppLocalizations {
       'head': 'الرأس',
       'legs': 'الأرجل',
       'skinAndCoat': 'الجلد والشعر',
-      'pelvis': 'الحوض',
-      'buttocks': 'المؤخرة',
+      'pelvis': 'الجهاز البولي والتناسلي',
+      'buttocks': 'فتحة الشرج والتبرز',
       'selected': 'المحدد',
       'howToUse': 'كيفية الاستخدام',
       'step': 'خطوة',
@@ -2171,10 +3084,11 @@ class AppLocalizations {
       'mouthTeethSymptoms': 'أعراض الفم والأسنان',
       'skinCoatSymptoms': 'أعراض الجلد والشعر',
       'movementLimbsIssues': 'مشاكل الحركة والأطراف',
-      'anusPoopingIssues': 'مشاكل الشرج والتبرز',
+      'anusPoopingIssues': 'الشرج والتبرز',
       'maleGenitalProblems': 'مشاكل الأعضاء التناسلية الذكورية',
       'femaleGenitalProblems': 'مشاكل الأعضاء التناسلية الأنثوية',
       'urinationProblems': 'مشاكل التبول',
+      'neurologicalIssues': 'مشاكل عصبية',
 
       // Eye Symptoms
       'Eye Redness': 'احمرار العين',
@@ -2182,7 +3096,7 @@ class AppLocalizations {
           'لو عين أليفك لونها أحمر، ممكن يكون بسبب حاجة بسيطة زي التراب، أو حاجة أخطر زي عدوى.',
       'Eye Redness_cause_0': 'تراب، هوا، أو حساسية',
       'Eye Redness_cause_1': 'عدوى (زي بكتيريا أو فيروس الهربس)',
-      'Eye Redness_cause_2': 'ضغط عالي في العين (جلوكوما)',
+      'Eye Redness_cause_2': 'ضغط عالي في العين (المياة الزرقاء)',
       'Eye Redness_cause_3': 'خبطة أو تهيّج',
       'Eye Redness_action_0':
           'لو الاحمرار بسيط ← اغسل العين بمحلول ملحي وتابعها كويس',
@@ -2214,7 +3128,7 @@ class AppLocalizations {
       'Cloudy Eye (Looks Foggy or Bluish)_cause_2':
           'خدش في القرنية (بعد خبطة أو عدوى)',
       'Cloudy Eye (Looks Foggy or Bluish)_cause_3':
-          'ضغط عالي في العين (جلوكوما)',
+          'ضغط عالي في العين (المياة الزرقاء)',
       'Cloudy Eye (Looks Foggy or Bluish)_action_0':
           'لو التغيير حصل تدريجي و أليفك كبير في السن ← قول للدكتور في الزيارة الجاية',
       'Cloudy Eye (Looks Foggy or Bluish)_action_1':
@@ -2235,21 +3149,21 @@ class AppLocalizations {
       'Watery Eyes (Excessive Tearing)_action_1':
           'لو الدموع كتير ومعاها احمرار أو حكّة ← روح العيادة',
 
-      'Third Eyelid Showing': 'حاجة بيضا أو وردي في جنب العين',
+      'Third Eyelid Showing': 'حاجة بيضاء أو وردي في جنب العين',
       'Third Eyelid Showing_description':
-          'شايف حاجة لونها أبيض أو وردي طالعة من جنب عين أليفك أو مغطيّة جزء منها؟ دي الغشاء التالت للعين.',
+          'شايف حاجة لونها أبيض أو وردي طالعة من جنب عين أليفك أو مغطيّة جزء منها؟ دي الجفن التالت للعين.',
       'Third Eyelid Showing_cause_0':
-          'طبيعي بعد النوم – الغشاء التالت ممكن يبان شوية لما أليفك يصحى',
+          'طبيعي بعد النوم – الجفن التالت ممكن يبان شوية لما أليفك يصحى',
       'Third Eyelid Showing_cause_1':
-          'عدوى في العين أو مشاكل في الأعصاب – ممكن تخلي الغشاء يفضل ظاهر',
+          'عدوى في العين أو مشاكل في الأعصاب – ممكن تخلي الجفن يفضل ظاهر',
       'Third Eyelid Showing_cause_2':
           'في الكلاب: لو فيه كتلة وردي في الركن الداخلي، ممكن تكون غدة طالعة لبرا',
       'Third Eyelid Showing_cause_3':
-          'في القطط: لو فيه غشاء أبيض بيغطي العينين، ممكن يكون علامة على مرض',
+          'في القطط: لو فيه جفن أبيض بيغطي العينين، ممكن يكون علامة على مرض',
       'Third Eyelid Showing_action_0':
           'لو اختفى بسرعة وأليفك باين عليه إنه كويس ← مفيش داعي للقلق، بس تابعها كويس',
       'Third Eyelid Showing_action_1':
-          'لو الغشاء التالت لسه باين أو بيغطي جزء من العين ← احجز زيارة للعيادة علشان تعرف السبب',
+          'لو الجفن التالت لسه باين أو بيغطي جزء من العين ← احجز زيارة للعيادة علشان تعرف السبب',
       'Third Eyelid Showing_action_2':
           'لو فيه ورم أو احمرار أو أليفك مش قادر يفتح عينه كويس ← روح العيادة فورًا',
       'Third Eyelid Showing_action_3':
@@ -2281,7 +3195,7 @@ class AppLocalizations {
       'Worms in the Eye_description':
           'شايف حاجة بتتحرك في عين أليفك؟ ممكن تكون دودة – وده محتاج تدخل سريع.',
       'Worms in the Eye_cause_0':
-          'طفيليات (ديدان أو خيوط بيضا) حوالين أو جوا العين',
+          'طفيليات (ديدان أو خيوط بيضاء) حوالين أو جوا العين',
       'Worms in the Eye_cause_1':
           'الطفيليات دي ممكن تضر العين وتسبب وجع، احمرار، أو حتى فقدان في النظر لو متمش علاجها بسرعة',
       'Worms in the Eye_action_0':
@@ -2403,7 +3317,7 @@ class AppLocalizations {
 
       // Mouth & Teeth Symptoms
 
-      'Bad Breath (Smelly Mouth)': 'نفس ريحته وحشة (بُقّه مش لطيف)',
+      'Bad Breath (Smelly Mouth)': 'نفس ريحته وحشة',
       'Bad Breath (Smelly Mouth)_description':
           'لو كل ما يقرب منك تحس بريحة مش لطيفة من بُقه، يبقى كده في مشكلة',
       'Bad Breath (Smelly Mouth)_cause_0':
@@ -2666,7 +3580,7 @@ class AppLocalizations {
 
       'Dandruff (Flaky Skin)': 'قشرة في الجلد',
       'Dandruff (Flaky Skin)_description':
-          'لو لاحظت فُتافيت بيضا صغيرة في فرو أليفك، ممكن يكون عنده جفاف في الجلد أو حاجة تانية!',
+          'لو لاحظت فُتافيت بيضاء صغيرة في فرو أليفك، ممكن يكون عنده جفاف في الجلد أو حاجة تانية!',
       'Dandruff (Flaky Skin)_cause_0': 'الهواء الجاف – شائع في الشتاء',
       'Dandruff (Flaky Skin)_cause_1':
           'نظام غذائي ضعيف – نقص الدهون المفيدة بيخلي الجلد ينشف',
@@ -2834,13 +3748,15 @@ class AppLocalizations {
       'Scooting or Dragging Butt on the Floor_cause_3':
           'براز لازق في الشعر – شائع في الأليفة اللي شعرها طويل',
       'Scooting or Dragging Butt on the Floor_action_0':
-          'نظّف المنطقة بمياه دافئة',
+          'افحص المنطقة الأول — لو في حاجة لازقة، نظّفها بلطف وشوف هل التصرّف ده هيقف ولا لأ',
       'Scooting or Dragging Butt on the Floor_action_1':
-          'شوف لو فيه ديدان (ممكن تلاحظ حاجت بيضا صغيرة شبه الرز حوالين فتحة الشرج)',
+          'لو الجرّ مع لعق المنطقة ← ممكن يكون الغدد الشرجية ممتلئة، الدكتور البيطري يقدر يفضيها',
       'Scooting or Dragging Butt on the Floor_action_2':
-          'تأكد إن أليفك واخد جرعة الديدان في معادها',
+          'شوف لو فيه ديدان (ممكن تلاحظ حاجات بيضاء صغيرة شبه الرز حوالين فتحة الشرج)',
       'Scooting or Dragging Butt on the Floor_action_3':
-          'لو الحكّ مستمر أو فيه ورم في المنطقة ← محتاج تروح العيادة',
+          'اتأكد إن أليفك واخد جرعة الديدان في معادها',
+      'Scooting or Dragging Butt on the Floor_action_4':
+          'لو الجرّ مستمر أو في تورّم ← محتاج كشف في العيادة',
 
       'Swelling or Redness Around the Anus': 'تورم أو احمرار في فتحة الشرج',
       'Swelling or Redness Around the Anus_description':
@@ -2862,22 +3778,21 @@ class AppLocalizations {
       'Swelling or Redness Around the Anus_action_3':
           'متحاولش تدخّل أي حاجة مكانها أو تستخدم كريمات من نفسك – ده ممكن يزود المشكلة',
 
-      'Blood in Stool or Around the Anus': 'دم في البراز أو حوالين فتحة الشرج',
-      'Blood in Stool or Around the Anus_description':
-          'لاحظت دم في براز أليفك أو حوالين مؤخرته؟',
-      'Blood in Stool or Around the Anus_cause_0':
-          'جرح صغير بسبب صعوبة الإخراج – بيحصل مع البراز الناشف أو الصلب',
-      'Blood in Stool or Around the Anus_cause_1': 'ديدان أو طفيليات',
-      'Blood in Stool or Around the Anus_cause_2':
-          'التهاب في الغدد الشرجية – لو الحالة شديدة ممكن تسبب نزيف',
-      'Blood in Stool or Around the Anus_cause_3':
-          'مشاكل أخطر – زي التهاب القولون، أورام، أو تسمم',
-      'Blood in Stool or Around the Anus_action_0':
-          'لو أثر دم بسيط وأليفك طبيعي ← تابع الحالة ووفّر له مياه نظيفة يشربها',
-      'Blood in Stool or Around the Anus_action_1':
-          'لو الدم بيظهر بشكل متكرر، أو لو فيه إسهال كمان← محتاج تروح العيادة قريب',
-      'Blood in Stool or Around the Anus_action_2':
-          'لو الدم كتير، أو أليفك باين عليه التعب، أو بيرجع، أو مش بياكل ← روح العيادة فورًا – دي حالة طارئة',
+      'Bloody Poop (Red or Black Stools)': 'دم في البراز (براز أحمر أو أسود)',
+      'Bloody Poop (Red or Black Stools)_description':
+          'لو لاحظت دم في براز أليفك، ما تتجاهلش الموضوع!',
+      'Bloody Poop (Red or Black Stools)_cause_0':
+          'دم أحمر فاتح ← ممكن يكون من الحزق أثناء التبرز، تهيّج في المعدة، أو إصابة بسيطة قريبة من فتحة الشرج',
+      'Bloody Poop (Red or Black Stools)_cause_1':
+          'براز أسود ولزج زي الدم القديم ← احتمال نزيف داخلي (في المعدة أو الأمعاء)',
+      'Bloody Poop (Red or Black Stools)_cause_2':
+          'ديدان، عدوى، أو أمراض خطيرة',
+      'Bloody Poop (Red or Black Stools)_action_0':
+          'لو خطوط دم بسيطة في البراز وأليفك طبيعي ← راقب كويس لمدة ٢٤ ساعة',
+      'Bloody Poop (Red or Black Stools)_action_1':
+          'لو الدم كتير، بيتكرر، أو أليفك ضعيف ← روح العيادة فورًا!',
+      'Bloody Poop (Red or Black Stools)_action_2':
+          'لو البراز أسود ولزج زي الدم القديم ← حالة طارئة! لازم تروح العيادة فورًا علشان نستبعد نزيف داخلي',
 
       'Straining to Poop or Constipation': 'صعوبة في التبرز أو إمساك',
       'Straining to Poop or Constipation_description':
@@ -2894,23 +3809,42 @@ class AppLocalizations {
       'Straining to Poop or Constipation_action_0':
           'وفّر مية أكتر وأضف ألياف للأكل (بطاطس مسلوقة مهروسة أو جزر مسلوق ممكن يساعدوا)',
       'Straining to Poop or Constipation_action_1':
-          'لو الإمساك مستمر أكتر من يوم أو في ألم → محتاج تروح العيادة',
+          'لو الإمساك استمر أكتر من ٤٨ ساعة ← محتاج كشف في العيادة علشان نتجنب انسداد في الأمعاء',
       'Straining to Poop or Constipation_action_2':
-          'أحيانًا صعوبة التبرز بتلخبط مع صعوبة التبول، خصوصًا في القطط الذكور — ودي حالة ممكن تكون مميتة',
+          'لو في محاولات للتبرز لكن مفيش براز بيطلع خالص ← احتمال يكون انسداد، وده محتاج زيارة طارئة للعيادة',
+      'Straining to Poop or Constipation_action_3':
+          '⚠️ مهم: أحيانًا صعوبة التبرز بتلخبط مع صعوبة التبول، خصوصًا في القطط الذكور — ودي حالة ممكن تكون مميتة. شوف قسم "صعوبة التبول" تحت مشاكل التبول علشان تعرف الخطوات الضرورية',
 
       'Diarrhea': 'الإسهال',
       'Diarrhea_description': 'أليفك عنده إسهال؟ حاول متخليش الموضوع يطول.',
-      'Diarrhea_cause_0': 'تغيير الأكل أو أكل حاجة مش مناسبة',
-      'Diarrhea_cause_1': 'ديدان أو عدوى',
-      'Diarrhea_cause_2': 'التوتر أو القلق',
-      'Diarrhea_cause_3':
-          'أمراض خطيرة – خصوصًا لو الإسهال فيه دم أو استمر لفترة طويلة',
+      'Diarrhea_cause_0': 'أكل حاجة وحشة (زبالة، أكل بايظ)',
+      'Diarrhea_cause_1': 'ديدان أو طفيليات',
+      'Diarrhea_cause_2': 'عدوى بكتيرية أو فيروسية',
+      'Diarrhea_cause_3': 'حساسية أكل أو تغيير مفاجئ في نوع الأكل',
+      'Diarrhea_cause_4': 'توتر أو قلق',
+      'Diarrhea_cause_5': 'مشاكل خطيرة زي أمراض البنكرياس أو الكبد',
       'Diarrhea_action_0':
-          'لو الإسهال بسيط ← قدم أكل زي فراخ مسلوقة مع رز أبيض',
+          'لو الإسهال حصل مرة أو اتنين وأليفك طبيعي ← جرب أكل بسيط زي فراخ مسلوقة مع رز أبيض، وراقب لمدة ٢٤ ساعة',
       'Diarrhea_action_1':
-          'خلي أليفك يشرب كويس ← الجفاف خطر كبير وممكن يهدد حياته',
+          'لو الإسهال استمر أكتر من يومين، أو فيه دم، أو معاه ترجيع/خمول ← لازم كشف عند دكتور، ممكن يكون خطير',
       'Diarrhea_action_2':
-          'لو الإسهال استمر أكتر من يومين،أو فيه دم، أو أليفك ضعيف ← روح العيادة',
+          'لو أليفك لسه صغير في السن أو من سلالة صغيرة ← متستناش! الإسهال ممكن يسبب جفاف بسرعة',
+
+      'No Pooping at All (Emergency!)': 'مفيش تبرز خالص (طوارئ)',
+      'No Pooping at All (Emergency!)_description':
+          'لو أليفك معملش براز لأكتر من 3 ايام، ممكن يكون عنده انسداد!',
+      'No Pooping at All (Emergency!)_cause_0':
+          'إمساك شديد أو انسداد في الأمعاء',
+      'No Pooping at All (Emergency!)_cause_1':
+          'ابتلاع جسم غريب (ألعاب، عظام، شعر، خيط)',
+      'No Pooping at All (Emergency!)_cause_2':
+          'مشاكل في الأعصاب بتأثر على حركة الأمعاء (زي إصابات العمود الفقري)',
+      'No Pooping at All (Emergency!)_action_0':
+          'لو مفيش براز لأكتر من 3 ايام ← روح العيادة فورًا! متستناش، ممكن يكون خطير',
+      'No Pooping at All (Emergency!)_action_1':
+          'لو أليفك بيحاول يتبرز لكن مفيش حاجة خارجة ومعاه ألم ← حالة طارئة! احتمال انسداد',
+      'No Pooping at All (Emergency!)_action_2':
+          'لو شاكك إن أليفك بلع حاجة (زي خيط، قماشة، عظام) ← لازم تروح العيادة فورًا',
 
       // Male Genital Problems
       'Swollen Testicles': 'تورم الخصيتين',
@@ -3021,7 +3955,7 @@ class AppLocalizations {
 
       'Discharge from the Vulva': 'إفرازات من الفرج',
       'Discharge from the Vulva_description':
-          'شوية إفرازات شفافة أو بيضا ممكن تكون طبيعية، لكن أي إفرازات لها ريحة أو شكل غريب ده مش طبيعي!',
+          'شوية إفرازات شفافة أو بيضاء ممكن تكون طبيعية، لكن أي إفرازات لها ريحة أو شكل غريب ده مش طبيعي!',
       'Discharge from the Vulva_cause_0':
           'فترة التزاوج – لو أليفتك متعقمتش، طبيعي يكون في شوية إفرازات شفافة وقتها',
       'Discharge from the Vulva_cause_1':
@@ -3205,6 +4139,523 @@ class AppLocalizations {
       'Not Peeing at All (Emergency!)_action_2':
           'لو مفيش تبول + مرض أو جفاف مؤخّرًا ← محتاج محاليل وكشف بيطري فورًا',
 
+      // Neurological Issues
+      'Seizures': 'نوبات تشنج (ارتعاش، سقوط، حركات لا إرادية)',
+      'Seizures_description':
+          'لو أليفك فجأة بدأ يهتز، يسيل لعابه، أو وقع على الأرض، ممكن تكون نوبة تشنج!',
+      'Seizures_cause_0': 'الصرع – بعض الحيوانات بتتولد بيه',
+      'Seizures_cause_1': 'تسمم – زي الشوكولاتة، أدوية البشر، أو مواد سامة',
+      'Seizures_cause_2': 'إصابة في الرأس',
+      'Seizures_cause_3': 'مشاكل في الكبد أو الكلى',
+      'Seizures_cause_4': 'انخفاض مستوى السكر في الدم',
+      'Seizures_cause_5': 'أورام في المخ (نادرة)',
+      'Seizures_action_0': 'حافظ على هدوئك ← ما تحاولش تمسكه أو تثبّته بالقوة',
+      'Seizures_action_1': 'ابعد أي حاجة حواليه ← علشان ما يتخبطش و ميتأذيش',
+      'Seizures_action_2': 'متديش أكل أو مياه غير لما يرجع طبيعي تمامًا',
+      'Seizures_action_3':
+          'راقب الوقت ← لو النوبة عدّت دقيقتين ← 🚨 حالة طارئة',
+      'Seizures_action_4':
+          'لو تقدر، صوّر فيديو للنوبة ← بيساعد الدكتور البيطري في التشخيص',
+      'Seizures_action_5':
+          'بعد انتهاء النوبة ← خلّي أليفك هادي ومرتاح؛ لما يصحى قدّمله مياه',
+      'Seizures_action_6':
+          'لازم تروح العيادة لو: النوبة استمرت أكتر من دقيقتين، حصل أكتر من نوبة في ٢٤ ساعة، ما رجعش لطبيعته بسرعة أو باين عليه ضعف شديد',
+      'Seizures_action_7':
+          'روح العيادة بعد انتهاء النوبة (ممنوع تحاول تنقله وهو لسه بيتشنج)',
+
+      'Head Tilt or Walking in Circles': 'ميلان الرأس أو المشي في دوائر',
+      'Head Tilt or Walking in Circles_description':
+          'لو أليفك بيميل راسه ناحية واحدة أو بيلف في دواير، ممكن يكون فيه مشكلة في المخ أو الأذن الداخلية!',
+      'Head Tilt or Walking in Circles_cause_0':
+          'التهاب في الأذن – من أكتر الأسباب شيوعًا، خصوصًا لو فيه هرش أو ريحة وحشة',
+      'Head Tilt or Walking in Circles_cause_1':
+          'مشاكل توازن – بتحصل أكتر في الحيوانات الكبيرة في السن',
+      'Head Tilt or Walking in Circles_cause_2': 'سموم أو أدوية معينة',
+      'Head Tilt or Walking in Circles_cause_3':
+          'مشاكل في المخ (ورم أو إصابة) – أقل شيوعًا',
+      'Head Tilt or Walking in Circles_action_0':
+          'لو الموضوع بدأ قريب وأليفك طبيعي في باقي تصرفاته ← تابع الحالة كويس لمدة 24 ساعة',
+      'Head Tilt or Walking in Circles_action_1':
+          'افحص ودانه ← لو فيه احمرار، ورم، أو ريحة وحشة ممكن يكون التهاب أذن ← محتاج عيادة',
+      'Head Tilt or Walking in Circles_action_2':
+          'لو مفيش علامات التهاب أذن لكن الأعراض مستمرة ← ممكن تكون مشكلة عصبية، لازم كشف بيطري',
+      'Head Tilt or Walking in Circles_action_3':
+          'لو الميلان مستمر أو بيزيد ← احجز زيارة للعيادة',
+      'Head Tilt or Walking in Circles_action_4':
+          'لو أليفك بيقع، بيلف في دواير، أو مش قادر يقف كويس ← روح العيادة فورًا',
+
+      'Loss of Balance': 'فقدان التوازن (تَعَثّر، وقوع، ضعف في الرجلين)',
+      'Loss of Balance_description':
+          'لو أليفك فجأة بدأ يتعثر، يترنح، أو يقع، ده ممكن يكون علامة على حاجة خطيرة!',
+      'Loss of Balance_cause_0': 'تسمم – زي الشوكولاتة، البصل، أو أدوية بشرية',
+      'Loss of Balance_cause_1':
+          'التهاب في الأذن – ممكن يأثر على التوازن والتنسيق',
+      'Loss of Balance_cause_2':
+          'مشاكل توازن مرتبطة بالعُمر – بتحصل أكتر مع الحيوانات الكبيرة في السن',
+      'Loss of Balance_cause_3':
+          'إصابة في العمود الفقري – نتيجة خبطة أو سقوط ممكن تأثر على الأعصاب أو الحركة',
+      'Loss of Balance_cause_4':
+          'جلطة دماغية – فقدان مفاجئ للتوازن أو ضعف في الأطراف',
+      'Loss of Balance_cause_5': 'أمراض عصبية – مشاكل في المخ أو الأعصاب',
+      'Loss of Balance_action_0':
+          'لو أليفك بيترنح شوية لكن صاحي وماشي كويس و بياكل كويس ← تابع الحالة كويس كام ساعة ولو متحسنش روح العيادة',
+      'Loss of Balance_action_1':
+          'لو مش قادر يقف خالص أو بيقع على طول ← حالة طارئة، لازم تروح العيادة فورًا',
+      'Loss of Balance_action_2':
+          'لو فقدان التوازن جاي مع ترجيع أو ميلان في الرأس ← محتاج كشف في العيادة بسرعة',
+      'Loss of Balance_action_3':
+          'لو شاكك في تسمم ← طوارئ، لازم تروح العيادة فورًا!',
+
+      'Sudden Blindness':
+          'فقدان البصر المفاجئ (بيخبط في الحيطان، توسع نني العين، ارتباك)',
+      'Sudden Blindness_description':
+          'لو أليفك فجأة بدأ يخبط في الحيطان، حاسس انو تايه، أو نني عينه واسع على الآخر ومش بيتأثر بالضوء — ده ممكن يكون فقدان بصر مفاجئ.',
+      'Sudden Blindness_cause_0':
+          'ارتفاع ضغط الدم – شائع جدًا خصوصًا في القطط الكبيرة في السن',
+      'Sudden Blindness_cause_1':
+          'انفصال الشبكية – ممكن يحصل فجأة ويسبب عمى كامل',
+      'Sudden Blindness_cause_2':
+          'مضاعفات مرض السكري – ممكن تأثر على العين مع الوقت',
+      'Sudden Blindness_cause_3': 'مشاكل في المخ – زي جلطة أو ورم (أقل شيوعًا)',
+      'Sudden Blindness_cause_4':
+          'أمراض العين – زي المياه الزرقاء أو المياه البيضاء',
+      'Sudden Blindness_action_0':
+          'لو فقدان البصر تدريجي ← روح العيادة عشان تكشف على العيون',
+      'Sudden Blindness_action_1':
+          'لو فقدان البصر حصل فجأة (خبط في الحيطان، مش مميز الأشخاص/الأماكن) ← لازم تروح العيادة فورًا! العلاج السريع (خصوصًا في حالات ارتفاع ضغط الدم) ممكن ينقذ النظر',
+      'Sudden Blindness_action_2':
+          'لو النني واسع جدًا ومش بيتأثر بالضوء ← حالة طارئة، لازم تروح العيادة فورًا',
+
+      'Sudden Collapse or Fainting': 'سقوط أو إغماء مفاجئ',
+      'Sudden Collapse or Fainting_description':
+          'لو أليفك وقع فجأة وبان عليه كأنه فاقد الوعي — حتى لو للحظة قصيرة — ده إنذار خطر.',
+      'Sudden Collapse or Fainting_cause_0':
+          'مرض في القلب – ممكن يسبب إغماء أو سقوط مفاجئ',
+      'Sudden Collapse or Fainting_cause_1':
+          'أنيميا – نقص الدم بيخلّي الحيوان ضعيف وسهل يدوخ أو يقع',
+      'Sudden Collapse or Fainting_cause_2':
+          'انخفاض السكر في الدم – شائع في الحيوانات الأليفة الصغيرة أو المصابة بالسكري',
+      'Sudden Collapse or Fainting_cause_3':
+          'ضربة شمس – خصوصًا بعد التعرض للشمس كتير',
+      'Sudden Collapse or Fainting_cause_4':
+          'تسمم – من أكل سام، أدوية بشر، أو مواد كيميائية',
+      'Sudden Collapse or Fainting_action_0':
+          'لو أليفك وقع بس فاق بسرعة ← قول للدكتور على الموضوع في الزيارة الجاية عشان تطمن',
+      'Sudden Collapse or Fainting_action_1':
+          'لو السقوط مع لثة باهتة، نبض ضعيف، أو صعوبة في التنفس ← طوارئ! روح العيادة فورًا',
+      'Sudden Collapse or Fainting_action_2':
+          'لو حصل بعد التعرض للشمس ← انقله لمكان بارد او ضل، قدّملو مياه وروح العيادة فورًا',
+      'Sudden Collapse or Fainting_action_3':
+          'لو السقوط اتكرر أو أليفك مرجعش طبيعي بسرعة ← طوارئ فورًا',
+
+      'Tremors': 'الرعشة أو الاهتزاز (وأليفك صاحي، مش نوبة تشنج)',
+      'Tremors_description':
+          'لو أليفك بيهتز أو بيرعش وهو صاحي (مش نوبة تشنج)، ممكن يكون فيه أسباب كتير.',
+      'Tremors_cause_0':
+          'البرد أو الخوف – الجو البارد، القلق أو التوتر ممكن يسببو رعشة',
+      'Tremors_cause_1': 'الألم – نتيجة إصابة مثلا أو التهاب مفاصل',
+      'Tremors_cause_2':
+          'انخفاض السكر في الدم – شائع أكتر في الكلاب الصغيرة أو الحيوانات المريضة',
+      'Tremors_cause_3':
+          'التسمم – زي الشوكولاتة، الأدوية البشرية، أو منتجات سامة',
+      'Tremors_cause_4': 'مشاكل في المخ أو الأعصاب',
+      'Tremors_action_0':
+          'لو أليفك بردان أو خايف وباقي تصرّفاته طبيعية ← دفّيه وحاول تهديه',
+      'Tremors_action_1':
+          'لو الرعشة معاها ترجيع، ريالة، أو ضعف ← ممكن يكون تسمم ← روح العيادة فورًا',
+      'Tremors_action_2':
+          'لو الرعشة مستمرة من غير سبب واضح، أو معاها ألم ← محتاج كشف عند الدكتور البيطري علشان نعرف السبب',
+
+      // Behavioral Issues
+      'behavioralIssues': 'مشاكل سلوكية',
+
+      'Aggression (Growling, Biting, Hissing, Snapping)':
+          'العدوانية (عَض، هجوم مفاجئ، بيزوم عليك)',
+      'Aggression (Growling, Biting, Hissing, Snapping)_description':
+          'لو أليفك فجأة بقى عدواني، ممكن يكون عنده ألم، خايف، أو حاسس بتعب!',
+      'Aggression (Growling, Biting, Hissing, Snapping)_cause_0':
+          'ألم أو مرض – زي التهاب المفاصل، إصابة، أو عدوى',
+      'Aggression (Growling, Biting, Hissing, Snapping)_cause_1':
+          'خوف أو تروما سابقة – خصوصًا في حيوانات التبني أو الإنقاذ',
+      'Aggression (Growling, Biting, Hissing, Snapping)_cause_2':
+          'سلوك دفاعي عن المكان أو الأكل أو اللعب',
+      'Aggression (Growling, Biting, Hissing, Snapping)_cause_3':
+          'قلة الاختلاط – مش متعوّد على الناس أو الحيوانات التانية',
+      'Aggression (Growling, Biting, Hissing, Snapping)_cause_4':
+          'الهرمونات – شائعة في الذكور الغير مُعقّمين',
+      'Aggression (Growling, Biting, Hissing, Snapping)_cause_5':
+          'السعار – خصوصًا لو الحيوان مش مُطعَّم أو اتعض من حيوان ضال',
+      'Aggression (Growling, Biting, Hissing, Snapping)_action_0':
+          'استبعد وجود ألم – لو العدوانية جديدة، شوف لو في إصابة أو مشكلة صحية وروح العيادة',
+      'Aggression (Growling, Biting, Hissing, Snapping)_action_1':
+          'تجنّب العقاب – العقاب ممكن يخلي العدوانية أسوأ، استخدم الهدوء والتعزيز الإيجابي',
+      'Aggression (Growling, Biting, Hissing, Snapping)_action_2':
+          'إدّيه مساحته – متجبرهوش يتعامل معاك أو مع حد وهو قلقان أو خايف منه',
+      'Aggression (Growling, Biting, Hissing, Snapping)_action_3':
+          'فكّر في التعقيم – ممكن يقلل من السلوك المرتبط بالهرمونات',
+      'Aggression (Growling, Biting, Hissing, Snapping)_action_4':
+          'لو العدوانية فجأة و شديدة، وأليفك مش مُطعّم أو اتعض من حيوان ضال ← لازم تروح العيادة فورًا علشان نستبعد أمراض خطيرة زي السعار',
+
+      'Excessive Meowing / Barking / Howling': 'مواء/نباح/عواء مُفرط',
+      'Excessive Meowing / Barking / Howling_description':
+          'لو أليفك بقى صوته عالي بشكل غير معتاد، ده معناه انو بيحاول يفهمك حاجه.',
+      'Excessive Meowing / Barking / Howling_cause_0':
+          'الجوع أو طلب اهتمام – بعض السلالات بطبيعتها صوتها أعلى من غيرها',
+      'Excessive Meowing / Barking / Howling_cause_1':
+          'ألم أو عدم راحة – ممكن يعبر عن الوجع بالصوت',
+      'Excessive Meowing / Barking / Howling_cause_2':
+          'القلق أو التوتر – زي لما تسيبو في مكان لوحدو أو تغييرات في البيئة',
+      'Excessive Meowing / Barking / Howling_cause_3':
+          'سلوك تزاوج – شائع في الحيوانات اللي مش مُعقمة',
+      'Excessive Meowing / Barking / Howling_action_0':
+          'راجع الأساسيات ← أكل، مياه، حمام، أو لعب',
+      'Excessive Meowing / Barking / Howling_action_1':
+          'لو الصوت جديد أو غير معتاد ← استبعد الألم بكشف عند العيادة',
+      'Excessive Meowing / Barking / Howling_action_2':
+          'لو السبب توتر أو قلق ← وفر بيئة هادية ومستقرة',
+      'Excessive Meowing / Barking / Howling_action_3':
+          'لو ليه علاقة بسلوك التزاوج ← اسأل دكتورك البيطري عن خيار التعقيم',
+
+      'Hiding or Avoiding People': 'الاختباء أو تجنّب الناس',
+      'Hiding or Avoiding People_description':
+          'لو أليفك فجأة بدأ يستخبى، ده طريقته يقولك إن في حاجة مش مظبوطة.',
+      'Hiding or Avoiding People_cause_0':
+          'مرض أو ألم – من أكتر الأسباب شيوعًا للاختباء المفاجئ',
+      'Hiding or Avoiding People_cause_1':
+          'خوف أو توتر – زي البيت الجديد، أصوات عالية، ضيوف، أو وجود حيوانات تانية',
+      'Hiding or Avoiding People_cause_2':
+          'تروما سابقة – خصوصًا في حيوانات الإنقاذ أو الي اتعرضت لسوء معاملة',
+      'Hiding or Avoiding People_cause_3':
+          'الحمل (في الإناث) – القطط والكلاب ساعات بيستخبوا قبل الولادة',
+      'Hiding or Avoiding People_action_0':
+          'لو الاختباء بيحصل أحيانًا بس ← سيبه في حاله، ماتجبرهوش يخرج',
+      'Hiding or Avoiding People_action_1':
+          'لو بيحصل مع أصوات عالية أو وجود ضيوف أو تغييرات جديدة ← غالبًا توتر؛ وفرله مكان هادي وآمن',
+      'Hiding or Avoiding People_action_2':
+          'لو الاختباء جديد ومعاه قلة أكل أو قلة لعب أو تعب ← محتاج كشف في العيادة علشان نستبعد المرض',
+      'Hiding or Avoiding People_action_3':
+          'لو أليفتك أنثى مش مُعقمة وبتستخبى مع بطن كبيرة أو سلوكيات تحضير للولادة ← ممكن يكون حمل؛ تابعها وجهّز للولادة، ولو مش متأكد روح العيادة',
+
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)':
+          'أكل حاجات مينفعش تتاكل (زي البلاستيك، القماش، الورق أو التراب)',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_description':
+          'لو أليفك بيعض أو بيبلع حاجات مش أكل، ده ممكن يكون وراه مشكلة.',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_cause_0':
+          'نقص في التغذية – نقص فيتامينات أو معادن مهمة',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_cause_1':
+          'الملل أو التوتر – الحيوانات ممكن تعض لما تكون زهقانة أو قلقانة',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_cause_2':
+          'التسنين – الجراوي والقطط الصغيرة بيعضوا علشان يخففوا وجع اللثة',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_action_0':
+          'راجع أكله ← اتأكد إن نظامه الغذائي متوازن ومغذي',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_action_1':
+          'وفّر ألعاب للعض ← ألعاب مناسبة بدل أي حاجة خطر',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_action_2':
+          'حوّل انتباهه بلطف ← لو مسكته بيعض حاجة خطر، بدّلها بهدوء بحاجة آمنة',
+      'Eating Non-Food Items (Chewing Plastic, Cloth, Paper, or Dirt)_action_3':
+          'لو معرفتش تحل المشكلة و دايما بيبلع حاجات مش أكل أو حاجات خطيرة ← محتاج كشف في العيادة علشان نستبعد مشاكل صحية أو نقص غذائي',
+
+      'Excessive Licking or Tail-Chasing': 'اللحس المفرط أو مطاردة الديل',
+      'Excessive Licking or Tail-Chasing_description':
+          'لو أليفك طول الوقت بيلحس رجليه أو بيجري ورا ديله، غالبًا فيه سبب أكبر من مجرد لعب.',
+      'Excessive Licking or Tail-Chasing_cause_0':
+          'حساسية أو تهيّج جلدي – من أكتر الأسباب اللي بتخلي الحيوان يلحس باستمرار',
+      'Excessive Licking or Tail-Chasing_cause_1':
+          'ألم – زي التهاب المفاصل أو مشاكل في المفاصل بتخليه يركّز على المكان الموجوع',
+      'Excessive Licking or Tail-Chasing_cause_2':
+          'قلق أو زهق - خصوصًا في الحيوانات اللي طاقتها عالية أو زهقانة',
+      'Excessive Licking or Tail-Chasing_cause_3':
+          'طفيليات – زي البراغيت، القراد أو جرب الجلد اللي يسبب هرش مستمر',
+      'Excessive Licking or Tail-Chasing_action_0':
+          'بص على المكان كويس ← لو فيه احمرار، جروح أو تورّم ممكن يكون التهاب أو حساسية',
+      'Excessive Licking or Tail-Chasing_action_1':
+          'فتّش على البراغيت أو القراد في الفرو ← ولو لقيت اديلو التطعيم في العيادة',
+      'Excessive Licking or Tail-Chasing_action_2':
+          'زوّد اللعب والتمارين ← بيساعد يقلل الملل والضغط النفسي',
+      'Excessive Licking or Tail-Chasing_action_3':
+          'لو اللحس أو مطاردة الديل مستمرة لدرجة إنها بتعمل جروح في الجلد ← محتاج كشف في العيادة',
+
+      'Loss of Interest in Playing or Interacting':
+          'فقدان الاهتمام باللعب أو التفاعل',
+      'Loss of Interest in Playing or Interacting_description':
+          'لو أليفك كان بيلعب وبقى فجأة مش مهتم، ممكن يكون في حاجة غلط.',
+      'Loss of Interest in Playing or Interacting_cause_0':
+          'ألم أو مرض – زي التهاب المفاصل، مشاكل الأسنان، سخونية، أو أمراض داخلية',
+      'Loss of Interest in Playing or Interacting_cause_1':
+          'الوحدة أو قلة التفاعل – لما الأليف يقعد كتير من غير لعب أو اهتمام',
+      'Loss of Interest in Playing or Interacting_cause_2':
+          'التقدم في العمر – الحيوانات الكبيرة في السن بتكون أقل نشاط وحب للّعب',
+      'Loss of Interest in Playing or Interacting_action_0':
+          'راقب علامات المرض ← زي فقدان وزن، ضعف في الأكل، عرج، أو حرارة عالية ← محتاج كشف بيطري',
+      'Loss of Interest in Playing or Interacting_action_1':
+          'جرّب ألعاب أو نشاطات بسيطة وهادية ← الملل أو التوتر ساعات بيقلل الحماس',
+      'Loss of Interest in Playing or Interacting_action_2':
+          'لو أليفك كبير في السن ← العب معاه بهدوء، وفرله تمارين خفيفة، واديله راحة أكتر',
+
+      // General Issues
+      'generalIssues': 'مشاكل عامة',
+
+      'Vomiting': 'الترجيع',
+      'Vomiting_description':
+          'لو رجع مرة واحدة مش دايمًا خطر، لكن التكرار علامة إن في مشكلة!',
+      'Vomiting_cause_0': 'أكل بسرعة أو بكميات كبيرة',
+      'Vomiting_cause_1': 'تغيير مفاجئ في الأكل أو أكل فاسد',
+      'Vomiting_cause_2': 'كرات شعر (خصوصًا في القطط)',
+      'Vomiting_cause_3': 'ديدان أو عدوى في المعدة',
+      'Vomiting_cause_4':
+          'تسمم – من الشوكولاتة، الأدوية البشرية، أو منتجات سامة',
+      'Vomiting_cause_5': 'أمراض في الكبد أو الكلى أو المعدة',
+      'Vomiting_cause_6': 'عدوى فيروسية أو بكتيرية',
+      'Vomiting_action_0':
+          'لو حصل ترجيع مرة واحدة وأليفك طبيعي ← راقب كويس، وقدم أكل ومية بكميات صغيرة بعد شوية',
+      'Vomiting_action_1':
+          'لو الترجيع متكرر (أكتر من 2-3 مرات في 24 ساعة) ← محتاج عيادة',
+      'Vomiting_action_2':
+          'لو في ترجيع + إسهال في حيوان صغير في السن ← طوارئ، لازم عيادة فورًا',
+      'Vomiting_action_3':
+          'لو في ترجيع + دم، ضعف، أو لون اللثة باهت ← طوارئ، ممكن يكون تسمم أو مرض خطير',
+      'Vomiting_action_4':
+          'لو السبب إن الأكل بسرعة ← قسم الأكل لوجبات صغيرة بدل وجبة كبيرة',
+      'Vomiting_action_5':
+          'لو الترجيع بيحصل مرة يوميًا ولسه مستمر أيام متتالية ← اعمل كشف في العيادة علشان نستبعد مشاكل مزمنة',
+
+      'Regurgitation (Throwing Up Undigested Food)':
+          'الارتجاع (رجوع الأكل بدون هضم)',
+      'Regurgitation (Throwing Up Undigested Food)_description':
+          'الارتجاع غير الترجيع — الارتجاع بيحصل بعد الأكل مباشرة، والأكل بيرجع زي ما هو مش مهضوم.',
+      'Regurgitation (Throwing Up Undigested Food)_cause_0':
+          'أكل بسرعة جدًا (شائع في الحيوانات النهمة)',
+      'Regurgitation (Throwing Up Undigested Food)_cause_1': 'مشاكل في المريء',
+      'Regurgitation (Throwing Up Undigested Food)_cause_2':
+          'جسم غريب واقف في الطريق',
+      'Regurgitation (Throwing Up Undigested Food)_action_0':
+          'لو بيحصل نادرًا ← جرّب تقسيم الأكل لكميات أصغر أو ارفع الطبق شوية',
+      'Regurgitation (Throwing Up Undigested Food)_action_1':
+          'لو متكرر أو فيه فقدان وزن ← محتاج كشف عند دكتور',
+      'Regurgitation (Throwing Up Undigested Food)_action_2':
+          'لو فيه كتمة نفس أو صعوبة بلع ← طوارئ، لازم عيادة فورًا',
+
+      'Loss of Appetite': 'فقدان الشهية',
+      'Loss of Appetite_description':
+          'إن أليفك يفوّت وجبة واحدة مش دايمًا حاجة تقلق، لكن لو مبياكلش خالص لأكتر من 24 ساعة ← كده في مشكلة!',
+      'Loss of Appetite_cause_0':
+          'توتر أو قلق – زي تغيير المكان، وجود حيوان جديد، أو أصوات عالية',
+      'Loss of Appetite_cause_1':
+          'ألم في الأسنان أو الفم – تسوّس، خراج، أو التهاب لثة',
+      'Loss of Appetite_cause_2': 'حرارة، مرض، أو أي ألم في الجسم',
+      'Loss of Appetite_cause_3':
+          'مشاكل خطيرة – زي فشل الكبد/الكلى، السرطان، أو عدوى قوية',
+      'Loss of Appetite_action_0':
+          'لو فوت وجبة واحدة وبعدين رجع أكل ← غالبًا توتر أو مشكلة بسيطة في المعدة، تابع بس',
+      'Loss of Appetite_action_1':
+          'جرّب تقدّم الأكل دافي أو حاجة بيحبها ← ساعات ده بيشجعه ياكل',
+      'Loss of Appetite_action_2':
+          'بص جوه بقو – لو فيه أسنان مكسورة، لثة حمرا، أو ريحة وحشة جدا← ممكن يكون الألم مانعه من الأكل',
+      'Loss of Appetite_action_3':
+          'لو فقدان الشهية استمر أكتر من 24 ساعة، أو جاي مع ترجيع، ضعف، أو نزول وزن ← محتاج دكتور',
+      'Loss of Appetite_action_4':
+          'لو أليفك رافض الأكل والمية مع بعض، أو عنده سخونية، انتفاخ بطن، أو وقع فجأة ← طوارئ، لازم عيادة فورًا',
+
+      'Sudden Weight Loss or Weight Gain': 'فقدان أو زيادة الوزن المفاجئة',
+      'Sudden Weight Loss or Weight Gain_description':
+          'لو وزن أليفك اتغير بسرعة من غير ما يكون فيه تغيير في الأكل أو النشاط، ده ممكن يكون وراه سبب مهم.',
+      'Sudden Weight Loss or Weight Gain_cause_0':
+          'فقدان الوزن: ديدان أو حشرات',
+      'Sudden Weight Loss or Weight Gain_cause_1':
+          'فقدان الوزن: مرض السكر أو مشاكل الغدة الدرقية',
+      'Sudden Weight Loss or Weight Gain_cause_2':
+          'فقدان الوزن: أمراض مزمنة (زي الكبد أو الكلى)',
+      'Sudden Weight Loss or Weight Gain_cause_3':
+          'فقدان الوزن: ضعف الشهية أو الأكل مش بيتهضم كويس',
+      'Sudden Weight Loss or Weight Gain_cause_4':
+          'زيادة الوزن: أكل كتير أو قلة حركة',
+      'Sudden Weight Loss or Weight Gain_cause_5':
+          'زيادة الوزن: اضطرابات هرمونية',
+      'Sudden Weight Loss or Weight Gain_cause_6':
+          'زيادة الوزن: تجمع سوائل (ممكن يكون علامة على مشاكل في القلب أو الكبد)',
+      'Sudden Weight Loss or Weight Gain_action_0':
+          'لو أليفك بيأكل عادي بس وزنه بينزل ← اعمل كشف روتيني عند الدكتور علشان نستبعد ديدان، سكر، أو أمراض تانية',
+      'Sudden Weight Loss or Weight Gain_action_1':
+          'لو شهيته ضعيفة والوزن بينزل بسرعة ← محتاج دكتور قريب، خصوصًا لو استمر أكتر من يومين',
+      'Sudden Weight Loss or Weight Gain_action_2':
+          'لو زيادة الوزن تدريجية ومفيش أعراض تانية ← راجع كميات الأكل ونسبة التمارين، وحاول تعدل في النظام الغذائي',
+      'Sudden Weight Loss or Weight Gain_action_3':
+          'لو زيادة الوزن مفاجئة أو فيه بطن منفوخة ← محتاج كشف دكتور (ممكن يكون تجمع سوائل أو مشكلة هرمونية)',
+      'Sudden Weight Loss or Weight Gain_action_4':
+          'دايمًا راجع مواعيد تطعيمات الديدان والوقاية من الحشرات — التأخير فيها ممكن يسبب تغييرات في الوزن والصحة',
+
+      'Fever (Hot Ears, Nose, or Body)':
+          'حرارة أو سخونية (سخونة الأذن، الأنف، أو الجسم)',
+      'Fever (Hot Ears, Nose, or Body)_description':
+          'لو حاسس إن جسم أليفك أسخن من الطبيعي، ممكن يكون عنده حرارة.',
+      'Fever (Hot Ears, Nose, or Body)_cause_0':
+          'عدوى (بكتيرية، فيروسية، أو فطرية)',
+      'Fever (Hot Ears, Nose, or Body)_cause_1': 'التهابات بسبب إصابة أو مرض',
+      'Fever (Hot Ears, Nose, or Body)_cause_2':
+          'مشاكل خطيرة (زي أمراض المناعة، تسمم، أو سرطان)',
+      'Fever (Hot Ears, Nose, or Body)_action_0':
+          'راقب العلامات التانية: خمول، فقدان شهية، رعشة، أو سخونة في الأذن',
+      'Fever (Hot Ears, Nose, or Body)_action_1':
+          'لو السخونة بسيطة وأليفك بياكل، بيشرب، وبيتحرك طبيعي ← تابع كويس',
+      'Fever (Hot Ears, Nose, or Body)_action_2':
+          'لو جسمه سخن جدًا + تعبان، مش بياكل، أو بيرتجف ← محتاج دكتور يكشف عليه',
+      'Fever (Hot Ears, Nose, or Body)_action_3':
+          'لو في ضعف شديد، ترجيع، أو تنفّس سريع ← روح العيادة فورًا',
+      'Fever (Hot Ears, Nose, or Body)_action_4':
+          'مهم: متديش أبدًا أدوية حرارة بتاعة البشر — سامة جدًا للحيوانات!',
+
+      'Lethargy (Weakness, Sleeping Too Much)': 'الخمول (ضعف، نوم كتير)',
+      'Lethargy (Weakness, Sleeping Too Much)_description':
+          'لو أليفك النشيط فجأة بقى تعبان أو نايم طول الوقت، ممكن يكون يوم كسل عادي أو علامة على مشكلة.',
+      'Lethargy (Weakness, Sleeping Too Much)_cause_0':
+          'يوم كسل عادي (خصوصًا بعد لعب كتير أو في الجو الحر)',
+      'Lethargy (Weakness, Sleeping Too Much)_cause_1':
+          'ألم أو عدم راحة (زي التهاب المفاصل، إصابة، أو تعب في البطن)',
+      'Lethargy (Weakness, Sleeping Too Much)_cause_2': 'عدوى أو حرارة',
+      'Lethargy (Weakness, Sleeping Too Much)_cause_3':
+          'مشاكل خطيرة: تسمم، أمراض في الأعضاء، أو نزيف داخلي',
+      'Lethargy (Weakness, Sleeping Too Much)_action_0':
+          'لو أليفك بس بيرتاح أكتر من المعتاد ولسه بياكل وبيشرب وبيلعب شوية ← غالبًا يوم كسل، مفيش قلق',
+      'Lethargy (Weakness, Sleeping Too Much)_action_1':
+          'لو الخمول معاه ترجيع، إسهال، عرج، أو مش بياكل ← احجز كشف قريب عند العيادة',
+      'Lethargy (Weakness, Sleeping Too Much)_action_2':
+          'لو أليفك ضعيف جدًا، وقع فجأة، أو رافض الأكل والشرب ← حالة طارئة، لازم كشف فورًا',
+
+      // Breathing Problems
+      'breathingProblems': 'مشاكل تنفسية',
+
+      'Heavy Panting': 'اللهث الشديد',
+      'Heavy Panting_description':
+          'اللهث بعد اللّعب أو في الحر شيء طبيعي — لكن اللهث الشديد من غير سبب أو أثناء الراحة ممكن يكون علامة خطيرة',
+      'Heavy Panting_cause_0':
+          'ارتفاع الحرارة أو ضربة شمس – بيحصل في جو حار جدًا، أو لما الأليف يفضل فترة في عربية، أو بعد نشاط مبالغ فيه',
+      'Heavy Panting_cause_1':
+          'الأليف وشّه مسطّح (بولدوج، باج، فرنش بولدوج، إلخ...) – الكلاب دي شعبها الهوائية ضيقة أصلًا، فبيلهثوا كتير حتى في جو عادي أو وهم مرتاحين',
+      'Heavy Panting_cause_2':
+          'ألم أو توتر – الحيوانات ساعات بتلهث أكتر لما تكون مش مرتاحة أو قلقانة',
+      'Heavy Panting_cause_3':
+          'مشاكل في القلب أو الرئة – السوائل أو الالتهاب بيخلّي التنفس صعب',
+      'Heavy Panting_cause_4':
+          'زيادة الوزن (السمنة) – زيادة الوزن بتخلّي الجسم يتعب أسرع وأصعب يبرّد نفسه',
+      'Heavy Panting_action_0':
+          'لو اللهث من الحر ← نقّله لمكان بارد وظليل، وادّيله كمية ميّه قليلة على فترات',
+      'Heavy Panting_action_1':
+          'لو كلبك من الفصيلة المسطحة الوش ← خد بالك زيادة: متسبهوش في الشمس أو يجري كتير، وابعد عن الجهد الزايد أو اللعب بعنف. لو شفت لهث قوي أو صوت نفس عالي حتى وهو قاعد ← لازم كشف بيطري قريب',
+      'Heavy Panting_action_2':
+          'لو أليفك بيلهث وهو قاعد أو مرتاح (من غير لعب أو حر)، أو اللهث معاه كحة أو ضعف عام أو قلق زيادة ← لازم كشف بيطري',
+      'Heavy Panting_action_3':
+          'لو اللهث جه فجأة وقوي، أو معاه انهيار، أو لثة شاحبة/زرقاء، أو صعوبة تنفس واضحة ← دي حالة طارئة، لازم دكتور فورًا!',
+
+      'Coughing': 'الكحة',
+      'Coughing_description':
+          'كحة واحدة أو اتنين مرة مرة عادي، لكن الكحة المتكررة أو الشديدة ممكن تدل على مشكلة خطيرة',
+      'Coughing_cause_0':
+          'تهيّج خفيف في الزور – بسبب غبار، أو سحب على المقود (الكولر)، أو من الحماس',
+      'Coughing_cause_1':
+          'كحة معدية (زي kennel cough عند الكلاب) – مرض بيتنقل بين الكلاب بسرعة',
+      'Coughing_cause_2':
+          'مشاكل في القلب – ممكن تسبب كحة بالليل أو بعد التمرين',
+      'Coughing_cause_3': 'التهاب في الرئة – غالبًا معاها حرارة أو ضعف عام',
+      'Coughing_cause_4':
+          'حساسية أو ربو (asthma) – ممكن يسبب كحة مستمرة أو صوت نفس عالي',
+      'Coughing_cause_5':
+          'ضيق أو انهيار في الشعب الهوائية – بيعمل كحة صوتها زي الهورن',
+      'Coughing_action_0':
+          'لو الكحة خفيفة وجت بعد الجري أو السحب على المقود ← عادي، غالبًا شيء مؤقت',
+      'Coughing_action_1':
+          'لو الكحة استمرت أكتر من يومين أو زادت ← لازم كشف بيطري',
+      'Cougking_action_2':
+          'لو الكحة معاها حرارة، أو الأليف مش بياكل أو طاقته قليلة ← كشف بيطري سريع',
+      'Coughing_action_3':
+          'لو أليفك عنده صعوبة في التنفس، لثة زرقاء، أو وقع أو انهار ← حالة طارئة، لازم دكتور فورًا',
+      'Coughing_action_4':
+          'لو الكحة بتحصل بعد الأكل أو الشرب مباشرة ← ممكن يكون عنده مشكلة في البلع أو مجرى التنفس ← استشر طبيب بيطري',
+
+      'Wheezing or Noisy Breathing': 'صوت نفس عالي',
+      'Wheezing or Noisy Breathing_description':
+          'لو أليفك بيطلع صوت غريب أو صعب في التنفس، ممكن يكون عنده انسداد أو ضيق في مجرى الهوا',
+      'Wheezing or Noisy Breathing_cause_0':
+          'التهاب خفيف في الجهاز التنفسي (زي إنفلونزا القطط أو kennel cough عند الكلاب)',
+      'Wheezing or Noisy Breathing_cause_1':
+          'ربو (asthma) – منتشر أكتر عند القطط',
+      'Wheezing or Noisy Breathing_cause_2':
+          'رد فعل تحسسي (تورم في الحلق أو الممر الهوائي)',
+      'Wheezing or Noisy Breathing_cause_3':
+          'ضيق أو انهيار في القصبة الهوائية (منتشر عند الكلاب الصغيرة)',
+      'Wheezing or Noisy Breathing_cause_4':
+          'حاجة عالقة في الحلق – زي عظمة أو جزء من لعبة',
+      'Wheezing or Noisy Breathing_cause_5':
+          'سلالات الوش المسطح (باج، بولدوج، فرنش بولدوج، إلخ...) – عندهم صوت نفس عالي "عادي" بس أي زيادة مفاجئة تبقى خطيرة',
+      'Wheezing or Noisy Breathing_action_0':
+          'لو الصوت خفيف والأليف طبيعي في باقي تصرفاته ← غالبًا التهاب بسيط أو شيء عادي بسبب فصيلة معينة، اذكره للطبيب في الزيارة الجاية',
+      'Wheezing or Noisy Breathing_action_1':
+          'لو الصوت زاد فجأة، خصوصًا بعد مجهود أو في جو حار ← دكتور فورًا',
+      'Wheezing or Noisy Breathing_action_2':
+          'لو أليفك بيتنفس بصعوبة، لثته زرقاء، أو وقع فجأة ← طوارئ، لازم دكتور فورًا',
+      'Wheezing or Noisy Breathing_action_3':
+          'لو شاكك إن في حاجة علقت في زوره ← لو تقدر تطلعها بسهولة وأمان اعملها، لو لأ ← اجري على الطبيب فورًا',
+
+      'Sneezing & Nasal Discharge': 'العطس وسيلان الأنف',
+      'Sneezing & Nasal Discharge_description':
+          'العطاس من وقت للتاني عادي، لكن لو كتير أو معاه إفرازات غريبة من الأنف ← يبقى محتاج انتباه',
+      'Sneezing & Nasal Discharge_cause_0':
+          'حساسية – من الغبار، حبوب اللقاح، دخان، عطور، أو منتجات تنظيف',
+      'Sneezing & Nasal Discharge_cause_1': 'التهاب في الجهاز التنفسي',
+      'Sneezing & Nasal Discharge_cause_2':
+          'جسم غريب عالق في الأنف – زي حشيش أو بذور أو تراب',
+      'Sneezing & Nasal Discharge_cause_3':
+          'مشاكل في الأسنان – الالتهاب في الأسنان العلوية ممكن ينتقل للأنف',
+      'Sneezing & Nasal Discharge_action_0':
+          'لو عطاس مرة أو مرتين، ومفيش إفرازات ← غالبًا بسبب غبار أو شيء بسيط، مفيش قلق',
+      'Sneezing & Nasal Discharge_action_1':
+          'لو فيه سيلان شفاف من الأنف ومستمر ← ممكن تكون حساسية، حاول تبعّد الدخان والعطور ومنتجات التنظيف',
+      'Sneezing & Nasal Discharge_action_2':
+          'لو الإفرازات من الأنف سميكة أو صفراء/خضراء ← غالبًا التهاب ← لازم كشف بيطري',
+      'Sneezing & Nasal Discharge_action_3':
+          'لو أليفك بيعطس كتير ومش بيوقف أو بيحك مناخيره بإيده/مخلبه ← ممكن يكون في حاجة علقت ← دكتور بيطري فورًا',
+
+      'Open-Mouth Breathing in Cats': 'التنفس من الفم عند القطط',
+      'Open-Mouth Breathing in Cats_description':
+          'لو شفت قطتك بتتنفس وفمها مفتوح – ممكن يكون توتر أو حر، لكن ساعات بيكون علامة على مشكلة تنفسية خطيرة',
+      'Open-Mouth Breathing in Cats_cause_0':
+          'حر أو توتر (بعد اللعب، أو السفر، أو ركوب العربية)',
+      'Open-Mouth Breathing in Cats_cause_1': 'مشاكل في القلب أو الرئة',
+      'Open-Mouth Breathing in Cats_cause_2': 'ربو أو مشاكل في الشعب الهوائية',
+      'Open-Mouth Breathing in Cats_cause_3': 'تجمع سوائل في الصدر',
+      'Open-Mouth Breathing in Cats_action_0':
+          'لو حصل بعد اللعب أو الحر أو السفر ← خلّي قطتك ترتاح في مكان هادي وبارد وراقبها',
+      'Open-Mouth Breathing in Cats_action_1':
+          'لو استمرت وهي مرتاحة، أو معاها تعب، أو سيلان لعاب، أو صعوبة في التنفس ← كشف بيطري في أقرب وقت',
+      'Open-Mouth Breathing in Cats_action_2':
+          'لو التنفس من الفم بدأ فجأة ومش بيوقف ← حالة طارئة، لازم دكتور فورًا',
+
+      'Gasping for Air / Struggling to Breathe':
+          'صعوبة في التنفس أو نهجان شديد',
+      'Gasping for Air / Struggling to Breathe_description':
+          'لو أليفك مش قادر يتنفس صح – دي حالة طارئة ومتستناش!',
+      'Gasping for Air / Struggling to Breathe_cause_0':
+          'رد فعل تحسسي شديد (تورم في الحلق)',
+      'Gasping for Air / Struggling to Breathe_cause_1':
+          'شرقة أو اختناق بسبب أكل أو جسم غريب',
+      'Gasping for Air / Struggling to Breathe_cause_2':
+          'انهيار في الرئة أو تجمع سوائل في الصدر',
+      'Gasping for Air / Struggling to Breathe_cause_3': 'أمراض القلب',
+      'Gasping for Air / Struggling to Breathe_action_0':
+          'افحص لثة أليفك أو لسانه ← لو لقيتهم زرقا أو شاحبين ← حالة طارئة، لازم دكتور فورًا!',
+      'Gasping for Air / Struggling to Breathe_action_1':
+          'لو أليفك بيسيّل لعاب، أو تنفسه تقيل جدًا، أو واضح إنه مش قادر يتنفس ← اجري عالطبيب فورًا!',
+
+      'Choking': 'أليفك شرقان',
+      'Choking_description':
+          'لو أليفك بدأ فجأة يتقيأ/يكح أو يحك فمه بإيده أو بالأرض – ممكن يكون في حاجة علقت في زوره',
+      'Choking_cause_0': 'أكل أو مكافآت (treats) اتبلعت بسرعة',
+      'Choking_cause_1': 'ألعاب، عظام، أو أجسام غريبة',
+      'Choking_cause_2': 'شعر أو خيط علق في الحلق',
+      'Choking_action_0':
+          'لو أليفك بيكح أو بيحاول يبلع بس لسه قادر يتنفس ← اهدى وراقبه، كتير من الحيوانات بتعرف تتخلص من الشيء الغلط لوحدها',
+      'Choking_action_1':
+          'لو أليفك مش قادر يتنفس خالص أو وقع أو انهار ← حالة طوارئ! اجري على الدكتور فورًا',
+
       'selectPetType': 'اختر نوع الحيوان الأليف',
       'choosePetModelToViewAnatomy': 'اختر نموذج حيوان أليف لعرض التشريح',
       'dog': 'كلب',
@@ -3247,6 +4698,14 @@ class AppLocalizations {
       'spayedNeutered': 'معقم/مخصي',
       'petNotes': 'ملاحظات',
       'additionalPetInfo': 'أي معلومات إضافية عن حيوانك الأليف',
+
+      // QR Code scanning
+      'scanQrCode': 'مسح رمز الاستجابة السريعة',
+      'scanVetQrCodeToComplete':
+          'امسح رمز QR الخاص بالطبيب البيطري لإتمام الموعد',
+      'pointCameraAtQrCode': 'وجّه الكاميرا نحو رمز QR',
+      'appointmentCompletedSuccessfully': 'تم إتمام الموعد بنجاح',
+      'scanQrToComplete': 'امسح QR للإتمام',
     },
   };
 }

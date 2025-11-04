@@ -190,7 +190,7 @@ class VetBookingTimeSlots extends StatelessWidget {
 
     return Obx(() {
       final isSelected = controller.isTimeSlotSelected(slot);
-      final isAvailable = slot.isBookable;
+      final isAvailable = slot.isBookableForDate(controller.selectedDay.value);
 
       return GestureDetector(
         onTap: isAvailable ? () => controller.updateTimeSlot(slot) : null,
@@ -253,7 +253,11 @@ class VetBookingTimeSlots extends StatelessWidget {
               if (!isAvailable) ...[
                 const SizedBox(height: 2),
                 Text(
-                  slot.isFull ? 'Full' : 'Unavailable',
+                  slot.isFull
+                      ? 'Full'
+                      : slot.isExpired(controller.selectedDay.value)
+                          ? 'Expired'
+                          : 'Unavailable',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: isDark ? Colors.grey[600] : Colors.grey[400],
                         fontSize: 10,

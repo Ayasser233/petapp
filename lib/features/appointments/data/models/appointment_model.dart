@@ -1,3 +1,5 @@
+import 'package:petapp/features/appointments/domain/entities/appointment_entity.dart';
+
 class AppointmentModel {
   final String id;
   final DateTime startTime;
@@ -15,6 +17,7 @@ class AppointmentModel {
   final String? coupons;
   final double couponDiscount;
   final double pointsDiscount;
+  final String? hash; // Verification code for vet users
   final AppointmentPet? pet;
   final AppointmentVet? vet;
 
@@ -35,6 +38,7 @@ class AppointmentModel {
     this.coupons,
     required this.couponDiscount,
     required this.pointsDiscount,
+    this.hash,
     this.pet,
     this.vet,
   });
@@ -78,6 +82,7 @@ class AppointmentModel {
       coupons: json['coupons'],
       couponDiscount: (json['couponDiscount'] ?? 0).toDouble(),
       pointsDiscount: (json['pointsDiscount'] ?? 0).toDouble(),
+      hash: json['hash']?.toString(),
       pet: json['pet'] != null ? AppointmentPet.fromJson(json['pet']) : null,
       vet: json['vet'] != null ? AppointmentVet.fromJson(json['vet']) : null,
     );
@@ -101,6 +106,7 @@ class AppointmentModel {
       'coupons': coupons,
       'couponDiscount': couponDiscount,
       'pointsDiscount': pointsDiscount,
+      'hash': hash,
       'pet': pet?.toJson(),
       'vet': vet?.toJson(),
     };
@@ -187,6 +193,7 @@ class AppointmentModel {
     String? coupons,
     double? couponDiscount,
     double? pointsDiscount,
+    String? hash,
     AppointmentPet? pet,
     AppointmentVet? vet,
   }) {
@@ -207,8 +214,86 @@ class AppointmentModel {
       coupons: coupons ?? this.coupons,
       couponDiscount: couponDiscount ?? this.couponDiscount,
       pointsDiscount: pointsDiscount ?? this.pointsDiscount,
+      hash: hash ?? this.hash,
       pet: pet ?? this.pet,
       vet: vet ?? this.vet,
+    );
+  }
+
+  // Convert model to entity
+  AppointmentEntity toEntity() {
+    return AppointmentEntity(
+      id: id,
+      startTime: startTime,
+      endTime: endTime,
+      status: status,
+      reasonForVisit: reasonForVisit,
+      consultationFee: consultationFee,
+      discount: discount,
+      finalAmount: finalAmount,
+      pointsUsed: pointsUsed,
+      pointsEarned: pointsEarned,
+      rating: rating,
+      reviewComment: reviewComment,
+      reviewedAt: reviewedAt,
+      coupons: coupons,
+      couponDiscount: couponDiscount,
+      pointsDiscount: pointsDiscount,
+      hash: hash,
+      pet: pet != null
+          ? AppointmentPetEntity(
+              id: pet!.id,
+              name: pet!.name,
+              image: pet!.type, // Mapping type to image field
+            )
+          : null,
+      vet: vet != null
+          ? AppointmentVetEntity(
+              id: vet!.id,
+              branchName: vet!.branchName,
+              description: vet!.description,
+              // Note: location, latitude, longitude not available in model
+            )
+          : null,
+    );
+  }
+
+  // Convert entity to model
+  static AppointmentModel fromEntity(AppointmentEntity entity) {
+    return AppointmentModel(
+      id: entity.id,
+      startTime: entity.startTime,
+      endTime: entity.endTime,
+      status: entity.status,
+      reasonForVisit: entity.reasonForVisit,
+      consultationFee: entity.consultationFee,
+      discount: entity.discount,
+      finalAmount: entity.finalAmount,
+      pointsUsed: entity.pointsUsed,
+      pointsEarned: entity.pointsEarned,
+      rating: entity.rating,
+      reviewComment: entity.reviewComment,
+      reviewedAt: entity.reviewedAt,
+      coupons: entity.coupons,
+      couponDiscount: entity.couponDiscount,
+      pointsDiscount: entity.pointsDiscount,
+      pet: entity.pet != null
+          ? AppointmentPet(
+              id: entity.pet!.id,
+              name: entity.pet!.name,
+              type: entity.pet!.image, // Mapping image back to type field
+            )
+          : null,
+      vet: entity.vet != null
+          ? AppointmentVet(
+              id: entity.vet!.id,
+              branchName: entity.vet!.branchName,
+              description: entity.vet!.description,
+              rating: 0.0, // Default value as entity doesn't have rating
+              consultationFee:
+                  entity.consultationFee, // Use appointment's consultationFee
+            )
+          : null,
     );
   }
 }

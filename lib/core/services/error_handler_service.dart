@@ -48,7 +48,14 @@ class ErrorHandlerService extends GetxService {
     // If this is a DioException, check the request URL
     if (error is DioException) {
       final url = error.requestOptions.uri.toString().toLowerCase();
+
+      // Suppress species-related errors
       if (url.contains('species') || url.contains('/pets/species')) {
+        return true;
+      }
+
+      // Suppress appointment-related errors - handled by feature's BlocListener
+      if (url.contains('/appointments')) {
         return true;
       }
     }
@@ -261,13 +268,20 @@ class ErrorHandlerService extends GetxService {
     Get.snackbar(
       title,
       message,
-      snackPosition: SnackPosition.TOP,
+      snackPosition: SnackPosition.BOTTOM, // Changed from TOP
       backgroundColor: color,
       colorText: Colors.white,
       duration: const Duration(seconds: 4),
-      margin: const EdgeInsets.all(16),
-      borderRadius: 8,
-      maxWidth: 400,
+      margin:
+          const EdgeInsets.only(left: 16, right: 16, bottom: 16), // Bottom only
+      borderRadius: 12,
+      isDismissible: true,
+      dismissDirection: DismissDirection.down,
+      icon: Icon(
+        Icons.error_outline,
+        color: Colors.white,
+        size: 28,
+      ),
     );
   }
 

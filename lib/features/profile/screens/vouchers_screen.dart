@@ -12,10 +12,10 @@ class VouchersScreen extends StatefulWidget {
   State<VouchersScreen> createState() => _VouchersScreenState();
 }
 
-class _VouchersScreenState extends State<VouchersScreen> 
+class _VouchersScreenState extends State<VouchersScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   // Sample vouchers data
   final List<VoucherModel> _allVouchers = [
     VoucherModel(
@@ -80,7 +80,7 @@ class _VouchersScreenState extends State<VouchersScreen>
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
     final localizations = AppLocalizations.of(context);
-    
+
     return Scaffold(
       appBar: AppBar(
         title: Text(localizations.myVouchers),
@@ -89,9 +89,13 @@ class _VouchersScreenState extends State<VouchersScreen>
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: '${localizations.available} (${_getAvailableVouchers().length})'),
+            Tab(
+                text:
+                    '${localizations.available} (${_getAvailableVouchers().length})'),
             Tab(text: '${localizations.used} (${_getUsedVouchers().length})'),
-            Tab(text: '${localizations.expired} (${_getExpiredVouchers().length})'),
+            Tab(
+                text:
+                    '${localizations.expired} (${_getExpiredVouchers().length})'),
           ],
           labelColor: AppColors.orange,
           unselectedLabelColor: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -118,7 +122,9 @@ class _VouchersScreenState extends State<VouchersScreen>
   }
 
   List<VoucherModel> _getExpiredVouchers() {
-    return _allVouchers.where((voucher) => voucher.isExpired && !voucher.isUsed).toList();
+    return _allVouchers
+        .where((voucher) => voucher.isExpired && !voucher.isUsed)
+        .toList();
   }
 
   Widget _buildVouchersList(List<VoucherModel> vouchers) {
@@ -167,14 +173,14 @@ class _VouchersScreenState extends State<VouchersScreen>
   Widget _buildVoucherCard(VoucherModel voucher) {
     final isDark = THelperFunctions.isDarkMode(context);
     final isValid = voucher.isValid;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: isDark ? Colors.grey[800] : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isValid 
+          color: isValid
               ? AppColors.orange.withValues(alpha: 0.3)
               : Colors.grey.withValues(alpha: 0.3),
         ),
@@ -198,11 +204,10 @@ class _VouchersScreenState extends State<VouchersScreen>
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        color: isValid 
-                            ? AppColors.orange 
-                            : Colors.grey,
+                        color: isValid ? AppColors.orange : Colors.grey,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -216,7 +221,8 @@ class _VouchersScreenState extends State<VouchersScreen>
                     ),
                     const Spacer(),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: isDark ? Colors.grey[700] : Colors.grey[200],
                         borderRadius: BorderRadius.circular(12),
@@ -232,15 +238,15 @@ class _VouchersScreenState extends State<VouchersScreen>
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Title and description
                 Text(
                   voucher.title,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: isValid 
+                        color: isValid
                             ? (isDark ? Colors.white : Colors.black87)
                             : Colors.grey,
                       ),
@@ -249,12 +255,12 @@ class _VouchersScreenState extends State<VouchersScreen>
                 Text(
                   voucher.description,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isValid 
+                        color: isValid
                             ? (isDark ? Colors.grey[300] : Colors.grey[700])
                             : Colors.grey,
                       ),
                 ),
-                
+
                 if (voucher.minPurchaseAmount != null) ...[
                   const SizedBox(height: 8),
                   Text(
@@ -265,9 +271,9 @@ class _VouchersScreenState extends State<VouchersScreen>
                         ),
                   ),
                 ],
-                
+
                 const SizedBox(height: 16),
-                
+
                 // Code and expiry
                 Row(
                   children: [
@@ -279,7 +285,8 @@ class _VouchersScreenState extends State<VouchersScreen>
                           color: isDark ? Colors.grey[700] : Colors.grey[100],
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: isDark ? Colors.grey[600]! : Colors.grey[300]!,
+                            color:
+                                isDark ? Colors.grey[600]! : Colors.grey[300]!,
                           ),
                         ),
                         child: Row(
@@ -287,7 +294,10 @@ class _VouchersScreenState extends State<VouchersScreen>
                             Expanded(
                               child: Text(
                                 voucher.code,
-                                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleSmall
+                                    ?.copyWith(
                                       fontWeight: FontWeight.bold,
                                       fontFamily: 'monospace',
                                     ),
@@ -315,9 +325,9 @@ class _VouchersScreenState extends State<VouchersScreen>
                     ),
                   ],
                 ),
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Expiry date
                 Row(
                   children: [
@@ -330,7 +340,9 @@ class _VouchersScreenState extends State<VouchersScreen>
                     Text(
                       voucher.formattedExpiry,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: voucher.isExpired ? Colors.red : Colors.grey[600],
+                            color: voucher.isExpired
+                                ? Colors.red
+                                : Colors.grey[600],
                             fontWeight: FontWeight.w500,
                           ),
                     ),
@@ -339,7 +351,7 @@ class _VouchersScreenState extends State<VouchersScreen>
               ],
             ),
           ),
-          
+
           // Status overlay
           if (!isValid)
             Positioned.fill(
@@ -352,7 +364,8 @@ class _VouchersScreenState extends State<VouchersScreen>
                   child: Transform.rotate(
                     angle: -0.3,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: voucher.isUsed ? Colors.green : Colors.red,
                         borderRadius: BorderRadius.circular(8),
@@ -376,10 +389,11 @@ class _VouchersScreenState extends State<VouchersScreen>
   }
 
   void _copyCode(String code) {
+    final localizations = AppLocalizations.of(context);
     Clipboard.setData(ClipboardData(text: code));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Voucher code "$code" copied to clipboard'),
+        content: Text(localizations.voucherCodeCopied(code)),
         backgroundColor: AppColors.orange,
         behavior: SnackBarBehavior.floating,
       ),

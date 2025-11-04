@@ -12,7 +12,7 @@ import 'package:petapp/features/location/screens/choose_location.dart';
 import 'package:petapp/features/location/screens/set_location.dart';
 import 'package:petapp/features/home/screens/home_screen.dart';
 import 'package:petapp/features/vets/screens/vet_detail_screen.dart';
-import 'package:petapp/features/appointments/screens/appointments_screen.dart';
+import 'package:petapp/features/appointments/presentation/screens/appointments_screen.dart';
 import 'package:petapp/features/profile/screens/profile_screen.dart';
 import 'package:petapp/features/profile/screens/account_details_screen.dart';
 import 'package:petapp/features/pet/screens/pet_3d_viewer/pet_3d_viewer_screen.dart';
@@ -22,12 +22,15 @@ import 'package:petapp/features/vets/screens/vet_explorer_screen.dart';
 // Add these imports for the pet-related screens
 import 'package:petapp/features/pet/screens/my_pets.dart';
 import 'package:petapp/features/pet/screens/add_pet.dart';
+import 'package:petapp/features/pet/screens/update_pet.dart';
 import 'package:petapp/features/pet/screens/pet_profile.dart';
 // Add import for settings screen
 import 'package:petapp/features/home/screens/settings_screen.dart';
 import 'package:petapp/features/profile/screens/points_history_screen.dart';
 import 'package:petapp/features/profile/screens/vouchers_screen.dart';
 import 'package:petapp/features/profile/screens/favorites_screen.dart';
+// Vaccination imports
+import 'package:petapp/features/vaccination/presentation/screens/select_pet_for_vaccination_screen.dart';
 
 class AppRoutes {
   static const String onboarding = '/onboarding';
@@ -53,6 +56,7 @@ class AppRoutes {
   // Add these route constants here instead of inside the getPages list
   static const String myPets = '/my-pets';
   static const String addPet = '/add-pet';
+  static const String updatePet = '/update-pet';
   static const String petProfile = '/pet-profile';
   static const String accountDetails = '/account-details';
   // Add settings route constant here
@@ -61,6 +65,9 @@ class AppRoutes {
   static const String pointsHistory = '/points-history';
   static const String redeem = '/redeem';
   static const String favorites = '/favorites';
+  // Vaccination routes
+  static const String selectPetForVaccination = '/select-pet-vaccination';
+  static const String petVaccinationRecord = '/pet-vaccination-record';
 
   static List<GetPage> get getPages => [
         GetPage(name: networkSplash, page: () => const NetworkSplashScreen()),
@@ -118,6 +125,13 @@ class AppRoutes {
           middlewares: [AuthMiddleware()],
         ),
         GetPage(
+          name: updatePet,
+          page: () => UpdatePetScreen(
+            pet: Get.arguments,
+          ),
+          middlewares: [AuthMiddleware()],
+        ),
+        GetPage(
           name: petProfile,
           page: () => PetProfileScreen(
             pet: Get.arguments,
@@ -147,6 +161,14 @@ class AppRoutes {
           page: () => const FavoritesScreen(),
           transition: Transition.rightToLeft,
           transitionDuration: const Duration(milliseconds: 250),
+        ),
+        // Vaccination routes
+        GetPage(
+          name: selectPetForVaccination,
+          page: () => const SelectPetForVaccinationScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          middlewares: [AuthMiddleware()],
         ),
       ];
 }
