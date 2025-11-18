@@ -4,6 +4,7 @@ import 'package:petapp/core/models/country_code.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/validation_utils.dart';
 import 'package:petapp/core/styles/input_styles.dart';
+import 'package:petapp/core/utils/arabic_numeral_formatter.dart';
 
 class PhoneInputField extends StatefulWidget {
   final TextEditingController controller;
@@ -31,13 +32,17 @@ class _PhoneInputFieldState extends State<PhoneInputField> {
 
   @override
   Widget build(BuildContext context) {
+    final locale = Localizations.localeOf(context);
+    final isArabic = locale.languageCode == 'ar';
+
     return TextFormField(
       controller: widget.controller,
       keyboardType: TextInputType.phone,
       autovalidateMode:
           AutovalidateMode.disabled, // Disable auto-validation initially
       inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
+        ArabicAwareDigitsOnlyFormatter(), // Allow both English and Arabic digits
+        ArabicNumeralInputFormatter(isArabic), // Convert to Arabic for display
       ],
       decoration: InputDecoration(
         prefixIcon: _buildCountryCodeDropdown(),

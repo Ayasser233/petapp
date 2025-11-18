@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/features/profile/controllers/profile_controller.dart';
+import 'package:petapp/core/utils/formatters.dart';
+import 'package:petapp/core/utils/arabic_numeral_formatter.dart';
 
 class AccountDetailsScreen extends StatefulWidget {
   const AccountDetailsScreen({super.key});
@@ -20,8 +24,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
-  late TextEditingController _addressController;
-  late TextEditingController _dobController;
 
   // Track if fields are being edited
   bool _isEditing = false;
@@ -32,8 +34,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     _nameController = TextEditingController();
     _emailController = TextEditingController();
     _phoneController = TextEditingController();
-    _addressController = TextEditingController();
-    _dobController = TextEditingController();
 
     // Initialize controllers with actual data
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -49,9 +49,33 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     if (profile != null) {
       _nameController.text = profile.name;
       _emailController.text = profile.email;
-      _phoneController.text = profile.phone;
-      _addressController.text = profile.address ?? '';
-      _dobController.text = profile.dateOfBirth ?? '1990-01-01';
+
+      // Strip country code from phone number for display
+      String displayPhone = profile.phone;
+      print('🔍 Original phone from profile: "$displayPhone"');
+
+      if (displayPhone.startsWith('+200')) {
+        // Backend sometimes returns +200 instead of +20
+        // Remove +200 and add back 0
+        displayPhone = '0${displayPhone.substring(4)}'; // Remove +200 and add 0
+      } else if (displayPhone.startsWith('+20')) {
+        // Normal case: Remove +20 and add 0
+        String phoneWithoutCode = displayPhone.substring(3); // Remove +20
+        if (!phoneWithoutCode.startsWith('0')) {
+          displayPhone = '0$phoneWithoutCode'; // Add 0 prefix
+        } else {
+          displayPhone = phoneWithoutCode; // Already has 0
+        }
+      } else if (displayPhone.startsWith('+')) {
+        // For other country codes, try to remove them
+        final match = RegExp(r'^\+\d{1,3}').firstMatch(displayPhone);
+        if (match != null) {
+          displayPhone = displayPhone.substring(match.group(0)!.length);
+        }
+      }
+
+      print('🔍 Display phone after processing: "$displayPhone"');
+      _phoneController.text = displayPhone;
     } else {
       // Handle null profile case - Load from storage or show defaults
       _loadDefaultOrStoredData();
@@ -73,8 +97,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
           _nameController.text = profile.name;
           _emailController.text = profile.email;
           _phoneController.text = profile.phone;
-          _addressController.text = profile.address ?? '';
-          _dobController.text = profile.dateOfBirth ?? '1990-01-01';
         } else {
           // Still null after refresh, use defaults
           _setDefaultValues();
@@ -84,15 +106,11 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
         _nameController.text = 'Guest User';
         _emailController.text = 'guest@example.com';
         _phoneController.text = '';
-        _addressController.text = '';
-        _dobController.text = '1990-01-01';
       } else {
         // Unauthenticated - show empty fields
         _nameController.text = '';
         _emailController.text = '';
         _phoneController.text = '';
-        _addressController.text = '';
-        _dobController.text = '';
       }
     } catch (e) {
       _setDefaultValues();
@@ -103,8 +121,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     _nameController.text = 'User';
     _emailController.text = 'user@example.com';
     _phoneController.text = '';
-    _addressController.text = '';
-    _dobController.text = '1990-01-01';
   }
 
   @override
@@ -112,8 +128,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     _nameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-    _addressController.dispose();
-    _dobController.dispose();
     super.dispose();
   }
 
@@ -144,10 +158,14 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     print('   Name Controller: "${_nameController.text}"');
     print('   Email Controller: "${_emailController.text}"');
     print('   Phone Controller: "${_phoneController.text}"');
-    print('   Address Controller: "${_addressController.text}"');
-    print('   DOB Controller: "${_dobController.text}"');
     print('   Parsed firstName: "$firstName"');
     print('   Parsed lastName: "$lastName"');
+
+    // Convert Arabic numerals to English for phone number
+    String phoneText =
+        TFormatter.toEnglishNumerals(_phoneController.text.trim());
+    final phoneValue = phoneText.isNotEmpty ? phoneText : null;
+    print('   Phone value being sent: "$phoneValue"');
 
     try {
       final success = await _profileController.updateProfile(
@@ -156,15 +174,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
         email: _emailController.text.trim().isNotEmpty
             ? _emailController.text.trim()
             : null,
-        phone: _phoneController.text.trim().isNotEmpty
-            ? _phoneController.text.trim()
-            : null,
-        address: _addressController.text.trim().isNotEmpty
-            ? _addressController.text.trim()
-            : null,
-        dateOfBirth: _dobController.text.trim().isNotEmpty
-            ? _dobController.text.trim()
-            : null,
+        phone: phoneValue,
       );
 
       if (success) {
@@ -326,7 +336,8 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                   children: [
                     // Section Title
                     Text(
-                      "Personal Information",
+                      localizations?.personalInformation ??
+                          "Personal Information",
                       style: TextStyle(
                         color: textColor,
                         fontSize: 18,
@@ -347,12 +358,12 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
 
                     const SizedBox(height: 16),
 
-                    // Email
+                    // Email (disabled - cannot be edited)
                     _buildTextField(
                       label: localizations?.email ?? "Email",
                       controller: _emailController,
                       icon: Icons.email,
-                      enabled: _isEditing,
+                      enabled: false, // Email field is always disabled
                       isDark: isDark,
                       cardColor: cardColor,
                       keyboardType: TextInputType.emailAddress,
@@ -369,33 +380,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                       isDark: isDark,
                       cardColor: cardColor,
                       keyboardType: TextInputType.phone,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Date of Birth
-                    _buildTextField(
-                      label: localizations?.dateOfBirth ?? "Date of Birth",
-                      controller: _dobController,
-                      icon: Icons.calendar_today,
-                      enabled: _isEditing,
-                      isDark: isDark,
-                      cardColor: cardColor,
-                      onTap: _isEditing ? () => _selectDate(context) : null,
-                      readOnly: true,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // Address
-                    _buildTextField(
-                      label: localizations?.address ?? "Address",
-                      controller: _addressController,
-                      icon: Icons.location_on,
-                      enabled: _isEditing,
-                      isDark: isDark,
-                      cardColor: cardColor,
-                      maxLines: 2,
                     ),
                   ],
                 ),
@@ -422,7 +406,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                   children: [
                     // Section Title
                     Text(
-                      "Security",
+                      localizations?.security ?? "Security",
                       style: TextStyle(
                         color: textColor,
                         fontSize: 18,
@@ -446,7 +430,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                         ),
                       ),
                       title: Text(
-                        "Change Password",
+                        localizations?.changePassword ?? "Change Password",
                         style: TextStyle(
                           color: textColor,
                           fontSize: 16,
@@ -460,138 +444,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                       ),
                       onTap: () {
                         // Navigate to change password screen
-                      },
-                    ),
-
-                    const Divider(),
-
-                    // Two-Factor Authentication Option
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppColors.lightorange.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.security,
-                          color: AppColors.orange,
-                        ),
-                      ),
-                      title: Text(
-                        "Two-Factor Authentication",
-                        style: TextStyle(
-                          color: textColor,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      trailing: Switch(
-                        value: false,
-                        onChanged: (value) {
-                          // Enable/disable two-factor authentication
-                        },
-                        activeThumbColor: AppColors.orange,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Account Management Section
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: cardColor,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 10,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Section Title
-                    Text(
-                      "Account Management",
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    // Deactivate Account Option
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.pause_circle_outline,
-                          color: Colors.orange,
-                        ),
-                      ),
-                      title: const Text(
-                        "Deactivate Account",
-                        style: TextStyle(
-                          color: Colors.orange,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      trailing: const Icon(
-                        Icons.arrow_forward_ios,
-                        size: 16,
-                        color: Colors.grey,
-                      ),
-                      onTap: () {
-                        // Show deactivate account confirmation dialog
-                      },
-                    ),
-
-                    const Divider(),
-
-                    // Delete Account Option
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.delete_outline,
-                          color: Colors.red,
-                        ),
-                      ),
-                      title: const Text(
-                        "Delete Account",
-                        style: TextStyle(
-                          color: Colors.red,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      trailing: const Icon(
-                        Icons.arrow_forward_ios,
-                        size: 16,
-                        color: Colors.grey,
-                      ),
-                      onTap: () {
-                        // Show delete account confirmation dialog
+                        Get.toNamed(AppRoutes.changePassword);
                       },
                     ),
                   ],
@@ -622,6 +475,18 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     final textColor = isDark ? Colors.white : Colors.black87;
     final disabledColor = isDark ? Colors.grey[700] : Colors.grey[200];
     final borderColor = isDark ? Colors.grey[700] : Colors.grey[300];
+    final locale = Localizations.localeOf(context);
+    final isArabic = locale.languageCode == 'ar';
+
+    // Use Arabic numeral formatter for numeric keyboards in Arabic locale
+    List<TextInputFormatter>? formatters;
+    if (keyboardType == TextInputType.phone ||
+        keyboardType == TextInputType.number) {
+      formatters = [
+        ArabicAwareDigitsOnlyFormatter(), // Allow both English and Arabic digits
+        ArabicNumeralInputFormatter(isArabic), // Convert to Arabic for display
+      ];
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -651,6 +516,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
             onTap: onTap,
             keyboardType: keyboardType,
             maxLines: maxLines,
+            inputFormatters: formatters,
             style: TextStyle(
               color: textColor,
               fontSize: 16,
@@ -671,42 +537,5 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
         ),
       ],
     );
-  }
-
-  // Date picker
-  Future<void> _selectDate(BuildContext context) async {
-    DateTime initialDate;
-    try {
-      initialDate = DateTime.parse("1990-01-01");
-    } catch (e) {
-      // Fallback to default date if parsing fails
-      initialDate = DateTime(1990, 1, 1);
-    }
-
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime(1920),
-      lastDate: DateTime.now(),
-      builder: (BuildContext context, Widget? child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: AppColors.orange,
-              onPrimary: Colors.white,
-            ),
-            dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
-          ),
-          child: child ?? Container(), // Safely handle null child
-        );
-      },
-    );
-
-    if (pickedDate != null) {
-      setState(() {
-        _dobController.text =
-            "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
-      });
-    }
   }
 }

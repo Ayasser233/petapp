@@ -274,18 +274,7 @@ class SettingsScreen extends StatelessWidget {
               settingsProvider.setEmailNotificationsEnabled(value);
             },
             icon: Icons.email_outlined,
-          ),
-          _buildDivider(),
-          _buildSwitchTile(
-            context: context,
-            title: localizations.sound,
-            subtitle: localizations.playSoundForNotifications,
-            value: settingsProvider.soundEnabled,
-            onChanged: (value) {
-              settingsProvider.setSoundEnabled(value);
-            },
-            icon: Icons.volume_up_outlined,
-          ),
+          )
         ],
       ),
     );
@@ -308,26 +297,7 @@ class SettingsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildActionTile(
-            context: context,
-            title: localizations.privacyPolicy,
-            subtitle: localizations.readOurPrivacyPolicy,
-            onTap: () {
-              // Navigate to privacy policy
-            },
-            icon: Icons.privacy_tip_outlined,
-          ),
-          _buildDivider(),
-          _buildActionTile(
-            context: context,
-            title: localizations.termsOfService,
-            subtitle: localizations.readOurTermsOfService,
-            onTap: () {
-              // Navigate to terms of service
-            },
-            icon: Icons.description_outlined,
-          ),
-          _buildDivider(),
+          
           _buildActionTile(
             context: context,
             title: localizations.deleteAccount,

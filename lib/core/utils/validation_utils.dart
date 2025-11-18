@@ -4,10 +4,10 @@ class ValidationUtils {
     r'^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+',
   );
 
-  // Phone number without country code - should not start with 0
-  // Must be 6-14 digits, starting with 1-9
-  static final RegExp _phoneWithoutCountryCodeRegex = RegExp(
-    r'^[1-9][0-9]{5,13}$',
+  // Phone number - Egyptian format (10-11 digits, can start with 0)
+  // Accepts both English (0-9) and Arabic (٠-٩) numerals
+  static final RegExp _phoneRegex = RegExp(
+    r'^[0-9٠-٩]{10,11}$',
   );
 
   // Name validation regex (at least 2 characters, letters and spaces only)
@@ -16,8 +16,9 @@ class ValidationUtils {
   );
 
   // Password validation regex (at least 6 chars, with at least one number)
+  // Accepts both English and Arabic numerals
   static final RegExp _passwordRegex = RegExp(
-    r'^(?=.*[0-9]).{6,}$',
+    r'^(?=.*[0-9٠-٩]).{6,}$',
   );
 
   // Validate email
@@ -31,20 +32,15 @@ class ValidationUtils {
     return null;
   }
 
-  // Validate phone number with country code
+  // Validate phone number (Egyptian format: 10-11 digits, can start with 0)
   static String? validatePhone(String? value, {String? countryCode}) {
     if (value == null || value.isEmpty) {
       return 'Please enter your phone number';
     }
 
-    // Check if phone starts with 0
-    if (value.startsWith('0')) {
-      return 'Phone number cannot start with 0';
-    }
-
-    // Validate the phone number format without country code
-    if (!_phoneWithoutCountryCodeRegex.hasMatch(value)) {
-      return 'Please enter a valid phone number (6-14 digits)';
+    // Validate the phone number format (10-11 digits)
+    if (!_phoneRegex.hasMatch(value)) {
+      return 'Please enter a valid phone number (10-11 digits)';
     }
 
     return null;

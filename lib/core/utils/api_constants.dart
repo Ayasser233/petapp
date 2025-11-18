@@ -1,22 +1,16 @@
-import 'dart:io';
-
 class ApiConstants {
   // API URLs
   static String get apiBaseUrl {
-    // Use 10.0.2.2 for Android emulators to access host's localhost
-    if (Platform.isAndroid) {
-      return 'http://10.0.2.2:3000/api/v1';
-    }
-    // Default for physical devices and iOS simulators
-    return 'http://localhost:3000/api/v1';
+    // Production API
+    return 'https://api-dev.aleefy-app.com/api/v1';
   }
 
-  static const String fallbackApiBaseUrl = 'http://10.0.2.2:3000/api/v1';
+  static const String fallbackApiBaseUrl = 'https://api-dev.aleefy-app.com/api/v1';
 
   // Timeouts
-  static const Duration connectionTimeout = Duration(seconds: 10);
-  static const Duration receiveTimeout = Duration(seconds: 10);
-  static const Duration sendTimeout = Duration(seconds: 10);
+  static const Duration connectionTimeout = Duration(seconds: 30);
+  static const Duration receiveTimeout = Duration(seconds: 30);
+  static const Duration sendTimeout = Duration(seconds: 30);
 
   // API Health Check
   static const String healthEndpoint = '/health';
@@ -27,13 +21,17 @@ class ApiConstants {
   static const String loginEndpoint = '/auth/login';
   static const String logoutEndpoint = '/auth/logout';
   static const String profileEndpoint = '/auth/profile';
-  static const String confirmEndpoint = 'auth/confirm';
+  static const String confirmEndpoint = '/auth/confirm';
   static const String resendOtpEndpoint = '/auth/resend-otp';
   static const String confirmNewEmailEndpoint = '/auth/confirm/new';
-  static const String forgotPasswordEndpoint = 'auth/forgot/password';
+  static const String forgotPasswordEndpoint = '/auth/forgot/password';
+  static const String verifyResetOtpEndpoint = '/auth/verify-reset-otp';
+  static const String resendResetOtpEndpoint =
+      '/auth/forgot/password'; // Resend uses same endpoint as forgot password
   static const String resetPasswordEndpoint = '/auth/reset/password';
+  static const String changePasswordEndpoint = '/auth/change-password';
   static const String refreshTokenEndpoint = '/auth/refresh';
-  static const String updateProfileEndpoint = '/auth/me';
+  static String updateProfileEndpoint(String userId) => '/users/$userId';
   static const String googleLoginEndpoint = '/auth/google/login';
 
   // Pet Endpoints

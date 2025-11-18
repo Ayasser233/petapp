@@ -47,6 +47,20 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthRegistrationSuccess(
           user: response.user?.name ?? 'User', email: userData['email']));
     } on DioException catch (e) {
+      // Special case: If it's a 500 error related to maildev (email service)
+      // the registration might have succeeded, so proceed to verification
+      if (e.response?.statusCode == 500 &&
+          e.response?.data != null &&
+          e.response!.data.toString().contains('maildev')) {
+        debugPrint(
+            'Mail service error detected, but proceeding with registration flow');
+        emit(AuthRegistrationSuccess(
+            user: userData['firstName'] ?? 'User',
+            email: userData['email'],
+            isMailServiceError: true));
+        return;
+      }
+
       emit(AuthFailure(
         message: _formatDioError(e, isSignup: true),
         errorCode: e.response?.statusCode,
@@ -87,6 +101,12 @@ class AuthCubit extends Cubit<AuthState> {
               'Unable to login. Please check your credentials and try again.',
           errorDetails: e.toString()));
     }
+  }
+
+  // Convenience method for login with Turnstile token
+  Future<void> loginWithTurnstile(
+      String identifier, String password, String turnstileToken) async {
+    await login(identifier, password, turnstileToken: turnstileToken);
   }
 
   // Helper method to format DioException errors

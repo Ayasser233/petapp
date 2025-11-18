@@ -33,7 +33,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   provider: ^6.0.5
-  http: ^1.1.0
+  http: any
   intl: ^0.20.2  # Update this line from ^0.18.1 to ^0.19.0
   iconsax: ^0.0.8
   get: ^4.6.8
@@ -45,8 +45,6 @@ dependencies:
   geocoding: ^3.0.0
   permission_handler: ^11.2.0
   shared_preferences: ^2.3.3
-  model_viewer_plus: ^1.7.0
-  vector_math: ^2.1.4
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
@@ -75,7 +73,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   
-  flutter_launcher_icons: ^0.13.1  # Add this
+  flutter_launcher_icons: any  # Compatible with three_dart
 
 
   # The "flutter_lints" package below contains a set of recommended lints to

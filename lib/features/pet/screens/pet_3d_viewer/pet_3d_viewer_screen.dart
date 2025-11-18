@@ -67,7 +67,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           onPressed: () => Get.back(),
         ),
         actions: [
-         
           IconButton(
             icon: Icon(Icons.help_outline, color: textColor),
             onPressed: () => _showHelpDialog(context),
@@ -82,8 +81,9 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
             modelPath: widget.modelPath,
             viewerHeight: MediaQuery.of(context).size.height * 0.4,
             backgroundColor: backgroundColor,
-            onSymptomSelected: (symptom) {
-              // Removed symptom selection - view only mode
+            onSymptomSelected: (bodyPart) {
+              // When mesh is clicked, show symptom selection for that body part
+              _showSymptomSelectionDialog(bodyPart.toLowerCase());
             },
           ),
 
@@ -134,31 +134,26 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
           children: [
             _buildHelpItem(
               '${localizations.step} 1: ${localizations.rotate}',
-              localizations.rotateInstructions,
+              localizations.rotate90Instructions,
               isDark,
             ),
             _buildHelpItem(
-              '${localizations.step} 2: ${localizations.zoom}',
-              localizations.zoomInstructions,
-              isDark,
-            ),
-            _buildHelpItem(
-              '${localizations.step} 3: ${localizations.selectText}',
+              '${localizations.step} 2: ${localizations.selectText}',
               localizations.selectInstructions,
               isDark,
             ),
             _buildHelpItem(
-              '${localizations.step} 4: ${localizations.symptoms}',
+              '${localizations.step} 3: ${localizations.symptoms}',
               localizations.symptomsInstructions,
               isDark,
             ),
             _buildHelpItem(
-              '${localizations.step} 5: ${localizations.viewSelected}',
+              '${localizations.step} 4: ${localizations.viewSelected}',
               localizations.viewSelectedInstructions,
               isDark,
             ),
             _buildHelpItem(
-              '${localizations.step} 6: ${localizations.findVet}',
+              '${localizations.step} 5: ${localizations.findVet}',
               localizations.findVetInstructions,
               isDark,
             ),
@@ -530,15 +525,6 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
               icon: Icon(Icons.arrow_back, color: textColor),
               onPressed: () => Navigator.pop(context),
             ),
-            actions: [
-              // Optional: Add bookmark or share action
-              IconButton(
-                icon: Icon(Icons.bookmark_border, color: textColor),
-                onPressed: () {
-                  // Add bookmark functionality here
-                },
-              ),
-            ],
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(20),

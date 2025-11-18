@@ -63,48 +63,6 @@ class ProfileController extends GetxController {
     return null;
   }
 
-  /// Validate date of birth (YYYY-MM-DD format)
-  String? _validateDateOfBirth(String? dateOfBirth) {
-    if (dateOfBirth == null || dateOfBirth.isEmpty) {
-      return null; // Date of birth is optional
-    }
-
-    try {
-      final date = DateTime.parse(dateOfBirth);
-      final now = DateTime.now();
-      final age = now.difference(date).inDays / 365.25;
-
-      if (age < 13) {
-        return 'You must be at least 13 years old';
-      }
-
-      if (age > 120) {
-        return 'Please enter a valid birth date';
-      }
-
-      return null;
-    } catch (e) {
-      return 'Please enter date in YYYY-MM-DD format';
-    }
-  }
-
-  /// Validate address (optional but if provided, should be at least 10 chars)
-  String? _validateAddress(String? address) {
-    if (address == null || address.isEmpty) {
-      return null; // Address is optional
-    }
-
-    if (address.trim().length < 10) {
-      return 'Address must be at least 10 characters';
-    }
-
-    if (address.trim().length > 200) {
-      return 'Address must be less than 200 characters';
-    }
-
-    return null;
-  }
-
   /// Validate all profile data at once
   Map<String, String> _validateProfileData({
     String? firstName,
@@ -113,8 +71,6 @@ class ProfileController extends GetxController {
     String? phone,
     String? mobile,
     String? username,
-    String? address,
-    String? dateOfBirth,
   }) {
     final errors = <String, String>{};
 
@@ -151,14 +107,6 @@ class ProfileController extends GetxController {
     // Validate username
     final usernameError = _validateUsername(username);
     if (usernameError != null) errors['username'] = usernameError;
-
-    // Validate address
-    final addressError = _validateAddress(address);
-    if (addressError != null) errors['address'] = addressError;
-
-    // Validate date of birth
-    final dobError = _validateDateOfBirth(dateOfBirth);
-    if (dobError != null) errors['dateOfBirth'] = dobError;
 
     return errors;
   }
@@ -206,8 +154,6 @@ class ProfileController extends GetxController {
           name: 'Guest User',
           email: 'guest@example.com',
           phone: '',
-          address: '',
-          dateOfBirth: '1990-01-01',
           emailVerified: false,
           twoFactorEnabled: false,
           createdAt: DateTime.now(),
@@ -225,8 +171,6 @@ class ProfileController extends GetxController {
           name: '',
           email: '',
           phone: '',
-          address: '',
-          dateOfBirth: '1990-01-01',
           emailVerified: false,
           twoFactorEnabled: false,
           createdAt: DateTime.now(),
@@ -253,8 +197,6 @@ class ProfileController extends GetxController {
         name: 'Default User',
         email: 'user@example.com',
         phone: '',
-        address: '',
-        dateOfBirth: '1990-01-01',
         emailVerified: false,
         twoFactorEnabled: false,
         createdAt: DateTime.now(),
@@ -273,8 +215,6 @@ class ProfileController extends GetxController {
     String? phone,
     String? mobile,
     String? username,
-    String? address,
-    String? dateOfBirth,
   }) async {
     try {
       _isUpdating.value = true;
@@ -287,8 +227,6 @@ class ProfileController extends GetxController {
         phone: phone,
         mobile: mobile,
         username: username,
-        address: address,
-        dateOfBirth: dateOfBirth,
       );
 
       // If there are validation errors, show them and return false
@@ -310,19 +248,27 @@ class ProfileController extends GetxController {
         profileData['email'] = email.trim().toLowerCase();
       }
       if (phone != null && phone.trim().isNotEmpty) {
-        profileData['mobile'] =
-            phone.trim(); // API expects 'mobile' not 'phone'
+        String phoneNumber = phone.trim();
+        print('🔍 PROFILE CONTROLLER: Original phone input: "$phoneNumber"');
+
+        // Add +20 country code if not already present
+        if (!phoneNumber.startsWith('+')) {
+          // DO NOT remove leading 0 - backend expects it
+          phoneNumber = '+20$phoneNumber';
+          print('🔍 PROFILE CONTROLLER: Added +20 prefix: "$phoneNumber"');
+        }
+        profileData['mobile'] = phoneNumber; // API expects 'mobile' not 'phone'
       }
       if (mobile != null && mobile.trim().isNotEmpty) {
-        profileData['mobile'] = mobile.trim();
+        String mobileNumber = mobile.trim();
+        // Add +20 country code if not already present
+        if (!mobileNumber.startsWith('+')) {
+          // DO NOT remove leading 0 - backend expects it
+          mobileNumber = '+20$mobileNumber';
+        }
+        profileData['mobile'] = mobileNumber;
       }
       // if (username != null) profileData['username'] = username.trim().toLowerCase();
-      if (address != null && address.trim().isNotEmpty) {
-        profileData['address'] = address.trim();
-      }
-      if (dateOfBirth != null && dateOfBirth.trim().isNotEmpty) {
-        profileData['dateOfBirth'] = dateOfBirth.trim();
-      }
 
       print('📋 ProfileController: Final profile data to send: $profileData');
 
@@ -371,8 +317,6 @@ class ProfileController extends GetxController {
       lastName: lastName,
       email: email,
       phone: phone,
-      address: address,
-      dateOfBirth: dateOfBirth,
     );
   }
 
@@ -399,11 +343,6 @@ class ProfileController extends GetxController {
     return updateProfile(phone: phone);
   }
 
-  /// Update only address
-  Future<bool> updateUserAddress(String address) async {
-    return updateProfile(address: address);
-  }
-
   /// Update only username
   Future<bool> updateUsername(String username) async {
     return updateProfile(username: username);
@@ -420,18 +359,14 @@ class ProfileController extends GetxController {
     );
   }
 
-  /// Update personal information (name and address)
+  /// Update personal information (name)
   Future<bool> updatePersonalInfo({
     required String firstName,
     required String lastName,
-    String? address,
-    String? dateOfBirth,
   }) async {
     return updateProfile(
       firstName: firstName,
       lastName: lastName,
-      address: address,
-      dateOfBirth: dateOfBirth,
     );
   }
 
@@ -443,8 +378,6 @@ class ProfileController extends GetxController {
     String? phone,
     String? mobile,
     String? username,
-    String? address,
-    String? dateOfBirth,
   }) {
     return _validateProfileData(
       firstName: firstName,
@@ -453,8 +386,6 @@ class ProfileController extends GetxController {
       phone: phone,
       mobile: mobile,
       username: username,
-      address: address,
-      dateOfBirth: dateOfBirth,
     );
   }
 
@@ -473,10 +404,6 @@ class ProfileController extends GetxController {
         return _validatePhone(value) == null;
       case 'username':
         return _validateUsername(value) == null;
-      case 'address':
-        return _validateAddress(value) == null;
-      case 'dateofbirth':
-        return _validateDateOfBirth(value) == null;
       default:
         return true; // Unknown fields are considered valid
     }
@@ -497,10 +424,6 @@ class ProfileController extends GetxController {
         return _validatePhone(value);
       case 'username':
         return _validateUsername(value);
-      case 'address':
-        return _validateAddress(value);
-      case 'dateofbirth':
-        return _validateDateOfBirth(value);
       default:
         return null;
     }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
@@ -10,6 +11,8 @@ import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/pet/utils/pet_constants.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:petapp/core/utils/arabic_numeral_formatter.dart';
+import 'package:petapp/core/utils/formatters.dart';
 
 class AddPetScreen extends StatefulWidget {
   const AddPetScreen({super.key});
@@ -384,14 +387,14 @@ class _AddPetScreenState extends State<AddPetScreen> {
         return;
       }
 
-      // In a real app, you would save the image to storage and get a URL
-      final String imageToUse = _isImageFromGallery
-          ? _imagePath
-          : _selectedSpecies == 'dog'
-              ? 'assets/images/dog_silhouette.png'
-              : _selectedSpecies == 'cat'
-                  ? 'assets/images/cat_silhouette.png'
-                  : 'assets/images/pet_placeholder.jpg';
+      // TODO: In a real app, you would save the image to storage and get a URL
+      // final String imageToUse = _isImageFromGallery
+      //     ? _imagePath
+      //     : _selectedSpecies == 'dog'
+      //         ? 'assets/images/dog_silhouette.png'
+      //         : _selectedSpecies == 'cat'
+      //             ? 'assets/images/cat_silhouette.png'
+      //             : 'assets/images/pet_placeholder.jpg';
 
       // Create date with first day of selected month and year
       final birthDate = DateTime(_selectedYear, _selectedMonth, 1);
@@ -410,7 +413,9 @@ class _AddPetScreenState extends State<AddPetScreen> {
         'allergies': _allergies,
         'spayNeuterStatus': _spayNeuterStatus,
         'weight': _weightController.text.trim().isNotEmpty
-            ? double.tryParse(_weightController.text.trim()) ?? 0.0
+            ? double.tryParse(TFormatter.toEnglishNumerals(
+                    _weightController.text.trim())) ??
+                0.0
             : null,
         'notes': _notesController.text.trim().isNotEmpty
             ? _notesController.text.trim()
@@ -697,28 +702,39 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    TextFormField(
-                      controller: _weightController,
-                      style: TextStyle(color: textColor),
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration: InputDecoration(
-                        hintText: localizations.enterPetWeight,
-                        hintStyle: TextStyle(
-                          color: isDark ? Colors.grey[400] : Colors.grey[600],
-                        ),
-                        filled: true,
-                        fillColor: inputFillColor,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide.none,
-                        ),
-                        prefixIcon: const Icon(
-                          Icons.monitor_weight,
-                          color: AppColors.orange,
-                        ),
-                        suffixText: localizations.kg,
-                      ),
+                    Builder(
+                      builder: (context) {
+                        final locale = Localizations.localeOf(context);
+                        final isArabic = locale.languageCode == 'ar';
+
+                        return TextFormField(
+                          controller: _weightController,
+                          style: TextStyle(color: textColor),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          inputFormatters: [
+                            ArabicNumeralInputFormatter(isArabic),
+                          ],
+                          decoration: InputDecoration(
+                            hintText: localizations.enterPetWeight,
+                            hintStyle: TextStyle(
+                              color:
+                                  isDark ? Colors.grey[400] : Colors.grey[600],
+                            ),
+                            filled: true,
+                            fillColor: inputFillColor,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            prefixIcon: const Icon(
+                              Icons.monitor_weight,
+                              color: AppColors.orange,
+                            ),
+                            suffixText: localizations.kg,
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 20),
 

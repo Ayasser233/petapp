@@ -32,11 +32,16 @@ class AuthUnauthenticated extends AuthState {}
 class AuthRegistrationSuccess extends AuthState {
   final String user;
   final String email;
+  final bool isMailServiceError; // Flag to indicate mail service error
 
-  const AuthRegistrationSuccess({required this.user, required this.email});
+  const AuthRegistrationSuccess({
+    required this.user,
+    required this.email,
+    this.isMailServiceError = false,
+  });
 
   @override
-  List<Object?> get props => [user, email];
+  List<Object?> get props => [user, email, isMailServiceError];
 }
 
 // Login was successful

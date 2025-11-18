@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/services/token_service.dart';
+import 'package:petapp/core/services/api_client.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum AuthStatus { authenticated, unauthenticated, guest }
 
 class AuthService extends GetxService {
   final TokenService _tokenService;
+  ApiClient? _apiClient;
 
   // Observable auth status
   final Rx<AuthStatus> _authStatus = AuthStatus.unauthenticated.obs;
@@ -143,14 +145,44 @@ class AuthService extends GetxService {
     }
   }
 
-  // Sign out user
+  // Sign out user (calls logout API)
   Future<void> signOut() async {
-    await _tokenService
-        .clearAllTokens(); // Clear both access and refresh tokens
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isLoggedIn', false);
-    await prefs.setBool('isGuestMode', false);
-    _authStatus.value = AuthStatus.unauthenticated;
+    try {
+      print('🚪 Starting logout process...');
+
+      // Call logout API if user is authenticated
+      if (_authStatus.value == AuthStatus.authenticated) {
+        try {
+          // Get ApiClient instance and call logout endpoint
+          _apiClient ??= Get.find<ApiClient>();
+          await _apiClient!.logout();
+          print('✅ Logout API call successful');
+        } catch (apiError) {
+          // Continue with local logout even if API call fails
+          print(
+              '⚠️ Logout API call failed, continuing with local logout: $apiError');
+        }
+      }
+
+      // Clear all tokens and local data
+      await _tokenService
+          .clearAllTokens(); // Clear both access and refresh tokens
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', false);
+      await prefs.setBool('isGuestMode', false);
+
+      // Update auth status
+      _authStatus.value = AuthStatus.unauthenticated;
+
+      print('✅ Logout completed successfully');
+    } catch (e) {
+      print('❌ Error during logout: $e');
+      // Even if there's an error, ensure we clear local state
+      await _tokenService.clearAllTokens();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', false);
+      _authStatus.value = AuthStatus.unauthenticated;
+    }
   }
 
   // Check if user can access protected features

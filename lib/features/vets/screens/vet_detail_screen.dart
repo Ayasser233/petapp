@@ -54,7 +54,6 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
         });
       }
     } catch (e) {
-      print('Error loading reviews: $e');
       setState(() {
         _isLoadingReviews = false;
       });
@@ -129,40 +128,10 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
               color: textColor,
             ),
       ),
-      actions: [
-        IconButton(
-          icon: Icon(Icons.more_vert, color: textColor),
-          onPressed: () {
-            _showOptionsMenu(context);
-          },
-        ),
-      ],
+     
       centerTitle: true,
       elevation: 0,
     );
   }
 
-  void _showOptionsMenu(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.share),
-              title: Text(AppLocalizations.of(context).share),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.report),
-              title: Text(AppLocalizations.of(context).report),
-              onTap: () => Navigator.pop(context),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }

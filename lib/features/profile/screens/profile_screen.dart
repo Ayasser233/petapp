@@ -5,7 +5,6 @@ import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/profile/screens/account_details_screen.dart';
 
@@ -176,10 +175,71 @@ class ProfileScreen extends StatelessWidget {
                   localizations.logout,
                   Icons.logout,
                   () async {
-                    // Log out
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setBool('isLoggedIn', false);
-                    Get.offAllNamed(AppRoutes.login);
+                    // Show confirmation dialog
+                    final shouldLogout = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: Text(localizations.logout),
+                        content: Text(localizations.areYouSureYouWantToLogout),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: Text(localizations.cancel),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                            ),
+                            child: Text(localizations.logout),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (shouldLogout == true) {
+                      // Show loading indicator
+                      Get.dialog(
+                        const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.orange,
+                          ),
+                        ),
+                        barrierDismissible: false,
+                      );
+
+                      try {
+                        // Call AuthService signOut which handles API call and cleanup
+                        await authService.signOut();
+
+                        // Close loading dialog
+                        Get.back();
+
+                        // Navigate to login screen
+                        Get.offAllNamed(AppRoutes.login);
+
+                        // Show success message
+                        Get.snackbar(
+                          localizations.success,
+                          localizations.loggedOutSuccessfully,
+                          backgroundColor: AppColors.orange,
+                          colorText: Colors.white,
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                      } catch (e) {
+                        // Close loading dialog
+                        Get.back();
+
+                        // Show error message
+                        Get.snackbar(
+                          localizations.error,
+                          localizations.logoutFailed,
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                          snackPosition: SnackPosition.BOTTOM,
+                        );
+                      }
+                    }
                   },
                   isDark: isDark,
                   cardColor: cardColor,

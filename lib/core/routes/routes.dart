@@ -6,6 +6,7 @@ import 'package:petapp/features/auth/presentation/screens/onboarding/onboarding.
 import 'package:petapp/features/auth/presentation/screens/password_config/createnewpass.dart';
 import 'package:petapp/features/auth/presentation/screens/password_config/forgot_password.dart';
 import 'package:petapp/features/auth/presentation/screens/password_config/enter_verification_code.dart';
+import 'package:petapp/features/auth/presentation/screens/password_config/change_password.dart';
 import 'package:petapp/features/auth/presentation/screens/signup/signup.dart';
 import 'package:petapp/features/auth/presentation/screens/signup/verifyemail.dart';
 import 'package:petapp/features/location/screens/choose_location.dart';
@@ -41,6 +42,7 @@ class AppRoutes {
   static const String forgotPassword = '/forgot-password';
   static const String enterVerificationCode = '/enter-verification-code';
   static const String createNewPassword = '/create-new-password';
+  static const String changePassword = '/change-password';
   static const String chooseLocation = '/choose-location';
   static const String setLocation = '/set-location';
   static const String home = '/home';
@@ -83,6 +85,7 @@ class AppRoutes {
         GetPage(
             name: createNewPassword,
             page: () => const CreateNewPasswordScreen()),
+        GetPage(name: changePassword, page: () => const ChangePasswordScreen()),
         GetPage(name: chooseLocation, page: () => const ChooseLocationScreen()),
         GetPage(name: setLocation, page: () => const SetLocationScreen()),
         GetPage(name: home, page: () => const HomeScreen()),

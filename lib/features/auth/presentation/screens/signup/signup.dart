@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:petapp/core/services/turnstile_service.dart';
 import 'package:petapp/core/styles/input_styles.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/app_fonts.dart';
@@ -13,6 +14,7 @@ import 'package:petapp/core/models/country_code.dart';
 import 'package:petapp/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/core/utils/formatters.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -113,8 +115,8 @@ class _SignUpFormState extends State<SignUpForm> {
     final isValid = _firstNameController.text.isNotEmpty &&
         _lastNameController.text.isNotEmpty &&
         _phoneController.text.isNotEmpty &&
-        !_phoneController.text
-            .startsWith('0') && // Phone should not start with 0
+        _phoneController.text.length >=
+            10 && // Phone should be at least 10 digits
         _emailController.text.isNotEmpty &&
         _emailController.text.contains('@') &&
         _passwordController.text.isNotEmpty &&
@@ -126,9 +128,30 @@ class _SignUpFormState extends State<SignUpForm> {
   }
 
   // Handle sign up
-  void _handleSignUp() {
+  Future<void> _handleSignUp() async {
     // Validate the form - this will show errors if any
     if (_formKey.currentState?.validate() != true) {
+      return;
+    }
+
+    // Check if widget is still mounted before using context
+    if (!mounted) return;
+
+    // Generate Turnstile token
+    final turnstileToken = await TurnstileService.generateToken(context);
+
+    // Check if widget is still mounted after async operation
+    if (!mounted) return;
+
+    if (turnstileToken == null) {
+      // Failed to generate token
+      Get.snackbar(
+        'Security Verification Failed',
+        'Unable to complete security verification. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withValues(alpha: 0.1),
+        colorText: Colors.red,
+      );
       return;
     }
 
@@ -138,9 +161,9 @@ class _SignUpFormState extends State<SignUpForm> {
       'lastName': _lastNameController.text.trim(),
       'email': _emailController.text.trim(),
       'password': _passwordController.text,
-      'mobile': '${_selectedCountry.dialCode}${_phoneController.text}',
-      'turnstileToken':
-          'cf-turnstile-token', // Static token for now, in production this should be generated
+      'mobile':
+          '${_selectedCountry.dialCode}${TFormatter.toEnglishNumerals(_phoneController.text)}',
+      'turnstileToken': turnstileToken,
     };
 
     // Use the cubit to register
@@ -165,16 +188,31 @@ class _SignUpFormState extends State<SignUpForm> {
         if (state is AuthRegistrationSuccess) {
           // Clear any previous field errors
 
-          // Show success message
-          Get.snackbar(
-            AppLocalizations.of(context).registrationSuccessful,
-            AppLocalizations.of(context).pleaseVerifyEmail,
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green.withValues(alpha: 0.1),
-            colorText: Colors.green,
-            borderRadius: 8,
-            margin: const EdgeInsets.all(16),
-          );
+          // Show appropriate message based on whether there's a mail service error
+          if (state.isMailServiceError) {
+            Get.snackbar(
+              AppLocalizations.of(context).registrationSuccessful,
+              AppLocalizations.of(context).pleaseVerifyEmail +
+                  '\n(Email service temporarily unavailable)',
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.orange.withValues(alpha: 0.1),
+              colorText: Colors.orange,
+              borderRadius: 8,
+              margin: const EdgeInsets.all(16),
+              duration: const Duration(seconds: 4),
+            );
+          } else {
+            // Show success message
+            Get.snackbar(
+              AppLocalizations.of(context).registrationSuccessful,
+              AppLocalizations.of(context).pleaseVerifyEmail,
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.green.withValues(alpha: 0.1),
+              colorText: Colors.green,
+              borderRadius: 8,
+              margin: const EdgeInsets.all(16),
+            );
+          }
 
           // Navigate to verification screen
           Get.toNamed(AppRoutes.verifyEmail, arguments: state.email);

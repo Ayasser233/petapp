@@ -276,6 +276,170 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['wrongCredentials'] ??
       'Wrong email or password';
 
+  // Forgot Password screen getters
+  String get resetYourPassword =>
+      _localizedValues[locale.languageCode]?['resetYourPassword'] ??
+      'Reset Your Password';
+  String get enterRegisteredEmail =>
+      _localizedValues[locale.languageCode]?['enterRegisteredEmail'] ??
+      'Enter your registered email to receive a verification code';
+  String get sendVerificationCode =>
+      _localizedValues[locale.languageCode]?['sendVerificationCode'] ??
+      'Send Verification Code';
+  String get codeSent =>
+      _localizedValues[locale.languageCode]?['codeSent'] ?? 'Code Sent';
+  String verificationCodeSentTo(String email) =>
+      _localizedValues[locale.languageCode]?['verificationCodeSentTo']
+          ?.replaceAll('{email}', email) ??
+      'Verification code has been sent to $email';
+  String get failedToSendCode =>
+      _localizedValues[locale.languageCode]?['failedToSendCode'] ??
+      'Failed to send verification code';
+  String get noAccountFoundWithEmail =>
+      _localizedValues[locale.languageCode]?['noAccountFoundWithEmail'] ??
+      'No account found with this email address. Please check your email or create a new account.';
+  String get pleaseEnterEmail =>
+      _localizedValues[locale.languageCode]?['pleaseEnterEmail'] ??
+      'Please enter your email';
+  String get pleaseEnterValidEmail =>
+      _localizedValues[locale.languageCode]?['pleaseEnterValidEmail'] ??
+      'Please enter a valid email';
+
+  // Enter Verification Code screen getters
+  String get enterVerificationCode =>
+      _localizedValues[locale.languageCode]?['enterVerificationCode'] ??
+      'Enter Verification Code';
+  String verificationCodeSentToEmail(String email) =>
+      _localizedValues[locale.languageCode]?['verificationCodeSentToEmail']
+          ?.replaceAll('{email}', email) ??
+      'We have sent a verification code to $email';
+  String get pleaseEnterAll6Digits =>
+      _localizedValues[locale.languageCode]?['pleaseEnterAll6Digits'] ??
+      'Please enter all 6 digits of the code';
+  String get verificationCodeExpired =>
+      _localizedValues[locale.languageCode]?['verificationCodeExpired'] ??
+      'Verification code has expired. Please request a new one.';
+  String get invalidVerificationCode =>
+      _localizedValues[locale.languageCode]?['invalidVerificationCode'] ??
+      'Invalid verification code. Please try again.';
+  String get errorVerifyingCode =>
+      _localizedValues[locale.languageCode]?['errorVerifyingCode'] ??
+      'Error verifying code';
+  String get newCodeSent =>
+      _localizedValues[locale.languageCode]?['newCodeSent'] ?? 'Code Sent';
+  String newVerificationCodeSentTo(String email) =>
+      _localizedValues[locale.languageCode]?['newVerificationCodeSentTo']
+          ?.replaceAll('{email}', email) ??
+      'A new verification code has been sent to $email';
+  String get failedToResendCode =>
+      _localizedValues[locale.languageCode]?['failedToResendCode'] ??
+      'Failed to resend code. Please try again.';
+  String get verifyCode =>
+      _localizedValues[locale.languageCode]?['verifyCode'] ?? 'Verify Code';
+  String get resendCode =>
+      _localizedValues[locale.languageCode]?['resendCode'] ?? 'Resend Code';
+  String get didntReceiveCode =>
+      _localizedValues[locale.languageCode]?['didntReceiveCode'] ??
+      'Didn\'t receive the code?';
+
+  // Email Verification screen getters
+  String get verifyYourEmail =>
+      _localizedValues[locale.languageCode]?['verifyYourEmail'] ??
+      'Verify Your Email';
+  String enterThe6DigitCodeSentTo(String email) =>
+      _localizedValues[locale.languageCode]?['enterThe6DigitCodeSentTo']
+          ?.replaceAll('{email}', email) ??
+      'Enter the 6-digit code sent to $email';
+  String get emailVerifiedSuccessfully =>
+      _localizedValues[locale.languageCode]?['emailVerifiedSuccessfully'] ??
+      'Email Verified Successfully!';
+  String get youCanNowContinueToTheApp =>
+      _localizedValues[locale.languageCode]?['youCanNowContinueToTheApp'] ??
+      'You can now continue to the app';
+  String get continueText =>
+      _localizedValues[locale.languageCode]?['continueText'] ?? 'Continue';
+  String get verify =>
+      _localizedValues[locale.languageCode]?['verify'] ?? 'Verify';
+  String get verificationFailed =>
+      _localizedValues[locale.languageCode]?['verificationFailed'] ??
+      'Verification Failed';
+  String get invalidOrExpiredCode =>
+      _localizedValues[locale.languageCode]?['invalidOrExpiredCode'] ??
+      'Invalid or expired code. Please try again.';
+  String get seconds =>
+      _localizedValues[locale.languageCode]?['seconds'] ?? 's';
+
+  // Create New Password screen getters
+  String get createNewPassword =>
+      _localizedValues[locale.languageCode]?['createNewPassword'] ??
+      'Create New Password';
+  String get newPasswordMustBeDifferent =>
+      _localizedValues[locale.languageCode]?['newPasswordMustBeDifferent'] ??
+      'Your new password must be different from previously used passwords';
+  String get atLeast6Characters =>
+      _localizedValues[locale.languageCode]?['atLeast6Characters'] ??
+      'At least 6 characters';
+  String get containsANumber =>
+      _localizedValues[locale.languageCode]?['containsANumber'] ??
+      'Contains a number';
+  String get containsAnUppercaseLetter =>
+      _localizedValues[locale.languageCode]?['containsAnUppercaseLetter'] ??
+      'Contains an uppercase letter';
+  String get newPassword =>
+      _localizedValues[locale.languageCode]?['newPassword'] ?? 'New Password';
+  String get confirmPassword =>
+      _localizedValues[locale.languageCode]?['confirmPassword'] ??
+      'Confirm Password';
+  String get pleaseEnterPassword =>
+      _localizedValues[locale.languageCode]?['pleaseEnterPassword'] ??
+      'Please enter a password';
+  String get passwordMustBeAtLeast6Characters =>
+      _localizedValues[locale.languageCode]
+          ?['passwordMustBeAtLeast6Characters'] ??
+      'Password must be at least 6 characters';
+  String get passwordMustContainUppercase =>
+      _localizedValues[locale.languageCode]?['passwordMustContainUppercase'] ??
+      'Password must contain at least one uppercase letter';
+  String get passwordMustContainNumber =>
+      _localizedValues[locale.languageCode]?['passwordMustContainNumber'] ??
+      'Password must contain at least one number';
+  String get pleaseConfirmPassword =>
+      _localizedValues[locale.languageCode]?['pleaseConfirmPassword'] ??
+      'Please confirm your password';
+  String get passwordsDoNotMatch =>
+      _localizedValues[locale.languageCode]?['passwordsDoNotMatch'] ??
+      'Passwords do not match';
+  String get resetPassword =>
+      _localizedValues[locale.languageCode]?['resetPassword'] ??
+      'Reset Password';
+  String get passwordResetSuccessfully =>
+      _localizedValues[locale.languageCode]?['passwordResetSuccessfully'] ??
+      'Password Reset Successfully!';
+  String get passwordChangedMessage =>
+      _localizedValues[locale.languageCode]?['passwordChangedMessage'] ??
+      'Your password has been changed. Please use your new password to login.';
+  String get loginNow =>
+      _localizedValues[locale.languageCode]?['loginNow'] ?? 'Login Now';
+  String get failedToResetPassword =>
+      _localizedValues[locale.languageCode]?['failedToResetPassword'] ??
+      'Failed to reset password. Please try again.';
+
+  // Account Details screen getters
+  String get personalInformation =>
+      _localizedValues[locale.languageCode]?['personalInformation'] ??
+      'Personal Information';
+  String get security =>
+      _localizedValues[locale.languageCode]?['security'] ?? 'Security';
+  String get changePassword =>
+      _localizedValues[locale.languageCode]?['changePassword'] ??
+      'Change Password';
+  String get currentPassword =>
+      _localizedValues[locale.languageCode]?['currentPassword'] ??
+      'Current Password';
+  String get enterCurrentPasswordPrompt =>
+      _localizedValues[locale.languageCode]?['enterCurrentPasswordPrompt'] ??
+      'Enter your current password and choose a new password';
+
   // Signup screen getters
   String get createAccount =>
       _localizedValues[locale.languageCode]?['createAccount'] ??
@@ -861,6 +1025,244 @@ class AppLocalizations {
   String get tapToSelectPets =>
       _localizedValues[locale.languageCode]?['tapToSelectPets'] ??
       'Tap to select pets for this visit';
+
+  // Vaccination Screen Strings
+  String get vaccinationRecord =>
+      _localizedValues[locale.languageCode]?['vaccinationRecord'] ??
+      'Vaccination Record';
+  String get addVaccine =>
+      _localizedValues[locale.languageCode]?['addVaccine'] ?? 'Add Vaccine';
+  String get viewAll =>
+      _localizedValues[locale.languageCode]?['viewAll'] ?? 'View All';
+  String get virusVaccines =>
+      _localizedValues[locale.languageCode]?['virusVaccines'] ??
+      'Virus Vaccines';
+  String get wormsVaccines =>
+      _localizedValues[locale.languageCode]?['wormsVaccines'] ?? 'Worms';
+  String get insectsVaccines =>
+      _localizedValues[locale.languageCode]?['insectsVaccines'] ?? 'Insects';
+  String get rabiesVaccines =>
+      _localizedValues[locale.languageCode]?['rabiesVaccines'] ?? 'Rabies';
+  String get monovalent =>
+      _localizedValues[locale.languageCode]?['monovalent'] ?? 'Monovalent';
+  String get bivalent =>
+      _localizedValues[locale.languageCode]?['bivalent'] ?? 'Bivalent';
+  String get trivalent =>
+      _localizedValues[locale.languageCode]?['trivalent'] ?? 'Trivalent';
+  String get quadrivalent =>
+      _localizedValues[locale.languageCode]?['quadrivalent'] ?? 'Quadrivalent';
+  String get pentavalent =>
+      _localizedValues[locale.languageCode]?['pentavalent'] ?? 'Pentavalent';
+  String get hexavalent =>
+      _localizedValues[locale.languageCode]?['hexavalent'] ?? 'Hexavalent';
+  String get heptavalent =>
+      _localizedValues[locale.languageCode]?['heptavalent'] ?? 'Heptavalent';
+  String get octavalent =>
+      _localizedValues[locale.languageCode]?['octavalent'] ?? 'Octavalent';
+  String get deworming =>
+      _localizedValues[locale.languageCode]?['deworming'] ?? 'Deworming';
+  String get antiInsects =>
+      _localizedValues[locale.languageCode]?['antiInsects'] ?? 'Anti-Insects';
+  String get rabies =>
+      _localizedValues[locale.languageCode]?['rabies'] ?? 'Rabies';
+  String get vaccineType =>
+      _localizedValues[locale.languageCode]?['vaccineType'] ?? 'Vaccine Type';
+  String get vaccinationDate =>
+      _localizedValues[locale.languageCode]?['vaccinationDate'] ??
+      'Vaccination Date';
+  String get administeredDoses =>
+      _localizedValues[locale.languageCode]?['administeredDoses'] ??
+      'Administered Doses';
+  String get addAnotherDose =>
+      _localizedValues[locale.languageCode]?['addAnotherDose'] ??
+      'Add Another Dose';
+  String get maximumDosesReached =>
+      _localizedValues[locale.languageCode]?['maximumDosesReached'] ??
+      'Maximum Doses Reached';
+  String get maximumReached =>
+      _localizedValues[locale.languageCode]?['maximumReached'] ??
+      'Maximum Reached';
+  String get thisVaccineRequiresOnly1Dose =>
+      _localizedValues[locale.languageCode]?['thisVaccineRequiresOnly1Dose'] ??
+      'This vaccine requires only 1 dose';
+  String get thisVaccineRequiresOnly2Doses =>
+      _localizedValues[locale.languageCode]?['thisVaccineRequiresOnly2Doses'] ??
+      'This vaccine requires only 2 doses';
+  String get youCanOnlyAddUpTo3Doses =>
+      _localizedValues[locale.languageCode]?['youCanOnlyAddUpTo3Doses'] ??
+      'You can only add up to 3 doses';
+  String get pleaseSelectVaccineType =>
+      _localizedValues[locale.languageCode]?['pleaseSelectVaccineType'] ??
+      'Please select a vaccine type';
+  String get pleaseAddAtLeastOneDose =>
+      _localizedValues[locale.languageCode]?['pleaseAddAtLeastOneDose'] ??
+      'Please add at least one dose';
+  String get vaccinationAddedSuccessfully =>
+      _localizedValues[locale.languageCode]?['vaccinationAddedSuccessfully'] ??
+      'Vaccination added successfully';
+  String get dateAdministered =>
+      _localizedValues[locale.languageCode]?['dateAdministered'] ??
+      'Date Administered';
+  String get removeDose =>
+      _localizedValues[locale.languageCode]?['removeDose'] ?? 'Remove Dose';
+  String get dose => _localizedValues[locale.languageCode]?['dose'] ?? 'Dose';
+  String get completedDoses =>
+      _localizedValues[locale.languageCode]?['completedDoses'] ??
+      'doses completed';
+  String get vaccine =>
+      _localizedValues[locale.languageCode]?['vaccine'] ?? 'vaccine';
+  String get vaccines =>
+      _localizedValues[locale.languageCode]?['vaccines'] ?? 'vaccines';
+  String get noPetsFound =>
+      _localizedValues[locale.languageCode]?['noPetsFound'] ?? 'No Pets Found';
+  String get addPetToViewVaccination =>
+      _localizedValues[locale.languageCode]?['addPetToViewVaccination'] ??
+      'Add a pet to view vaccination records';
+  String get selectPetToViewVaccination =>
+      _localizedValues[locale.languageCode]?['selectPetToViewVaccination'] ??
+      'Select a pet to view vaccination records';
+  String get viewRecord =>
+      _localizedValues[locale.languageCode]?['viewRecord'] ?? 'View Record';
+  String get failedToLoadRewardsData =>
+      _localizedValues[locale.languageCode]?['failedToLoadRewardsData'] ??
+      'Failed to load rewards data';
+  String get areYouSureYouWantToLogout =>
+      _localizedValues[locale.languageCode]?['areYouSureYouWantToLogout'] ??
+      'Are you sure you want to logout?';
+  String get loggedOutSuccessfully =>
+      _localizedValues[locale.languageCode]?['loggedOutSuccessfully'] ??
+      'Logged out successfully';
+  String get logoutFailed =>
+      _localizedValues[locale.languageCode]?['logoutFailed'] ??
+      'Logout failed. Please try again.';
+  String get virusVaccineMissing =>
+      _localizedValues[locale.languageCode]?['virusVaccineMissing'] ??
+      'Virus Vaccine Missing';
+  String get virusVaccineMissingMessage =>
+      _localizedValues[locale.languageCode]?['virusVaccineMissingMessage'] ??
+      'Your pet needs virus protection. Start the vaccine series soon to protect against diseases.';
+  String get wormTreatmentMissing =>
+      _localizedValues[locale.languageCode]?['wormTreatmentMissing'] ??
+      'Worm Treatment Missing';
+  String get wormTreatmentMissingMessage =>
+      _localizedValues[locale.languageCode]?['wormTreatmentMissingMessage'] ??
+      'Your pet needs deworming treatment. Only 2 doses required to prevent parasites.';
+  String get insectProtectionMissing =>
+      _localizedValues[locale.languageCode]?['insectProtectionMissing'] ??
+      'Insect Protection Missing';
+  String get insectProtectionMissingMessage =>
+      _localizedValues[locale.languageCode]
+          ?['insectProtectionMissingMessage'] ??
+      'Your pet needs flea and tick protection. Only 1 dose required to prevent infestations.';
+  String get rabiesVaccineMissing =>
+      _localizedValues[locale.languageCode]?['rabiesVaccineMissing'] ??
+      'Rabies Vaccine Missing';
+  String get rabiesVaccineMissingMessage =>
+      _localizedValues[locale.languageCode]?['rabiesVaccineMissingMessage'] ??
+      'Your pet needs rabies protection. Only 1 dose required. This vaccine is critical for your pet\'s safety.';
+  String get noVaccinationRecords =>
+      _localizedValues[locale.languageCode]?['noVaccinationRecords'] ??
+      'No Vaccination Records';
+  String get addYourPetsFirstVaccine =>
+      _localizedValues[locale.languageCode]?['addYourPetsFirstVaccine'] ??
+      'Add your pet\'s first vaccine to get started';
+  String get vaccinationRecords =>
+      _localizedValues[locale.languageCode]?['vaccinationRecords'] ??
+      'Vaccination Records';
+  String get annualBoosters =>
+      _localizedValues[locale.languageCode]?['annualBoosters'] ??
+      'Annual Boosters';
+  String get markAsComplete =>
+      _localizedValues[locale.languageCode]?['markAsComplete'] ??
+      'Mark as Complete';
+  String get markComplete =>
+      _localizedValues[locale.languageCode]?['markComplete'] ?? 'Mark';
+  String get notYetAdministered =>
+      _localizedValues[locale.languageCode]?['notYetAdministered'] ??
+      'Not yet administered';
+  String get doseMarkedComplete =>
+      _localizedValues[locale.languageCode]?['doseMarkedComplete'] ??
+      '✓ Dose marked as complete!';
+  String get boosterMarkedComplete =>
+      _localizedValues[locale.languageCode]?['boosterMarkedComplete'] ??
+      '✓ Annual booster marked as complete!';
+  String get nextDose =>
+      _localizedValues[locale.languageCode]?['nextDose'] ?? 'Next dose';
+  String get protectionActive =>
+      _localizedValues[locale.languageCode]?['protectionActive'] ??
+      'Protection active. Repeat on schedule to stay safe';
+  String get protectedFromRabies =>
+      _localizedValues[locale.languageCode]?['protectedFromRabies'] ??
+      'Protected from rabies. Repeat yearly to stay safe';
+  String get notProtectedFromFleasOrTicks =>
+      _localizedValues[locale.languageCode]?['notProtectedFromFleasOrTicks'] ??
+      'Not protected from fleas or ticks. Start soon';
+  String get yourPetIsntProtectedFromRabies =>
+      _localizedValues[locale.languageCode]
+          ?['yourPetIsntProtectedFromRabies'] ??
+      'Your pet isn\'t protected from rabies. Vaccinate soon';
+  String get treatmentComplete =>
+      _localizedValues[locale.languageCode]?['treatmentComplete'] ??
+      'Treatment complete! Your pet is now protected';
+  String get secondDoseRequiredForFullDeworming =>
+      _localizedValues[locale.languageCode]
+          ?['secondDoseRequiredForFullDeworming'] ??
+      'Second dose required for full deworming';
+  String get notProtectedFromWorms =>
+      _localizedValues[locale.languageCode]?['notProtectedFromWorms'] ??
+      'Not protected from worms. Start deworming soon';
+  String get fullyProtected =>
+      _localizedValues[locale.languageCode]?['fullyProtected'] ??
+      'Fully protected. Follow booster schedule to stay safe';
+  String get protectedThirdDoseGivesStrongestImmunity =>
+      _localizedValues[locale.languageCode]
+          ?['protectedThirdDoseGivesStrongestImmunity'] ??
+      'Protected. Third dose gives strongest immunity';
+  String get protectionIncomplete =>
+      _localizedValues[locale.languageCode]?['protectionIncomplete'] ??
+      'Protection incomplete. Second dose needed to activate immunity';
+  String get notProtectedStartVirusVaccineSoon =>
+      _localizedValues[locale.languageCode]
+          ?['notProtectedStartVirusVaccineSoon'] ??
+      'Not protected. Start the virus vaccine soon';
+  String get dismiss =>
+      _localizedValues[locale.languageCode]?['dismiss'] ?? 'Dismiss';
+  String get errorLoadingVaccinationRecord =>
+      _localizedValues[locale.languageCode]?['errorLoadingVaccinationRecord'] ??
+      'Error Loading Vaccination Record';
+  String get noVaccinationData =>
+      _localizedValues[locale.languageCode]?['noVaccinationData'] ??
+      'No vaccination data';
+  String get overdue =>
+      _localizedValues[locale.languageCode]?['overdue'] ?? 'Overdue';
+  String get markDoseComplete =>
+      _localizedValues[locale.languageCode]?['markDoseComplete'] ??
+      'Mark Dose Complete';
+  String get selectPet =>
+      _localizedValues[locale.languageCode]?['selectPet'] ?? 'Select Pet';
+  String get addVaccinationTitle =>
+      _localizedValues[locale.languageCode]?['addVaccinationTitle'] ??
+      'Add Vaccination';
+  String get active =>
+      _localizedValues[locale.languageCode]?['active'] ?? 'ACTIVE';
+  String get completedStatus =>
+      _localizedValues[locale.languageCode]?['completedStatus'] ?? 'COMPLETED';
+  String get dosesCompleted =>
+      _localizedValues[locale.languageCode]?['dosesCompleted'] ??
+      'doses completed';
+  String get wormTreatment =>
+      _localizedValues[locale.languageCode]?['wormTreatment'] ??
+      'Worm Treatment';
+  String get insectProtection =>
+      _localizedValues[locale.languageCode]?['insectProtection'] ??
+      'Insect Protection';
+  String get rabiesVaccine =>
+      _localizedValues[locale.languageCode]?['rabiesVaccine'] ??
+      'Rabies Vaccine';
+  String get markBoosterCompleteFeatureComingSoon =>
+      _localizedValues[locale.languageCode]
+          ?['markBoosterCompleteFeatureComingSoon'] ??
+      'Mark booster complete feature coming soon';
   String get addingPetsOptional =>
       _localizedValues[locale.languageCode]?['addingPetsOptional'] ??
       'Adding pets is optional';
@@ -953,6 +1355,9 @@ class AppLocalizations {
   String get rotateInstructions =>
       _localizedValues[locale.languageCode]?['rotateInstructions'] ??
       'Touch and drag to rotate the model';
+  String get rotate90Instructions =>
+      _localizedValues[locale.languageCode]?['rotate90Instructions'] ??
+      'Tap the rotate button to turn the model 90 degrees';
   String get zoomInstructions =>
       _localizedValues[locale.languageCode]?['zoomInstructions'] ??
       'Pinch to zoom in and out';
@@ -1516,8 +1921,8 @@ class AppLocalizations {
       'guestBrowsingMessage':
           'You\'re browsing as a guest. Some features require login.',
       'login': 'Login',
-      'vetVisit': 'vet Visit',
-      'animalView3D': '3D Animal View',
+      'vetVisit': 'Vet Visit',
+      'animalView3D': 'Symptom Checker',
       'searchPlaceholder': 'Search for Vets, doctors...',
       'nearYou': 'Near You',
       'seeAll': 'See All',
@@ -1553,6 +1958,80 @@ class AppLocalizations {
       'rememberMe': 'Remember me',
       'forgotPassword': 'Forgot Password?',
       'orContinueWith': 'Or continue with',
+
+      // Forgot Password screen translations
+      'resetYourPassword': 'Reset Your Password',
+      'enterRegisteredEmail':
+          'Enter your registered email to receive a verification code',
+      'sendVerificationCode': 'Send Verification Code',
+      'codeSent': 'Code Sent',
+      'verificationCodeSentTo': 'Verification code has been sent to {email}',
+      'failedToSendCode': 'Failed to send verification code',
+      'noAccountFoundWithEmail':
+          'No account found with this email address. Please check your email or create a new account.',
+      'pleaseEnterEmail': 'Please enter your email',
+      'pleaseEnterValidEmail': 'Please enter a valid email',
+
+      // Enter Verification Code screen translations
+      'enterVerificationCode': 'Enter Verification Code',
+      'verificationCodeSentToEmail':
+          'We have sent a verification code to {email}',
+      'pleaseEnterAll6Digits': 'Please enter all 6 digits of the code',
+      'verificationCodeExpired':
+          'Verification code has expired. Please request a new one.',
+      'invalidVerificationCode': 'Invalid verification code. Please try again.',
+      'errorVerifyingCode': 'Error verifying code',
+      'newCodeSent': 'Code Sent',
+      'newVerificationCodeSentTo':
+          'A new verification code has been sent to {email}',
+      'failedToResendCode': 'Failed to resend code. Please try again.',
+      'verifyCode': 'Verify Code',
+      'resendCode': 'Resend Code',
+      'didntReceiveCode': 'Didn\'t receive the code?',
+
+      // Email Verification screen translations
+      'verifyYourEmail': 'Verify Your Email',
+      'enterThe6DigitCodeSentTo': 'Enter the 6-digit code sent to {email}',
+      'emailVerifiedSuccessfully': 'Email Verified Successfully!',
+      'youCanNowContinueToTheApp': 'You can now continue to the app',
+      'continueText': 'Continue',
+      'verify': 'Verify',
+      'verificationFailed': 'Verification Failed',
+      'invalidOrExpiredCode': 'Invalid or expired code. Please try again.',
+      'seconds': 's',
+
+      // Create New Password screen translations
+      'createNewPassword': 'Create New Password',
+      'newPasswordMustBeDifferent':
+          'Your new password must be different from previously used passwords',
+      'atLeast6Characters': 'At least 6 characters',
+      'containsANumber': 'Contains a number',
+      'containsAnUppercaseLetter': 'Contains an uppercase letter',
+      'newPassword': 'New Password',
+      'confirmPassword': 'Confirm Password',
+      'pleaseEnterPassword': 'Please enter a password',
+      'passwordMustBeAtLeast6Characters':
+          'Password must be at least 6 characters',
+      'passwordMustContainUppercase':
+          'Password must contain at least one uppercase letter',
+      'passwordMustContainNumber': 'Password must contain at least one number',
+      'pleaseConfirmPassword': 'Please confirm your password',
+      'passwordsDoNotMatch': 'Passwords do not match',
+      'resetPassword': 'Reset Password',
+      'passwordResetSuccessfully': 'Password Reset Successfully!',
+      'passwordChangedMessage':
+          'Your password has been changed. Please use your new password to login.',
+      'loginNow': 'Login Now',
+      'failedToResetPassword': 'Failed to reset password. Please try again.',
+
+      // Account Details screen translations
+      'personalInformation': 'Personal Information',
+      'security': 'Security',
+      'changePassword': 'Change Password',
+      'currentPassword': 'Current Password',
+      'enterCurrentPasswordPrompt':
+          'Enter your current password and choose a new password',
+
       'signInWithGoogle': 'Sign in with Google',
       'signInWithApple': 'Sign in with Apple',
       'dontHaveAccount': 'Don\'t have an account?',
@@ -1641,6 +2120,107 @@ class AppLocalizations {
       'petUpdatedSuccessfully': '{name} has been updated successfully.',
       'info': 'Info',
       'noChangesToUpdate': 'No changes to update',
+
+      // Vaccination Strings
+      'vaccinationRecord': 'Vaccination Record',
+      'addVaccine': 'Add Vaccine',
+      'viewAll': 'View All',
+      'virusVaccines': 'Virus Vaccines',
+      'wormsVaccines': 'Worms',
+      'insectsVaccines': 'Insects',
+      'rabiesVaccines': 'Rabies',
+      'monovalent': 'Monovalent',
+      'bivalent': 'Bivalent',
+      'trivalent': 'Trivalent',
+      'quadrivalent': 'Quadrivalent',
+      'pentavalent': 'Pentavalent',
+      'hexavalent': 'Hexavalent',
+      'heptavalent': 'Heptavalent',
+      'octavalent': 'Octavalent',
+      'deworming': 'Deworming',
+      'antiInsects': 'Anti-Insects',
+      'rabies': 'Rabies',
+      'vaccineType': 'Vaccine Type',
+      'vaccinationDate': 'Vaccination Date',
+      'administeredDoses': 'Administered Doses',
+      'addAnotherDose': 'Add Another Dose',
+      'maximumDosesReached': 'Maximum Doses Reached',
+      'maximumReached': 'Maximum Reached',
+      'thisVaccineRequiresOnly1Dose': 'This vaccine requires only 1 dose',
+      'thisVaccineRequiresOnly2Doses': 'This vaccine requires only 2 doses',
+      'youCanOnlyAddUpTo3Doses': 'You can only add up to 3 doses',
+      'pleaseSelectVaccineType': 'Please select a vaccine type',
+      'pleaseAddAtLeastOneDose': 'Please add at least one dose',
+      'vaccinationAddedSuccessfully': 'Vaccination added successfully',
+      'dateAdministered': 'Date Administered',
+      'removeDose': 'Remove Dose',
+      'dose': 'Dose',
+      'completedDoses': 'doses completed',
+      'vaccine': 'vaccine',
+      'vaccines': 'vaccines',
+      'noPetsFound': 'No Pets Found',
+      'addPetToViewVaccination': 'Add a pet to view vaccination records',
+      'selectPetToViewVaccination': 'Select a pet to view vaccination records',
+      'viewRecord': 'View Record',
+      'failedToLoadRewardsData': 'Failed to load rewards data',
+      'areYouSureYouWantToLogout': 'Are you sure you want to logout?',
+      'loggedOutSuccessfully': 'Logged out successfully',
+      'logoutFailed': 'Logout failed. Please try again.',
+      'virusVaccineMissing': 'Virus Vaccine Missing',
+      'virusVaccineMissingMessage':
+          'Your pet needs virus protection. Start the vaccine series soon to protect against diseases.',
+      'wormTreatmentMissing': 'Worm Treatment Missing',
+      'wormTreatmentMissingMessage':
+          'Your pet needs deworming treatment. Only 2 doses required to prevent parasites.',
+      'insectProtectionMissing': 'Insect Protection Missing',
+      'insectProtectionMissingMessage':
+          'Your pet needs flea and tick protection. Only 1 dose required to prevent infestations.',
+      'rabiesVaccineMissing': 'Rabies Vaccine Missing',
+      'rabiesVaccineMissingMessage':
+          'Your pet needs rabies protection. Only 1 dose required. This vaccine is critical for your pet\'s safety.',
+      'noVaccinationRecords': 'No Vaccination Records',
+      'addYourPetsFirstVaccine': 'Add your pet\'s first vaccine to get started',
+      'vaccinationRecords': 'Vaccination Records',
+      'annualBoosters': 'Annual Boosters',
+      'markAsComplete': 'Mark as Complete',
+      'markComplete': 'Mark',
+      'notYetAdministered': 'Not yet administered',
+      'doseMarkedComplete': '✓ Dose marked as complete!',
+      'boosterMarkedComplete': '✓ Annual booster marked as complete!',
+      'nextDose': 'Next dose',
+      'protectionActive': 'Protection active. Repeat on schedule to stay safe',
+      'protectedFromRabies':
+          'Protected from rabies. Repeat yearly to stay safe',
+      'notProtectedFromFleasOrTicks':
+          'Not protected from fleas or ticks. Start soon',
+      'yourPetIsntProtectedFromRabies':
+          'Your pet isn\'t protected from rabies. Vaccinate soon',
+      'treatmentComplete': 'Treatment complete! Your pet is now protected',
+      'secondDoseRequiredForFullDeworming':
+          'Second dose required for full deworming',
+      'notProtectedFromWorms': 'Not protected from worms. Start deworming soon',
+      'fullyProtected': 'Fully protected. Follow booster schedule to stay safe',
+      'protectedThirdDoseGivesStrongestImmunity':
+          'Protected. Third dose gives strongest immunity',
+      'protectionIncomplete':
+          'Protection incomplete. Second dose needed to activate immunity',
+      'notProtectedStartVirusVaccineSoon':
+          'Not protected. Start the virus vaccine soon',
+      'dismiss': 'Dismiss',
+      'errorLoadingVaccinationRecord': 'Error Loading Vaccination Record',
+      'noVaccinationData': 'No vaccination data',
+      'overdue': 'Overdue',
+      'markDoseComplete': 'Mark Dose Complete',
+      'selectPet': 'Select Pet',
+      'addVaccinationTitle': 'Add Vaccination',
+      'active': 'ACTIVE',
+      'completedStatus': 'COMPLETED',
+      'dosesCompleted': 'doses completed',
+      'wormTreatment': 'Worm Treatment',
+      'insectProtection': 'Insect Protection',
+      'rabiesVaccine': 'Rabies Vaccine',
+      'markBoosterCompleteFeatureComingSoon':
+          'Mark booster complete feature coming soon',
 
       'noFavoritesYet': 'No favorites yet',
       'noFavoritesMessage':
@@ -2699,6 +3279,80 @@ class AppLocalizations {
       'rememberMe': 'تذكرني',
       'forgotPassword': 'نسيت كلمة المرور؟',
       'orContinueWith': 'أو متابعة باستخدام',
+
+      // Forgot Password screen translations
+      'resetYourPassword': 'إعادة تعيين كلمة المرور',
+      'enterRegisteredEmail': 'أدخل بريدك الإلكتروني المسجل لتلقي رمز التحقق',
+      'sendVerificationCode': 'إرسال رمز التحقق',
+      'codeSent': 'تم إرسال الرمز',
+      'verificationCodeSentTo': 'تم إرسال رمز التحقق إلى {email}',
+      'failedToSendCode': 'فشل في إرسال رمز التحقق',
+      'noAccountFoundWithEmail':
+          'لم يتم العثور على حساب بهذا البريد الإلكتروني. يرجى التحقق من بريدك الإلكتروني أو إنشاء حساب جديد.',
+      'pleaseEnterEmail': 'الرجاء إدخال بريدك الإلكتروني',
+      'pleaseEnterValidEmail': 'الرجاء إدخال بريد إلكتروني صحيح',
+
+      // Enter Verification Code screen translations
+      'enterVerificationCode': 'أدخل رمز التحقق',
+      'verificationCodeSentToEmail': 'لقد أرسلنا رمز التحقق إلى {email}',
+      'pleaseEnterAll6Digits': 'الرجاء إدخال جميع الأرقام الستة للرمز',
+      'verificationCodeExpired': 'انتهت صلاحية رمز التحقق. يرجى طلب رمز جديد.',
+      'invalidVerificationCode': 'رمز تحقق غير صالح. يرجى المحاولة مرة أخرى.',
+      'errorVerifyingCode': 'خطأ في التحقق من الرمز',
+      'newCodeSent': 'تم إرسال الرمز',
+      'newVerificationCodeSentTo': 'تم إرسال رمز تحقق جديد إلى {email}',
+      'failedToResendCode': 'فشل في إعادة إرسال الرمز. يرجى المحاولة مرة أخرى.',
+      'verifyCode': 'تحقق من الرمز',
+      'resendCode': 'إعادة إرسال الرمز',
+      'didntReceiveCode': 'لم تتلق الرمز؟',
+
+      // Email Verification screen translations
+      'verifyYourEmail': 'تحقق من بريدك الإلكتروني',
+      'enterThe6DigitCodeSentTo':
+          'أدخل الرمز المكون من ٦ أرقام المرسل إلى {email}',
+      'emailVerifiedSuccessfully': 'تم التحقق من البريد الإلكتروني بنجاح!',
+      'youCanNowContinueToTheApp': 'يمكنك الآن المتابعة إلى التطبيق',
+      'continueText': 'متابعة',
+      'verify': 'تحقق',
+      'verificationFailed': 'فشل التحقق',
+      'invalidOrExpiredCode':
+          'رمز غير صالح أو منتهي الصلاحية. يرجى المحاولة مرة أخرى.',
+      'seconds': 'ث',
+
+      // Create New Password screen translations
+      'createNewPassword': 'إنشاء كلمة مرور جديدة',
+      'newPasswordMustBeDifferent':
+          'يجب أن تكون كلمة المرور الجديدة مختلفة عن كلمات المرور المستخدمة سابقًا',
+      'atLeast6Characters': 'على الأقل 6 أحرف',
+      'containsANumber': 'يحتوي على رقم',
+      'containsAnUppercaseLetter': 'يحتوي على حرف كبير',
+      'newPassword': 'كلمة المرور الجديدة',
+      'confirmPassword': 'تأكيد كلمة المرور',
+      'pleaseEnterPassword': 'الرجاء إدخال كلمة المرور',
+      'passwordMustBeAtLeast6Characters':
+          'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل',
+      'passwordMustContainUppercase':
+          'يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل',
+      'passwordMustContainNumber':
+          'يجب أن تحتوي كلمة المرور على رقم واحد على الأقل',
+      'pleaseConfirmPassword': 'الرجاء تأكيد كلمة المرور',
+      'passwordsDoNotMatch': 'كلمتا المرور غير متطابقتين',
+      'resetPassword': 'إعادة تعيين كلمة المرور',
+      'passwordResetSuccessfully': 'تم إعادة تعيين كلمة المرور بنجاح!',
+      'passwordChangedMessage':
+          'تم تغيير كلمة المرور الخاصة بك. يرجى استخدام كلمة المرور الجديدة لتسجيل الدخول.',
+      'loginNow': 'تسجيل الدخول الآن',
+      'failedToResetPassword':
+          'فشل في إعادة تعيين كلمة المرور. يرجى المحاولة مرة أخرى.',
+
+      // Account Details screen translations
+      'personalInformation': 'المعلومات الشخصية',
+      'security': 'الأمان',
+      'changePassword': 'تغيير كلمة المرور',
+      'currentPassword': 'كلمة المرور الحالية',
+      'enterCurrentPasswordPrompt':
+          'أدخل كلمة المرور الحالية واختر كلمة مرور جديدة',
+
       'signInWithGoogle': 'تسجيل الدخول باستخدام Google',
       'signInWithApple': 'تسجيل الدخول باستخدام Apple',
       'dontHaveAccount': 'ليس لديك حساب؟',
@@ -2832,6 +3486,103 @@ class AppLocalizations {
       'petUpdatedSuccessfully': 'تم تحديث {name} بنجاح.',
       'info': 'معلومات',
       'noChangesToUpdate': 'لا توجد تغييرات للتحديث',
+
+      // Vaccination Strings (Arabic)
+      'vaccinationRecord': 'سجل التطعيمات',
+      'addVaccine': 'إضافة تطعيم',
+      'viewAll': 'عرض الكل',
+      'virusVaccines': 'لقاحات الفيروسات',
+      'wormsVaccines': 'الديدان',
+      'insectsVaccines': 'الحشرات',
+      'rabiesVaccines': 'السعار',
+      'monovalent': 'أحادي',
+      'bivalent': 'ثنائي',
+      'trivalent': 'ثلاثي',
+      'quadrivalent': 'رباعي',
+      'pentavalent': 'خماسي',
+      'hexavalent': 'سداسي',
+      'heptavalent': 'سباعي',
+      'octavalent': 'ثماني',
+      'deworming': 'طارد الديدان',
+      'antiInsects': 'مضاد الحشرات',
+      'rabies': 'السعار',
+      'vaccineType': 'نوع اللقاح',
+      'vaccinationDate': 'تاريخ التطعيم',
+      'administeredDoses': 'الجرعات المعطاة',
+      'addAnotherDose': 'إضافة جرعة أخرى',
+      'maximumDosesReached': 'تم الوصول إلى الحد الأقصى للجرعات',
+      'maximumReached': 'تم الوصول للحد الأقصى',
+      'thisVaccineRequiresOnly1Dose': 'هذا اللقاح يتطلب جرعة واحدة فقط',
+      'thisVaccineRequiresOnly2Doses': 'هذا اللقاح يتطلب جرعتين فقط',
+      'youCanOnlyAddUpTo3Doses': 'يمكنك إضافة 3 جرعات كحد أقصى',
+      'pleaseSelectVaccineType': 'يرجى اختيار نوع اللقاح',
+      'pleaseAddAtLeastOneDose': 'يرجى إضافة جرعة واحدة على الأقل',
+      'vaccinationAddedSuccessfully': 'تمت إضافة التطعيم بنجاح',
+      'dateAdministered': 'تاريخ الإعطاء',
+      'removeDose': 'إزالة الجرعة',
+      'dose': 'جرعة',
+      'completedDoses': 'جرعات مكتملة',
+      'vaccine': 'لقاح',
+      'vaccines': 'لقاحات',
+      'noPetsFound': 'لا توجد حيوانات أليفة',
+      'addPetToViewVaccination': 'أضف حيوان أليف لعرض سجلات التطعيم',
+      'selectPetToViewVaccination': 'اختر حيوان أليف لعرض سجلات التطعيم',
+      'viewRecord': 'عرض السجل',
+      'failedToLoadRewardsData': 'فشل تحميل بيانات المكافآت',
+      'areYouSureYouWantToLogout': 'هل أنت متأكد أنك تريد تسجيل الخروج؟',
+      'loggedOutSuccessfully': 'تم تسجيل الخروج بنجاح',
+      'logoutFailed': 'فشل تسجيل الخروج. يرجى المحاولة مرة أخرى.',
+      'virusVaccineMissing': 'لقاح الفيروسات مفقود',
+      'virusVaccineMissingMessage':
+          'حيوانك الأليف يحتاج إلى حماية من الفيروسات. ابدأ سلسلة اللقاحات قريباً للحماية من الأمراض.',
+      'wormTreatmentMissing': 'علاج الديدان مفقود',
+      'wormTreatmentMissingMessage':
+          'حيوانك الأليف يحتاج إلى علاج طارد للديدان. جرعتان فقط مطلوبتان للوقاية من الطفيليات.',
+      'insectProtectionMissing': 'الحماية من الحشرات مفقودة',
+      'insectProtectionMissingMessage':
+          'حيوانك الأليف يحتاج إلى حماية من البراغيث والقراد. جرعة واحدة فقط مطلوبة لمنع الإصابة.',
+      'rabiesVaccineMissing': 'لقاح داء الكلب مفقود',
+      'rabiesVaccineMissingMessage':
+          'حيوانك الأليف يحتاج إلى الحماية من داء الكلب. جرعة واحدة فقط مطلوبة. هذا اللقاح ضروري لسلامة حيوانك الأليف.',
+      'noVaccinationRecords': 'لا توجد سجلات تطعيم',
+      'addYourPetsFirstVaccine': 'أضف أول لقاح لحيوانك الأليف للبدء',
+      'vaccinationRecords': 'سجلات التطعيم',
+      'annualBoosters': 'الجرعات التنشيطية السنوية',
+      'markAsComplete': 'تحديد كمكتمل',
+      'markComplete': 'تحديد',
+      'notYetAdministered': 'لم يتم إعطاؤها بعد',
+      'doseMarkedComplete': '✓ تم تحديد الجرعة كمكتملة!',
+      'boosterMarkedComplete': '✓ تم تحديد الجرعة التنشيطية السنوية كمكتملة!',
+      'nextDose': 'الجرعة التالية',
+      'protectionActive': 'أليفك محمي، كرّر العلاج في معاده',
+      'protectedFromRabies': 'أليفك في أمان، طعّمه مرة كل سنة',
+      'notProtectedFromFleasOrTicks':
+          'أليفك مش محمي من البراغيث و القراد، اديلو الدواء قريب',
+      'yourPetIsntProtectedFromRabies': 'أليفك مش محمي من السعار، طعّمه قريب',
+      'treatmentComplete': 'العلاج خلص، أليفك دلوقتي محمي',
+      'secondDoseRequiredForFullDeworming':
+          'الجرعة التانية ضرورية عشان العلاج يكمل',
+      'notProtectedFromWorms': 'أليفك مش محمي من الديدان، ابدأ العلاج قريب',
+      'fullyProtected': 'أليفك محمي بأفضل شكل، تابع التطعيم السنوي',
+      'protectedThirdDoseGivesStrongestImmunity':
+          'أليفك محمي، الجرعة التالتة بتقوّي المناعة أكتر',
+      'protectionIncomplete': 'أليفك لسه مش محمي، لازم الجرعة التانية',
+      'notProtectedStartVirusVaccineSoon': 'أليفك مش محمي، طعّمه قريب',
+      'dismiss': 'إغلاق',
+      'errorLoadingVaccinationRecord': 'خطأ في تحميل سجل التطعيمات',
+      'noVaccinationData': 'لا توجد بيانات تطعيم',
+      'overdue': 'متأخر',
+      'markDoseComplete': 'تحديد الجرعة كمكتملة',
+      'selectPet': 'اختر أليفك',
+      'addVaccinationTitle': 'إضافة تطعيم',
+      'active': 'نشط',
+      'completedStatus': 'مكتمل',
+      'dosesCompleted': 'جرعة مكتملة',
+      'wormTreatment': 'علاج الديدان',
+      'insectProtection': 'الحماية من الحشرات',
+      'rabiesVaccine': 'لقاح السعار',
+      'markBoosterCompleteFeatureComingSoon':
+          'ميزة تحديد الجرعة التنشيطية كمكتملة قريباً',
 
       'noFavoritesYet': 'لا توجد مفضلات بعد',
       'noFavoritesMessage':
@@ -3050,6 +3801,7 @@ class AppLocalizations {
       'viewSelected': 'عرض المحدد',
       'findVet': 'العثور على دكتور',
       'rotateInstructions': 'اضغط واسحب لتدوير النموذج',
+      'rotate90Instructions': 'اضغط على زر التدوير لتدوير النموذج 90 درجة',
       'zoomInstructions': 'اقرص لتكبير وتصغير الصورة',
       'selectInstructions': 'اضغط على جزء من الجسم لاختياره',
       'symptomsInstructions': 'اختر الأعراض لجزء الجسم المحدد',

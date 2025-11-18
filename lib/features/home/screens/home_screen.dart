@@ -146,8 +146,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             : Colors.grey,
                       ),
                 tooltip: _locationService.isPermissionGranted
-                    ? 'Refresh location'
-                    : 'Enable location',
+                    ? localizations.refreshLocation
+                    : localizations.enableLocation,
               )),
         ],
       ),
@@ -195,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             _buildCompactVaccinationServiceItem(
                               context,
-                              'Vaccination',
+                              localizations.vaccination,
                               Icons.vaccines,
                               isDark,
                               onTap: () => Get.toNamed(
@@ -286,15 +286,15 @@ class _HomeScreenState extends State<HomeScreen> {
                                         color:
                                             Colors.red.withValues(alpha: 0.3)),
                                   ),
-                                  child: const Row(
+                                  child: Row(
                                     children: [
-                                      Icon(Icons.error_outline,
+                                      const Icon(Icons.error_outline,
                                           color: Colors.red),
-                                      SizedBox(width: 12),
+                                      const SizedBox(width: 12),
                                       Expanded(
                                         child: Text(
-                                          'Failed to load rewards data',
-                                          style: TextStyle(
+                                          localizations.failedToLoadRewardsData,
+                                          style: const TextStyle(
                                               color: Colors.red, fontSize: 14),
                                         ),
                                       ),
@@ -419,21 +419,21 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Location Access Disabled',
-                    style: TextStyle(
+                    AppLocalizations.of(context).locationAccessDisabled,
+                    style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       color: AppColors.lightorange,
                       fontSize: 14,
                     ),
                   ),
                   Text(
-                    'Enable location to find nearby vets',
-                    style: TextStyle(
+                    AppLocalizations.of(context).enableLocationToFindVets,
+                    style: const TextStyle(
                       color: AppColors.lightorange,
                       fontSize: 12,
                     ),
@@ -486,7 +486,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Current Location',
+                  AppLocalizations.of(context).currentLocation,
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark ? Colors.grey[400] : Colors.grey[600],
@@ -520,7 +520,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.refresh, size: 18),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
-              tooltip: 'Refresh location',
+              tooltip: localizations.refreshLocation,
             ),
         ],
       ),

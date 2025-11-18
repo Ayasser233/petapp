@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/localization/app_localizations.dart';
 import '../../../../core/utils/app_colors.dart';
+import '../../utils/vaccination_utils.dart';
 import '../cubit/vaccination_cubit.dart';
 import '../cubit/vaccination_state.dart';
 
@@ -32,43 +34,47 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
   DateTime singleDoseDate = DateTime.now(); // For Insects/Rabies vaccines
 
   // Vaccine types mapping - based on pet species
-  Map<String, String> get virusVaccineTypes {
+  Map<String, String> getVirusVaccineTypes(BuildContext context) {
     final isDog = widget.petSpecies.toUpperCase() == 'DOG';
+    final loc = AppLocalizations.of(context);
     if (isDog) {
       return {
-        'DOG_MONOVALENT': 'Monovalent',
-        'DOG_BIVALENT': 'Bivalent',
-        'DOG_PENTAVALENT': 'Pentavalent',
-        'DOG_HEPTAVALENT': 'Heptavalent',
-        'DOG_OCTAVALENT': 'Octavalent',
+        'DOG_MONOVALENT': loc.monovalent,
+        'DOG_BIVALENT': loc.bivalent,
+        'DOG_PENTAVALENT': loc.pentavalent,
+        'DOG_HEPTAVALENT': loc.heptavalent,
+        'DOG_OCTAVALENT': loc.octavalent,
       };
     } else {
       return {
-        'CAT_TRIVALENT': 'Trivalent',
-        'CAT_QUADRIVALENT': 'Quadrivalent',
+        'CAT_TRIVALENT': loc.trivalent,
+        'CAT_QUADRIVALENT': loc.quadrivalent,
       };
     }
   }
 
   // These will be populated based on pet species
-  Map<String, String> get wormsVaccineTypes {
+  Map<String, String> getWormsVaccineTypes(BuildContext context) {
     final isDog = widget.petSpecies.toUpperCase() == 'DOG';
+    final loc = AppLocalizations.of(context);
     return {
-      isDog ? 'WORMS_DOG' : 'WORMS_CAT': 'Deworming',
+      isDog ? 'WORMS_DOG' : 'WORMS_CAT': loc.deworming,
     };
   }
 
-  Map<String, String> get insectsVaccineTypes {
+  Map<String, String> getInsectsVaccineTypes(BuildContext context) {
     final isDog = widget.petSpecies.toUpperCase() == 'DOG';
+    final loc = AppLocalizations.of(context);
     return {
-      isDog ? 'INSECTS_DOG' : 'INSECTS_CAT': 'Anti-Insects',
+      isDog ? 'INSECTS_DOG' : 'INSECTS_CAT': loc.antiInsects,
     };
   }
 
-  Map<String, String> get rabiesVaccineTypes {
+  Map<String, String> getRabiesVaccineTypes(BuildContext context) {
     final isDog = widget.petSpecies.toUpperCase() == 'DOG';
+    final loc = AppLocalizations.of(context);
     return {
-      isDog ? 'RABIES_DOG' : 'RABIES_CAT': 'Rabies',
+      isDog ? 'RABIES_DOG' : 'RABIES_CAT': loc.rabies,
     };
   }
 
@@ -82,17 +88,32 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
   // Check if selected vaccine type requires dose tracking
   bool _requiresDoses() {
     if (selectedVaccineType == null) return false;
-    // Only Virus and Worms vaccines require dose tracking
-    return selectedVaccineType!.startsWith('DOG_') ||
-        selectedVaccineType!.startsWith('CAT_') ||
-        selectedVaccineType!.startsWith('WORMS_');
+    // Use utility to check if vaccine requires dose tracking
+    return VaccinationUtils.requiresDoseTracking(selectedVaccineType!);
   }
 
   void _addDose() {
-    if (doses.length >= 3) {
+    final loc = AppLocalizations.of(context);
+
+    if (selectedVaccineType == null) return;
+
+    // Get max doses from utility
+    final maxDoses = VaccinationUtils.getRequiredDoses(selectedVaccineType!);
+
+    // Determine appropriate message
+    String maxDosesMessage;
+    if (maxDoses == 1) {
+      maxDosesMessage = loc.thisVaccineRequiresOnly1Dose;
+    } else if (maxDoses == 2) {
+      maxDosesMessage = loc.thisVaccineRequiresOnly2Doses;
+    } else {
+      maxDosesMessage = loc.youCanOnlyAddUpTo3Doses;
+    }
+
+    if (doses.length >= maxDoses) {
       Get.snackbar(
-        'Maximum Reached',
-        'You can only add up to 3 doses',
+        AppLocalizations.of(context).maximumReached,
+        maxDosesMessage,
         backgroundColor: Colors.orange,
         colorText: Colors.white,
       );
@@ -168,10 +189,11 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
   }
 
   void _submitVaccination() {
+    final loc = AppLocalizations.of(context);
     if (selectedVaccineType == null) {
       Get.snackbar(
-        'Error',
-        'Please select a vaccine type',
+        loc.error,
+        loc.pleaseSelectVaccineType,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -181,8 +203,8 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
     // Only check for doses if the vaccine type requires them
     if (_requiresDoses() && doses.isEmpty) {
       Get.snackbar(
-        'Error',
-        'Please add at least one dose',
+        loc.error,
+        loc.pleaseAddAtLeastOneDose,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -226,21 +248,23 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: Text('Add Vaccination - ${widget.petName}'),
+        title: Text(
+            '${AppLocalizations.of(context).addVaccinationTitle} - ${widget.petName}'),
         centerTitle: true,
         elevation: 0,
         backgroundColor: cardColor,
       ),
       body: BlocListener<VaccinationCubit, VaccinationState>(
         listener: (context, state) {
+          final loc = AppLocalizations.of(context);
           if (state is VaccinationSeriesCreated) {
             setState(() {
               isLoading = false;
             });
             Get.back(result: true);
             Get.snackbar(
-              'Success',
-              'Vaccination added successfully',
+              loc.success,
+              loc.vaccinationAddedSuccessfully,
               backgroundColor: AppColors.orange,
               colorText: Colors.white,
             );
@@ -249,7 +273,7 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
               isLoading = false;
             });
             Get.snackbar(
-              'Error',
+              loc.error,
               state.message,
               backgroundColor: Colors.red,
               colorText: Colors.white,
@@ -263,25 +287,30 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Vaccine Type Selection
-              _buildSectionTitle('Vaccine Type', isDark),
+              _buildSectionTitle(
+                  AppLocalizations.of(context).vaccineType, isDark),
+              const SizedBox(height: 12),
+              _buildVaccineTypeCard(AppLocalizations.of(context).virusVaccines,
+                  getVirusVaccineTypes(context), cardColor, isDark),
+              const SizedBox(height: 12),
+              _buildVaccineTypeCard(AppLocalizations.of(context).wormsVaccines,
+                  getWormsVaccineTypes(context), cardColor, isDark),
               const SizedBox(height: 12),
               _buildVaccineTypeCard(
-                  'Virus Vaccines', virusVaccineTypes, cardColor, isDark),
+                  AppLocalizations.of(context).insectsVaccines,
+                  getInsectsVaccineTypes(context),
+                  cardColor,
+                  isDark),
               const SizedBox(height: 12),
-              _buildVaccineTypeCard(
-                  'Worms', wormsVaccineTypes, cardColor, isDark),
-              const SizedBox(height: 12),
-              _buildVaccineTypeCard(
-                  'Insects', insectsVaccineTypes, cardColor, isDark),
-              const SizedBox(height: 12),
-              _buildVaccineTypeCard(
-                  'Rabies', rabiesVaccineTypes, cardColor, isDark),
+              _buildVaccineTypeCard(AppLocalizations.of(context).rabiesVaccines,
+                  getRabiesVaccineTypes(context), cardColor, isDark),
 
               const SizedBox(height: 32),
 
               // Date Selection for Insects/Rabies vaccines
               if (!_requiresDoses() && selectedVaccineType != null) ...[
-                _buildSectionTitle('Vaccination Date', isDark),
+                _buildSectionTitle(
+                    AppLocalizations.of(context).vaccinationDate, isDark),
                 const SizedBox(height: 12),
                 _buildSingleDoseDateCard(cardColor, isDark),
                 const SizedBox(height: 32),
@@ -289,7 +318,8 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
 
               // Doses Section - Only show for Virus and Worms vaccines
               if (_requiresDoses()) ...[
-                _buildSectionTitle('Administered Doses', isDark),
+                _buildSectionTitle(
+                    AppLocalizations.of(context).administeredDoses, isDark),
                 const SizedBox(height: 12),
                 ...doses.asMap().entries.expand((entry) {
                   final index = entry.key;
@@ -304,30 +334,44 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
 
                 const SizedBox(height: 12),
 
-                // Add Dose Button (max 3 doses)
-                OutlinedButton.icon(
-                  onPressed: doses.length < 3 ? _addDose : null,
-                  icon: Icon(
-                    Icons.add,
-                    color: doses.length < 3 ? AppColors.orange : Colors.grey,
-                  ),
-                  label: Text(
-                    doses.length < 3
-                        ? 'Add Another Dose (${doses.length}/3)'
-                        : 'Maximum 3 Doses Reached',
-                    style: TextStyle(
-                      color: doses.length < 3 ? AppColors.orange : Colors.grey,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: BorderSide(
-                      color: doses.length < 3 ? AppColors.orange : Colors.grey,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
+                // Add Dose Button (dynamic max based on vaccine type)
+                Builder(
+                  builder: (context) {
+                    final loc = AppLocalizations.of(context);
+
+                    // Get max doses from utility
+                    final maxDoses = selectedVaccineType != null
+                        ? VaccinationUtils.getRequiredDoses(
+                            selectedVaccineType!)
+                        : 3;
+
+                    final canAddMore = doses.length < maxDoses;
+
+                    return OutlinedButton.icon(
+                      onPressed: canAddMore ? _addDose : null,
+                      icon: Icon(
+                        Icons.add,
+                        color: canAddMore ? AppColors.orange : Colors.grey,
+                      ),
+                      label: Text(
+                        canAddMore
+                            ? '${loc.addAnotherDose} (${doses.length}/$maxDoses)'
+                            : '${loc.maximumDosesReached} $maxDoses ${loc.dose}${maxDoses > 1 ? 's' : ''}',
+                        style: TextStyle(
+                          color: canAddMore ? AppColors.orange : Colors.grey,
+                        ),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: canAddMore ? AppColors.orange : Colors.grey,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 32),
@@ -355,9 +399,9 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
                             strokeWidth: 2,
                           ),
                         )
-                      : const Text(
-                          'Add Vaccination',
-                          style: TextStyle(
+                      : Text(
+                          AppLocalizations.of(context).addVaccination,
+                          style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -562,7 +606,7 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Date Administered',
+                    AppLocalizations.of(context).dateAdministered,
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey[600],
@@ -662,7 +706,7 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
             IconButton(
               onPressed: () => _removeDose(index),
               icon: const Icon(Icons.delete_outline, color: Colors.red),
-              tooltip: 'Remove Dose',
+              tooltip: AppLocalizations.of(context).removeDose,
             ),
           ],
         ],
@@ -671,17 +715,18 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
   }
 
   IconData _getCategoryIcon(String category) {
-    switch (category) {
-      case 'Virus Vaccines':
-        return Icons.coronavirus;
-      case 'Worms':
-        return Icons.bug_report;
-      case 'Insects':
-        return Icons.pest_control;
-      case 'Rabies':
-        return Icons.warning;
-      default:
-        return Icons.vaccines;
+    final loc = AppLocalizations.of(context);
+    // Match against localized strings
+    if (category == loc.virusVaccines) {
+      return Icons.coronavirus;
+    } else if (category == loc.wormsVaccines) {
+      return Icons.bug_report;
+    } else if (category == loc.insectsVaccines) {
+      return Icons.pest_control;
+    } else if (category == loc.rabiesVaccines) {
+      return Icons.warning;
+    } else {
+      return Icons.vaccines;
     }
   }
 }

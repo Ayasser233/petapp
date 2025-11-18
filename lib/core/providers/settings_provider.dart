@@ -79,12 +79,7 @@ class SettingsProvider extends ChangeNotifier {
     await _prefs.setBool('emailNotificationsEnabled', value);
     notifyListeners();
   }
-  
-  Future<void> setSoundEnabled(bool value) async {
-    _soundEnabled = value;
-    await _prefs.setBool('soundEnabled', value);
-    notifyListeners();
-  }
+
   
   // Get ThemeMode for MaterialApp
   ThemeMode getThemeMode() {

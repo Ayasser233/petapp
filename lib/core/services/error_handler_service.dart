@@ -58,6 +58,16 @@ class ErrorHandlerService extends GetxService {
       if (url.contains('/appointments')) {
         return true;
       }
+
+      // Suppress auth-related errors - handled by AuthCubit's BlocListener
+      if (url.contains('/auth/register') ||
+          url.contains('/auth/login') ||
+          url.contains('/auth/confirm') ||
+          url.contains('/auth/forgot') ||
+          url.contains('/auth/reset') ||
+          url.contains('/auth/change-password')) {
+        return true;
+      }
     }
 
     return false;
@@ -277,7 +287,7 @@ class ErrorHandlerService extends GetxService {
       borderRadius: 12,
       isDismissible: true,
       dismissDirection: DismissDirection.down,
-      icon: Icon(
+      icon: const Icon(
         Icons.error_outline,
         color: Colors.white,
         size: 28,
@@ -305,7 +315,7 @@ class ErrorHandlerService extends GetxService {
     final messages = <String>[];
 
     errors.forEach((field, fieldErrors) {
-      if (fieldErrors is List) {
+      if (fieldErrors is List) {                                                              
         for (var error in fieldErrors) {
           messages.add('${_capitalizeField(field)}: $error');
         }
@@ -314,7 +324,7 @@ class ErrorHandlerService extends GetxService {
       }
     });
 
-    Get.dialog(
+    Get.dialog( 
       AlertDialog(
         title: const Text('Validation Errors'),
         content: SingleChildScrollView(

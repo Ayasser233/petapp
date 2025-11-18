@@ -26,7 +26,7 @@ class CountryCodes {
   static final List<CountryCode> commonCodes = [
     CountryCode(
       name: "Egypt",
-      dialCode: "+20",
+      dialCode: "+2",
       code: "EG",
       flag: "🇪🇬",
     ),

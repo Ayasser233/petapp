@@ -3,13 +3,12 @@ import 'package:petapp/core/themes/elevated_btn_theme.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/app_style.dart';
 
-class AppTheme{
-
+class AppTheme {
   static ThemeData lightTheme = ThemeData(
     // surfaceTintColor: AppColors.orange,
     useMaterial3: true,
     fontFamily: 'Alilato Arabic Regular',
-    primaryColor: AppColors.orange,
+    primaryColor: const Color(0xFFEA9249),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
       foregroundColor: Colors.black,
@@ -19,9 +18,17 @@ class AppTheme{
     ),
     brightness: Brightness.light,
     scaffoldBackgroundColor: Colors.white,
-    textTheme: AppStyles.lightTextTheme,
-    elevatedButtonTheme: elevatedButtonTheme.lightElevatedThemeButton
+    textTheme: AppStyles.lightTextTheme.apply(
+      fontFamily: 'Alilato Arabic Regular',
+    ),
+    elevatedButtonTheme: elevatedButtonTheme.lightElevatedThemeButton,
+    inputDecorationTheme: InputDecorationTheme(
+      // Ensure input fields use the same font
+      hintStyle: const TextStyle(fontFamily: 'Alilato Arabic Regular'),
+      labelStyle: const TextStyle(fontFamily: 'Alilato Arabic Regular'),
+    ),
   );
+
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     fontFamily: 'Alilato Arabic Regular',
@@ -35,7 +42,14 @@ class AppTheme{
     ),
     brightness: Brightness.dark,
     scaffoldBackgroundColor: Colors.black,
-    textTheme: AppStyles.darkTextTheme,
-    elevatedButtonTheme: elevatedButtonTheme.darkElevatedThemeButton
+    textTheme: AppStyles.darkTextTheme.apply(
+      fontFamily: 'Alilato Arabic Regular',
+    ),
+    elevatedButtonTheme: elevatedButtonTheme.darkElevatedThemeButton,
+    inputDecorationTheme: InputDecorationTheme(
+      // Ensure input fields use the same font
+      hintStyle: const TextStyle(fontFamily: 'Alilato Arabic Regular'),
+      labelStyle: const TextStyle(fontFamily: 'Alilato Arabic Regular'),
+    ),
   );
 }

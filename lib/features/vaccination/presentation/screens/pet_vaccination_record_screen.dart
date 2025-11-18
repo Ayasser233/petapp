@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
@@ -42,6 +43,61 @@ class _PetVaccinationRecordScreenState
     context.read<VaccinationCubit>().getMedicalSheet(widget.pet.id);
   }
 
+  /// Generate annual boosters from vaccination series with annualBoosterDate
+  /// This is a workaround in case the backend doesn't populate annualBoosters array
+  List<dynamic> _generateAnnualBoosters(dynamic medicalSheet) {
+    final List<dynamic> boosters = [];
+
+    // Add backend-provided boosters first
+    boosters.addAll(medicalSheet.annualBoosters);
+
+    // Also check vaccination series for annualBoosterDate
+    for (var series in medicalSheet.vaccinationSeries) {
+      // Check if series has annual booster date (means it's ready for boosters)
+      if (series.annualBoosterDate != null) {
+        // For single-dose vaccines (insects, rabies), they should show booster after dose 1
+        // For worms, they should show booster after dose 2
+        final isInsectsOrRabies = _isInsectsVaccine(series.vaccineType) ||
+            _isRabiesVaccine(series.vaccineType);
+        final isWorms = _isWormsVaccine(series.vaccineType);
+
+        final shouldShowBooster =
+            (isInsectsOrRabies && series.completedDoses >= 1) ||
+                (isWorms && series.completedDoses >= 2) ||
+                series.isComplete;
+
+        if (shouldShowBooster) {
+          // Check if this booster is already in the list
+          final alreadyExists =
+              boosters.any((b) => b.seriesId == series.seriesId);
+
+          if (!alreadyExists) {
+            // Create a synthetic booster from series data
+            final dueDate = DateTime.parse(series.annualBoosterDate!);
+            final now = DateTime.now();
+            final isOverdue = dueDate.isBefore(now);
+
+            boosters.add(_SyntheticBooster(
+              vaccineType: series.vaccineType,
+              dueDate: series.annualBoosterDate!,
+              isOverdue: isOverdue,
+              seriesId: series.seriesId,
+            ));
+          }
+        }
+      }
+    }
+
+    // Sort by due date
+    boosters.sort((a, b) {
+      final dateA = DateTime.parse(a.dueDate);
+      final dateB = DateTime.parse(b.dueDate);
+      return dateA.compareTo(dateB);
+    });
+
+    return boosters;
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
@@ -52,7 +108,7 @@ class _PetVaccinationRecordScreenState
       backgroundColor: backgroundColor,
       appBar: AppBar(
         title: Text(
-          '${widget.pet.name} - Vaccination Record',
+          '${widget.pet.name} - ${AppLocalizations.of(context).vaccinationRecord}',
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
@@ -71,22 +127,34 @@ class _PetVaccinationRecordScreenState
         listener: (context, state) {
           if (state is DoseMarkedComplete) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('✓ Dose marked as complete!'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context).doseMarkedComplete),
                 backgroundColor: Colors.green,
-                duration: Duration(seconds: 2),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+            // Refresh medical sheet after successful completion
+            context.read<VaccinationCubit>().getMedicalSheet(widget.pet.id);
+          } else if (state is AnnualBoosterMarkedComplete) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content:
+                    Text(AppLocalizations.of(context).boosterMarkedComplete),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 2),
               ),
             );
             // Refresh medical sheet after successful completion
             context.read<VaccinationCubit>().getMedicalSheet(widget.pet.id);
           } else if (state is VaccinationError) {
+            final loc = AppLocalizations.of(context);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),
                 backgroundColor: Colors.red,
                 duration: const Duration(seconds: 4),
                 action: SnackBarAction(
-                  label: 'Dismiss',
+                  label: loc.dismiss,
                   textColor: Colors.white,
                   onPressed: () {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -106,15 +174,17 @@ class _PetVaccinationRecordScreenState
           }
 
           if (state is VaccinationError) {
+            final loc = AppLocalizations.of(context);
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Icon(Icons.error_outline, color: Colors.red, size: 60),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Error Loading Vaccination Record',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  Text(
+                    loc.errorLoadingVaccinationRecord,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Padding(
@@ -136,7 +206,7 @@ class _PetVaccinationRecordScreenState
                       backgroundColor: AppColors.orange,
                       foregroundColor: Colors.white,
                     ),
-                    child: const Text('Retry'),
+                    child: Text(loc.retry),
                   ),
                 ],
               ),
@@ -146,15 +216,8 @@ class _PetVaccinationRecordScreenState
           if (state is MedicalSheetLoaded) {
             final medicalSheet = state.medicalSheet;
 
-            // Auto-expand all categories on first load
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted && _expandedCategoryIds.isEmpty) {
-                setState(() {
-                  _expandedCategoryIds
-                      .addAll(['VIRUS', 'WORMS', 'INSECTS', 'RABIES']);
-                });
-              }
-            });
+            // Generate annual boosters from series with annualBoosterDate
+            final allBoosters = _generateAnnualBoosters(medicalSheet);
 
             return RefreshIndicator(
               color: AppColors.orange,
@@ -184,17 +247,7 @@ class _PetVaccinationRecordScreenState
                         context,
                         medicalSheet.completedDosesCount,
                         medicalSheet.totalUpcomingDoses,
-                        medicalSheet.totalAnnualBoosters,
-                        isDark,
-                        cardColor,
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Virus Vaccine Protection Status
-                      _buildVirusVaccineStatus(
-                        context,
-                        medicalSheet.vaccinationSeries,
+                        allBoosters.length,
                         isDark,
                         cardColor,
                       ),
@@ -213,7 +266,9 @@ class _PetVaccinationRecordScreenState
                       if (medicalSheet.vaccinationSeries.isNotEmpty) ...[
                         const SizedBox(height: 12),
                         _buildSectionTitle(
-                            context, 'Vaccination Records', isDark),
+                            context,
+                            AppLocalizations.of(context).vaccinationRecords,
+                            isDark),
                         const SizedBox(height: 12),
                         ..._buildCategoryCards(
                           context,
@@ -224,17 +279,19 @@ class _PetVaccinationRecordScreenState
                       ],
 
                       // Annual Boosters Section
-                      if (medicalSheet.annualBoosters.isNotEmpty) ...[
+                      if (allBoosters.isNotEmpty) ...[
                         const SizedBox(height: 24),
-                        _buildSectionTitle(context, 'Annual Boosters', isDark),
+                        _buildSectionTitle(
+                            context,
+                            AppLocalizations.of(context).annualBoosters,
+                            isDark),
                         const SizedBox(height: 12),
-                        ...medicalSheet.annualBoosters
-                            .map((booster) => _buildAnnualBoosterCard(
-                                  context,
-                                  booster,
-                                  isDark,
-                                  cardColor,
-                                )),
+                        ...allBoosters.map((booster) => _buildAnnualBoosterCard(
+                              context,
+                              booster,
+                              isDark,
+                              cardColor,
+                            )),
                       ],
 
                       // Empty State
@@ -248,6 +305,7 @@ class _PetVaccinationRecordScreenState
           }
 
           // Initial state or other states
+          final loc = AppLocalizations.of(context);
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -259,7 +317,7 @@ class _PetVaccinationRecordScreenState
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  'No vaccination data',
+                  loc.noVaccinationData,
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.grey[600],
@@ -364,9 +422,9 @@ class _PetVaccinationRecordScreenState
           }
         },
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text(
-          'Add Vaccine',
-          style: TextStyle(
+        label: Text(
+          AppLocalizations.of(context).addVaccine,
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -383,63 +441,126 @@ class _PetVaccinationRecordScreenState
     );
   }
 
-  Widget _buildVirusVaccineStatus(
+  List<Widget> _buildMissingVaccineWarnings(
     BuildContext context,
     List<dynamic> vaccinationSeries,
     bool isDark,
     Color? cardColor,
   ) {
-    // Check for virus vaccines
-    final virusVaccines = vaccinationSeries
-        .where((series) => _isVirusVaccine(series.vaccineType))
-        .toList();
+    final List<Widget> warnings = [];
 
-    String? statusMessage;
-    Color? statusColor;
-    IconData? statusIcon;
+    // Check for each vaccine type
+    final hasVirusVaccine =
+        vaccinationSeries.any((series) => _isVirusVaccine(series.vaccineType));
+    final hasWormsVaccine =
+        vaccinationSeries.any((series) => _isWormsVaccine(series.vaccineType));
+    final hasInsectsVaccine = vaccinationSeries
+        .any((series) => _isInsectsVaccine(series.vaccineType));
+    final hasRabiesVaccine =
+        vaccinationSeries.any((series) => _isRabiesVaccine(series.vaccineType));
 
-    if (virusVaccines.isEmpty) {
-      // No virus vaccines at all
-      statusMessage = 'Not protected. Start the virus vaccine soon';
-      statusColor = Colors.red;
-      statusIcon = Icons.warning_amber;
-    } else {
-      // Check if any virus vaccine is complete
-      final hasCompleteVirusVaccine =
-          virusVaccines.any((series) => series.isComplete);
+    final loc = AppLocalizations.of(context);
 
-      if (hasCompleteVirusVaccine) {
-        statusMessage = 'Fully protected. Follow booster schedule to stay safe';
-        statusColor = Colors.green;
-        statusIcon = Icons.check_circle;
-      }
+    // Virus vaccine warning
+    if (!hasVirusVaccine) {
+      warnings.add(_buildMissingVaccineCard(
+        loc.virusVaccineMissing,
+        loc.virusVaccineMissingMessage,
+        Icons.coronavirus,
+        Colors.purple,
+        isDark,
+        cardColor,
+      ));
+      warnings.add(const SizedBox(height: 12));
     }
 
-    // Only show if we have a status message
-    if (statusMessage == null) return const SizedBox.shrink();
+    // Worms vaccine warning
+    if (!hasWormsVaccine) {
+      warnings.add(_buildMissingVaccineCard(
+        loc.wormTreatmentMissing,
+        loc.wormTreatmentMissingMessage,
+        Icons.pest_control,
+        Colors.orange,
+        isDark,
+        cardColor,
+      ));
+      warnings.add(const SizedBox(height: 12));
+    }
 
+    // Insects vaccine warning
+    if (!hasInsectsVaccine) {
+      warnings.add(_buildMissingVaccineCard(
+        loc.insectProtectionMissing,
+        loc.insectProtectionMissingMessage,
+        Icons.bug_report,
+        Colors.teal,
+        isDark,
+        cardColor,
+      ));
+      warnings.add(const SizedBox(height: 12));
+    }
+
+    // Rabies vaccine warning
+    if (!hasRabiesVaccine) {
+      warnings.add(_buildMissingVaccineCard(
+        loc.rabiesVaccineMissing,
+        loc.rabiesVaccineMissingMessage,
+        Icons.warning,
+        Colors.red,
+        isDark,
+        cardColor,
+      ));
+      warnings.add(const SizedBox(height: 12));
+    }
+
+    return warnings;
+  }
+
+  Widget _buildMissingVaccineCard(
+    String title,
+    String message,
+    IconData icon,
+    Color color,
+    bool isDark,
+    Color? cardColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: statusColor!.withValues(alpha: 0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: statusColor.withValues(alpha: 0.3),
+          color: color.withValues(alpha: 0.3),
           width: 1.5,
         ),
       ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(statusIcon, color: statusColor, size: 28),
+          Icon(icon, color: color, size: 28),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              statusMessage,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: statusColor,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark ? Colors.grey[300] : Colors.grey[700],
+                    height: 1.3,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -473,10 +594,12 @@ class _PetVaccinationRecordScreenState
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildSummaryItem(
-              'Completed', completed, Colors.green, Icons.check_circle),
-          _buildSummaryItem('Upcoming', upcoming, Colors.blue, Icons.schedule),
-          _buildSummaryItem('Overdue', overdue, Colors.red, Icons.warning),
+          _buildSummaryItem(AppLocalizations.of(context).completed, completed,
+              Colors.green, Icons.check_circle),
+          _buildSummaryItem(AppLocalizations.of(context).upcoming, upcoming,
+              Colors.blue, Icons.schedule),
+          _buildSummaryItem(AppLocalizations.of(context).overdue, overdue,
+              Colors.red, Icons.warning),
         ],
       ),
     );
@@ -525,6 +648,18 @@ class _PetVaccinationRecordScreenState
     Color? cardColor,
   ) {
     final isExpanded = _expandedSeriesIds.contains(series.seriesId);
+
+    // Determine correct total doses based on vaccine type
+    final int correctTotalDoses;
+    if (_isInsectsVaccine(series.vaccineType) ||
+        _isRabiesVaccine(series.vaccineType)) {
+      correctTotalDoses = 1; // Single dose
+    } else if (_isWormsVaccine(series.vaccineType)) {
+      correctTotalDoses = 2; // Two doses
+    } else {
+      correctTotalDoses =
+          series.totalDoses; // Use backend value for virus (3 doses)
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -582,7 +717,7 @@ class _PetVaccinationRecordScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _formatVaccineName(series.vaccineType),
+                          _formatVaccineName(context, series.vaccineType),
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -590,7 +725,7 @@ class _PetVaccinationRecordScreenState
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${series.completedDoses}/${series.totalDoses} doses completed',
+                          '${series.completedDoses}/$correctTotalDoses ${AppLocalizations.of(context).dosesCompleted}',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[600],
@@ -608,7 +743,9 @@ class _PetVaccinationRecordScreenState
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      series.status,
+                      series.isComplete
+                          ? AppLocalizations.of(context).completedStatus
+                          : AppLocalizations.of(context).active,
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -630,12 +767,29 @@ class _PetVaccinationRecordScreenState
           // Prepare data for both collapsed and expanded views
           Builder(
             builder: (context) {
+              // Check vaccine type first
+              final isVirusVaccine = _isVirusVaccine(series.vaccineType);
+              final isWormsVaccine = _isWormsVaccine(series.vaccineType);
+              final isInsectsVaccine = _isInsectsVaccine(series.vaccineType);
+              final isRabiesVaccine = _isRabiesVaccine(series.vaccineType);
+
+              // Determine correct total doses based on vaccine type
+              final int correctTotalDoses;
+              if (isInsectsVaccine || isRabiesVaccine) {
+                correctTotalDoses = 1; // Single dose
+              } else if (isWormsVaccine) {
+                correctTotalDoses = 2; // Two doses
+              } else {
+                correctTotalDoses =
+                    series.totalDoses; // Use backend value for virus (3 doses)
+              }
+
               // Generate virtual doses for uncompleted ones
               // Backend only returns completed doses, we need to create placeholders
               final List<int> uncompletedDoseNumbers = [];
 
-              // Find which dose numbers are missing
-              for (int i = 1; i <= series.totalDoses; i++) {
+              // Find which dose numbers are missing (up to correct total)
+              for (int i = 1; i <= correctTotalDoses; i++) {
                 final hasThisDose =
                     series.doses.any((dose) => dose.doseNumber == i);
                 if (!hasThisDose) {
@@ -643,72 +797,58 @@ class _PetVaccinationRecordScreenState
                 }
               }
 
-              // Check vaccine type
-              final isVirusVaccine = _isVirusVaccine(series.vaccineType);
-              final isWormsVaccine = _isWormsVaccine(series.vaccineType);
-              final isInsectsVaccine = _isInsectsVaccine(series.vaccineType);
-              final isRabiesVaccine = _isRabiesVaccine(series.vaccineType);
-
               // Determine which message to show based on completed doses
               final completedDosesCount = series.completedDoses;
+              final loc = AppLocalizations.of(context);
               String? statusMessage;
               DateTime? nextDoseDate;
 
               if (isVirusVaccine && uncompletedDoseNumbers.isNotEmpty) {
                 if (completedDosesCount == 0) {
-                  statusMessage = 'Not protected. Start the virus vaccine soon';
+                  statusMessage = loc.notProtectedStartVirusVaccineSoon;
                 } else if (completedDosesCount == 1) {
-                  statusMessage =
-                      'Protection incomplete. Second dose needed to activate immunity';
+                  statusMessage = loc.protectionIncomplete;
                   if (series.doses.isNotEmpty) {
                     nextDoseDate =
                         DateTime.parse(series.doses.first.administeredDate!)
                             .add(const Duration(days: 21));
                   }
                 } else if (completedDosesCount == 2) {
-                  statusMessage =
-                      'Protected. Third dose gives strongest immunity';
+                  statusMessage = loc.protectedThirdDoseGivesStrongestImmunity;
                   if (series.doses.length >= 2) {
                     nextDoseDate =
                         DateTime.parse(series.doses.last.administeredDate!)
                             .add(const Duration(days: 21));
                   }
                 } else if (completedDosesCount >= 3) {
-                  statusMessage =
-                      'Fully protected. Follow booster schedule to stay safe';
+                  statusMessage = loc.fullyProtected;
                 }
               } else if (isWormsVaccine && uncompletedDoseNumbers.isNotEmpty) {
                 if (completedDosesCount == 0) {
-                  statusMessage =
-                      'Not protected from worms. Start deworming soon';
+                  statusMessage = loc.notProtectedFromWorms;
                 } else if (completedDosesCount == 1) {
-                  statusMessage = 'Second dose required for full deworming';
+                  statusMessage = loc.secondDoseRequiredForFullDeworming;
                   if (series.doses.isNotEmpty) {
                     nextDoseDate =
                         DateTime.parse(series.doses.first.administeredDate!)
                             .add(const Duration(days: 21));
                   }
                 } else if (completedDosesCount >= 2) {
-                  statusMessage =
-                      'Treatment complete! Your pet is now protected';
+                  statusMessage = loc.treatmentComplete;
                 }
               } else if (isInsectsVaccine) {
                 // Insects vaccines are single-dose
                 if (completedDosesCount == 0) {
-                  statusMessage =
-                      'Not protected from fleas or ticks. Start soon';
+                  statusMessage = loc.notProtectedFromFleasOrTicks;
                 } else {
-                  statusMessage =
-                      'Protection active. Repeat on schedule to stay safe';
+                  statusMessage = loc.protectionActive;
                 }
               } else if (isRabiesVaccine) {
                 // Rabies vaccines are single-dose
                 if (completedDosesCount == 0) {
-                  statusMessage =
-                      "Your pet isn't protected from rabies. Vaccinate soon";
+                  statusMessage = loc.yourPetIsntProtectedFromRabies;
                 } else {
-                  statusMessage =
-                      'Protected from rabies. Repeat yearly to stay safe';
+                  statusMessage = loc.protectedFromRabies;
                 }
               }
 
@@ -741,7 +881,7 @@ class _PetVaccinationRecordScreenState
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Next dose: ${DateFormat('MMM dd, yyyy').format(nextDoseDate)}',
+                                    '${AppLocalizations.of(context).nextDose}: ${DateFormat('MMM dd, yyyy').format(nextDoseDate)}',
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
@@ -834,7 +974,7 @@ class _PetVaccinationRecordScreenState
                               },
                             ),
                           ],
-                          ...List.generate(series.totalDoses, (index) {
+                          ...List.generate(correctTotalDoses, (index) {
                             final doseNumber = index + 1;
                             // Find if this dose exists in completed doses
                             final matchingDoses = series.doses
@@ -842,7 +982,7 @@ class _PetVaccinationRecordScreenState
                             final completedDose = matchingDoses.isNotEmpty
                                 ? matchingDoses.first
                                 : null;
-                            final isLast = index == series.totalDoses - 1;
+                            final isLast = index == correctTotalDoses - 1;
 
                             final isCompleted = completedDose != null;
 
@@ -919,7 +1059,7 @@ class _PetVaccinationRecordScreenState
                                                       .spaceBetween,
                                               children: [
                                                 Text(
-                                                  'Dose $doseNumber',
+                                                  '${AppLocalizations.of(context).dose} $doseNumber',
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 16,
@@ -938,9 +1078,11 @@ class _PetVaccinationRecordScreenState
                                                           BorderRadius.circular(
                                                               12),
                                                     ),
-                                                    child: const Text(
-                                                      'COMPLETED',
-                                                      style: TextStyle(
+                                                    child: Text(
+                                                      AppLocalizations.of(
+                                                              context)
+                                                          .completedStatus,
+                                                      style: const TextStyle(
                                                         color: Colors.white,
                                                         fontSize: 10,
                                                         fontWeight:
@@ -993,8 +1135,10 @@ class _PetVaccinationRecordScreenState
                                                   },
                                                   icon: const Icon(Icons.check,
                                                       size: 16),
-                                                  label: const Text(
-                                                      'Mark as Complete'),
+                                                  label: Text(
+                                                      AppLocalizations.of(
+                                                              context)
+                                                          .markAsComplete),
                                                   style:
                                                       ElevatedButton.styleFrom(
                                                     backgroundColor:
@@ -1089,7 +1233,7 @@ class _PetVaccinationRecordScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Dose $doseNumber',
+                  '${AppLocalizations.of(context).dose} $doseNumber',
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 15,
@@ -1105,7 +1249,7 @@ class _PetVaccinationRecordScreenState
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'Not yet administered',
+                      AppLocalizations.of(context).notYetAdministered,
                       style: TextStyle(
                         fontSize: 13,
                         color: Colors.grey[600],
@@ -1128,7 +1272,7 @@ class _PetVaccinationRecordScreenState
               );
             },
             icon: const Icon(Icons.check, size: 16),
-            label: const Text('Mark'),
+            label: Text(AppLocalizations.of(context).markComplete),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.orange,
               foregroundColor: Colors.white,
@@ -1205,7 +1349,7 @@ class _PetVaccinationRecordScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          _formatVaccineName(booster.vaccineType),
+                          _formatVaccineName(context, booster.vaccineType),
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -1296,17 +1440,13 @@ class _PetVaccinationRecordScreenState
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        // TODO: Implement mark as complete
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                                'Mark booster complete feature coming soon'),
-                            backgroundColor: AppColors.orange,
-                          ),
+                        _showMarkBoosterCompleteDialog(
+                          context,
+                          booster.seriesId,
                         );
                       },
                       icon: const Icon(Icons.check, size: 18),
-                      label: const Text('Mark as Complete'),
+                      label: Text(AppLocalizations.of(context).markAsComplete),
                       style: ElevatedButton.styleFrom(
                         backgroundColor:
                             isOverdue ? Colors.red : AppColors.orange,
@@ -1343,7 +1483,7 @@ class _PetVaccinationRecordScreenState
           ),
           const SizedBox(height: 16),
           Text(
-            'No Vaccination Records',
+            AppLocalizations.of(context).noVaccinationRecords,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -1352,7 +1492,7 @@ class _PetVaccinationRecordScreenState
           ),
           const SizedBox(height: 8),
           Text(
-            'Add your pet\'s first vaccine to get started',
+            AppLocalizations.of(context).addYourPetsFirstVaccine,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -1421,7 +1561,7 @@ class _PetVaccinationRecordScreenState
     final isExpanded = _expandedCategoryIds.contains(category);
     final categoryIcon = _getCategoryIcon(category);
     final categoryColor = _getCategoryColor(category);
-    final categoryName = _getCategoryDisplayName(category);
+    final categoryName = _getCategoryDisplayName(context, category);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -1496,7 +1636,7 @@ class _PetVaccinationRecordScreenState
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${series.length} vaccine${series.length > 1 ? 's' : ''}',
+                          '${series.length} ${series.length > 1 ? AppLocalizations.of(context).vaccines : AppLocalizations.of(context).vaccine}',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[600],
@@ -1550,16 +1690,17 @@ class _PetVaccinationRecordScreenState
     }
   }
 
-  String _getCategoryDisplayName(String category) {
+  String _getCategoryDisplayName(BuildContext context, String category) {
+    final loc = AppLocalizations.of(context);
     switch (category.toUpperCase()) {
       case 'VIRUS':
-        return 'Virus Vaccines';
+        return loc.virusVaccines;
       case 'WORMS':
-        return 'Worm Treatment';
+        return loc.wormTreatment;
       case 'INSECTS':
-        return 'Insect Protection';
+        return loc.insectProtection;
       case 'RABIES':
-        return 'Rabies Vaccine';
+        return loc.rabiesVaccine;
       default:
         return category;
     }
@@ -1601,8 +1742,10 @@ class _PetVaccinationRecordScreenState
 
           final isValidDate = previousDoseDate == null || daysGap! >= 21;
 
+          final loc = AppLocalizations.of(statefulContext);
+
           return AlertDialog(
-            title: const Text('Mark Dose Complete'),
+            title: Text(loc.markDoseComplete),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1677,7 +1820,7 @@ class _PetVaccinationRecordScreenState
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Cancel'),
+                child: Text(loc.cancel),
               ),
               ElevatedButton(
                 onPressed: isValidDate
@@ -1692,7 +1835,7 @@ class _PetVaccinationRecordScreenState
                   foregroundColor: Colors.white,
                   disabledBackgroundColor: Colors.grey,
                 ),
-                child: const Text('Mark Complete'),
+                child: Text(loc.markComplete),
               ),
             ],
           );
@@ -1712,6 +1855,84 @@ class _PetVaccinationRecordScreenState
           seriesId: seriesId,
           doseNumber: doseNumber,
           administeredAt: administeredAt,
+        );
+  }
+
+  void _showMarkBoosterCompleteDialog(
+    BuildContext context,
+    String seriesId,
+  ) {
+    DateTime selectedDate = DateTime.now();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (statefulContext, setState) {
+          final loc = AppLocalizations.of(statefulContext);
+
+          return AlertDialog(
+            title: Text(loc.markAsComplete),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('When was the annual booster administered?'),
+                const SizedBox(height: 16),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    final date = await showDatePicker(
+                      context: dialogContext,
+                      initialDate: selectedDate,
+                      firstDate: DateTime(2000),
+                      lastDate: DateTime.now(),
+                    );
+                    if (date != null) {
+                      setState(() {
+                        selectedDate = date;
+                      });
+                    }
+                  },
+                  icon: const Icon(Icons.calendar_today),
+                  label: Text(DateFormat('MMM dd, yyyy').format(selectedDate)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.orange,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(loc.cancel),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  _markBoosterComplete(context, seriesId, selectedDate);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.orange,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(loc.markComplete),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  void _markBoosterComplete(
+    BuildContext context,
+    String seriesId,
+    DateTime completedDate,
+  ) {
+    // Just call the cubit - BlocListener will handle success/error feedback
+    context.read<VaccinationCubit>().markAnnualBoosterComplete(
+          seriesId: seriesId,
+          completedDate: completedDate,
         );
   }
 
@@ -1759,8 +1980,23 @@ class _PetVaccinationRecordScreenState
     }
   }
 
-  String _formatVaccineName(String vaccine) {
-    // Convert from "DOG_MONOVALENT" to "Monovalent"
+  String _formatVaccineName(BuildContext context, String vaccine) {
+    final loc = AppLocalizations.of(context);
+
+    // Map vaccine types to localized names
+    if (vaccine.contains('MONOVALENT')) return loc.monovalent;
+    if (vaccine.contains('BIVALENT')) return loc.bivalent;
+    if (vaccine.contains('TRIVALENT')) return loc.trivalent;
+    if (vaccine.contains('QUADRIVALENT')) return loc.quadrivalent;
+    if (vaccine.contains('PENTAVALENT')) return loc.pentavalent;
+    if (vaccine.contains('HEXAVALENT')) return loc.hexavalent;
+    if (vaccine.contains('HEPTAVALENT')) return loc.heptavalent;
+    if (vaccine.contains('OCTAVALENT')) return loc.octavalent;
+    if (vaccine.contains('WORMS')) return loc.deworming;
+    if (vaccine.contains('INSECTS')) return loc.antiInsects;
+    if (vaccine.contains('RABIES')) return loc.rabies;
+
+    // Fallback: Convert from "DOG_MONOVALENT" to "Monovalent"
     return vaccine
         .replaceAll('DOG_', '')
         .replaceAll('CAT_', '')
@@ -1771,4 +2007,20 @@ class _PetVaccinationRecordScreenState
         .map((word) => word[0].toUpperCase() + word.substring(1).toLowerCase())
         .join(' ');
   }
+}
+
+/// Synthetic booster class for creating boosters from series data
+/// Used when backend doesn't populate annualBoosters array
+class _SyntheticBooster {
+  final String vaccineType;
+  final String dueDate;
+  final bool isOverdue;
+  final String seriesId;
+
+  _SyntheticBooster({
+    required this.vaccineType,
+    required this.dueDate,
+    required this.isOverdue,
+    required this.seriesId,
+  });
 }

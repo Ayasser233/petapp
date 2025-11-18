@@ -7,8 +7,6 @@ class UserModel {
   final String phone;
   final String? mobile;
   final String? username;
-  final String? address;
-  final String? dateOfBirth;
   final bool emailVerified;
   final bool twoFactorEnabled;
   final String? role;
@@ -24,8 +22,6 @@ class UserModel {
     required this.phone,
     this.mobile,
     this.username,
-    this.address,
-    this.dateOfBirth,
     required this.emailVerified,
     required this.twoFactorEnabled,
     this.role,
@@ -54,8 +50,6 @@ class UserModel {
       phone: json['mobile']?.toString() ?? json['phone']?.toString() ?? '',
       mobile: json['mobile']?.toString(),
       username: json['username'],
-      address: json['address'],
-      dateOfBirth: json['dateOfBirth'] ?? json['date_of_birth'],
       emailVerified: json['emailVerified'] ??
           json['email_verified'] ??
           json['isVerified'] ??
@@ -86,8 +80,6 @@ class UserModel {
       'phone': phone,
       'mobile': mobile,
       'username': username,
-      'address': address,
-      'dateOfBirth': dateOfBirth,
       'emailVerified': emailVerified,
       'twoFactorEnabled': twoFactorEnabled,
       'role': role,
@@ -105,8 +97,6 @@ class UserModel {
     String? phone,
     String? mobile,
     String? username,
-    String? address,
-    String? dateOfBirth,
     bool? emailVerified,
     bool? twoFactorEnabled,
     String? profilePictureUrl,
@@ -123,8 +113,6 @@ class UserModel {
       phone: phone ?? this.phone,
       mobile: mobile ?? this.mobile,
       username: username ?? this.username,
-      address: address ?? this.address,
-      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       emailVerified: emailVerified ?? this.emailVerified,
       twoFactorEnabled: twoFactorEnabled ?? this.twoFactorEnabled,
       role: role ?? this.role,

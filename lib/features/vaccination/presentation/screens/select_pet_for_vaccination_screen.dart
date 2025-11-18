@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
@@ -40,9 +41,9 @@ class _SelectPetForVaccinationScreenState
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: const Text(
-          'Select Pet',
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          AppLocalizations.of(context).selectPet,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         elevation: 0,
@@ -62,9 +63,10 @@ class _SelectPetForVaccinationScreenState
               children: [
                 const Icon(Icons.error_outline, color: Colors.red, size: 60),
                 const SizedBox(height: 16),
-                const Text(
-                  'Error Loading Pets',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                Text(
+                  AppLocalizations.of(context).errorLoadingPets,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Padding(
@@ -82,7 +84,7 @@ class _SelectPetForVaccinationScreenState
                     backgroundColor: AppColors.orange,
                     foregroundColor: Colors.white,
                   ),
-                  child: const Text('Retry'),
+                  child: Text(AppLocalizations.of(context).retry),
                 ),
               ],
             ),
@@ -97,7 +99,7 @@ class _SelectPetForVaccinationScreenState
                 Icon(Icons.pets, size: 80, color: Colors.grey[400]),
                 const SizedBox(height: 16),
                 Text(
-                  'No Pets Found',
+                  AppLocalizations.of(context).noPetsFound,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -106,14 +108,14 @@ class _SelectPetForVaccinationScreenState
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Add a pet to view vaccination records',
+                  AppLocalizations.of(context).addPetToViewVaccination,
                   style: TextStyle(color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: () => Get.toNamed('/add-pet'),
                   icon: const Icon(Icons.add),
-                  label: const Text('Add Pet'),
+                  label: Text(AppLocalizations.of(context).addPet),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.orange,
                     foregroundColor: Colors.white,
@@ -130,7 +132,7 @@ class _SelectPetForVaccinationScreenState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Select a pet to view vaccination records',
+                AppLocalizations.of(context).selectPetToViewVaccination,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       color: Colors.grey[600],
                     ),
@@ -237,7 +239,7 @@ class _SelectPetForVaccinationScreenState
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
-                pet.species,
+                _translateSpecies(context, pet.species),
                 style: TextStyle(
                   fontSize: 14,
                   color: Colors.grey[600],
@@ -256,18 +258,18 @@ class _SelectPetForVaccinationScreenState
                 color: AppColors.orange.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.vaccines,
                     color: AppColors.orange,
                     size: 16,
                   ),
-                  SizedBox(width: 4),
+                  const SizedBox(width: 4),
                   Text(
-                    'View Record',
-                    style: TextStyle(
+                    AppLocalizations.of(context).viewRecord,
+                    style: const TextStyle(
                       color: AppColors.orange,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -280,5 +282,20 @@ class _SelectPetForVaccinationScreenState
         ),
       ),
     );
+  }
+
+  String _translateSpecies(BuildContext context, String species) {
+    final loc = AppLocalizations.of(context);
+    final lowerSpecies = species.toLowerCase();
+
+    if (lowerSpecies.contains('dog') || lowerSpecies.contains('كلب')) {
+      return loc.dog;
+    } else if (lowerSpecies.contains('cat') ||
+        lowerSpecies.contains('قط') ||
+        lowerSpecies.contains('قطة')) {
+      return loc.cat;
+    }
+
+    return species; // Return original if no match
   }
 }

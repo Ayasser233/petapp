@@ -255,11 +255,52 @@ class ApiClient {
     }
   }
 
+  Future<Response> verifyResetOtp(String email, String otp) async {
+    try {
+      final response = await _dio.post(ApiConstants.verifyResetOtpEndpoint,
+          data: {'email': email, 'otp': otp});
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> resendResetOtp(String email) async {
+    try {
+      final response = await _dio
+          .post(ApiConstants.resendResetOtpEndpoint, data: {'email': email});
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
   Future<Response> resetPassword(
-      String email, String otp, String password) async {
+      String email, String resetToken, String password) async {
     try {
       final response = await _dio.post(ApiConstants.resetPasswordEndpoint,
-          data: {'email': email, 'otp': otp, 'password': password});
+          data: {
+            'email': email,
+            'resetToken': resetToken,
+            'password': password
+          });
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> changePassword(
+      String currentPassword, String newPassword) async {
+    try {
+      final response = await _dio.post(ApiConstants.changePasswordEndpoint,
+          data: {
+            'currentPassword': currentPassword,
+            'newPassword': newPassword
+          });
       return response;
     } catch (e) {
       ErrorHandlerService.instance.handleError(e);
@@ -303,22 +344,19 @@ class ApiClient {
 
   Future<Response> updateUserProfile(Map<String, dynamic> userData) async {
     try {
-      // Debug logging for profile update
-      print('🚀 UPDATE PROFILE REQUEST:');
-      print('   Endpoint: ${ApiConstants.updateProfileEndpoint}');
-      print(
-          '   Full URL: ${_dio.options.baseUrl}${ApiConstants.updateProfileEndpoint}');
-      print('   Data: $userData');
+      // Get user ID from token service
+      final userId = await tokenService.getUserId();
 
-      final response =
-          await _dio.patch(ApiConstants.updateProfileEndpoint, data: userData);
+      if (userId == null || userId.isEmpty) {
+        throw Exception('User ID not found. Please log in again.');
+      }
 
-      print('✅ UPDATE PROFILE SUCCESS: ${response.statusCode}');
-      print('   Response: ${response.data}');
+      final endpoint = ApiConstants.updateProfileEndpoint(userId);
+
+      final response = await _dio.patch(endpoint, data: userData);
 
       return response;
     } catch (e) {
-      print('❌ UPDATE PROFILE ERROR: $e');
       ErrorHandlerService.instance.handleError(e);
       rethrow;
     }
@@ -452,6 +490,15 @@ class ApiClient {
 
       if (refreshToken != null) {
         await tokenService.saveRefreshToken(refreshToken.toString());
+      }
+
+      // Save user ID if available in the response
+      final user = data['user'];
+      if (user != null && user is Map<String, dynamic>) {
+        final userId = user['id'] ?? user['_id'];
+        if (userId != null) {
+          await tokenService.saveUserId(userId.toString());
+        }
       }
     }
   }

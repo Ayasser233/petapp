@@ -10,6 +10,7 @@ import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/pet/utils/pet_constants.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:petapp/core/utils/formatters.dart';
 import 'dart:io';
 
 class UpdatePetScreen extends StatefulWidget {
@@ -396,7 +397,8 @@ class _UpdatePetScreenState extends State<UpdatePetScreen> {
 
       // Add optional fields only if they have values
       if (_weightController.text.trim().isNotEmpty) {
-        petData['weight'] = double.tryParse(_weightController.text.trim());
+        petData['weight'] = double.tryParse(
+            TFormatter.toEnglishNumerals(_weightController.text.trim()));
       }
 
       if (_notesController.text.trim().isNotEmpty) {

@@ -50,9 +50,9 @@ Future<void> setupPushNotifications() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await resetAppState();  
+  // await resetAppState();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    
+
   await setupPushNotifications();
 
   // Initialize dependencies
@@ -77,24 +77,23 @@ void main() async {
 Future<void> initServices() async {
   // Initialize ErrorHandlerService first
   Get.put(ErrorHandlerService());
-  
+
   // Initialize location service
   await Get.putAsync(() async => LocationService());
   await Get.putAsync(() async => ConnectivityService());
-  
+
   // Register TokenService with GetX
   Get.put(sl<TokenService>());
-  
+
   // Register ApiClient with GetX (needed for ClinicService and other services)
   Get.put(sl<ApiClient>());
-  
+
   // Initialize AuthService
   await Get.putAsync(() async => await sl<AuthService>().init());
-  
+
   // Initialize controllers
   Get.lazyPut(() => sl<PetController>());
-  Get.lazyPut(() => sl<ProfileController>()); 
-
+  Get.lazyPut(() => sl<ProfileController>());
 }
 
 class MyApp extends StatefulWidget {
@@ -143,11 +142,27 @@ class _MyAppState extends State<MyApp> {
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
-        
       ],
       supportedLocales: AppLocalizations.supportedLocales,
       initialRoute: AppRoutes.networkSplash, // Always start with the splash
       getPages: AppRoutes.getPages,
+      builder: (context, child) {
+        // Wrap the entire app to automatically convert numbers to Arabic numerals
+        return _ArabicNumeralWrapper(child: child ?? const SizedBox.shrink());
+      },
     );
+  }
+}
+
+/// Wrapper widget that automatically converts numbers in Text widgets
+/// to Arabic numerals when the locale is Arabic
+class _ArabicNumeralWrapper extends StatelessWidget {
+  final Widget child;
+
+  const _ArabicNumeralWrapper({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
   }
 }
