@@ -82,22 +82,39 @@ class _TurnstileWebViewState extends State<_TurnstileWebView> {
           // Check if it's an error message
           if (response.startsWith('ERROR:')) {
             debugPrint('Turnstile error: $response');
-            Navigator.of(context).pop(null);
+            // Use a post-frame callback and re-check mounted to avoid race where
+            // the State becomes unmounted between the JS callback and Navigator usage.
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) return;
+              try {
+                Navigator.of(context).pop(null);
+              } catch (e) {
+                debugPrint('Navigator pop failed after JS error: $e');
+              }
+            });
             return;
           }
 
           // Valid token received
           debugPrint(
               'Turnstile token received: ${response.length > 20 ? "${response.substring(0, 20)}..." : response}');
-          Navigator.of(context).pop(response);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            try {
+              Navigator.of(context).pop(response);
+            } catch (e) {
+              debugPrint('Navigator pop failed after receiving token: $e');
+            }
+          });
         },
       )
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageFinished: (String url) {
-            setState(() {
-              _isLoading = false;
-            });
+                if (!mounted) return;
+                setState(() {
+                  _isLoading = false;
+                });
           },
           onWebResourceError: (WebResourceError error) {
             debugPrint('WebView error: ${error.description}');
