@@ -371,20 +371,12 @@ class _HomeScreenState extends State<HomeScreen> {
                                       itemCount: nearbyVets.length,
                                       itemBuilder: (context, index) {
                                         final vet = nearbyVets[index];
-                                        return Padding(
-                                          padding: EdgeInsets.only(
-                                            right:
-                                                index == nearbyVets.length - 1
-                                                    ? 0
-                                                    : 16.0,
-                                          ),
-                                          child: _buildNearbyCard(
-                                            context,
-                                            vet: vet,
-                                            isDark: isDark,
-                                            onTap: () =>
-                                                _navigateToVetDetail(vet),
-                                          ),
+                                        return _buildNearbyCard(
+                                          context,
+                                          vet: vet,
+                                          isDark: isDark,
+                                          onTap: () =>
+                                              _navigateToVetDetail(vet),
                                         );
                                       }),
                         ),
@@ -759,6 +751,7 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: onTap,
       child: Container(
         width: 200, // Fixed width for horizontal scrolling
+        margin: const EdgeInsets.only(right: 12), // Add spacing between cards
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           color: isDark ? AppColors.lightblack : Colors.white,

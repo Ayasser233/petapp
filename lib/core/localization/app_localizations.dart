@@ -893,6 +893,12 @@ class AppLocalizations {
   String get initialExaminationFee =>
       _localizedValues[locale.languageCode]?['initialExaminationFee'] ??
       'Initial examination fee';
+  String get earnPoints =>
+      _localizedValues[locale.languageCode]?['earnPoints'] ??
+      'Earn';
+  String get pointsAfterCompletion =>
+      _localizedValues[locale.languageCode]?['pointsAfterCompletion'] ??
+      'points after completing your visit!';
   String get workingHours =>
       _localizedValues[locale.languageCode]?['workingHours'] ?? 'Working Hours';
   String get mondayFriday =>
@@ -2511,6 +2517,8 @@ class AppLocalizations {
       'emergencyCare': 'Emergency care',
       'consultationFee': 'Consultation Fee',
       'initialExaminationFee': 'Initial examination fee',
+      'earnPoints': 'Earn',
+      'pointsAfterCompletion': 'points after completing your visit!',
       'workingHours': 'Working Hours',
       'mondayFriday': 'Monday - Friday',
       'saturday': 'Saturday',
@@ -3938,6 +3946,8 @@ class AppLocalizations {
       'emergencyCare': 'العناية الطارئة',
       'consultationFee': 'رسوم الاستشارة',
       'initialExaminationFee': 'رسوم الفحص الأولي',
+      'earnPoints': 'احصل على',
+      'pointsAfterCompletion': 'نقطة بعد إتمام زيارتك!',
       'workingHours': 'ساعات العمل',
       'mondayFriday': 'الاثنين - الجمعة',
       'saturday': 'السبت',

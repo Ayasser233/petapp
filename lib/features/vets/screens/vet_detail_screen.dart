@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import '../widgets/vet_detail_screen_widgets/vet_header.dart';
+import '../widgets/vet_detail_screen_widgets/vet_availability_status.dart';
 import '../widgets/vet_detail_screen_widgets/vet_stats.dart';
 import '../widgets/vet_detail_screen_widgets/vet_description.dart';
 import '../widgets/vet_detail_screen_widgets/vet_services.dart';
@@ -82,6 +83,8 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               VetHeader(vet: widget.vet),
+              const SizedBox(height: 12),
+              VetAvailabilityStatus(vet: widget.vet),
               const SizedBox(height: 24),
               VetStats(vet: widget.vet),
               const SizedBox(height: 24),
