@@ -125,4 +125,242 @@ class VaccinationUtils {
     final requiredDoses = getRequiredDoses(vaccineType);
     return doseNumber > 0 && doseNumber <= requiredDoses;
   }
+
+  /// Check if worming vaccine 2nd dose is within valid window
+  ///
+  /// Worming Protocol:
+  /// - 2 doses required
+  /// - 2nd dose must be given AFTER 14 days from 1st dose
+  /// - Valid window: Day 14 to Day 20
+  /// - Before Day 14: Too early, not valid
+  /// - After Day 20: Too late, series must restart
+  ///
+  /// Returns:
+  /// - null: Not a worming vaccine or dose 1
+  /// - true: Within valid window (Day 14-20)
+  /// - false: Outside valid window (before Day 14 or after Day 20)
+  static bool? isWormsSecondDoseValid(
+    String vaccineType,
+    int doseNumber,
+    DateTime? firstDoseDate,
+  ) {
+    // Only applies to worming vaccines
+    if (!isWormsVaccine(vaccineType)) {
+      return null;
+    }
+
+    // Only check 2nd dose
+    if (doseNumber != 2) {
+      return null;
+    }
+
+    // Need first dose date to validate
+    if (firstDoseDate == null) {
+      return null;
+    }
+
+    final now = DateTime.now();
+    final daysSinceFirstDose = now.difference(firstDoseDate).inDays;
+
+    // Valid window: Day 14 to Day 20 (inclusive)
+    // Before Day 14: Too early
+    // After Day 20: Too late
+    return daysSinceFirstDose >= 14 && daysSinceFirstDose <= 20;
+  }
+
+  /// Check if it's too early for worming 2nd dose (before Day 14)
+  static bool isWormsDoseTooEarly(
+    String vaccineType,
+    int doseNumber,
+    DateTime? firstDoseDate,
+  ) {
+    if (!isWormsVaccine(vaccineType) || doseNumber != 2 || firstDoseDate == null) {
+      return false;
+    }
+
+    final now = DateTime.now();
+    final daysSinceFirstDose = now.difference(firstDoseDate).inDays;
+    return daysSinceFirstDose < 14;
+  }
+
+  /// Get days remaining until worming 2nd dose window opens (Day 14)
+  ///
+  /// Returns:
+  /// - Number of days until Day 14 if before Day 14
+  /// - 0 if at or past Day 14
+  /// - null if not applicable
+  static int? getDaysUntilWormsWindowOpens(
+    String vaccineType,
+    int doseNumber,
+    DateTime? firstDoseDate,
+  ) {
+    if (!isWormsVaccine(vaccineType) || doseNumber != 2 || firstDoseDate == null) {
+      return null;
+    }
+
+    final now = DateTime.now();
+    final daysSinceFirstDose = now.difference(firstDoseDate).inDays;
+
+    if (daysSinceFirstDose >= 14) {
+      return 0; // Window is already open
+    }
+
+    return 14 - daysSinceFirstDose;
+  }
+
+  /// Get days remaining in worming vaccine window (until Day 20)
+  ///
+  /// Returns number of days until the 20-day window expires
+  /// Returns null if not applicable or if before Day 14
+  static int? getWormsWindowDaysRemaining(
+    String vaccineType,
+    int doseNumber,
+    DateTime? firstDoseDate,
+  ) {
+    if (!isWormsVaccine(vaccineType) || doseNumber != 2 || firstDoseDate == null) {
+      return null;
+    }
+
+    final now = DateTime.now();
+    final daysSinceFirstDose = now.difference(firstDoseDate).inDays;
+
+    // If before Day 14, window hasn't opened yet
+    if (daysSinceFirstDose < 14) {
+      return null;
+    }
+
+    // Calculate days remaining from current day to Day 20
+    final daysRemaining = 20 - daysSinceFirstDose;
+    return daysRemaining > 0 ? daysRemaining : 0;
+  }
+
+  /// Check if worming vaccine window is expired (after Day 20)
+  static bool isWormsWindowExpired(
+    String vaccineType,
+    int doseNumber,
+    DateTime? firstDoseDate,
+  ) {
+    if (!isWormsVaccine(vaccineType) || doseNumber != 2 || firstDoseDate == null) {
+      return false;
+    }
+
+    final now = DateTime.now();
+    final daysSinceFirstDose = now.difference(firstDoseDate).inDays;
+    return daysSinceFirstDose > 20;
+  }
+
+  /// Get the date when worming 2nd dose window opens (Day 14)
+  static DateTime? getWormsWindowOpenDate(DateTime? firstDoseDate) {
+    if (firstDoseDate == null) return null;
+    return firstDoseDate.add(const Duration(days: 14));
+  }
+
+  /// Get latest valid date for worming 2nd dose (Day 20)
+  static DateTime? getWormsWindowCloseDate(DateTime? firstDoseDate) {
+    if (firstDoseDate == null) return null;
+    return firstDoseDate.add(const Duration(days: 20));
+  }
+
+  /// Get worming vaccination status message
+  ///
+  /// Returns a descriptive message about the current worming vaccine status
+  static String getWormsVaccineStatusMessage(
+    int doseNumber,
+    DateTime? firstDoseDate,
+  ) {
+    if (doseNumber == 1 || firstDoseDate == null) {
+      return 'First dose completed. Second dose required after 14 days.';
+    }
+
+    final now = DateTime.now();
+    final daysSinceFirstDose = now.difference(firstDoseDate).inDays;
+
+    if (daysSinceFirstDose < 14) {
+      final daysUntil = 14 - daysSinceFirstDose;
+      return 'Too early. Wait $daysUntil more day${daysUntil == 1 ? '' : 's'} (until Day 14).';
+    } else if (daysSinceFirstDose <= 20) {
+      final daysRemaining = 20 - daysSinceFirstDose;
+      return 'Valid window! $daysRemaining day${daysRemaining == 1 ? '' : 's'} remaining to complete.';
+    } else {
+      return 'Window expired. Must restart vaccination series.';
+    }
+  }
+
+  /// Check if dose is missed (more than 35 days since last dose without next dose)
+  /// Applies to VIRUS, INSECTS, and RABIES vaccines
+  static bool isDoseMissedAfter35Days(
+    String vaccineType,
+    int nextDoseNumber,
+    DateTime? lastDoseDate,
+  ) {
+    if (lastDoseDate == null) return false;
+
+    // Only applies to VIRUS, INSECTS, and RABIES
+    if (!isVirusVaccine(vaccineType) &&
+        !isInsectsVaccine(vaccineType) &&
+        !isRabiesVaccine(vaccineType)) {
+      return false;
+    }
+
+    final now = DateTime.now();
+    final daysSinceLastDose = now.difference(lastDoseDate).inDays;
+
+    // Check if more than 35 days have passed
+    return daysSinceLastDose > 35;
+  }
+
+  /// Get message for missed dose based on vaccine type and dose number
+  /// Returns appropriate message based on which dose was missed
+  static String getMissedDoseMessage(
+    String vaccineType,
+    int missedDoseNumber,
+  ) {
+    // For VIRUS vaccines (3 doses)
+    if (isVirusVaccine(vaccineType)) {
+      if (missedDoseNumber == 2) {
+        return 'Unfortunately, since the second dose was missed, your pet is no longer protected. You\'ll need to restart the vaccination series.';
+      } else if (missedDoseNumber == 3) {
+        return 'Your pet is still protected because it received the first two doses, but please give the third as soon as possible for full protection.';
+      }
+    }
+
+    // For INSECTS (1 dose) - no missed dose scenario
+    if (isInsectsVaccine(vaccineType)) {
+      return 'Please administer the dose as soon as possible to protect your pet.';
+    }
+
+    // For RABIES (1 dose) - no missed dose scenario
+    if (isRabiesVaccine(vaccineType)) {
+      return 'Please administer the rabies vaccine as soon as possible. This vaccine is critical for your pet\'s safety.';
+    }
+
+    return 'Please contact your veterinarian about the missed dose.';
+  }
+
+  /// Check if vaccination series needs to be restarted due to missed dose
+  static bool needsSeriesRestart(
+    String vaccineType,
+    int missedDoseNumber,
+  ) {
+    // VIRUS vaccine: restart needed if 2nd dose is missed
+    if (isVirusVaccine(vaccineType) && missedDoseNumber == 2) {
+      return true;
+    }
+
+    // Other vaccines don't require restart
+    return false;
+  }
+
+  /// Get days since last dose
+  static int? getDaysSinceLastDose(DateTime? lastDoseDate) {
+    if (lastDoseDate == null) return null;
+    final now = DateTime.now();
+    return now.difference(lastDoseDate).inDays;
+  }
+
+  /// Get deadline date (Day 35 from last dose)
+  static DateTime? getDay35Deadline(DateTime? lastDoseDate) {
+    if (lastDoseDate == null) return null;
+    return lastDoseDate.add(const Duration(days: 35));
+  }
 }

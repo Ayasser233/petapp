@@ -5,8 +5,7 @@ import 'package:petapp/core/utils/formatters.dart';
 class ArabicAwareTextController extends TextEditingController {
   final bool isArabic;
 
-  ArabicAwareTextController({this.isArabic = false, String? text})
-      : super(text: text);
+  ArabicAwareTextController({this.isArabic = false, super.text});
 
   @override
   set text(String newText) {

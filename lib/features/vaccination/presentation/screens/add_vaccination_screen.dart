@@ -261,24 +261,25 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
             setState(() {
               isLoading = false;
             });
+            // Close screen and return success
             Get.back(result: true);
+            // Success message will be shown by parent screen
             Get.snackbar(
               loc.success,
               loc.vaccinationAddedSuccessfully,
               backgroundColor: AppColors.orange,
               colorText: Colors.white,
+              snackPosition: SnackPosition.BOTTOM, // Show from bottom consistently
+              duration: const Duration(seconds: 2),
             );
           } else if (state is VaccinationError) {
             setState(() {
               isLoading = false;
             });
-            Get.snackbar(
-              loc.error,
-              state.message,
-              backgroundColor: Colors.red,
-              colorText: Colors.white,
-              duration: const Duration(seconds: 4),
-            );
+            // Close screen immediately and let parent handle the error message
+            Get.back(result: false);
+            // Don't show SnackBar here - let parent screen handle it
+            // This prevents duplicate SnackBars (one from top, one from bottom)
           }
         },
         child: SingleChildScrollView(

@@ -1186,6 +1186,12 @@ class AppLocalizations {
   String get boosterMarkedComplete =>
       _localizedValues[locale.languageCode]?['boosterMarkedComplete'] ??
       '✓ Annual booster marked as complete!';
+  String get boosterMarkedCompleteWithNextScheduled =>
+      _localizedValues[locale.languageCode]?['boosterMarkedCompleteWithNextScheduled'] ??
+      '✓ Booster complete! Next booster has been scheduled automatically.';
+  String get viewSchedule =>
+      _localizedValues[locale.languageCode]?['viewSchedule'] ??
+      'View';
   String get nextDose =>
       _localizedValues[locale.languageCode]?['nextDose'] ?? 'Next dose';
   String get protectionActive =>
@@ -1211,6 +1217,135 @@ class AppLocalizations {
   String get notProtectedFromWorms =>
       _localizedValues[locale.languageCode]?['notProtectedFromWorms'] ??
       'Not protected from worms. Start deworming soon';
+  String get whatToDoNow =>
+      _localizedValues[locale.languageCode]?['whatToDoNow'] ??
+      'What to do now?';
+  String get wormsWindowExpiredExplanation =>
+      _localizedValues[locale.languageCode]?['wormsWindowExpiredExplanation'] ??
+      'Unfortunately, the valid window for the 2nd dose has ended (Day 14-20). You must restart the vaccination series with a new 1st dose to ensure your pet is protected.';
+  String get tipCancelAndRestart =>
+      _localizedValues[locale.languageCode]?['tipCancelAndRestart'] ??
+      '💡 Tip: Press "Cancel" and start a new vaccination series.';
+  String get wormsSecondDoseExpired =>
+      _localizedValues[locale.languageCode]?['wormsSecondDoseExpired'] ??
+      'Unfortunately, the second dose window has passed. Your pet is not protected. We must restart the vaccination for best protection.';
+
+  // Worms vaccine warning messages
+  String get warningTooEarlyFor2ndDose =>
+      _localizedValues[locale.languageCode]?['warningTooEarlyFor2ndDose'] ??
+      'Warning: Too Early for 2nd Dose';
+  String get warning2ndDoseWindowExpired =>
+      _localizedValues[locale.languageCode]?['warning2ndDoseWindowExpired'] ??
+      'Warning: 2nd Dose Window Expired';
+  String get wormingVaccineProtocol =>
+      _localizedValues[locale.languageCode]?['wormingVaccineProtocol'] ??
+      'Worming Vaccine Protocol:';
+  String get wormingVaccineInfo =>
+      _localizedValues[locale.languageCode]?['wormingVaccineInfo'] ??
+      'Worming Vaccine Info';
+  String get firstDose =>
+      _localizedValues[locale.languageCode]?['firstDose'] ??
+      '1st Dose';
+  String get windowOpensDay14 =>
+      _localizedValues[locale.languageCode]?['windowOpensDay14'] ??
+      'Window Opens (Day 14)';
+  String get windowClosedDay20 =>
+      _localizedValues[locale.languageCode]?['windowClosedDay20'] ??
+      'Window Closed (Day 20)';
+  String get dosesRequired2 =>
+      _localizedValues[locale.languageCode]?['dosesRequired2'] ??
+      '2 doses required';
+  String get secondDoseDay14to20Only =>
+      _localizedValues[locale.languageCode]?['secondDoseDay14to20Only'] ??
+      '2nd dose: Day 14-20 only';
+  String get beforeDay14TooEarly =>
+      _localizedValues[locale.languageCode]?['beforeDay14TooEarly'] ??
+      'Before Day 14: Too early';
+  String get afterDay20MustRestart =>
+      _localizedValues[locale.languageCode]?['afterDay20MustRestart'] ??
+      'After Day 20: Must restart';
+  String get doses2Between14to20Days =>
+      _localizedValues[locale.languageCode]?['doses2Between14to20Days'] ??
+      '2 doses, 14-20 days apart';
+  String get validWindowDay14to20 =>
+      _localizedValues[locale.languageCode]?['validWindowDay14to20'] ??
+      'Valid window: Day 14-20';
+  String get afterDay20MustRestartFromBeginning =>
+      _localizedValues[locale.languageCode]?['afterDay20MustRestartFromBeginning'] ??
+      'After day 20: Must restart';
+  String get restartVaccinationSeries =>
+      _localizedValues[locale.languageCode]?['restartVaccinationSeries'] ??
+      'Restart Vaccination Series';
+  String get daysRemaining =>
+      _localizedValues[locale.languageCode]?['daysRemaining'] ??
+      'Days Remaining:';
+
+  // Dynamic messages with parameters
+  String waitMoreDaysBeforeSecondDose(int days) {
+    final template = _localizedValues[locale.languageCode]?['waitMoreDaysBeforeSecondDose'] ??
+        'You must wait {days} more day(s) before giving the 2nd dose. The 2nd dose must be given at least 14 days after the 1st dose.';
+    return template.replaceAll('{days}', days.toString());
+  }
+
+  // Missed dose warnings (Day 35)
+  String get warningMissedDose =>
+      _localizedValues[locale.languageCode]?['warningMissedDose'] ??
+      'Warning: Missed Dose';
+  String get missed2ndDoseVirusMessage =>
+      _localizedValues[locale.languageCode]?['missed2ndDoseVirusMessage'] ??
+      'Unfortunately, since the second dose was missed, your pet is no longer protected. You\'ll need to restart the vaccination series.';
+  String get missed3rdDoseVirusMessage =>
+      _localizedValues[locale.languageCode]?['missed3rdDoseVirusMessage'] ??
+      'Your pet is still protected because it received the first two doses, but please give the third as soon as possible for full protection.';
+  String get missedInsectsMessage =>
+      _localizedValues[locale.languageCode]?['missedInsectsMessage'] ??
+      'Please administer the dose as soon as possible to protect your pet.';
+  String get missedRabiesMessage =>
+      _localizedValues[locale.languageCode]?['missedRabiesMessage'] ??
+      'Please administer the rabies vaccine as soon as possible. This vaccine is critical for your pet\'s safety.';
+  String get deadlineDay35 =>
+      _localizedValues[locale.languageCode]?['deadlineDay35'] ??
+      'Deadline (Day 35)';
+  String get lastDoseGiven =>
+      _localizedValues[locale.languageCode]?['lastDoseGiven'] ??
+      'Last Dose Given';
+  String get daysSinceLastDose =>
+      _localizedValues[locale.languageCode]?['daysSinceLastDose'] ??
+      'Days Since Last Dose:';
+  String get scheduleNextDose =>
+      _localizedValues[locale.languageCode]?['scheduleNextDose'] ??
+      'Schedule Next Dose';
+
+  // Delete vaccination strings
+  String get deleteVaccination =>
+      _localizedValues[locale.languageCode]?['deleteVaccination'] ??
+      'Delete Vaccination';
+  String get areYouSureDeleteVaccination =>
+      _localizedValues[locale.languageCode]?['areYouSureDeleteVaccination'] ??
+      'Are you sure you want to delete this vaccination series?';
+
+  String get deleteVaccinationFeatureComingSoon =>
+      _localizedValues[locale.languageCode]?['deleteVaccinationFeatureComingSoon'] ??
+      'Delete vaccination feature coming soon. API will be integrated later.';
+  String get vaccinationDeleted =>
+      _localizedValues[locale.languageCode]?['vaccinationDeleted'] ??
+      'Vaccination deleted successfully';
+  String get cannotDeleteVaccination =>
+      _localizedValues[locale.languageCode]?['cannotDeleteVaccination'] ??
+      'Cannot Delete Vaccination';
+  String get cannotDeleteCompletedVaccination =>
+      _localizedValues[locale.languageCode]?['cannotDeleteCompletedVaccination'] ??
+      'Completed vaccinations cannot be deleted. They are part of your pet\'s permanent medical record.';
+  String get completedVaccinationsAreProtected =>
+      _localizedValues[locale.languageCode]?['completedVaccinationsAreProtected'] ??
+      'Completed vaccinations are protected and kept for medical history.';
+  String get understood =>
+      _localizedValues[locale.languageCode]?['understood'] ??
+      'Understood';
+  String get nextAnnualBoosterWillBeScheduled =>
+      _localizedValues[locale.languageCode]?['nextAnnualBoosterWillBeScheduled'] ??
+      'Next annual booster will be automatically scheduled for 1 year from this date.';
+
   String get fullyProtected =>
       _localizedValues[locale.languageCode]?['fullyProtected'] ??
       'Fully protected. Follow booster schedule to stay safe';
@@ -2187,6 +2322,9 @@ class AppLocalizations {
       'notYetAdministered': 'Not yet administered',
       'doseMarkedComplete': '✓ Dose marked as complete!',
       'boosterMarkedComplete': '✓ Annual booster marked as complete!',
+      'boosterMarkedCompleteWithNextScheduled':
+          '✓ Booster complete! Next booster has been scheduled automatically.',
+      'viewSchedule': 'View',
       'nextDose': 'Next dose',
       'protectionActive': 'Protection active. Repeat on schedule to stay safe',
       'protectedFromRabies':
@@ -2198,7 +2336,59 @@ class AppLocalizations {
       'treatmentComplete': 'Treatment complete! Your pet is now protected',
       'secondDoseRequiredForFullDeworming':
           'Second dose required for full deworming',
+      'wormsSecondDoseExpired':
+          'Unfortunately, the second dose window has passed. Your pet is not protected. We must restart the vaccination for best protection.',
       'notProtectedFromWorms': 'Not protected from worms. Start deworming soon',
+      'whatToDoNow': 'What to do now?',
+      'wormsWindowExpiredExplanation':
+          'Unfortunately, the valid window for the 2nd dose has ended (Day 14-20). You must restart the vaccination series with a new 1st dose to ensure your pet is protected.',
+      'tipCancelAndRestart':
+          '💡 Tip: Press "Cancel" and start a new vaccination series.',
+      'warningTooEarlyFor2ndDose': 'Warning: Too Early for 2nd Dose',
+      'warning2ndDoseWindowExpired': 'Warning: 2nd Dose Window Expired',
+      'wormingVaccineProtocol': 'Worming Vaccine Protocol:',
+      'wormingVaccineInfo': 'Worming Vaccine Info',
+      'firstDose': '1st Dose',
+      'windowOpensDay14': 'Window Opens (Day 14)',
+      'windowClosedDay20': 'Window Closed (Day 20)',
+      'dosesRequired2': '2 doses required',
+      'secondDoseDay14to20Only': '2nd dose: Day 14-20 only',
+      'beforeDay14TooEarly': 'Before Day 14: Too early',
+      'afterDay20MustRestart': 'After Day 20: Must restart',
+      'doses2Between14to20Days': '2 doses, 14-20 days apart',
+      'validWindowDay14to20': 'Valid window: Day 14-20',
+      'afterDay20MustRestartFromBeginning': 'After day 20: Must restart',
+      'restartVaccinationSeries': 'Restart Vaccination Series',
+      'daysRemaining': 'Days Remaining:',
+      'waitMoreDaysBeforeSecondDose':
+          'You must wait {days} more day(s) before giving the 2nd dose. The 2nd dose must be given at least 14 days after the 1st dose.',
+      'warningMissedDose': 'Warning: Missed Dose',
+      'missed2ndDoseVirusMessage':
+          'Unfortunately, since the second dose was missed, your pet is no longer protected. You\'ll need to restart the vaccination series.',
+      'missed3rdDoseVirusMessage':
+          'Your pet is still protected because it received the first two doses, but please give the third as soon as possible for full protection.',
+      'missedInsectsMessage':
+          'Please administer the dose as soon as possible to protect your pet.',
+      'missedRabiesMessage':
+          'Please administer the rabies vaccine as soon as possible. This vaccine is critical for your pet\'s safety.',
+      'deadlineDay35': 'Deadline (Day 35)',
+      'lastDoseGiven': 'Last Dose Given',
+      'daysSinceLastDose': 'Days Since Last Dose:',
+      'scheduleNextDose': 'Schedule Next Dose',
+      'deleteVaccination': 'Delete Vaccination',
+      'areYouSureDeleteVaccination':
+          'Are you sure you want to delete this vaccination series?',
+      'deleteVaccinationFeatureComingSoon':
+          'Delete vaccination feature coming soon. API will be integrated later.',
+      'vaccinationDeleted': 'Vaccination deleted successfully',
+      'cannotDeleteVaccination': 'Cannot Delete Vaccination',
+      'cannotDeleteCompletedVaccination':
+          'Completed vaccinations cannot be deleted. They are part of your pet\'s permanent medical record.',
+      'completedVaccinationsAreProtected':
+          'Completed vaccinations are protected and kept for medical history.',
+      'understood': 'Understood',
+      'nextAnnualBoosterWillBeScheduled':
+          'Next annual booster will be automatically scheduled for 1 year from this date.',
       'fullyProtected': 'Fully protected. Follow booster schedule to stay safe',
       'protectedThirdDoseGivesStrongestImmunity':
           'Protected. Third dose gives strongest immunity',
@@ -3553,6 +3743,9 @@ class AppLocalizations {
       'notYetAdministered': 'لم يتم إعطاؤها بعد',
       'doseMarkedComplete': '✓ تم تحديد الجرعة كمكتملة!',
       'boosterMarkedComplete': '✓ تم تحديد الجرعة التنشيطية السنوية كمكتملة!',
+      'boosterMarkedCompleteWithNextScheduled':
+          '✓ اكتملت الجرعة التنشيطية! تم جدولة الجرعة التنشيطية التالية تلقائياً.',
+      'viewSchedule': 'عرض',
       'nextDose': 'الجرعة التالية',
       'protectionActive': 'أليفك محمي، كرّر العلاج في معاده',
       'protectedFromRabies': 'أليفك في أمان، طعّمه مرة كل سنة',
@@ -3562,7 +3755,58 @@ class AppLocalizations {
       'treatmentComplete': 'العلاج خلص، أليفك دلوقتي محمي',
       'secondDoseRequiredForFullDeworming':
           'الجرعة التانية ضرورية عشان العلاج يكمل',
+      'wormsSecondDoseExpired':
+          'لألسف بما إن الجرعة التانية فاتت، كده أليفك مش محمي، والزم نعيد التطعيم من األول علشان نوصل لأفضل حماية',
       'notProtectedFromWorms': 'أليفك مش محمي من الديدان، ابدأ العلاج قريب',
+      'whatToDoNow': 'ماذا تفعل الآن؟',
+      'wormsWindowExpiredExplanation':
+          'لألسف، الفترة الصحيحة للجرعة التانية انتهت (يوم 14-20). لازم تبدأ سلسلة التطعيم من جديد بجرعة أولى جديدة عشان أليفك يكون محمي.',
+      'tipCancelAndRestart':
+          '💡 نصيحة: اضغط "Cancel" وابدأ سلسلة تطعيم جديدة.',
+      'warningTooEarlyFor2ndDose': 'تنبيه: الجرعة التانية بدري',
+      'warning2ndDoseWindowExpired': 'تحذير: الجرعة التانية فاتت',
+      'wormingVaccineProtocol': 'بروتوكول تطعيم الديدان:',
+      'wormingVaccineInfo': 'معلومات تطعيم الديدان',
+      'firstDose': 'الجرعة األولى',
+      'windowOpensDay14': 'بداية الفترة الصحيحة (يوم 14)',
+      'windowClosedDay20': 'آخر موعد (يوم 20)',
+      'dosesRequired2': 'جرعتين مطلوبة',
+      'secondDoseDay14to20Only': 'الجرعة التانية: يوم 14-20 فقط',
+      'beforeDay14TooEarly': 'قبل يوم 14: بدري',
+      'afterDay20MustRestart': 'بعد يوم 20: لازم نعيد',
+      'doses2Between14to20Days': 'جرعتين، 14-20 يوم بينهم',
+      'validWindowDay14to20': 'الفترة الصحيحة: يوم 14-20',
+      'afterDay20MustRestartFromBeginning': 'بعد يوم 20: لازم نعيد من األول',
+      'restartVaccinationSeries': 'إعادة التطعيم من البداية',
+      'daysRemaining': 'الوقت المتبقي:',
+      'waitMoreDaysBeforeSecondDose':
+          'لازم تستنى {days} يوم كمان قبل ما تدي الجرعة التانية. الجرعة التانية لازم تكون بعد 14 يوم على األقل من الجرعة األولى.',
+      'warningMissedDose': 'تحذير: جرعة فائتة',
+      'missed2ndDoseVirusMessage':
+          'لألسف بما إن الجرعة التانية فاتت، كده أليفك مش محمي، والزم تعيد التطعيم من األول.',
+      'missed3rdDoseVirusMessage':
+          'أليفك لسه محمي عشان أخذ أول جرعتين، بس لازم تديله الجرعة التالتة بسرعة عشان يكون محمي بالكامل.',
+      'missedInsectsMessage':
+          'من فضلك ادي الجرعة بسرعة عشان تحمي أليفك.',
+      'missedRabiesMessage':
+          'من فضلك ادي تطعيم السعار بسرعة. التطعيم ده مهم جداً لسلامة أليفك.',
+      'deadlineDay35': 'آخر موعد (يوم 35)',
+      'lastDoseGiven': 'آخر جرعة تم إعطاؤها',
+      'daysSinceLastDose': 'الأيام منذ آخر جرعة:',
+      'scheduleNextDose': 'حدد موعد الجرعة التالية',
+      'deleteVaccination': 'حذف التطعيم',
+      'areYouSureDeleteVaccination': 'هل أنت متأكد من حذف سلسلة التطعيم هذه؟',
+      'deleteVaccinationFeatureComingSoon':
+          'ميزة حذف التطعيم قريباً. سيتم دمج الـ API لاحقاً.',
+      'vaccinationDeleted': 'تم حذف التطعيم بنجاح',
+      'cannotDeleteVaccination': 'لا يمكن حذف التطعيم',
+      'cannotDeleteCompletedVaccination':
+          'لا يمكن حذف التطعيمات المكتملة. هي جزء من السجل الطبي الدائم لأليفك.',
+      'completedVaccinationsAreProtected':
+          'التطعيمات المكتملة محمية ومحفوظة للتاريخ الطبي.',
+      'understood': 'مفهوم',
+      'nextAnnualBoosterWillBeScheduled':
+          'سيتم جدولة الجرعة التنشيطية السنوية التالية تلقائياً بعد سنة من هذا التاريخ.',
       'fullyProtected': 'أليفك محمي بأفضل شكل، تابع التطعيم السنوي',
       'protectedThirdDoseGivesStrongestImmunity':
           'أليفك محمي، الجرعة التالتة بتقوّي المناعة أكتر',

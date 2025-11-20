@@ -6,6 +6,8 @@ import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
+
+import '../../utils/vaccination_utils.dart';
 import '../cubit/vaccination_cubit.dart';
 import '../cubit/vaccination_state.dart';
 import 'add_vaccination_screen.dart';
@@ -31,8 +33,10 @@ class _PetVaccinationRecordScreenState
     extends State<PetVaccinationRecordScreen> {
   // Track which series cards are expanded
   final Set<String> _expandedSeriesIds = {};
+
   // Track which booster cards are expanded
   final Set<String> _expandedBoosterIds = {};
+
   // Track which category cards are expanded
   final Set<String> _expandedCategoryIds = {};
 
@@ -126,6 +130,8 @@ class _PetVaccinationRecordScreenState
       body: BlocConsumer<VaccinationCubit, VaccinationState>(
         listener: (context, state) {
           if (state is DoseMarkedComplete) {
+            // Clear any existing SnackBars first
+            ScaffoldMessenger.of(context).clearSnackBars();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(AppLocalizations.of(context).doseMarkedComplete),
@@ -136,17 +142,43 @@ class _PetVaccinationRecordScreenState
             // Refresh medical sheet after successful completion
             context.read<VaccinationCubit>().getMedicalSheet(widget.pet.id);
           } else if (state is AnnualBoosterMarkedComplete) {
+            // Clear any existing SnackBars first
+            ScaffoldMessenger.of(context).clearSnackBars();
+            final loc = AppLocalizations.of(context);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content:
-                    Text(AppLocalizations.of(context).boosterMarkedComplete),
+                content: Text(loc.boosterMarkedCompleteWithNextScheduled),
+                backgroundColor: Colors.green,
+                duration: const Duration(seconds: 3),
+                action: SnackBarAction(
+                  label: loc.viewSchedule,
+                  textColor: Colors.white,
+                  onPressed: () {
+                    // Scroll to annual boosters section or just dismiss
+                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                  },
+                ),
+              ),
+            );
+            // Refresh medical sheet after successful completion
+            // This will load the new annual booster from backend
+            context.read<VaccinationCubit>().getMedicalSheet(widget.pet.id);
+          } else if (state is VaccinationSeriesDeleted) {
+            // Clear any existing SnackBars first
+            ScaffoldMessenger.of(context).clearSnackBars();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context).vaccinationDeleted),
                 backgroundColor: Colors.green,
                 duration: const Duration(seconds: 2),
               ),
             );
-            // Refresh medical sheet after successful completion
+            // Refresh medical sheet after successful deletion
             context.read<VaccinationCubit>().getMedicalSheet(widget.pet.id);
           } else if (state is VaccinationError) {
+            // Clear any existing SnackBars first to prevent duplicates
+            ScaffoldMessenger.of(context).clearSnackBars();
+
             final loc = AppLocalizations.of(context);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -734,6 +766,13 @@ class _PetVaccinationRecordScreenState
                       ],
                     ),
                   ),
+                  // Delete button
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, size: 22),
+                    color: Colors.red,
+                    tooltip: AppLocalizations.of(context).delete,
+                    onPressed: () => _showDeleteVaccineDialog(context, series),
+                  ),
                   Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -818,7 +857,7 @@ class _PetVaccinationRecordScreenState
                   if (series.doses.length >= 2) {
                     nextDoseDate =
                         DateTime.parse(series.doses.last.administeredDate!)
-                            .add(const Duration(days: 21));
+                            .add(const Duration(days: 22));
                   }
                 } else if (completedDosesCount >= 3) {
                   statusMessage = loc.fullyProtected;
@@ -880,12 +919,15 @@ class _PetVaccinationRecordScreenState
                                     size: 18,
                                   ),
                                   const SizedBox(width: 8),
-                                  Text(
-                                    '${AppLocalizations.of(context).nextDose}: ${DateFormat('MMM dd, yyyy').format(nextDoseDate)}',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.blue[700],
+                                  Flexible(
+                                    child: Text(
+                                      '${AppLocalizations.of(context).nextDose}: ${DateFormat('MMM dd, yyyy').format(nextDoseDate)}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.blue[700],
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
                                 ],
@@ -896,6 +938,7 @@ class _PetVaccinationRecordScreenState
                             (doseNumber) => _buildCompactDoseItemForPending(
                               context,
                               series.seriesId,
+                              series.vaccineType,
                               doseNumber,
                               series.doses,
                               isDark,
@@ -1104,16 +1147,20 @@ class _PetVaccinationRecordScreenState
                                                     color: Colors.grey[600],
                                                   ),
                                                   const SizedBox(width: 4),
-                                                  Text(
-                                                    DateFormat('MMM dd, yyyy')
-                                                        .format(
-                                                      DateTime.parse(
-                                                          completedDose!
-                                                              .administeredDate!),
-                                                    ),
-                                                    style: TextStyle(
-                                                      fontSize: 13,
-                                                      color: Colors.grey[600],
+                                                  Flexible(
+                                                    child: Text(
+                                                      DateFormat('MMM dd, yyyy')
+                                                          .format(
+                                                        DateTime.parse(
+                                                            completedDose!
+                                                                .administeredDate!),
+                                                      ),
+                                                      style: TextStyle(
+                                                        fontSize: 13,
+                                                        color: Colors.grey[600],
+                                                      ),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
                                                     ),
                                                   ),
                                                 ],
@@ -1129,6 +1176,7 @@ class _PetVaccinationRecordScreenState
                                                     _showMarkDoseCompleteDialog(
                                                       context,
                                                       series.seriesId,
+                                                      series.vaccineType,
                                                       doseNumber,
                                                       series.doses,
                                                     );
@@ -1186,6 +1234,7 @@ class _PetVaccinationRecordScreenState
   Widget _buildCompactDoseItemForPending(
     BuildContext context,
     String seriesId,
+    String vaccineType,
     int doseNumber,
     List<dynamic> completedDoses,
     bool isDark,
@@ -1248,11 +1297,14 @@ class _PetVaccinationRecordScreenState
                       color: Colors.grey[600],
                     ),
                     const SizedBox(width: 4),
-                    Text(
-                      AppLocalizations.of(context).notYetAdministered,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.grey[600],
+                    Flexible(
+                      child: Text(
+                        AppLocalizations.of(context).notYetAdministered,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey[600],
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -1267,6 +1319,7 @@ class _PetVaccinationRecordScreenState
               _showMarkDoseCompleteDialog(
                 context,
                 seriesId,
+                vaccineType,
                 doseNumber,
                 completedDoses,
               );
@@ -1364,15 +1417,18 @@ class _PetVaccinationRecordScreenState
                               color: Colors.grey[600],
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              'Due: ${DateFormat('MMM dd, yyyy').format(dueDate)}',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color:
-                                    isOverdue ? Colors.red : Colors.grey[600],
-                                fontWeight: isOverdue
-                                    ? FontWeight.bold
-                                    : FontWeight.normal,
+                            Flexible(
+                              child: Text(
+                                'Due: ${DateFormat('MMM dd, yyyy').format(dueDate)}',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color:
+                                      isOverdue ? Colors.red : Colors.grey[600],
+                                  fontWeight: isOverdue
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -1709,6 +1765,7 @@ class _PetVaccinationRecordScreenState
   void _showMarkDoseCompleteDialog(
     BuildContext context,
     String seriesId,
+    String vaccineType,
     int doseNumber,
     List<dynamic> completedDoses,
   ) {
@@ -1740,7 +1797,35 @@ class _PetVaccinationRecordScreenState
             daysGap = selectedDate.difference(previousDoseDate).inDays;
           }
 
-          final isValidDate = previousDoseDate == null || daysGap! >= 21;
+          // Validation logic
+          bool isValidDate;
+          String? validationMessage;
+
+          // Check if this is a worming vaccine 2nd dose
+          if (VaccinationUtils.isWormsVaccine(vaccineType) && doseNumber == 2 && previousDoseDate != null) {
+            // Worming vaccine: Valid window is Day 14-20
+            if (daysGap! < 14) {
+              isValidDate = false;
+              validationMessage = 'Too early: Only $daysGap days after Dose 1. Must wait until Day 14 (need ${14 - daysGap} more days).';
+            } else if (daysGap > 20) {
+              isValidDate = false;
+              validationMessage = '⚠️ EXPIRED: $daysGap days after Dose 1. The valid window (Day 14-20) has ended. You MUST restart the vaccination series from the beginning.';
+            } else {
+              isValidDate = true;
+              final daysRemaining = 20 - daysGap;
+              validationMessage = 'Valid spacing: $daysGap days after Dose 1 (Day $daysGap of 14-20 window, $daysRemaining days remaining)';
+            }
+          } else {
+            // Other vaccines: 21+ days gap requirement
+            isValidDate = previousDoseDate == null || daysGap! >= 21;
+            if (previousDoseDate != null) {
+              if (isValidDate) {
+                validationMessage = 'Valid spacing: $daysGap days after Dose ${doseNumber - 1}';
+              } else {
+                validationMessage = '⚠️ Invalid: Only $daysGap days after Dose ${doseNumber - 1}. Need at least 21 days between doses. The vaccination series may need to be restarted.';
+              }
+            }
+          }
 
           final loc = AppLocalizations.of(statefulContext);
 
@@ -1774,7 +1859,7 @@ class _PetVaccinationRecordScreenState
                   ),
                 ),
                 // Show validation warning if date is too close
-                if (previousDoseDate != null) ...[
+                if (previousDoseDate != null && validationMessage != null) ...[
                   const SizedBox(height: 16),
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -1799,9 +1884,7 @@ class _PetVaccinationRecordScreenState
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            isValidDate
-                                ? 'Valid spacing: $daysGap days after Dose ${doseNumber - 1}'
-                                : 'Invalid: Only $daysGap days after Dose ${doseNumber - 1}. Need 21+ days.',
+                            validationMessage,
                             style: TextStyle(
                               fontSize: 12,
                               color: isValidDate
@@ -1809,6 +1892,69 @@ class _PetVaccinationRecordScreenState
                                   : Colors.red[800],
                               fontWeight: FontWeight.w500,
                             ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                // Additional warning for expired worming vaccine window
+                if (!isValidDate &&
+                    VaccinationUtils.isWormsVaccine(vaccineType) &&
+                    doseNumber == 2 &&
+                    previousDoseDate != null &&
+                    daysGap != null &&
+                    daysGap > 20) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.orange.withValues(alpha: 0.5),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.info_outline,
+                              color: Colors.orange,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                loc.whatToDoNow,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: Colors.orange,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          loc.wormsWindowExpiredExplanation,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[800],
+                            height: 1.4,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          loc.tipCancelAndRestart,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey[700],
+                            fontStyle: FontStyle.italic,
                           ),
                         ),
                       ],
@@ -1858,6 +2004,171 @@ class _PetVaccinationRecordScreenState
         );
   }
 
+  void _showDeleteVaccineDialog(BuildContext context, dynamic series) {
+    final loc = AppLocalizations.of(context);
+
+    // Check if the series is complete - don't allow deletion
+    if (series.isComplete) {
+      showDialog(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: Row(
+            children: [
+              const Icon(Icons.info, color: Colors.blue),
+              const SizedBox(width: 8),
+              Text(loc.cannotDeleteVaccination),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                loc.cannotDeleteCompletedVaccination,
+                style: const TextStyle(fontSize: 15),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _formatVaccineName(context, series.vaccineType),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${series.completedDoses} ${loc.dosesCompleted} - ${loc.completedStatus}',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                loc.completedVaccinationsAreProtected,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.blue[700],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(loc.understood),
+            ),
+          ],
+        ),
+      );
+      return; // Exit early
+    }
+
+    // Original delete confirmation dialog for incomplete series
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Row(
+          children: [
+            const Icon(Icons.warning, color: Colors.red),
+            const SizedBox(width: 8),
+            Text(loc.deleteVaccination),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              loc.areYouSureDeleteVaccination,
+              style: const TextStyle(fontSize: 15),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _formatVaccineName(context, series.vaccineType),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${series.completedDoses} ${loc.dosesCompleted}',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              loc.thisActionCannotBeUndone,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.red[700],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(loc.cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              _deleteVaccineSeries(context, series.seriesId);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(loc.delete),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteVaccineSeries(BuildContext context, String seriesId) {
+    // Call the cubit to delete the vaccination series
+    context.read<VaccinationCubit>().deleteVaccinationSeries(seriesId: seriesId);
+  }
+
   void _showMarkBoosterCompleteDialog(
     BuildContext context,
     String seriesId,
@@ -1876,7 +2187,7 @@ class _PetVaccinationRecordScreenState
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('When was the annual booster administered?'),
+                const Text('When was the annual booster administered?'),
                 const SizedBox(height: 16),
                 ElevatedButton.icon(
                   onPressed: () async {
@@ -1897,6 +2208,38 @@ class _PetVaccinationRecordScreenState
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.orange,
                     foregroundColor: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Info about next booster
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Colors.blue.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(
+                        Icons.info_outline,
+                        color: Colors.blue,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          loc.nextAnnualBoosterWillBeScheduled,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

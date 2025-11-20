@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:petapp/core/services/token_service.dart';
 import 'package:petapp/core/services/api_client.dart';
+import 'package:petapp/core/services/token_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum AuthStatus { authenticated, unauthenticated, guest }
@@ -30,7 +30,6 @@ class AuthService extends GetxService {
     // Check if user has a valid session (access token or refresh token)
     if (await hasValidSession()) {
       _authStatus.value = AuthStatus.authenticated;
-      print('✅ User has valid session');
     } else {
       // Check if user is in guest mode
       final prefs = await SharedPreferences.getInstance();
@@ -38,7 +37,6 @@ class AuthService extends GetxService {
 
       _authStatus.value =
           isGuest ? AuthStatus.guest : AuthStatus.unauthenticated;
-      print('ℹ️ User status: ${_authStatus.value}');
     }
 
     // Set up listener for authentication status changes
@@ -95,16 +93,10 @@ class AuthService extends GetxService {
     try {
       final refreshToken = await _tokenService.getRefreshToken();
       if (refreshToken == null || refreshToken.isEmpty) {
-        print('❌ No refresh token available');
         return false;
       }
-
-      print('🔄 Attempting to refresh token...');
-      // The actual refresh will be handled by ApiClient's interceptor
-      // This method just checks if we have a refresh token available
       return true;
     } catch (e) {
-      print('❌ Error checking refresh token: $e');
       return false;
     }
   }
@@ -148,15 +140,12 @@ class AuthService extends GetxService {
   // Sign out user (calls logout API)
   Future<void> signOut() async {
     try {
-      print('🚪 Starting logout process...');
-
       // Call logout API if user is authenticated
       if (_authStatus.value == AuthStatus.authenticated) {
         try {
           // Get ApiClient instance and call logout endpoint
           _apiClient ??= Get.find<ApiClient>();
           await _apiClient!.logout();
-          print('✅ Logout API call successful');
         } catch (apiError) {
           // Continue with local logout even if API call fails
           print(
@@ -173,10 +162,7 @@ class AuthService extends GetxService {
 
       // Update auth status
       _authStatus.value = AuthStatus.unauthenticated;
-
-      print('✅ Logout completed successfully');
     } catch (e) {
-      print('❌ Error during logout: $e');
       // Even if there's an error, ensure we clear local state
       await _tokenService.clearAllTokens();
       final prefs = await SharedPreferences.getInstance();

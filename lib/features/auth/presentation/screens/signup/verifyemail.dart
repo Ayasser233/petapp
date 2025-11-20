@@ -1,16 +1,16 @@
 import 'dart:async';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
-import 'package:petapp/core/routes/routes.dart';
-import 'package:petapp/core/utils/app_colors.dart';
-import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/services/api_client.dart';
-import 'package:dio/dio.dart';
+import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/arabic_numeral_formatter.dart';
 import 'package:petapp/core/utils/formatters.dart';
+import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/widgets/success_dialog.dart';
 
 class VerifyEmailScreen extends StatefulWidget {

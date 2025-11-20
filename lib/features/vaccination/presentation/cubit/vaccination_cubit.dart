@@ -3,6 +3,7 @@ import '../../domain/usecases/get_eligible_categories_usecase.dart';
 import '../../domain/usecases/create_vaccination_series_usecase.dart';
 import '../../domain/usecases/mark_dose_complete_usecase.dart';
 import '../../domain/usecases/mark_annual_booster_complete_usecase.dart';
+import '../../domain/usecases/delete_vaccination_series_usecase.dart';
 import '../../domain/usecases/get_medical_sheet_usecase.dart';
 import 'vaccination_state.dart';
 
@@ -15,6 +16,7 @@ class VaccinationCubit extends Cubit<VaccinationState> {
   final CreateVaccinationSeriesUsecase createVaccinationSeriesUsecase;
   final MarkDoseCompleteUsecase markDoseCompleteUsecase;
   final MarkAnnualBoosterCompleteUsecase markAnnualBoosterCompleteUsecase;
+  final DeleteVaccinationSeriesUsecase deleteVaccinationSeriesUsecase;
   final GetMedicalSheetUsecase getMedicalSheetUsecase;
 
   VaccinationCubit({
@@ -22,6 +24,7 @@ class VaccinationCubit extends Cubit<VaccinationState> {
     required this.createVaccinationSeriesUsecase,
     required this.markDoseCompleteUsecase,
     required this.markAnnualBoosterCompleteUsecase,
+    required this.deleteVaccinationSeriesUsecase,
     required this.getMedicalSheetUsecase,
   }) : super(const VaccinationInitial());
 
@@ -104,6 +107,20 @@ class VaccinationCubit extends Cubit<VaccinationState> {
     result.fold(
       (failure) => emit(VaccinationError(failure.message)),
       (series) => emit(AnnualBoosterMarkedComplete(series)),
+    );
+  }
+
+  /// Delete a vaccination series
+  Future<void> deleteVaccinationSeries({
+    required String seriesId,
+  }) async {
+    emit(const VaccinationLoading());
+
+    final result = await deleteVaccinationSeriesUsecase(seriesId: seriesId);
+
+    result.fold(
+      (failure) => emit(VaccinationError(failure.message)),
+      (_) => emit(VaccinationSeriesDeleted(seriesId)),
     );
   }
 

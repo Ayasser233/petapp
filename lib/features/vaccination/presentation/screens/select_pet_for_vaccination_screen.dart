@@ -144,7 +144,7 @@ class _SelectPetForVaccinationScreenState
                     crossAxisCount: 2,
                     crossAxisSpacing: 16,
                     mainAxisSpacing: 16,
-                    childAspectRatio: 0.85,
+                    childAspectRatio: 0.75, // Increased height to prevent overflow
                   ),
                   itemCount: _petController.pets.length,
                   itemBuilder: (context, index) {
@@ -197,8 +197,8 @@ class _SelectPetForVaccinationScreenState
           children: [
             // Pet Image
             Container(
-              width: 100,
-              height: 100,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.orange.withValues(alpha: 0.1),
@@ -213,11 +213,11 @@ class _SelectPetForVaccinationScreenState
                   ? const Icon(
                       Icons.pets,
                       color: AppColors.orange,
-                      size: 50,
+                      size: 40,
                     )
                   : null,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
             // Pet Name
             Padding(
@@ -225,7 +225,7 @@ class _SelectPetForVaccinationScreenState
               child: Text(
                 pet.name,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
@@ -233,7 +233,7 @@ class _SelectPetForVaccinationScreenState
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
 
             // Pet Type
             Padding(
@@ -241,7 +241,7 @@ class _SelectPetForVaccinationScreenState
               child: Text(
                 _translateSpecies(context, pet.species),
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   color: Colors.grey[600],
                 ),
                 textAlign: TextAlign.center,

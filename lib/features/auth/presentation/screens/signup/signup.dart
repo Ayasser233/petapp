@@ -139,7 +139,6 @@ class _SignUpFormState extends State<SignUpForm> {
 
     // Generate Turnstile token
     final turnstileToken = await TurnstileService.generateToken(context);
-
     // Check if widget is still mounted after async operation
     if (!mounted) return;
 
@@ -192,8 +191,7 @@ class _SignUpFormState extends State<SignUpForm> {
           if (state.isMailServiceError) {
             Get.snackbar(
               AppLocalizations.of(context).registrationSuccessful,
-              AppLocalizations.of(context).pleaseVerifyEmail +
-                  '\n(Email service temporarily unavailable)',
+              '${AppLocalizations.of(context).pleaseVerifyEmail}\n(Email service temporarily unavailable)',
               snackPosition: SnackPosition.BOTTOM,
               backgroundColor: Colors.orange.withValues(alpha: 0.1),
               colorText: Colors.orange,

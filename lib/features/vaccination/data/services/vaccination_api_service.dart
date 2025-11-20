@@ -113,7 +113,7 @@ class VaccinationApiService {
 
   /// Mark annual booster as complete in a vaccination series
   ///
-  /// POST /vaccination/series/:seriesId/mark-annual-booster-complete
+  /// PATCH /vaccination/series/:seriesId/mark-annual-booster-complete
   Future<VaccinationSeriesModel> markAnnualBoosterComplete({
     required String seriesId,
     required DateTime completedDate,
@@ -122,10 +122,12 @@ class VaccinationApiService {
     String? notes,
   }) async {
     try {
-      final response = await apiClient.post(
+      final response = await apiClient.patch(
         ApiConstants.vaccinationMarkAnnualBoosterCompleteEndpoint(seriesId),
         data: {
-          'completedDate': completedDate.toIso8601String(),
+          'administeredAt': completedDate
+              .toIso8601String()
+              .split('T')[0], // Format as YYYY-MM-DD to match backend expectation
           if (administeredBy != null) 'administeredBy': administeredBy,
           if (batchNumber != null) 'batchNumber': batchNumber,
           if (notes != null) 'notes': notes,
@@ -133,6 +135,21 @@ class VaccinationApiService {
       );
 
       return VaccinationSeriesModel.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Delete a vaccination series
+  ///
+  /// DELETE /vaccination/series/:seriesId
+  Future<void> deleteVaccinationSeries({
+    required String seriesId,
+  }) async {
+    try {
+      await apiClient.delete(
+        ApiConstants.vaccinationDeleteSeriesEndpoint(seriesId),
+      );
     } catch (e) {
       rethrow;
     }

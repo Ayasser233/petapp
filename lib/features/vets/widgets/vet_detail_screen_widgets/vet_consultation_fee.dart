@@ -27,32 +27,40 @@ class VetConsultationFee extends StatelessWidget {
         ),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                AppLocalizations.of(context).consultationFee,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: textColor,
-                  fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context).consultationFee,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: textColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                AppLocalizations.of(context).initialExaminationFee,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: subTextColor,
+                const SizedBox(height: 4),
+                Text(
+                  AppLocalizations.of(context).initialExaminationFee,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: subTextColor,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          Text(
-            price,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              color: AppColors.orange,
-              fontWeight: FontWeight.bold,
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              price,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                color: AppColors.orange,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

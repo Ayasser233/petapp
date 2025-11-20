@@ -87,15 +87,12 @@ class AppointmentRemoteDataSource {
         if (couponCode != null) 'couponCode': couponCode,
       };
 
-      print('📤 Creating appointment: $requestBody');
-
       final response = await apiClient.post(
         ApiConstants.appointmentsEndpoint,
         data: requestBody,
       );
 
       if (response.data['success'] == true && response.data['data'] != null) {
-        print('✅ Appointment created successfully');
         return response.data['data'] as Map<String, dynamic>;
       } else {
         throw ServerException(
@@ -111,19 +108,15 @@ class AppointmentRemoteDataSource {
   /// Cancel an appointment
   Future<bool> cancelAppointment(String appointmentId) async {
     try {
-      print('📤 Cancelling appointment: $appointmentId');
-
       final response = await apiClient.patch(
         ApiConstants.appointmentCancelEndpoint(appointmentId),
       );
 
       if (response.data['success'] == true) {
-        print('✅ Appointment cancelled successfully');
         return true;
       } else {
         final errorMessage =
             response.data['message'] ?? 'Cannot cancel appointment';
-        print('❌ Failed to cancel appointment: $errorMessage');
         throw AppointmentException(errorMessage);
       }
     } catch (e) {
@@ -135,14 +128,11 @@ class AppointmentRemoteDataSource {
   /// Complete an appointment
   Future<bool> completeAppointment(String appointmentId) async {
     try {
-      print('📤 Completing appointment: $appointmentId');
-
       final response = await apiClient.patch(
         ApiConstants.appointmentCompleteEndpoint(appointmentId),
       );
 
       if (response.data['success'] == true) {
-        print('✅ Appointment completed successfully');
         return true;
       }
       return false;
@@ -157,9 +147,6 @@ class AppointmentRemoteDataSource {
     required String qrCode,
   }) async {
     try {
-      print(
-          '📤 Completing appointment by QR: $appointmentId with code: $qrCode');
-
       final requestBody = {
         'qrCode': qrCode,
       };
@@ -170,7 +157,6 @@ class AppointmentRemoteDataSource {
       );
 
       if (response.data['success'] == true) {
-        print('✅ Appointment completed by QR successfully');
         return;
       } else {
         throw ServerException(
@@ -199,16 +185,12 @@ class AppointmentRemoteDataSource {
         if (comment != null && comment.isNotEmpty) 'comment': comment,
       };
 
-      print(
-          '📤 Submitting review for appointment $appointmentId: $requestBody');
-
       final response = await apiClient.patch(
         ApiConstants.appointmentReviewEndpoint(appointmentId),
         data: requestBody,
       );
 
       if (response.data['success'] == true) {
-        print('✅ Review submitted successfully');
         return true;
       }
       return false;
@@ -220,15 +202,12 @@ class AppointmentRemoteDataSource {
 
   /// Validate coupon code
   Future<Map<String, dynamic>> validateCoupon(String couponCode) async {
-    print('📤 Validating coupon: $couponCode');
-
     final response = await apiClient.post(
       ApiConstants.pointsValidateEndpoint,
       data: {'couponCode': couponCode},
     );
 
     if (response.data['success'] == true) {
-      print('✅ Coupon validated successfully');
       return {
         'valid': true,
         'discount': (response.data['data']['discount'] ?? 0).toDouble(),
@@ -245,15 +224,12 @@ class AppointmentRemoteDataSource {
 
   /// Validate points
   Future<Map<String, dynamic>> validatePoints(int points) async {
-    print('📤 Validating points: $points');
-
     final response = await apiClient.post(
       ApiConstants.pointsValidateEndpoint,
       data: {'points': points},
     );
 
     if (response.data['success'] == true) {
-      print('✅ Points validated successfully');
       return {
         'valid': true,
         'discount': (response.data['data']['discount'] ?? 0).toDouble(),

@@ -28,25 +28,22 @@ class ServerFailure extends Failure {
 
 /// Failure when there's a network connectivity issue
 class NetworkFailure extends Failure {
-  const NetworkFailure([String message = 'No internet connection'])
-      : super(message);
+  const NetworkFailure([super.message = 'No internet connection']);
 }
 
 /// Failure when cached data is not available or invalid
 class CacheFailure extends Failure {
-  const CacheFailure([String message = 'Cache error']) : super(message);
+  const CacheFailure([super.message = 'Cache error']);
 }
 
 /// Failure when authentication fails
 class UnauthorizedFailure extends Failure {
-  const UnauthorizedFailure([String message = 'Unauthorized access'])
-      : super(message);
+  const UnauthorizedFailure([super.message = 'Unauthorized access']);
 }
 
 /// Failure when requested resource is not found
 class NotFoundFailure extends Failure {
-  const NotFoundFailure([String message = 'Resource not found'])
-      : super(message);
+  const NotFoundFailure([super.message = 'Resource not found']);
 }
 
 /// Failure when request validation fails
@@ -64,31 +61,30 @@ class ValidationFailure extends Failure {
 
 /// Failure when a timeout occurs
 class TimeoutFailure extends Failure {
-  const TimeoutFailure([String message = 'Request timeout']) : super(message);
+  const TimeoutFailure([super.message = 'Request timeout']);
 }
 
 /// Generic failure for unexpected errors
 class UnexpectedFailure extends Failure {
-  const UnexpectedFailure([String message = 'An unexpected error occurred'])
-      : super(message);
+  const UnexpectedFailure([super.message = 'An unexpected error occurred']);
 }
 
 /// Failure specific to appointment operations
 class AppointmentFailure extends Failure {
-  const AppointmentFailure(String message) : super(message);
+  const AppointmentFailure(super.message);
 }
 
 /// Failure specific to vet operations
 class VetFailure extends Failure {
-  const VetFailure(String message) : super(message);
+  const VetFailure(super.message);
 }
 
 /// Failure specific to pet operations
 class PetFailure extends Failure {
-  const PetFailure(String message) : super(message);
+  const PetFailure(super.message);
 }
 
 /// Failure specific to profile operations
 class ProfileFailure extends Failure {
-  const ProfileFailure(String message) : super(message);
+  const ProfileFailure(super.message);
 }

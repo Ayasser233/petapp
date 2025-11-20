@@ -61,6 +61,16 @@ class AnnualBoosterMarkedComplete extends VaccinationState {
   List<Object?> get props => [series];
 }
 
+/// Vaccination Series Deleted
+class VaccinationSeriesDeleted extends VaccinationState {
+  final String seriesId;
+
+  const VaccinationSeriesDeleted(this.seriesId);
+
+  @override
+  List<Object?> get props => [seriesId];
+}
+
 /// Medical Sheet Loaded
 class MedicalSheetLoaded extends VaccinationState {
   final MedicalSheetEntity medicalSheet;

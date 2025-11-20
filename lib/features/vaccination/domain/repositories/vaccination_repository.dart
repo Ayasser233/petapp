@@ -64,6 +64,15 @@ abstract class VaccinationRepository {
     String? notes,
   });
 
+  /// Delete a vaccination series
+  /// Backend endpoint: DELETE /vaccination/series/:seriesId
+  ///
+  /// [seriesId] The ID of the vaccination series to delete
+  /// Returns Either a Failure or void on success
+  Future<Either<Failure, void>> deleteVaccinationSeries({
+    required String seriesId,
+  });
+
   /// Get the complete medical sheet for a pet
   /// Backend endpoint: GET /vaccination/schedules/pet/:id/medical-sheet
   /// Aggregates all vaccination series and schedules for the pet

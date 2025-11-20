@@ -35,6 +35,7 @@ import 'package:petapp/features/vaccination/domain/usecases/get_eligible_categor
 import 'package:petapp/features/vaccination/domain/usecases/create_vaccination_series_usecase.dart';
 import 'package:petapp/features/vaccination/domain/usecases/mark_dose_complete_usecase.dart';
 import 'package:petapp/features/vaccination/domain/usecases/mark_annual_booster_complete_usecase.dart';
+import 'package:petapp/features/vaccination/domain/usecases/delete_vaccination_series_usecase.dart';
 import 'package:petapp/features/vaccination/domain/usecases/get_medical_sheet_usecase.dart';
 import 'package:petapp/features/vaccination/presentation/cubit/vaccination_cubit.dart';
 
@@ -126,6 +127,7 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => CreateVaccinationSeriesUsecase(sl()));
   sl.registerLazySingleton(() => MarkDoseCompleteUsecase(sl()));
   sl.registerLazySingleton(() => MarkAnnualBoosterCompleteUsecase(sl()));
+  sl.registerLazySingleton(() => DeleteVaccinationSeriesUsecase(sl()));
   sl.registerLazySingleton(() => GetMedicalSheetUsecase(sl()));
 
   // Cubits
@@ -148,6 +150,7 @@ Future<void> setupServiceLocator() async {
         createVaccinationSeriesUsecase: sl(),
         markDoseCompleteUsecase: sl(),
         markAnnualBoosterCompleteUsecase: sl(),
+        deleteVaccinationSeriesUsecase: sl(),
         getMedicalSheetUsecase: sl(),
       ));
 }

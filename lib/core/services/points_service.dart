@@ -20,21 +20,17 @@ class PointsService {
   /// Get user's points balance
   Future<Map<String, dynamic>> getPointsBalance() async {
     try {
-      print('📊 Fetching points balance...');
-
       final response = await _apiClient.get(
         ApiConstants.pointsBalanceEndpoint,
       );
 
       if (response.data['success'] == true && response.data['data'] != null) {
-        print('✅ Points balance fetched successfully');
         return response.data['data'] as Map<String, dynamic>;
       } else {
         throw Exception(
             response.data['message'] ?? 'Failed to fetch points balance');
       }
     } catch (e) {
-      print('❌ Error fetching points balance: $e');
       rethrow;
     }
   }
@@ -45,8 +41,6 @@ class PointsService {
     int limit = 20,
   }) async {
     try {
-      print('📋 Fetching points transactions (page: $page, limit: $limit)...');
-
       final response = await _apiClient.get(
         ApiConstants.pointsTransactionsEndpoint,
         queryParameters: {
@@ -56,7 +50,6 @@ class PointsService {
       );
 
       if (response.data['success'] == true && response.data['data'] != null) {
-        print('✅ Points transactions fetched successfully');
         final data = response.data['data'];
 
         // Handle both array and paginated responses
@@ -72,7 +65,6 @@ class PointsService {
             response.data['message'] ?? 'Failed to fetch points transactions');
       }
     } catch (e) {
-      print('❌ Error fetching points transactions: $e');
       rethrow;
     }
   }
@@ -80,22 +72,18 @@ class PointsService {
   /// Validate points for booking
   Future<Map<String, dynamic>> validatePoints(int points) async {
     try {
-      print('🔍 Validating $points points...');
-
       final response = await _apiClient.post(
         ApiConstants.pointsValidateEndpoint,
         data: {'points': points},
       );
 
       if (response.data['success'] == true) {
-        print('✅ Points validated successfully');
         return response.data['data'] as Map<String, dynamic>;
       } else {
         throw Exception(
             response.data['message'] ?? 'Failed to validate points');
       }
     } catch (e) {
-      print('❌ Error validating points: $e');
       rethrow;
     }
   }

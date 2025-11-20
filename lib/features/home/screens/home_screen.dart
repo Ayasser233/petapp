@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
+import 'package:petapp/core/services/auth_service.dart';
+import 'package:petapp/core/services/location_service.dart';
+import 'package:petapp/core/services/points_service.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/widgets/custom_app_bar.dart';
 import 'package:petapp/core/widgets/rewards_card.dart';
-import 'package:petapp/core/services/location_service.dart';
-import 'package:petapp/core/services/auth_service.dart';
-import 'package:petapp/core/services/points_service.dart';
+import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/features/vets/models/vet_model.dart';
 import 'package:petapp/features/vets/services/vet_service.dart';
-import 'package:petapp/core/localization/app_localizations.dart';
-import 'package:petapp/di/service_locator.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -178,28 +178,34 @@ class _HomeScreenState extends State<HomeScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            _buildCompactServiceItem(
-                              context,
-                              localizations.vetVisit,
-                              'assets/icons/icons-01.png',
-                              isDark,
-                              onTap: () => Get.toNamed(AppRoutes.vetExplorer),
+                            Expanded(
+                              child: _buildCompactServiceItem(
+                                context,
+                                localizations.vetVisit,
+                                'assets/icons/icons-01.png',
+                                isDark,
+                                onTap: () => Get.toNamed(AppRoutes.vetExplorer),
+                              ),
                             ),
-                            _buildCompactServiceItem(
-                              context,
-                              localizations.animalView3D,
-                              'assets/icons/icons-02.png',
-                              isDark,
-                              onTap: () =>
-                                  Get.toNamed(AppRoutes.pet3DModelSelector),
+                            Expanded(
+                              child: _buildCompactServiceItem(
+                                context,
+                                localizations.animalView3D,
+                                'assets/icons/icons-02.png',
+                                isDark,
+                                onTap: () =>
+                                    Get.toNamed(AppRoutes.pet3DModelSelector),
+                              ),
                             ),
-                            _buildCompactVaccinationServiceItem(
-                              context,
-                              localizations.vaccination,
-                              Icons.vaccines,
-                              isDark,
-                              onTap: () => Get.toNamed(
-                                  AppRoutes.selectPetForVaccination),
+                            Expanded(
+                              child: _buildCompactVaccinationServiceItem(
+                                context,
+                                localizations.vaccination,
+                                Icons.vaccines,
+                                isDark,
+                                onTap: () => Get.toNamed(
+                                    AppRoutes.selectPetForVaccination),
+                              ),
                             ),
                           ],
                         ),
@@ -306,10 +312,12 @@ class _HomeScreenState extends State<HomeScreen> {
                               final userData = snapshot.data;
                               return RewardsCard(
                                 points: userData?['points'] ?? 0,
-                                vouchers: 0, // Removed vouchers feature
+                                vouchers: 0,
+                                // Removed vouchers feature
                                 onRedeemTap: () =>
                                     Get.toNamed(AppRoutes.pointsHistory),
-                                onVouchersTap: null, // Removed vouchers feature
+                                onVouchersTap: null,
+                                // Removed vouchers feature
                                 onViewHistoryTap: () =>
                                     Get.toNamed(AppRoutes.pointsHistory),
                               );
@@ -616,7 +624,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 100,
         height: 110,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
@@ -683,7 +690,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 100,
         height: 110,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
@@ -777,7 +783,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(16),
                   ),
-                  child: _buildVetImage(vet.primaryImage, 120),
+                  child: _buildVetImage(vet.primaryImage, 110),
                 ),
                 // Rating Badge
                 Positioned(
@@ -817,7 +823,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             // Info Section
             Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -831,7 +837,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   // Specialization/Category
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -853,7 +859,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   // Address/Location
                   Row(
                     children: [
@@ -873,7 +879,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         : Colors.grey[600],
                                     fontSize: 11,
                                   ),
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -1010,113 +1016,10 @@ class _HomeScreenState extends State<HomeScreen> {
         'history': balance['recent'] ?? [],
       };
     } catch (e) {
-      print('❌ Error loading user rewards data: $e');
       return {
         'points': 0,
         'history': [],
       };
     }
   }
-
-  // TODO: Uncomment and implement when APIs are ready
-  /*
-  /// Load user rewards data from API
-  Future<Map<String, dynamic>> _loadUserRewardsData() async {
-    try {
-      // TODO: Replace with actual API calls
-      // final pointsResponse = await ApiService.getUserPoints();
-      // final vouchersResponse = await ApiService.getUserVouchers();
-      
-      // For now, return mock data structure
-      return {
-        'points': 0, // pointsResponse.data['points']
-        'vouchers': 0, // vouchersResponse.data['available_vouchers']
-        'history': [], // pointsResponse.data['history']
-      };
-    } catch (e) {
-      print('Error loading user rewards data: $e');
-      return {
-        'points': 0,
-        'vouchers': 0,
-        'history': [],
-      };
-    }
-  }
-
-  /// Build rewards card with API data
-  Widget _buildRewardsCard() {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _loadUserRewardsData(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(
-            height: 120,
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Center(
-              child: CircularProgressIndicator(color: AppColors.orange),
-            ),
-          );
-        }
-        
-        if (snapshot.hasError) {
-          return Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.red.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.error_outline, color: Colors.red),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Failed to load rewards data. Please try again.',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
-        
-        final userData = snapshot.data ?? {};
-        return RewardsCard(
-          points: userData['points'] ?? 0,
-          vouchers: userData['vouchers'] ?? 0,
-          onRedeemTap: () {
-            if (userData['points'] > 0) {
-              Get.toNamed('/redeem');
-            } else {
-              _showNoPointsDialog();
-            }
-          },
-          onVouchersTap: () => Get.toNamed(AppRoutes.vouchers),
-          onViewHistoryTap: () => Get.toNamed(AppRoutes.pointsHistory),
-        );
-      },
-    );
-  }
-
-  /// Show dialog when user has no points
-  void _showNoPointsDialog() {
-    final localizations = AppLocalizations.of(Get.context!);
-    Get.dialog(
-      AlertDialog(
-        title: Text(localizations.noPointsAvailable),
-        content: Text(localizations.noPointsMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(localizations.ok),
-          ),
-        ],
-      ),
-    );
-  }
-  */
 }

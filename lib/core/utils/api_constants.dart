@@ -2,10 +2,10 @@ class ApiConstants {
   // API URLs
   static String get apiBaseUrl {
     // Production API
-    return 'https://api.aleefy-app.com/api/v1';
+    return 'https://api-dev.aleefy-app.com/api/v1';
   }
 
-  static const String fallbackApiBaseUrl = 'https://api.aleefy-app.com/api/v1';
+  static const String fallbackApiBaseUrl = 'https://api-dev.aleefy-app.com/api/v1';
 
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);
@@ -78,6 +78,8 @@ class ApiConstants {
       '/vaccination/series/$seriesId/mark-dose-complete';
   static String vaccinationMarkAnnualBoosterCompleteEndpoint(String seriesId) =>
       '/vaccination/series/$seriesId/mark-annual-booster-complete';
+  static String vaccinationDeleteSeriesEndpoint(String seriesId) =>
+      '/vaccination/series/$seriesId';
   static String vaccinationMedicalSheetEndpoint(String petId) =>
       '/vaccination/schedules/pet/$petId/medical-sheet';
 

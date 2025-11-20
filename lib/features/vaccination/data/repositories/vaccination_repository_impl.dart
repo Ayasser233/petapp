@@ -101,6 +101,20 @@ class VaccinationRepositoryImpl implements VaccinationRepository {
   }
 
   @override
+  Future<Either<Failure, void>> deleteVaccinationSeries({
+    required String seriesId,
+  }) async {
+    try {
+      await apiService.deleteVaccinationSeries(seriesId: seriesId);
+      return const Right(null);
+    } on DioException catch (e) {
+      return Left(_handleDioError(e));
+    } catch (e) {
+      return Left(ServerFailure('Unexpected error: ${e.toString()}'));
+    }
+  }
+
+  @override
   Future<Either<Failure, MedicalSheetEntity>> getMedicalSheet(
     String petId,
   ) async {
@@ -120,10 +134,10 @@ class VaccinationRepositoryImpl implements VaccinationRepository {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.receiveTimeout:
-        return NetworkFailure('Connection timeout');
+        return const NetworkFailure('Connection timeout');
 
       case DioExceptionType.connectionError:
-        return NetworkFailure('No internet connection');
+        return const NetworkFailure('No internet connection');
 
       case DioExceptionType.badResponse:
         final statusCode = error.response?.statusCode;
@@ -141,7 +155,7 @@ class VaccinationRepositoryImpl implements VaccinationRepository {
         return ServerFailure(message);
 
       case DioExceptionType.cancel:
-        return NetworkFailure('Request cancelled');
+        return const NetworkFailure('Request cancelled');
 
       default:
         return ServerFailure('Unexpected error: ${error.message}');

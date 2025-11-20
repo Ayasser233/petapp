@@ -1,15 +1,15 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:get/get.dart';
-import 'package:petapp/core/routes/routes.dart';
-import 'package:petapp/core/utils/app_colors.dart';
-import 'package:petapp/core/utils/helper_functions.dart';
-import 'package:petapp/core/localization/app_localizations.dart';
-import 'package:petapp/core/services/api_client.dart';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/core/routes/routes.dart';
+import 'package:petapp/core/services/api_client.dart';
+import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/arabic_numeral_formatter.dart';
 import 'package:petapp/core/utils/formatters.dart';
+import 'package:petapp/core/utils/helper_functions.dart';
 
 class EnterVerificationCodeScreen extends StatefulWidget {
   const EnterVerificationCodeScreen({super.key});
@@ -221,178 +221,185 @@ class _EnterVerificationCodeScreenState
         ),
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Text(
-              localizations.enterVerificationCode,
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8.0),
-            Text(
-              localizations.verificationCodeSentToEmail(_email),
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey,
-                  ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32.0),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(
+                localizations.enterVerificationCode,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8.0),
+              Text(
+                localizations.verificationCodeSentToEmail(_email),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32.0),
 
-            // OTP Fields (6 digits)
-            Builder(
-              builder: (context) {
-                final locale = Localizations.localeOf(context);
-                final isArabic = locale.languageCode == 'ar';
+              // OTP Fields (6 digits)
+              Builder(
+                builder: (context) {
+                  final locale = Localizations.localeOf(context);
+                  final isArabic = locale.languageCode == 'ar';
 
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(
-                    6,
-                    (index) => SizedBox(
-                      width: 48,
-                      height: 60,
-                      child: TextFormField(
-                        controller: _controllers[index],
-                        focusNode: _focusNodes[index],
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        maxLength: 1,
-                        style:
-                            Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                        inputFormatters: [
-                          ArabicAwareDigitsOnlyFormatter(), // Allow both English and Arabic digits
-                          ArabicNumeralInputFormatter(
-                              isArabic), // Convert to Arabic for display
-                        ],
-                        onChanged: (value) {
-                          // Clear error when typing
-                          if (_errorMessage != null) {
-                            setState(() {
-                              _errorMessage = null;
-                            });
-                          }
-
-                          if (value.isNotEmpty) {
-                            // Auto-advance to next field
-                            if (index < 5) {
-                              _focusNodes[index + 1].requestFocus();
-                            } else {
-                              // Last field - hide keyboard
-                              _focusNodes[index].unfocus();
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(
+                      6,
+                      (index) => SizedBox(
+                        width: 48,
+                        height: 60,
+                        child: TextFormField(
+                          controller: _controllers[index],
+                          focusNode: _focusNodes[index],
+                          textAlign: TextAlign.center,
+                          keyboardType: TextInputType.number,
+                          maxLength: 1,
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                          inputFormatters: [
+                            ArabicAwareDigitsOnlyFormatter(),
+                            // Allow both English and Arabic digits
+                            ArabicNumeralInputFormatter(isArabic),
+                            // Convert to Arabic for display
+                          ],
+                          onChanged: (value) {
+                            // Clear error when typing
+                            if (_errorMessage != null) {
+                              setState(() {
+                                _errorMessage = null;
+                              });
                             }
-                          }
-                        },
-                        decoration: InputDecoration(
-                          counterText: '',
-                          filled: true,
-                          fillColor:
-                              isDark ? AppColors.lightblack : Colors.grey[100],
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16.0),
-                            borderSide: BorderSide.none,
+
+                            if (value.isNotEmpty) {
+                              // Auto-advance to next field
+                              if (index < 5) {
+                                _focusNodes[index + 1].requestFocus();
+                              } else {
+                                // Last field - hide keyboard
+                                _focusNodes[index].unfocus();
+                              }
+                            }
+                          },
+                          decoration: InputDecoration(
+                            counterText: '',
+                            filled: true,
+                            fillColor: isDark
+                                ? AppColors.lightblack
+                                : Colors.grey[100],
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                              borderSide: BorderSide.none,
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                              borderSide: BorderSide.none,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(16.0),
+                              borderSide: const BorderSide(
+                                  color: AppColors.orange, width: 1.5),
+                            ),
+                            contentPadding: const EdgeInsets.all(12),
+                            errorStyle: const TextStyle(height: 0),
                           ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16.0),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(16.0),
-                            borderSide: const BorderSide(
-                                color: AppColors.orange, width: 1.5),
-                          ),
-                          contentPadding: const EdgeInsets.all(12),
-                          errorStyle: const TextStyle(height: 0),
                         ),
                       ),
                     ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 16.0),
+
+              // Error message
+              if (_errorMessage != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 16.0),
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(color: Colors.red, fontSize: 14),
                   ),
-                );
-              },
-            ),
+                ),
 
-            const SizedBox(height: 16.0),
+              // Resend timer text
+              Text(
+                _resendTimer > 0
+                    ? 'You can resend the code in $_resendTimer seconds'
+                    : (localizations.didntReceiveCode),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey,
+                    ),
+              ),
 
-            // Error message
-            if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
+              const SizedBox(height: 8.0),
+
+              // Resend button
+              TextButton(
+                onPressed: _resendTimer > 0 ? null : _handleResendCode,
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.orange,
+                  disabledForegroundColor: Colors.grey,
+                ),
                 child: Text(
-                  _errorMessage!,
-                  style: const TextStyle(color: Colors.red, fontSize: 14),
-                ),
-              ),
-
-            // Resend timer text
-            Text(
-              _resendTimer > 0
-                  ? 'You can resend the code in $_resendTimer seconds'
-                  : (localizations.didntReceiveCode),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey,
+                  localizations.resendCode,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: _resendTimer > 0 ? Colors.grey : AppColors.orange,
                   ),
-            ),
-
-            const SizedBox(height: 8.0),
-
-            // Resend button
-            TextButton(
-              onPressed: _resendTimer > 0 ? null : _handleResendCode,
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.orange,
-                disabledForegroundColor: Colors.grey,
-              ),
-              child: Text(
-                localizations.resendCode,
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: _resendTimer > 0 ? Colors.grey : AppColors.orange,
                 ),
               ),
-            ),
-            const SizedBox(height: 32.0),
+              const SizedBox(height: 32.0),
 
-            // Verify button
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _isLoading ? null : _handleVerification,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  backgroundColor: AppColors.orange,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0),
+              // Verify button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _handleVerification,
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    backgroundColor: AppColors.orange,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    elevation: 0,
+                    disabledBackgroundColor:
+                        AppColors.orange.withValues(alpha: 0.5),
                   ),
-                  elevation: 0,
-                  disabledBackgroundColor:
-                      AppColors.orange.withValues(alpha: 0.5),
-                ),
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2.0,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.0,
+                          ),
+                        )
+                      : Text(
+                          localizations.verifyCode,
+                          style:
+                              Theme.of(context).textTheme.labelLarge?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
-                      )
-                    : Text(
-                        localizations.verifyCode,
-                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                      ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

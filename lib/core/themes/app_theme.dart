@@ -22,10 +22,10 @@ class AppTheme {
       fontFamily: 'Alilato Arabic Regular',
     ),
     elevatedButtonTheme: elevatedButtonTheme.lightElevatedThemeButton,
-    inputDecorationTheme: InputDecorationTheme(
+    inputDecorationTheme: const InputDecorationTheme(
       // Ensure input fields use the same font
-      hintStyle: const TextStyle(fontFamily: 'Alilato Arabic Regular'),
-      labelStyle: const TextStyle(fontFamily: 'Alilato Arabic Regular'),
+      hintStyle: TextStyle(fontFamily: 'Alilato Arabic Regular'),
+      labelStyle: TextStyle(fontFamily: 'Alilato Arabic Regular'),
     ),
   );
 
@@ -46,10 +46,10 @@ class AppTheme {
       fontFamily: 'Alilato Arabic Regular',
     ),
     elevatedButtonTheme: elevatedButtonTheme.darkElevatedThemeButton,
-    inputDecorationTheme: InputDecorationTheme(
+    inputDecorationTheme: const InputDecorationTheme(
       // Ensure input fields use the same font
-      hintStyle: const TextStyle(fontFamily: 'Alilato Arabic Regular'),
-      labelStyle: const TextStyle(fontFamily: 'Alilato Arabic Regular'),
+      hintStyle: TextStyle(fontFamily: 'Alilato Arabic Regular'),
+      labelStyle: TextStyle(fontFamily: 'Alilato Arabic Regular'),
     ),
   );
 }

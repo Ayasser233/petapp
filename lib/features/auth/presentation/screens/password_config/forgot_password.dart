@@ -1,13 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:petapp/core/routes/routes.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/core/routes/routes.dart';
+import 'package:petapp/core/services/api_client.dart';
 import 'package:petapp/core/styles/input_styles.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
-import 'package:petapp/core/localization/app_localizations.dart';
-import 'package:petapp/core/services/api_client.dart';
-import 'package:dio/dio.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -180,104 +180,109 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                localizations.resetYourPassword,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 8.0),
-              Text(
-                localizations.enterRegisteredEmail,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey,
-                    ),
-              ),
-              const SizedBox(height: 32.0),
-
-              // Email Field (removed separate label)
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Iconsax.sms, color: AppColors.orange),
-                  hintText: localizations.email,
-                  hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[400],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  localizations.resetYourPassword,
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
                       ),
-                  filled: true,
-                  fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedErrorBorder: focusedFieldStyle(),
-                  focusedBorder: focusedFieldStyle(),
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 16.0, horizontal: 16.0),
-                  errorStyle: const TextStyle(height: 0.8),
                 ),
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: _validateEmail,
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.done,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: isDark ? Colors.white : Colors.black,
-                    ),
-              ),
+                const SizedBox(height: 8.0),
+                Text(
+                  localizations.enterRegisteredEmail,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.grey,
+                      ),
+                ),
+                const SizedBox(height: 32.0),
 
-              const SizedBox(height: 32.0),
-
-              // Send OTP Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _handleSendOTP,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16.0),
-                    backgroundColor: AppColors.orange,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16.0),
-                    ),
-                    elevation: 0,
-                    disabledBackgroundColor:
-                        AppColors.orange.withValues(alpha: 0.5),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.0,
-                          ),
-                        )
-                      : Text(
-                          localizations.sendVerificationCode,
-                          style:
-                              Theme.of(context).textTheme.labelLarge?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                // Email Field (removed separate label)
+                TextFormField(
+                  controller: _emailController,
+                  decoration: InputDecoration(
+                    prefixIcon:
+                        const Icon(Iconsax.sms, color: AppColors.orange),
+                    hintText: localizations.email,
+                    hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.grey[400],
                         ),
+                    filled: true,
+                    fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                      borderSide: BorderSide.none,
+                    ),
+                    focusedErrorBorder: focusedFieldStyle(),
+                    focusedBorder: focusedFieldStyle(),
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 16.0, horizontal: 16.0),
+                    errorStyle: const TextStyle(height: 0.8),
+                  ),
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: _validateEmail,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.done,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 32.0),
+
+                // Send OTP Button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleSendOTP,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      backgroundColor: AppColors.orange,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                      elevation: 0,
+                      disabledBackgroundColor:
+                          AppColors.orange.withValues(alpha: 0.5),
+                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.0,
+                            ),
+                          )
+                        : Text(
+                            localizations.sendVerificationCode,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
