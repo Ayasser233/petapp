@@ -112,9 +112,9 @@ class SkipLoginButton extends StatelessWidget {
       child: Center(
         child: TextButton(
           onPressed: _skipLogin,
-          child: const Text(
-            'Skip Login',
-            style: TextStyle(
+          child: Text(
+            AppLocalizations.of(context).skipLogin,
+            style: const TextStyle(
               color: AppColors.orange,
               fontSize: 16,
               fontWeight: FontWeight.w500,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/core/services/turnstile_service.dart';
 import 'package:petapp/core/styles/input_styles.dart';
 import 'package:petapp/core/utils/app_colors.dart';
@@ -52,6 +53,9 @@ class SignUpScreen extends StatelessWidget {
                 LoginText(
                     text: AppLocalizations.of(context).alreadyHaveAccount,
                     loginText: " ${AppLocalizations.of(context).signIn}"),
+
+                // Skip signup button
+                const SkipSignupButton(),
               ],
             ),
           ),
@@ -614,3 +618,37 @@ class HeaderText extends StatelessWidget {
     );
   }
 }
+
+// Skip Signup Button
+class SkipSignupButton extends StatelessWidget {
+  const SkipSignupButton({super.key});
+
+  void _skipSignup() async {
+    final AuthService authService = Get.find<AuthService>();
+    await authService.setGuestMode();
+    Get.offAllNamed(AppRoutes.home);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0),
+      child: Center(
+        child: TextButton(
+          onPressed: _skipSignup,
+          child: Text(
+            AppLocalizations.of(context).skipSignup,
+            style: const TextStyle(
+              color: AppColors.orange,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+

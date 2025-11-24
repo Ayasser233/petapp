@@ -1,8 +1,8 @@
 class Constants{
   //onboarding Images
-  static const String onboardingImage1 = 'assets/images/onboardingImages/pet1.svg';
-  static const String onboardingImage2 = 'assets/images/onboardingImages/pet2.svg';
-  static const String onboardingImage3 = 'assets/images/onboardingImages/pet3.svg';
+  static const String onboardingImage1 = 'assets/images/onboardingImages/IMG_0011.PNG';
+  static const String onboardingImage2 = 'assets/images/onboardingImages/IMG_0012.PNG';
+  static const String onboardingImage3 = 'assets/images/onboardingImages/IMG_0013.PNG';
 
   //logos 
   static const String logoiconlight = 'assets/logos/logo_icon_light.png';

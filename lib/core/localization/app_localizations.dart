@@ -247,6 +247,33 @@ class AppLocalizations {
   String get noSlotsAvailable =>
       _localizedValues[locale.languageCode]?['noSlotsAvailable'] ??
       'No slots available';
+
+  // Onboarding screen getters
+  String get skip =>
+      _localizedValues[locale.languageCode]?['skip'] ?? 'Skip';
+  String get skipLogin =>
+      _localizedValues[locale.languageCode]?['skipLogin'] ?? 'Skip Login';
+  String get skipSignup =>
+      _localizedValues[locale.languageCode]?['skipSignup'] ?? 'Skip Signup';
+  String get welcomeToAleefy =>
+      _localizedValues[locale.languageCode]?['welcomeToAleefy'] ??
+      'Welcome to Aleefy';
+  String get onboardingSubtitle1 =>
+      _localizedValues[locale.languageCode]?['onboardingSubtitle1'] ??
+      'The simplest way to care for your pet, every day.';
+  String get checkAndBookInSeconds =>
+      _localizedValues[locale.languageCode]?['checkAndBookInSeconds'] ??
+      'Check & Book in Seconds';
+  String get onboardingSubtitle2 =>
+      _localizedValues[locale.languageCode]?['onboardingSubtitle2'] ??
+      'Review common symptoms, find nearby clinics, and reserve a spot instantly — no waiting rooms, no hassle.';
+  String get exclusiveBenefits =>
+      _localizedValues[locale.languageCode]?['exclusiveBenefits'] ??
+      'Exclusive Benefits for Your Pet';
+  String get onboardingSubtitle3 =>
+      _localizedValues[locale.languageCode]?['onboardingSubtitle3'] ??
+      'Unlock free checkups, grooming offers, and special clinic discounts — only on Aleefy.';
+
   // Auth screen getters
   String get welcomeBack =>
       _localizedValues[locale.languageCode]?['welcomeBack'] ?? 'Welcome Back';
@@ -1252,6 +1279,17 @@ class AppLocalizations {
   String get firstDose =>
       _localizedValues[locale.languageCode]?['firstDose'] ??
       '1st Dose';
+  String get vaccinesNeverTakenAndOverdue =>
+      _localizedValues[locale.languageCode]?['vaccinesNeverTakenAndOverdue'] ??
+      'Vaccines that were never taken and are now overdue';
+  String get dueWithinNext30Days =>
+      _localizedValues[locale.languageCode]?['dueWithinNext30Days'] ??
+      'Due within the next 30 days';
+  String get inProgressVaccinesNeedingNextDose =>
+      _localizedValues[locale.languageCode]?['inProgressVaccinesNeedingNextDose'] ??
+      'Vaccines in progress that need the next dose';
+  String get notAdded =>
+      _localizedValues[locale.languageCode]?['notAdded'] ?? 'Not Added';
   String get windowOpensDay14 =>
       _localizedValues[locale.languageCode]?['windowOpensDay14'] ??
       'Window Opens (Day 14)';
@@ -1489,6 +1527,8 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['selectText'] ?? 'Select';
   String get symptoms =>
       _localizedValues[locale.languageCode]?['symptoms'] ?? 'Symptoms';
+  String get searchSymptoms =>
+      _localizedValues[locale.languageCode]?['searchSymptoms'] ?? 'Search symptoms...';
   String get viewSelected =>
       _localizedValues[locale.languageCode]?['viewSelected'] ?? 'View Selected';
   String get findVet =>
@@ -1516,6 +1556,12 @@ class AppLocalizations {
       'After selecting symptoms, tap "Find Vet"';
   String get gotIt =>
       _localizedValues[locale.languageCode]?['gotIt'] ?? 'Got it';
+  String get swipeToRotate =>
+      _localizedValues[locale.languageCode]?['swipeToRotate'] ??
+      'Swipe to Rotate';
+  String get tapBodyPartToExplore =>
+      _localizedValues[locale.languageCode]?['tapBodyPartToExplore'] ??
+      'Tap on body parts to explore symptoms';
   String get noDataAvailable =>
       _localizedValues[locale.languageCode]?['noDataAvailable'] ??
       'No Data Available';
@@ -2093,6 +2139,18 @@ class AppLocalizations {
       'enterVoucherCode': 'Enter voucher code',
       'enterYourVoucherCode': 'Enter your voucher code',
       'pleaseEnterVoucherCode': 'Please enter a voucher code',
+
+      // Onboarding screen translations
+      'skip': 'Skip',
+      'skipLogin': 'Skip Login',
+      'skipSignup': 'Skip Signup',
+      'welcomeToAleefy': 'Welcome to Aleefy',
+      'onboardingSubtitle1': 'The simplest way to care for your pet, every day.',
+      'checkAndBookInSeconds': 'Check & Book in Seconds',
+      'onboardingSubtitle2': 'Review common symptoms, find nearby clinics, and reserve a spot instantly — no waiting rooms, no hassle.',
+      'exclusiveBenefits': 'Exclusive Benefits for Your Pet',
+      'onboardingSubtitle3': 'Unlock free checkups, grooming offers, and special clinic discounts — only on Aleefy.',
+
       // Auth screen translations
       'welcomeBack': 'Welcome Back',
       'loginToAccount': 'Login to your account',
@@ -2355,6 +2413,10 @@ class AppLocalizations {
       'wormingVaccineProtocol': 'Worming Vaccine Protocol:',
       'wormingVaccineInfo': 'Worming Vaccine Info',
       'firstDose': '1st Dose',
+      'vaccinesNeverTakenAndOverdue': 'Vaccines that were never taken and are now overdue',
+      'dueWithinNext30Days': 'Due within the next 30 days',
+      'inProgressVaccinesNeedingNextDose': 'Vaccines in progress that need the next dose',
+      'notAdded': 'Not Added',
       'windowOpensDay14': 'Window Opens (Day 14)',
       'windowClosedDay20': 'Window Closed (Day 20)',
       'dosesRequired2': '2 doses required',
@@ -3382,6 +3444,11 @@ class AppLocalizations {
       'moderate': 'Moderate',
       'mild': 'Mild',
 
+      // 3D Viewer gesture hints
+      'swipeToRotate': 'Swipe to Rotate',
+      'tapBodyPartToExplore': 'Tap on body parts to explore symptoms',
+      'searchSymptoms': 'Search symptoms...',
+
       // Actions and causes (add more specific ones as needed)
       'dustWindAllergies': 'Dust, wind, or allergies',
       'infectionBacteriaHerpes': 'Infection (like bacteria or herpes virus)',
@@ -3471,6 +3538,18 @@ class AppLocalizations {
       'no': 'لا',
       'cancel': 'إلغاء',
       'confirm': 'تأكيد',
+
+      // Onboarding screen translations
+      'skip': 'تخطي',
+      'skipLogin': 'تخطي تسجيل الدخول',
+      'skipSignup': 'تخطي التسجيل',
+      'welcomeToAleefy': 'مرحبًا بك في أليفي',
+      'onboardingSubtitle1': 'أبسط طريقة للعناية بحيوانك الأليف، كل يوم.',
+      'checkAndBookInSeconds': 'تحقق واحجز في ثوانٍ',
+      'onboardingSubtitle2': 'راجع الأعراض الشائعة، وابحث عن العيادات القريبة، واحجز مكانًا على الفور — بدون غرف انتظار، بدون متاعب.',
+      'exclusiveBenefits': 'مزايا حصرية لحيوانك الأليف',
+      'onboardingSubtitle3': 'احصل على فحوصات مجانية، وعروض العناية، وخصومات خاصة للعيادات — فقط على أليفي.',
+
       // Auth screen translations
       'welcomeBack': 'مرحبًا بعودتك',
       'loginToAccount': 'تسجيل الدخول إلى حسابك',
@@ -3572,7 +3651,7 @@ class AppLocalizations {
       'confirmDeleteAccount':
           'هل أنت متأكد أنك تريد حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء.',
       'vetVisit': 'زيارة العيادة',
-      'animalView3D': 'مشخص الأعراض',
+      'animalView3D': 'كاشف الأعراض',
       'virtualVet': 'طبيب بيطري افتراضي',
       'searchPlaceholder': 'البحث عن عيادات، خدمات...',
       'redeemAndSave': 'استبدال ووفر',
@@ -3701,7 +3780,7 @@ class AppLocalizations {
       'hexavalent': 'سداسي',
       'heptavalent': 'سباعي',
       'octavalent': 'ثماني',
-      'deworming': 'طارد الديدان',
+      'deworming': 'علاج الديدان',
       'antiInsects': 'مضاد الحشرات',
       'rabies': 'السعار',
       'vaccineType': 'نوع اللقاح',
@@ -3739,18 +3818,18 @@ class AppLocalizations {
       'insectProtectionMissing': 'الحماية من الحشرات مفقودة',
       'insectProtectionMissingMessage':
           'حيوانك الأليف يحتاج إلى حماية من البراغيث والقراد. جرعة واحدة فقط مطلوبة لمنع الإصابة.',
-      'rabiesVaccineMissing': 'لقاح داء الكلب مفقود',
+      'rabiesVaccineMissing': 'لقاح السعار مفقود',
       'rabiesVaccineMissingMessage':
-          'حيوانك الأليف يحتاج إلى الحماية من داء الكلب. جرعة واحدة فقط مطلوبة. هذا اللقاح ضروري لسلامة حيوانك الأليف.',
+          'حيوانك الأليف يحتاج إلى الحماية من السعار. جرعة واحدة فقط مطلوبة. هذا اللقاح ضروري لسلامة حيوانك الأليف.',
       'noVaccinationRecords': 'لا توجد سجلات تطعيم',
       'addYourPetsFirstVaccine': 'أضف أول لقاح لحيوانك الأليف للبدء',
       'vaccinationRecords': 'سجلات التطعيم',
-      'annualBoosters': 'الجرعات التنشيطية السنوية',
+      'annualBoosters': 'الجرعات التنشيطية',
       'markAsComplete': 'تحديد كمكتمل',
       'markComplete': 'تحديد',
       'notYetAdministered': 'لم يتم إعطاؤها بعد',
       'doseMarkedComplete': '✓ تم تحديد الجرعة كمكتملة!',
-      'boosterMarkedComplete': '✓ تم تحديد الجرعة التنشيطية السنوية كمكتملة!',
+      'boosterMarkedComplete': '✓ تم تحديد الجرعة التنشيطية كمكتملة!',
       'boosterMarkedCompleteWithNextScheduled':
           '✓ اكتملت الجرعة التنشيطية! تم جدولة الجرعة التنشيطية التالية تلقائياً.',
       'viewSchedule': 'عرض',
@@ -3776,6 +3855,10 @@ class AppLocalizations {
       'wormingVaccineProtocol': 'بروتوكول تطعيم الديدان:',
       'wormingVaccineInfo': 'معلومات تطعيم الديدان',
       'firstDose': 'الجرعة األولى',
+      'vaccinesNeverTakenAndOverdue': 'اللقاحات التي لم يتم أخذها أبدًا ومتأخرة الآن',
+      'dueWithinNext30Days': 'مستحقة خلال الـ 30 يومًا القادمة',
+      'inProgressVaccinesNeedingNextDose': 'اللقاحات قيد التقدم التي تحتاج الجرعة التالية',
+      'notAdded': 'لم تتم الإضافة',
       'windowOpensDay14': 'بداية الفترة الصحيحة (يوم 14)',
       'windowClosedDay20': 'آخر موعد (يوم 20)',
       'dosesRequired2': 'جرعتين مطلوبة',
@@ -4052,6 +4135,7 @@ class AppLocalizations {
       'zoom': 'تكبير',
       'selectText': 'اختيار',
       'symptoms': 'الأعراض',
+      'searchSymptoms': 'ابحث عن الأعراض...',
       'viewSelected': 'عرض المحدد',
       'findVet': 'العثور على دكتور',
       'rotateInstructions': 'اضغط واسحب لتدوير النموذج',
@@ -4063,6 +4147,8 @@ class AppLocalizations {
           'اضغط على أيقونة الأعراض في الشريط العلوي لرؤية اختياراتك',
       'findVetInstructions': 'بعد اختيار الأعراض، اضغط على "العثور على دكتور"',
       'gotIt': 'فهمت',
+      'swipeToRotate': 'اسحب للتدوير',
+      'tapBodyPartToExplore': 'اضغط على أجزاء الجسم لاستكشاف الأعراض',
       'noDataAvailable': 'لا توجد بيانات متاحة',
       'noSymptomDataFound': 'لم يتم العثور على بيانات أعراض لـ',
       'noSymptomsFound': 'لم يتم العثور على أعراض لـ',

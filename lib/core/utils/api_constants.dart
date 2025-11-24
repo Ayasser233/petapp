@@ -2,10 +2,10 @@ class ApiConstants {
   // API URLs
   static String get apiBaseUrl {
     // Production API
-    return 'https://api.aleefy-app.com/api/v1';
+    return 'https://api-dev.aleefy-app.com/api/v1';
   }
 
-  static const String fallbackApiBaseUrl = 'https://api.aleefy-app.com/api/v1';
+  static const String fallbackApiBaseUrl = 'https://api-dev.aleefy-app.com/api/v1';
 
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);

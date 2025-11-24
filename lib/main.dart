@@ -15,6 +15,8 @@ import 'package:petapp/core/services/connectivity_service.dart';
 import 'package:petapp/core/services/error_handler_service.dart';
 import 'package:petapp/core/services/location_service.dart';
 import 'package:petapp/core/services/token_service.dart';
+import 'package:petapp/core/services/activity_lifecycle_manager.dart';
+import 'package:petapp/core/services/app_lifecycle_actions.dart';
 import 'package:petapp/core/themes/app_theme.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
@@ -78,6 +80,10 @@ Future<void> initServices() async {
   // Initialize ErrorHandlerService first
   Get.put(ErrorHandlerService());
 
+  // Initialize Activity Lifecycle Manager
+  final lifecycleManager = Get.put(ActivityLifecycleManager());
+  // onInit() is called automatically by GetX, no need to await it
+
   // Initialize location service
   await Get.putAsync(() async => LocationService());
   await Get.putAsync(() async => ConnectivityService());
@@ -91,9 +97,22 @@ Future<void> initServices() async {
   // Initialize AuthService
   await Get.putAsync(() async => await sl<AuthService>().init());
 
+  // Initialize App Lifecycle Actions
+  final authService = Get.find<AuthService>();
+  final connectivityService = Get.find<ConnectivityService>();
+  final lifecycleActions = AppLifecycleActions(
+    lifecycleManager: lifecycleManager,
+    authService: authService,
+    connectivityService: connectivityService,
+  );
+  lifecycleActions.initialize();
+  Get.put(lifecycleActions);
+
   // Initialize controllers
   Get.lazyPut(() => sl<PetController>());
   Get.lazyPut(() => sl<ProfileController>());
+
+  print('✅ All services initialized with lifecycle management');
 }
 
 class MyApp extends StatefulWidget {

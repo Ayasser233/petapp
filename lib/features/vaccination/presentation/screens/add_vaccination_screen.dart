@@ -532,8 +532,13 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
   }
 
   Widget _buildDoseSpacingWarning(DateTime firstDoseDate, bool isDark) {
-    // Calculate recommended date for dose 2 (typically 3-4 weeks after dose 1)
-    final recommendedDate = firstDoseDate.add(const Duration(days: 21));
+    // Calculate recommended date for dose 2 based on vaccine type
+    // Worms vaccines: 14 days interval
+    // Virus vaccines: 21 days interval (3 weeks)
+    final isWormsVaccine = selectedVaccineType?.contains('WORMS') ?? false;
+    final daysInterval = isWormsVaccine ? 14 : 21;
+    final recommendedDate = firstDoseDate.add(Duration(days: daysInterval));
+    final loc = AppLocalizations.of(context);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -560,7 +565,7 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Next Dose date: ${DateFormat('MMM dd, yyyy').format(recommendedDate)}',
+                  '${loc.nextDose}: ${DateFormat('MMM dd, yyyy').format(recommendedDate)}',
                   style: TextStyle(
                     fontSize: 13,
                     color: isDark ? Colors.grey[300] : Colors.grey[800],

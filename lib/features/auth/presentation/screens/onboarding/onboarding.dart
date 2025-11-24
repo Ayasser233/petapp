@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/constants.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:petapp/core/localization/app_localizations.dart';
 
 class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
@@ -36,23 +36,21 @@ class OnboardingScreen extends StatelessWidget {
           PageView(
             controller: controller.pageController,
             onPageChanged: controller.updatePage,
-            children: const [
+            children: [
               OnBoardingPage(
                 image: Constants.onboardingImage1,
-                title: 'Find Your Pet',
-                subtitle:
-                    'Find your perfect pet match with our advanced search and filter options.',
+                title: AppLocalizations.of(context).welcomeToAleefy,
+                subtitle: AppLocalizations.of(context).onboardingSubtitle1,
               ),
               OnBoardingPage(
                 image: Constants.onboardingImage2,
-                title: 'Adopt a Pet',
-                subtitle: 'Adopt a pet and give them a loving home.',
+                title: AppLocalizations.of(context).checkAndBookInSeconds,
+                subtitle: AppLocalizations.of(context).onboardingSubtitle2,
               ),
               OnBoardingPage(
                 image: Constants.onboardingImage3,
-                title: 'Pet Care',
-                subtitle:
-                    'Get tips and advice on how to care for your new pet.',
+                title: AppLocalizations.of(context).exclusiveBenefits,
+                subtitle: AppLocalizations.of(context).onboardingSubtitle3,
               ),
             ],
           ),
@@ -148,8 +146,8 @@ class OnBoardingSkip extends StatelessWidget {
               ? AppColors.white
               : AppColors.black,
         ),
-        child: const Text(
-          'Skip',
+        child: Text(
+          AppLocalizations.of(context).skip,
         ),
       ),
     );
@@ -172,10 +170,11 @@ class OnBoardingPage extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          SvgPicture.asset(
+          Image.asset(
             image,
             width: MediaQuery.of(context).size.width * 0.8,
             height: MediaQuery.of(context).size.height * 0.6,
+            fit: BoxFit.contain,
           ),
           Text(
             title,

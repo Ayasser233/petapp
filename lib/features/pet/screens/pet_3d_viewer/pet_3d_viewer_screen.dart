@@ -26,6 +26,13 @@ class Pet3DViewerScreen extends StatefulWidget {
 class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animController;
+  bool _showGestureHint = true;
+  bool _hasInteracted = false;
+
+  // Search functionality
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  final List<MapEntry<String, PetSymptom>> _searchResults = [];
 
   @override
   void initState() {
@@ -36,12 +43,71 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
+
+    // Auto-hide gesture hint after 5 seconds
+    Future.delayed(const Duration(seconds: 5), () {
+      if (mounted && !_hasInteracted) {
+        setState(() {
+          _showGestureHint = false;
+        });
+      }
+    });
+
+    // Listen to search changes
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  void _onSearchChanged() {
+    setState(() {
+      _searchQuery = _searchController.text.toLowerCase();
+      if (_searchQuery.isNotEmpty) {
+        _performSearch();
+      } else {
+        _searchResults.clear();
+      }
+    });
+  }
+
+  void _performSearch() {
+    _searchResults.clear();
+
+    // Use the built-in search method
+    final results = PetSymptomData.searchSymptoms(_searchQuery, context);
+
+    // Map results with their categories and body parts
+    for (var symptom in results) {
+      // Find which category and body part this symptom belongs to
+      String foundCategory = 'general';
+      String foundBodyPart = 'general';
+
+      PetSymptomData.symptoms.forEach((bodyPart, categories) {
+        categories.forEach((category, symptomList) {
+          if (symptomList.contains(symptom)) {
+            foundCategory = category;
+            foundBodyPart = bodyPart;
+          }
+        });
+      });
+
+      // Store as category|bodyPart for later use
+      _searchResults.add(MapEntry('$foundCategory|$foundBodyPart', symptom));
+    }
   }
 
   @override
   void dispose() {
     _animController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _onUserInteracted() {
+    if (!_hasInteracted) {
+      setState(() {
+        _hasInteracted = true;
+        _showGestureHint = false;
+      });
+    }
   }
 
   @override
@@ -75,41 +141,283 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
       ),
       body: Column(
         children: [
-          // Use the Pet3DViewer in a Column, not inside a Stack with Expanded
-          Pet3DViewer(
-            petType: widget.petType,
-            modelPath: widget.modelPath,
-            viewerHeight: MediaQuery.of(context).size.height * 0.4,
-            backgroundColor: backgroundColor,
-            onSymptomSelected: (bodyPart) {
-              // When mesh is clicked, show symptom selection for that body part
-              _showSymptomSelectionDialog(bodyPart.toLowerCase());
-            },
-          ),
-
-          // Your existing body part selection UI can go in an Expanded widget here
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+          // 3D Viewer with gesture hint
+          GestureDetector(
+            onPanStart: (_) => _onUserInteracted(),
+            onPanUpdate: (_) => _onUserInteracted(),
+            child: Stack(
               children: [
-                _buildBodyPartItem(localizations.head, isDark, textColor),
-                _buildBodyPartItem(localizations.legs, isDark, textColor),
-                _buildBodyPartItem(
-                    localizations.skinAndCoat, isDark, textColor),
-                _buildBodyPartItem(localizations.pelvis, isDark, textColor),
-                _buildBodyPartItem(localizations.buttocks, isDark, textColor),
-                _buildBodyPartItem(
-                    localizations.neurologicalIssues, isDark, textColor),
-                _buildBodyPartItem(
-                    localizations.behavioralIssues, isDark, textColor),
-                _buildBodyPartItem(
-                    localizations.generalIssues, isDark, textColor),
-                _buildBodyPartItem(
-                    localizations.breathingProblems, isDark, textColor),
+                // The 3D Viewer
+                Pet3DViewer(
+                  petType: widget.petType,
+                  modelPath: widget.modelPath,
+                  viewerHeight: MediaQuery.of(context).size.height * 0.4,
+                  backgroundColor: backgroundColor,
+                  onSymptomSelected: (bodyPart) {
+                    _onUserInteracted();
+                    // When mesh is clicked, show symptom selection for that body part
+                    _showSymptomSelectionDialog(bodyPart.toLowerCase());
+                  },
+                ),
+
+                // Gesture hint overlay
+                if (_showGestureHint)
+                  Positioned.fill(
+                    child: _buildGestureHint(isDark, localizations),
+                  ),
               ],
             ),
           ),
+
+          // Search Bar
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              style: TextStyle(color: textColor),
+              decoration: InputDecoration(
+                hintText: localizations.searchSymptoms,
+                hintStyle: TextStyle(color: textColor.withValues(alpha: 0.5)),
+                prefixIcon: Icon(Icons.search, color: textColor.withValues(alpha: 0.7)),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: Icon(Icons.clear, color: textColor.withValues(alpha: 0.7)),
+                        onPressed: () {
+                          _searchController.clear();
+                        },
+                      )
+                    : null,
+                filled: true,
+                fillColor: isDark ? Colors.grey[800] : Colors.grey[200],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              ),
+            ),
+          ),
+
+          // Content - either search results or body part list
+          Expanded(
+            child: _searchQuery.isNotEmpty
+                ? _buildSearchResults(isDark, textColor, localizations)
+                : _buildBodyPartList(isDark, textColor, localizations),
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSearchResults(bool isDark, Color textColor, AppLocalizations localizations) {
+    if (_searchResults.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: textColor.withValues(alpha: 0.3),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              localizations.noSymptomsFound,
+              style: TextStyle(
+                color: textColor.withValues(alpha: 0.6),
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: _searchResults.length,
+      itemBuilder: (context, index) {
+        final entry = _searchResults[index];
+        final parts = entry.key.split('|');
+        final category = parts[0];
+        final bodyPart = parts.length > 1 ? parts[1] : 'general';
+        final symptom = entry.value;
+
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          color: isDark ? Colors.grey[850] : Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ListTile(
+            contentPadding: const EdgeInsets.all(16),
+            title: Text(
+              symptom.getLocalizedName(context),
+              style: TextStyle(
+                color: textColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 8),
+                Text(
+                  PetSymptomData.getLocalizedCategoryName(context, category),
+                  style: TextStyle(
+                    color: AppColors.orange,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  symptom.getLocalizedDescription(context),
+                  style: TextStyle(
+                    color: textColor.withValues(alpha: 0.7),
+                    fontSize: 14,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+            trailing: Icon(
+              Icons.arrow_forward_ios,
+              color: textColor.withValues(alpha: 0.5),
+              size: 16,
+            ),
+            onTap: () {
+              _showSymptomDetailDialog(
+                bodyPart,
+                category,
+                symptom.toMap(),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBodyPartList(bool isDark, Color textColor, AppLocalizations localizations) {
+    return ListView(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      children: [
+        _buildBodyPartItem(localizations.head, isDark, textColor),
+        _buildBodyPartItem(localizations.legs, isDark, textColor),
+        _buildBodyPartItem(localizations.skinAndCoat, isDark, textColor),
+        _buildBodyPartItem(localizations.pelvis, isDark, textColor),
+        _buildBodyPartItem(localizations.buttocks, isDark, textColor),
+        _buildBodyPartItem(localizations.neurologicalIssues, isDark, textColor),
+        _buildBodyPartItem(localizations.behavioralIssues, isDark, textColor),
+        _buildBodyPartItem(localizations.generalIssues, isDark, textColor),
+        _buildBodyPartItem(localizations.breathingProblems, isDark, textColor),
+      ],
+    );
+  }
+
+  Widget _buildGestureHint(bool isDark, AppLocalizations localizations) {
+    // ...existing code...
+    return AnimatedOpacity(
+      opacity: _showGestureHint ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 500),
+      child: Container(
+        color: Colors.black.withValues(alpha: 0.4),
+        child: Center(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[850] : Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 30,
+                  offset: const Offset(0, 15),
+                  spreadRadius: 5,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Animated swipe icon
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: -30.0, end: 30.0),
+                  duration: const Duration(milliseconds: 1500),
+                  curve: Curves.easeInOut,
+                  builder: (context, value, child) {
+                    return Transform.translate(
+                      offset: Offset(value, 0),
+                      child: Icon(
+                        Icons.swipe_outlined,
+                        size: 56,
+                        color: AppColors.orange,
+                      ),
+                    );
+                  },
+                  onEnd: () {
+                    if (mounted && _showGestureHint) {
+                      setState(() {});
+                    }
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                // Title
+                Text(
+                  localizations.swipeToRotate,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: isDark ? Colors.white : Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 12),
+
+                // Subtitle
+                Text(
+                  localizations.tapBodyPartToExplore,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+
+                const SizedBox(height: 24),
+
+                // Got it button
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _onUserInteracted,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      localizations.gotIt,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

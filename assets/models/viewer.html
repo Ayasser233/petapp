@@ -34,73 +34,119 @@
     </style>
 </head>
 <body>
-    <div id="canvas-container">
-        <div id="loading">Loading 3D Model...</div>
-    </div>
+<div id="canvas-container">
+    <div id="loading">Loading 3D Model...</div>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/OBJLoader.js"></script>
 
-    <script>
-        let scene, camera, renderer, controls, model;
-        let meshes = [];
-        let selectedMesh = null;
-        let originalMaterials = new Map();
+<script>
+    let scene, camera, renderer, model, modelContainer;
+    let meshes = [];
+    let selectedMesh = null;
+    let originalMaterials = new Map();
 
-        // Initialize Three.js scene
-        function initScene(backgroundColor) {
-            const container = document.getElementById('canvas-container');
-            
-            // Scene
-            scene = new THREE.Scene();
-            const bgColor = backgroundColor || '#1a1a1a';
-            scene.background = new THREE.Color(bgColor);
+    // Initialize Three.js scene
+    function initScene(backgroundColor) {
+        const container = document.getElementById('canvas-container');
 
-            // Camera - centered on model
-            camera = new THREE.PerspectiveCamera(
-                45,
-                container.clientWidth / container.clientHeight,
-                0.1,
-                1000
-            );
-            camera.position.set(0, 1, 3); // Centered vertically
+        // Scene
+        scene = new THREE.Scene();
+        const bgColor = backgroundColor || '#1a1a1a';
+        scene.background = new THREE.Color(bgColor);
 
-            // Renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.shadowMap.enabled = true;
-            container.appendChild(renderer.domElement);
+        // Camera - positioned to view model from front
+        camera = new THREE.PerspectiveCamera(
+            45,
+            container.clientWidth / container.clientHeight,
+            0.1,
+            1000
+        );
+        camera.position.set(0, 0, 4); // Further back to see full model
+        camera.lookAt(0, 0, 0); // Look at origin
 
-            // Lights
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-            scene.add(ambientLight);
+        // Renderer
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.shadowMap.enabled = true;
+        container.appendChild(renderer.domElement);
 
-            const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.6);
-            directionalLight1.position.set(5, 10, 5);
-            directionalLight1.castShadow = true;
-            scene.add(directionalLight1);
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+        scene.add(ambientLight);
 
-            const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
-            directionalLight2.position.set(-5, 5, -5);
-            scene.add(directionalLight2);
+        const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.6);
+        directionalLight1.position.set(5, 10, 5);
+        directionalLight1.castShadow = true;
+        scene.add(directionalLight1);
 
-            // Controls - DISABLED for fixed model
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enabled = false; // Disable all user controls
-            controls.enableRotate = false;
-            controls.enableZoom = false;
-            controls.enablePan = false;
-            controls.target.set(0, 0, 0); // Center target
-            controls.update();
+        const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.4);
+        directionalLight2.position.set(-5, 5, -5);
+        scene.add(directionalLight2);
 
-            // Raycaster for mesh interaction
-            const raycaster = new THREE.Raycaster();
-            const mouse = new THREE.Vector2();
+        // Custom Y-axis rotation handling - rotate model around its own axis
+        let isDragging = false;
+        let previousMouseX = 0;
 
-            renderer.domElement.addEventListener('click', (event) => {
+        // Zoom handling
+        const minZoom = 2;
+        const maxZoom = 8;
+        let currentZoom = 4; // Initial camera distance
+
+        // Raycaster for mesh interaction
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        let clickStartX = 0;
+        let clickStartY = 0;
+
+        // Mouse drag for rotation
+        renderer.domElement.addEventListener('mousedown', (event) => {
+            isDragging = true;
+            previousMouseX = event.clientX;
+            clickStartX = event.clientX;
+            clickStartY = event.clientY;
+        });
+
+        renderer.domElement.addEventListener('mousemove', (event) => {
+            if (isDragging && modelContainer) {
+                const deltaX = event.clientX - previousMouseX;
+                // Rotate around Y-axis (up axis) - model rotates in place
+                modelContainer.rotation.y += deltaX * 0.01;
+                previousMouseX = event.clientX;
+                console.log('Rotation Y:', modelContainer.rotation.y);
+            }
+        });
+
+        renderer.domElement.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        renderer.domElement.addEventListener('mouseleave', () => {
+            isDragging = false;
+        });
+
+        // Mouse wheel zoom
+        renderer.domElement.addEventListener('wheel', (event) => {
+            event.preventDefault();
+
+            const delta = event.deltaY * -0.001;
+            currentZoom += delta;
+            currentZoom = Math.max(minZoom, Math.min(maxZoom, currentZoom));
+
+            camera.position.z = currentZoom;
+        }, { passive: false });
+
+        // Click for mesh selection (only if not dragging)
+        renderer.domElement.addEventListener('click', (event) => {
+            // Only trigger click if mouse didn't move much (not a drag)
+            const deltaX = Math.abs(event.clientX - clickStartX);
+            const deltaY = Math.abs(event.clientY - clickStartY);
+
+            if (deltaX < 5 && deltaY < 5) {
                 const rect = renderer.domElement.getBoundingClientRect();
                 mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
                 mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -112,244 +158,355 @@
                     const clickedMesh = intersects[0].object;
                     onMeshClicked(clickedMesh);
                 }
-            });
-
-            // Handle window resize
-            window.addEventListener('resize', () => {
-                camera.aspect = container.clientWidth / container.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, container.clientHeight);
-            });
-
-            animate();
-        }
-
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
-        }
-
-        // Load model from base64 data URL (supports both GLB and OBJ)
-        function loadModel(dataUrl, fileType = 'glb') {
-            const loading = document.getElementById('loading');
-            loading.classList.remove('hidden');
-
-            try {
-                // Extract base64 data from data URL
-                const base64Data = dataUrl.split(',')[1];
-                
-                // Convert base64 to binary
-                const binaryString = atob(base64Data);
-                const bytes = new Uint8Array(binaryString.length);
-                for (let i = 0; i < binaryString.length; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
-                }
-                
-                // Determine file type and mime type
-                const isOBJ = fileType.toLowerCase() === 'obj';
-                const mimeType = isOBJ ? 'text/plain' : 'model/gltf-binary';
-                
-                // Create blob and URL
-                const blob = new Blob([bytes], { type: mimeType });
-                const blobUrl = URL.createObjectURL(blob);
-
-                // Process loaded model
-                const processModel = (loadedModel) => {
-                    model = loadedModel;
-                    
-                    // Clean up blob URL
-                    URL.revokeObjectURL(blobUrl);
-                    
-                    // Center and scale the model
-                    const box = new THREE.Box3().setFromObject(model);
-                    const center = box.getCenter(new THREE.Vector3());
-                    const size = box.getSize(new THREE.Vector3());
-                    
-                    const maxDim = Math.max(size.x, size.y, size.z);
-                    const scale = 2 / maxDim;
-                    model.scale.multiplyScalar(scale);
-                    
-                    // Center the model at origin (0, 0, 0)
-                    model.position.sub(center.multiplyScalar(scale));
-
-                    // Collect all meshes and remove materials (show basic geometry)
-                    meshes = [];
-                    model.traverse((child) => {
-                        if (child.isMesh) {
-                            meshes.push(child);
-                            // Store original for reference
-                            originalMaterials.set(child, child.material.clone());
-                            // Replace with basic material - medium gray
-                            child.material = new THREE.MeshStandardMaterial({
-                                color: 0x808080,
-                                flatShading: true,
-                                roughness: 1.0,
-                                metalness: 0.0
-                            });
-                        }
-                    });
-
-                    scene.add(model);
-                    loading.classList.add('hidden');
-
-                    // Send mesh names to Flutter
-                    const meshNames = meshes.map(m => m.name).filter(n => n);
-                    sendMessageToFlutter('meshesDetected', { meshes: meshNames });
-                    sendMessageToFlutter('modelLoaded', { success: true });
-                };
-
-                if (isOBJ) {
-                    // Load OBJ file
-                    const loader = new THREE.OBJLoader();
-                    loader.load(
-                        blobUrl,
-                        (obj) => {
-                            processModel(obj);
-                        },
-                        (progress) => {
-                            const percent = (progress.loaded / progress.total * 100).toFixed(0);
-                            loading.textContent = `Loading: ${percent}%`;
-                        },
-                        (error) => {
-                            console.error('Error loading OBJ model:', error);
-                            loading.textContent = 'Error loading model';
-                            sendMessageToFlutter('modelLoaded', { success: false, error: error.message });
-                            URL.revokeObjectURL(blobUrl);
-                        }
-                    );
-                } else {
-                    // Load GLB file
-                    const loader = new THREE.GLTFLoader();
-                    loader.load(
-                        blobUrl,
-                        (gltf) => {
-                            processModel(gltf.scene);
-                        },
-                        (progress) => {
-                            const percent = (progress.loaded / progress.total * 100).toFixed(0);
-                            loading.textContent = `Loading: ${percent}%`;
-                        },
-                        (error) => {
-                            console.error('Error loading GLB model:', error);
-                            loading.textContent = 'Error loading model';
-                            sendMessageToFlutter('modelLoaded', { success: false, error: error.message });
-                            URL.revokeObjectURL(blobUrl);
-                        }
-                    );
-                }
-            } catch (error) {
-                console.error('Error processing model data:', error);
-                loading.textContent = 'Error processing model';
-                sendMessageToFlutter('modelLoaded', { success: false, error: error.message });
             }
+        });
+
+        // Touch support for mobile
+        let previousTouchX = 0;
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let initialPinchDistance = 0;
+        let isPinching = false;
+
+        // Get distance between two touch points
+        function getTouchDistance(touches) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
         }
 
-        // Handle mesh click
-        function onMeshClicked(mesh) {
-            // Reset previous selection to basic material - medium gray
-            if (selectedMesh) {
-                selectedMesh.material = new THREE.MeshStandardMaterial({
-                    color: 0x808080,
-                    flatShading: true,
-                    roughness: 1.0,
-                    metalness: 0.0
+        renderer.domElement.addEventListener('touchstart', (event) => {
+            if (event.touches.length === 1) {
+                isDragging = true;
+                isPinching = false;
+                previousTouchX = event.touches[0].clientX;
+                touchStartX = event.touches[0].clientX;
+                touchStartY = event.touches[0].clientY;
+                event.preventDefault();
+            } else if (event.touches.length === 2) {
+                // Start pinch zoom
+                isDragging = false;
+                isPinching = true;
+                initialPinchDistance = getTouchDistance(event.touches);
+                event.preventDefault();
+            }
+        });
+
+        renderer.domElement.addEventListener('touchmove', (event) => {
+            if (event.touches.length === 1 && isDragging && !isPinching && modelContainer) {
+                const deltaX = event.touches[0].clientX - previousTouchX;
+                // Rotate around Y-axis (up axis) - model rotates in place
+                modelContainer.rotation.y += deltaX * 0.01;
+                previousTouchX = event.touches[0].clientX;
+                event.preventDefault();
+            } else if (event.touches.length === 2 && isPinching) {
+                // Pinch zoom
+                const currentDistance = getTouchDistance(event.touches);
+                const delta = (currentDistance - initialPinchDistance) * 0.01;
+
+                currentZoom -= delta;
+                currentZoom = Math.max(minZoom, Math.min(maxZoom, currentZoom));
+                camera.position.z = currentZoom;
+
+                initialPinchDistance = currentDistance;
+                event.preventDefault();
+            }
+        });
+
+        renderer.domElement.addEventListener('touchend', (event) => {
+            if (isPinching) {
+                isPinching = false;
+                event.preventDefault();
+                return;
+            }
+
+            isDragging = false;
+
+            // Check if it was a tap (not a swipe)
+            if (event.changedTouches.length === 1) {
+                const touch = event.changedTouches[0];
+                const deltaX = Math.abs(touch.clientX - touchStartX);
+                const deltaY = Math.abs(touch.clientY - touchStartY);
+
+                if (deltaX < 5 && deltaY < 5) {
+                    const rect = renderer.domElement.getBoundingClientRect();
+                    mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+                    mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
+
+                    raycaster.setFromCamera(mouse, camera);
+                    const intersects = raycaster.intersectObjects(meshes, true);
+
+                    if (intersects.length > 0) {
+                        const clickedMesh = intersects[0].object;
+                        onMeshClicked(clickedMesh);
+                    }
+                }
+            }
+        });
+
+        renderer.domElement.addEventListener('touchcancel', () => {
+            isDragging = false;
+            isPinching = false;
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        animate();
+    }
+
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    }
+
+    // Load model from base64 data URL (supports both GLB and OBJ)
+    function loadModel(dataUrl, fileType = 'glb') {
+        const loading = document.getElementById('loading');
+        loading.classList.remove('hidden');
+
+        try {
+            // Extract base64 data from data URL
+            const base64Data = dataUrl.split(',')[1];
+
+            // Convert base64 to binary
+            const binaryString = atob(base64Data);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+
+            // Determine file type and mime type
+            const isOBJ = fileType.toLowerCase() === 'obj';
+            const mimeType = isOBJ ? 'text/plain' : 'model/gltf-binary';
+
+            // Create blob and URL
+            const blob = new Blob([bytes], { type: mimeType });
+            const blobUrl = URL.createObjectURL(blob);
+
+            // Process loaded model
+            const processModel = (loadedModel) => {
+                model = loadedModel;
+
+                // Clean up blob URL
+                URL.revokeObjectURL(blobUrl);
+
+                // Calculate bounding box
+                const box = new THREE.Box3().setFromObject(model);
+                const size = box.getSize(new THREE.Vector3());
+                const center = box.getCenter(new THREE.Vector3());
+
+                // Scale model to fit in view (target size of 2 units)
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const scale = 2 / maxDim;
+
+                // Apply scale
+                model.scale.set(scale, scale, scale);
+
+                // After scaling, recalculate center
+                const boxAfterScale = new THREE.Box3().setFromObject(model);
+                const centerAfterScale = boxAfterScale.getCenter(new THREE.Vector3());
+
+                // Position model so its center is at origin (0, 0, 0)
+                model.position.set(
+                    -centerAfterScale.x,
+                    -centerAfterScale.y,
+                    -centerAfterScale.z
+                );
+
+                // Collect all meshes and apply basic material
+                meshes = [];
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        meshes.push(child);
+                        // Store original for reference
+                        originalMaterials.set(child, child.material.clone());
+                        // Replace with basic material - medium gray
+                        child.material = new THREE.MeshStandardMaterial({
+                            color: 0x808080,
+                            flatShading: true,
+                            roughness: 1.0,
+                            metalness: 0.0
+                        });
+                    }
                 });
-            }
 
-            // Highlight new selection
-            selectedMesh = mesh;
-            const highlightMaterial = new THREE.MeshStandardMaterial({
-                color: 0xff6b35,
-                emissive: 0xff6b35,
-                emissiveIntensity: 0.5,
+                // Create container at origin - this will be rotated
+                modelContainer = new THREE.Group();
+                modelContainer.position.set(0, 0, 0);
+                modelContainer.add(model);
+
+                // Add container to scene
+                scene.add(modelContainer);
+                loading.classList.add('hidden');
+
+                // Debug logging
+                console.log('Model loaded and centered:');
+                console.log('Model position:', model.position);
+                console.log('Container position:', modelContainer.position);
+                console.log('Model center (should be at origin):', centerAfterScale);
+
+                // Send mesh names to Flutter
+                const meshNames = meshes.map(m => m.name).filter(n => n);
+                sendMessageToFlutter('meshesDetected', { meshes: meshNames });
+                sendMessageToFlutter('modelLoaded', { success: true });
+            };
+
+            if (isOBJ) {
+                // Load OBJ file
+                const loader = new THREE.OBJLoader();
+                loader.load(
+                    blobUrl,
+                    (obj) => {
+                        processModel(obj);
+                    },
+                    (progress) => {
+                        const percent = (progress.loaded / progress.total * 100).toFixed(0);
+                        loading.textContent = `Loading: ${percent}%`;
+                    },
+                    (error) => {
+                        console.error('Error loading OBJ model:', error);
+                        loading.textContent = 'Error loading model';
+                        sendMessageToFlutter('modelLoaded', { success: false, error: error.message });
+                        URL.revokeObjectURL(blobUrl);
+                    }
+                );
+            } else {
+                // Load GLB file
+                const loader = new THREE.GLTFLoader();
+                loader.load(
+                    blobUrl,
+                    (gltf) => {
+                        processModel(gltf.scene);
+                    },
+                    (progress) => {
+                        const percent = (progress.loaded / progress.total * 100).toFixed(0);
+                        loading.textContent = `Loading: ${percent}%`;
+                    },
+                    (error) => {
+                        console.error('Error loading GLB model:', error);
+                        loading.textContent = 'Error loading model';
+                        sendMessageToFlutter('modelLoaded', { success: false, error: error.message });
+                        URL.revokeObjectURL(blobUrl);
+                    }
+                );
+            }
+        } catch (error) {
+            console.error('Error processing model data:', error);
+            loading.textContent = 'Error processing model';
+            sendMessageToFlutter('modelLoaded', { success: false, error: error.message });
+        }
+    }
+
+    // Handle mesh click
+    function onMeshClicked(mesh) {
+        // Reset previous selection to basic material - medium gray
+        if (selectedMesh) {
+            selectedMesh.material = new THREE.MeshStandardMaterial({
+                color: 0x808080,
                 flatShading: true,
                 roughness: 1.0,
                 metalness: 0.0
             });
-            mesh.material = highlightMaterial;
-
-            // Send to Flutter
-            sendMessageToFlutter('meshClicked', {
-                name: mesh.name || 'unnamed',
-                position: {
-                    x: mesh.position.x,
-                    y: mesh.position.y,
-                    z: mesh.position.z
-                }
-            });
         }
 
-        // Highlight specific mesh by name
-        function highlightMesh(meshName) {
-            const mesh = meshes.find(m => m.name === meshName);
-            if (mesh) {
-                onMeshClicked(mesh);
-            }
-        }
+        // Highlight new selection
+        selectedMesh = mesh;
+        const highlightMaterial = new THREE.MeshStandardMaterial({
+            color: 0xff6b35,
+            emissive: 0xff6b35,
+            emissiveIntensity: 0.5,
+            flatShading: true,
+            roughness: 1.0,
+            metalness: 0.0
+        });
+        mesh.material = highlightMaterial;
 
-        // Clear all highlights
-        function clearHighlights() {
-            if (selectedMesh) {
-                // Reset to basic material - medium gray
-                selectedMesh.material = new THREE.MeshStandardMaterial({
-                    color: 0x808080,
-                    flatShading: true,
-                    roughness: 1.0,
-                    metalness: 0.0
-                });
-                selectedMesh = null;
-            }
-        }
-
-        // Get list of all mesh names
-        function getMeshNames() {
-            const names = meshes.map(m => m.name).filter(n => n);
-            sendMessageToFlutter('meshNames', { names: names });
-        }
-
-        // Send message to Flutter
-        function sendMessageToFlutter(type, data) {
-            if (window.FlutterChannel) {
-                window.FlutterChannel.postMessage(JSON.stringify({ type, data }));
-            }
-        }
-
-        // Listen for messages from Flutter
-        window.addEventListener('message', (event) => {
-            try {
-                const message = JSON.parse(event.data);
-                handleFlutterMessage(message);
-            } catch (e) {
-                console.error('Error parsing message:', e);
+        // Send to Flutter
+        sendMessageToFlutter('meshClicked', {
+            name: mesh.name || 'unnamed',
+            position: {
+                x: mesh.position.x,
+                y: mesh.position.y,
+                z: mesh.position.z
             }
         });
+    }
 
-        function handleFlutterMessage(message) {
-            switch (message.action) {
-                case 'init':
-                    initScene(message.backgroundColor);
-                    break;
-                case 'loadModel':
-                    loadModel(message.dataUrl, message.fileType || 'glb');
-                    break;
-                case 'highlightMesh':
-                    highlightMesh(message.meshName);
-                    break;
-                case 'clearHighlights':
-                    clearHighlights();
-                    break;
-                case 'getMeshNames':
-                    getMeshNames();
-                    break;
-                case 'rotateModel':
-                    if (model) {
-                        model.rotation.y += (message.angle || 90) * Math.PI / 180;
-                    }
-                    break;
-            }
+    // Highlight specific mesh by name
+    function highlightMesh(meshName) {
+        const mesh = meshes.find(m => m.name === meshName);
+        if (mesh) {
+            onMeshClicked(mesh);
         }
-    </script>
+    }
+
+    // Clear all highlights
+    function clearHighlights() {
+        if (selectedMesh) {
+            // Reset to basic material - medium gray
+            selectedMesh.material = new THREE.MeshStandardMaterial({
+                color: 0x808080,
+                flatShading: true,
+                roughness: 1.0,
+                metalness: 0.0
+            });
+            selectedMesh = null;
+        }
+    }
+
+    // Get list of all mesh names
+    function getMeshNames() {
+        const names = meshes.map(m => m.name).filter(n => n);
+        sendMessageToFlutter('meshNames', { names: names });
+    }
+
+    // Send message to Flutter
+    function sendMessageToFlutter(type, data) {
+        if (window.FlutterChannel) {
+            window.FlutterChannel.postMessage(JSON.stringify({ type, data }));
+        }
+    }
+
+    // Listen for messages from Flutter
+    window.addEventListener('message', (event) => {
+        try {
+            const message = JSON.parse(event.data);
+            handleFlutterMessage(message);
+        } catch (e) {
+            console.error('Error parsing message:', e);
+        }
+    });
+
+    function handleFlutterMessage(message) {
+        switch (message.action) {
+            case 'init':
+                initScene(message.backgroundColor);
+                break;
+            case 'loadModel':
+                loadModel(message.dataUrl, message.fileType || 'glb');
+                break;
+            case 'highlightMesh':
+                highlightMesh(message.meshName);
+                break;
+            case 'clearHighlights':
+                clearHighlights();
+                break;
+            case 'getMeshNames':
+                getMeshNames();
+                break;
+            case 'rotateModel':
+                if (modelContainer) {
+                    modelContainer.rotation.y += (message.angle || 90) * Math.PI / 180;
+                }
+                break;
+        }
+    }
+</script>
 </body>
 </html>

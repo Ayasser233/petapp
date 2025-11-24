@@ -198,10 +198,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             Expanded(
-                              child: _buildCompactVaccinationServiceItem(
+                              child: _buildCompactServiceItem(
                                 context,
                                 localizations.vaccination,
-                                Icons.vaccines,
+                                'assets/icons/icons-03.png',
                                 isDark,
                                 onTap: () => Get.toNamed(
                                     AppRoutes.selectPetForVaccination),
@@ -674,73 +674,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // Compact vaccination service item
-  Widget _buildCompactVaccinationServiceItem(
-      BuildContext context, String title, IconData icon, bool isDark,
-      {VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 110,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.lightblack : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            if (!isDark)
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.2),
-                blurRadius: 8,
-                spreadRadius: 1,
-                offset: const Offset(0, 2),
-              ),
-          ],
-          border: !isDark
-              ? Border.all(
-                  color: Colors.grey.withValues(alpha: 0.1), width: 1.0)
-              : null,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Icon container
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: !isDark
-                  ? BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.orange.withValues(alpha: 0.1),
-                    )
-                  : null,
-              child: Icon(
-                icon,
-                size: 45,
-                color: AppColors.orange,
-              ),
-            ),
-            const SizedBox(height: 6),
-            // Title text
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text(
-                title,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontSize: 11,
-                    ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
+  // Build nearby vet card
   Widget _buildNearbyCard(
     BuildContext context, {
     required VetModel vet,
