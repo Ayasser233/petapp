@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/foundation.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/utils/app_colors.dart';
@@ -148,6 +150,9 @@ class _Pet3DViewerWebViewState extends State<Pet3DViewerWebView> {
         ),
       );
 
+    // Enable gesture recognizers for touch events
+    await _controller.enableZoom(false); // Disable default zoom to use custom pinch
+
     // Load the HTML file
     final htmlContent =
         await rootBundle.loadString('assets/models/viewer.html');
@@ -294,6 +299,24 @@ class _Pet3DViewerWebViewState extends State<Pet3DViewerWebView> {
     ''');
   }
 
+  void _zoomIn() {
+    _controller.runJavaScript('''
+      handleFlutterMessage({
+        action: 'zoom',
+        direction: 'in'
+      });
+    ''');
+  }
+
+  void _zoomOut() {
+    _controller.runJavaScript('''
+      handleFlutterMessage({
+        action: 'zoom',
+        direction: 'out'
+      });
+    ''');
+  }
+
   void getMeshNames() {
     _controller.runJavaScript('''
       handleFlutterMessage({
@@ -314,8 +337,24 @@ class _Pet3DViewerWebViewState extends State<Pet3DViewerWebView> {
         borderRadius: BorderRadius.circular(16),
         child: Stack(
           children: [
-            // WebView
-            WebViewWidget(controller: _controller),
+            // WebView with gesture recognizers enabled
+            WebViewWidget(
+              controller: _controller,
+              gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
+                Factory<VerticalDragGestureRecognizer>(
+                  () => VerticalDragGestureRecognizer(),
+                ),
+                Factory<HorizontalDragGestureRecognizer>(
+                  () => HorizontalDragGestureRecognizer(),
+                ),
+                Factory<ScaleGestureRecognizer>(
+                  () => ScaleGestureRecognizer(),
+                ),
+                Factory<TapGestureRecognizer>(
+                  () => TapGestureRecognizer(),
+                ),
+              },
+            ),
 
             // Loading indicator
             if (_isLoading)
@@ -375,19 +414,52 @@ class _Pet3DViewerWebViewState extends State<Pet3DViewerWebView> {
                 ),
               ),
 
-            // Rotation button
+            // Control buttons
             if (widget.allowRotation && !_isLoading && _errorMessage == null)
               Positioned(
                 bottom: 16,
                 right: 16,
-                child: FloatingActionButton(
-                  mini: true,
-                  onPressed: () => rotateModel(),
-                  backgroundColor: AppColors.orange,
-                  child: const Icon(
-                    Icons.rotate_right,
-                    color: Colors.white,
-                  ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Zoom In button
+                    if (widget.allowZoom)
+                      FloatingActionButton(
+                        mini: true,
+                        onPressed: () => _zoomIn(),
+                        backgroundColor: AppColors.orange,
+                        heroTag: 'zoom_in',
+                        child: const Icon(
+                          Icons.add,
+                          color: Colors.white,
+                        ),
+                      ),
+                    if (widget.allowZoom) const SizedBox(height: 8),
+                    // Zoom Out button
+                    if (widget.allowZoom)
+                      FloatingActionButton(
+                        mini: true,
+                        onPressed: () => _zoomOut(),
+                        backgroundColor: AppColors.orange,
+                        heroTag: 'zoom_out',
+                        child: const Icon(
+                          Icons.remove,
+                          color: Colors.white,
+                        ),
+                      ),
+                    const SizedBox(height: 8),
+                    // Rotation button
+                    FloatingActionButton(
+                      mini: true,
+                      onPressed: () => rotateModel(),
+                      backgroundColor: AppColors.orange,
+                      heroTag: 'rotate',
+                      child: const Icon(
+                        Icons.rotate_right,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
           ],

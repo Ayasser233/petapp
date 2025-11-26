@@ -18,6 +18,13 @@
             width: 100vw;
             height: 100vh;
             position: relative;
+            touch-action: none; /* Prevent default touch behaviors */
+            user-select: none; /* Prevent text selection */
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+        canvas {
+            touch-action: none; /* Prevent default touch behaviors on canvas */
         }
         #loading {
             position: absolute;
@@ -49,6 +56,38 @@
     let selectedMesh = null;
     let originalMaterials = new Map();
 
+    // Zoom variables - global scope
+    const minZoom = 1.5;  // Closer zoom in
+    const maxZoom = 10;   // Further zoom out
+    let currentZoom = 4; // Initial camera distance
+    let targetZoom = 4;  // For smooth zoom animation
+
+    // Touch gesture variables - global scope
+    let isDragging = false;
+    let previousTouchX = 0;
+    let previousTouchY = 0;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    let initialPinchDistance = 0;
+    let isPinching = false;
+    let lastPinchScale = 1;
+    let pinchStartZoom = 4; // Store zoom level when pinch starts
+
+    // Raycaster for mesh interaction - global scope
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let clickStartX = 0;
+    let clickStartY = 0;
+    let clickStartTime = 0;
+
+    // Get distance between two touch points
+    function getTouchDistance(touches) {
+        const dx = touches[0].clientX - touches[1].clientX;
+        const dy = touches[0].clientY - touches[1].clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
     // Initialize Three.js scene
     function initScene(backgroundColor) {
         const container = document.getElementById('canvas-container');
@@ -73,6 +112,7 @@
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
+        renderer.domElement.style.touchAction = 'none'; // Important for touch gestures
         container.appendChild(renderer.domElement);
 
         // Lights
@@ -88,65 +128,34 @@
         directionalLight2.position.set(-5, 5, -5);
         scene.add(directionalLight2);
 
-        // Custom Y-axis rotation handling - rotate model around its own axis
-        let isDragging = false;
-        let previousMouseX = 0;
-
-        // Zoom handling
-        const minZoom = 2;
-        const maxZoom = 8;
-        let currentZoom = 4; // Initial camera distance
-
-        // Raycaster for mesh interaction
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        let clickStartX = 0;
-        let clickStartY = 0;
-
-        // Mouse drag for rotation
+        // Mouse click tracking (for selection only, no rotation)
         renderer.domElement.addEventListener('mousedown', (event) => {
-            isDragging = true;
-            previousMouseX = event.clientX;
             clickStartX = event.clientX;
             clickStartY = event.clientY;
+            clickStartTime = Date.now();
         });
 
-        renderer.domElement.addEventListener('mousemove', (event) => {
-            if (isDragging && modelContainer) {
-                const deltaX = event.clientX - previousMouseX;
-                // Rotate around Y-axis (up axis) - model rotates in place
-                modelContainer.rotation.y += deltaX * 0.01;
-                previousMouseX = event.clientX;
-                console.log('Rotation Y:', modelContainer.rotation.y);
-            }
-        });
-
-        renderer.domElement.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
-
-        renderer.domElement.addEventListener('mouseleave', () => {
-            isDragging = false;
-        });
-
-        // Mouse wheel zoom
+        // Mouse wheel zoom - improved sensitivity
         renderer.domElement.addEventListener('wheel', (event) => {
             event.preventDefault();
 
-            const delta = event.deltaY * -0.001;
-            currentZoom += delta;
-            currentZoom = Math.max(minZoom, Math.min(maxZoom, currentZoom));
+            // Better zoom speed based on current zoom level
+            const zoomSpeed = currentZoom * 0.0015;
+            const delta = event.deltaY * -zoomSpeed;
 
-            camera.position.z = currentZoom;
+            targetZoom += delta;
+            targetZoom = Math.max(minZoom, Math.min(maxZoom, targetZoom));
         }, { passive: false });
 
         // Click for mesh selection (only if not dragging)
         renderer.domElement.addEventListener('click', (event) => {
-            // Only trigger click if mouse didn't move much (not a drag)
+            // Only trigger click if mouse didn't move much (not a drag) and was quick
             const deltaX = Math.abs(event.clientX - clickStartX);
             const deltaY = Math.abs(event.clientY - clickStartY);
+            const deltaTime = Date.now() - clickStartTime;
 
-            if (deltaX < 5 && deltaY < 5) {
+            // Allow slightly more movement but still detect as click if quick
+            if (deltaX < 10 && deltaY < 10 && deltaTime < 300) {
                 const rect = renderer.domElement.getBoundingClientRect();
                 mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
                 mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -161,57 +170,65 @@
             }
         });
 
-        // Touch support for mobile
-        let previousTouchX = 0;
-        let touchStartX = 0;
-        let touchStartY = 0;
-        let initialPinchDistance = 0;
-        let isPinching = false;
-
-        // Get distance between two touch points
-        function getTouchDistance(touches) {
-            const dx = touches[0].clientX - touches[1].clientX;
-            const dy = touches[0].clientY - touches[1].clientY;
-            return Math.sqrt(dx * dx + dy * dy);
-        }
-
+        // Touch support for mobile - event listeners only
         renderer.domElement.addEventListener('touchstart', (event) => {
             if (event.touches.length === 1) {
                 isDragging = true;
                 isPinching = false;
                 previousTouchX = event.touches[0].clientX;
+                previousTouchY = event.touches[0].clientY;
                 touchStartX = event.touches[0].clientX;
                 touchStartY = event.touches[0].clientY;
+                touchStartTime = Date.now();
                 event.preventDefault();
             } else if (event.touches.length === 2) {
                 // Start pinch zoom
                 isDragging = false;
                 isPinching = true;
                 initialPinchDistance = getTouchDistance(event.touches);
+                pinchStartZoom = currentZoom; // Save current zoom level
+                lastPinchScale = 1;
                 event.preventDefault();
             }
-        });
+        }, { passive: false });
 
         renderer.domElement.addEventListener('touchmove', (event) => {
-            if (event.touches.length === 1 && isDragging && !isPinching && modelContainer) {
-                const deltaX = event.touches[0].clientX - previousTouchX;
-                // Rotate around Y-axis (up axis) - model rotates in place
-                modelContainer.rotation.y += deltaX * 0.01;
-                previousTouchX = event.touches[0].clientX;
+            if (event.touches.length === 1 && isDragging && !isPinching) {
+                // Check if model is loaded before rotating
+                if (modelContainer) {
+                    const deltaX = event.touches[0].clientX - previousTouchX;
+                    const deltaY = event.touches[0].clientY - previousTouchY;
+
+                    // Rotate around Y-axis (horizontal swipe) - increased sensitivity
+                    modelContainer.rotation.y += deltaX * 0.02;
+
+                    // Rotate around X-axis (vertical swipe) for more control
+                    modelContainer.rotation.x += deltaY * 0.015;
+
+                    // Clamp X rotation to prevent flipping
+                    modelContainer.rotation.x = Math.max(-Math.PI / 3, Math.min(Math.PI / 3, modelContainer.rotation.x));
+
+                    previousTouchX = event.touches[0].clientX;
+                    previousTouchY = event.touches[0].clientY;
+                } else {
+                    console.log('Model not loaded yet, cannot rotate');
+                }
                 event.preventDefault();
             } else if (event.touches.length === 2 && isPinching) {
-                // Pinch zoom
+                // Pinch zoom with improved sensitivity
                 const currentDistance = getTouchDistance(event.touches);
-                const delta = (currentDistance - initialPinchDistance) * 0.01;
 
-                currentZoom -= delta;
-                currentZoom = Math.max(minZoom, Math.min(maxZoom, currentZoom));
-                camera.position.z = currentZoom;
+                // Calculate zoom based on distance ratio from initial pinch
+                const distanceRatio = currentDistance / initialPinchDistance;
 
-                initialPinchDistance = currentDistance;
+                // More intuitive zoom: spread fingers = zoom in (closer), pinch = zoom out (further)
+                // Inverse relationship: larger distance = smaller zoom value (closer to model)
+                targetZoom = pinchStartZoom / distanceRatio;
+                targetZoom = Math.max(minZoom, Math.min(maxZoom, targetZoom));
+
                 event.preventDefault();
             }
-        });
+        }, { passive: false });
 
         renderer.domElement.addEventListener('touchend', (event) => {
             if (isPinching) {
@@ -227,8 +244,10 @@
                 const touch = event.changedTouches[0];
                 const deltaX = Math.abs(touch.clientX - touchStartX);
                 const deltaY = Math.abs(touch.clientY - touchStartY);
+                const deltaTime = Date.now() - touchStartTime;
 
-                if (deltaX < 5 && deltaY < 5) {
+                // Allow slightly more movement for tap detection but require quick action
+                if (deltaX < 15 && deltaY < 15 && deltaTime < 300) {
                     const rect = renderer.domElement.getBoundingClientRect();
                     mouse.x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
                     mouse.y = -((touch.clientY - rect.top) / rect.height) * 2 + 1;
@@ -242,7 +261,7 @@
                     }
                 }
             }
-        });
+        }, { passive: false });
 
         renderer.domElement.addEventListener('touchcancel', () => {
             isDragging = false;
@@ -262,6 +281,13 @@
     // Animation loop
     function animate() {
         requestAnimationFrame(animate);
+
+        // Smooth zoom animation
+        if (Math.abs(currentZoom - targetZoom) > 0.01) {
+            currentZoom += (targetZoom - currentZoom) * 0.1; // Lerp for smooth transition
+            camera.position.z = currentZoom;
+        }
+
         renderer.render(scene, camera);
     }
 
@@ -503,6 +529,13 @@
             case 'rotateModel':
                 if (modelContainer) {
                     modelContainer.rotation.y += (message.angle || 90) * Math.PI / 180;
+                }
+                break;
+            case 'zoom':
+                if (message.direction === 'in') {
+                    targetZoom = Math.max(minZoom, targetZoom - 0.5);
+                } else if (message.direction === 'out') {
+                    targetZoom = Math.min(maxZoom, targetZoom + 0.5);
                 }
                 break;
         }

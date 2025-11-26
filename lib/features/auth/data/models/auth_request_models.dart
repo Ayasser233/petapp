@@ -2,30 +2,22 @@
 class LoginRequest {
   final String identifier; // Can be email, phone, or username
   final String password;
-  final String? turnstileToken;
 
   LoginRequest({
     required this.identifier,
     required this.password,
-    this.turnstileToken,
   });
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = {
+    return {
       'identifier': identifier,
       'password': password,
     };
-
-    if (turnstileToken != null && turnstileToken!.isNotEmpty) {
-      data['turnstileToken'] = turnstileToken;
-    }
-
-    return data;
   }
 
   @override
   String toString() {
-    return 'LoginRequest(identifier: $identifier, turnstileToken: ${turnstileToken != null ? "[PRESENT]" : "[ABSENT]"})';
+    return 'LoginRequest(identifier: $identifier)';
   }
 }
 
@@ -37,7 +29,6 @@ class RegisterRequest {
   final String? username;
   final String mobile;
   final String? role;
-  final String? turnstileToken;
 
   RegisterRequest({
     required this.email,
@@ -47,7 +38,6 @@ class RegisterRequest {
     this.username,
     required this.mobile,
     this.role,
-    this.turnstileToken,
   });
 
   Map<String, dynamic> toJson() {
@@ -69,10 +59,6 @@ class RegisterRequest {
       data['role'] = role;
     }
 
-    // Only include turnstileToken if provided
-    if (turnstileToken != null && turnstileToken!.isNotEmpty) {
-      data['turnstileToken'] = turnstileToken;
-    }
 
     return data;
   }

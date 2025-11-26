@@ -31,7 +31,6 @@ class AuthCubit extends Cubit<AuthState> {
         username: userData['username'], // Only include if provided
         mobile: userData['mobile'] ?? userData['phone'] ?? '',
         role: userData['role'], // Only include if provided
-        turnstileToken: userData['turnstileToken'],
       );
 
       final response = await _authRepository.register(request);
@@ -73,14 +72,12 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> login(String identifier, String password,
-      {String? turnstileToken}) async {
+  Future<void> login(String identifier, String password) async {
     emit(AuthLoading());
     try {
       final request = LoginRequest(
         identifier: identifier,
         password: password,
-        turnstileToken: turnstileToken,
       );
 
       final response = await _authRepository.login(request);
@@ -103,11 +100,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // Convenience method for login with Turnstile token
-  Future<void> loginWithTurnstile(
-      String identifier, String password, String turnstileToken) async {
-    await login(identifier, password, turnstileToken: turnstileToken);
-  }
 
   // Helper method to format DioException errors
   String _formatDioError(DioException e, {bool isSignup = false}) {

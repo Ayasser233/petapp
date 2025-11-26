@@ -66,8 +66,12 @@ abstract class AppointmentRepository {
   /// Complete an appointment (admin/vet action)
   ///
   /// [appointmentId] - The appointment ID to complete
+  /// [completionHash] - The completion hash from QR code
   /// Returns true if successful
-  Future<Either<Failure, bool>> completeAppointment(String appointmentId);
+  Future<Either<Failure, bool>> completeAppointment(
+    String appointmentId,
+    String completionHash,
+  );
 
   /// Complete an appointment by scanning vet's QR code
   ///

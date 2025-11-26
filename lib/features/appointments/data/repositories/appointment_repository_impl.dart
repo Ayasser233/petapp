@@ -172,9 +172,14 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
 
   @override
   Future<Either<Failure, bool>> completeAppointment(
-      String appointmentId) async {
+    String appointmentId,
+    String completionHash,
+  ) async {
     try {
-      final result = await remoteDataSource.completeAppointment(appointmentId);
+      final result = await remoteDataSource.completeAppointment(
+        appointmentId,
+        completionHash,
+      );
       return Right(result);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));

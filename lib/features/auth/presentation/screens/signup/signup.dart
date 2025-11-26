@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:petapp/core/services/auth_service.dart';
-import 'package:petapp/core/services/turnstile_service.dart';
 import 'package:petapp/core/styles/input_styles.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/app_fonts.dart';
@@ -141,23 +140,6 @@ class _SignUpFormState extends State<SignUpForm> {
     // Check if widget is still mounted before using context
     if (!mounted) return;
 
-    // Generate Turnstile token
-    final turnstileToken = await TurnstileService.generateToken(context);
-    // Check if widget is still mounted after async operation
-    if (!mounted) return;
-
-    if (turnstileToken == null) {
-      // Failed to generate token
-      Get.snackbar(
-        'Security Verification Failed',
-        'Unable to complete security verification. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withValues(alpha: 0.1),
-        colorText: Colors.red,
-      );
-      return;
-    }
-
     // Prepare data for new API format
     final Map<String, dynamic> userData = {
       'firstName': _firstNameController.text.trim(),
@@ -166,7 +148,6 @@ class _SignUpFormState extends State<SignUpForm> {
       'password': _passwordController.text,
       'mobile':
           '${_selectedCountry.dialCode}${TFormatter.toEnglishNumerals(_phoneController.text)}',
-      'turnstileToken': turnstileToken,
     };
 
     // Use the cubit to register

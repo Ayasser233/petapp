@@ -22,7 +22,6 @@ class AuthRepository {
       final response = await _apiClient.login(
         request.identifier,
         request.password,
-        turnstileToken: request.turnstileToken,
       );
       return AuthResponse.fromJson(response.data);
     } catch (e) {

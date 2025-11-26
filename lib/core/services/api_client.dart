@@ -190,17 +190,13 @@ class ApiClient {
     }
   }
 
-  Future<Response> login(String identifier, String password,
-      {String? turnstileToken}) async {
+  Future<Response> login(String identifier, String password) async {
     try {
       final Map<String, dynamic> data = {
         'identifier': identifier,
         'password': password,
       };
 
-      if (turnstileToken != null && turnstileToken.isNotEmpty) {
-        data['turnstileToken'] = turnstileToken;
-      }
       final response = await _dio.post(ApiConstants.loginEndpoint, data: data);
       await _handleTokenResponse(response);
       return response;
@@ -434,10 +430,14 @@ class ApiClient {
     }
   }
 
-  Future<Response> completeAppointment(String appointmentId) async {
+  Future<Response> completeAppointment(
+    String appointmentId,
+    String completionHash,
+  ) async {
     try {
-      final response = await _dio.patch(
+      final response = await _dio.post(
         ApiConstants.appointmentCompleteEndpoint(appointmentId),
+        data: {'completionHash': completionHash},
       );
       return response;
     } catch (e) {

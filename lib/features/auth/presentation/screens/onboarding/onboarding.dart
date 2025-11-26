@@ -43,12 +43,12 @@ class OnboardingScreen extends StatelessWidget {
                 subtitle: AppLocalizations.of(context).onboardingSubtitle1,
               ),
               OnBoardingPage(
-                image: Constants.onboardingImage2,
+                image: Constants.onboardingImage3,
                 title: AppLocalizations.of(context).checkAndBookInSeconds,
                 subtitle: AppLocalizations.of(context).onboardingSubtitle2,
               ),
               OnBoardingPage(
-                image: Constants.onboardingImage3,
+                image: Constants.onboardingImage2,
                 title: AppLocalizations.of(context).exclusiveBenefits,
                 subtitle: AppLocalizations.of(context).onboardingSubtitle3,
               ),

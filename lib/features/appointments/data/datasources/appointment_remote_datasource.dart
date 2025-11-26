@@ -126,10 +126,18 @@ class AppointmentRemoteDataSource {
   }
 
   /// Complete an appointment
-  Future<bool> completeAppointment(String appointmentId) async {
+  Future<bool> completeAppointment(
+    String appointmentId,
+    String completionHash,
+  ) async {
     try {
-      final response = await apiClient.patch(
+      final requestBody = {
+        'completionHash': completionHash,
+      };
+
+      final response = await apiClient.post(
         ApiConstants.appointmentCompleteEndpoint(appointmentId),
+        data: requestBody,
       );
 
       if (response.data['success'] == true) {

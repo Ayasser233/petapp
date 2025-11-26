@@ -265,7 +265,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                 const SizedBox(height: 8),
                 Text(
                   PetSymptomData.getLocalizedCategoryName(context, category),
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppColors.orange,
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -352,7 +352,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
                   builder: (context, value, child) {
                     return Transform.translate(
                       offset: Offset(value, 0),
-                      child: Icon(
+                      child: const Icon(
                         Icons.swipe_outlined,
                         size: 56,
                         color: AppColors.orange,
@@ -380,13 +380,40 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
 
                 const SizedBox(height: 12),
 
-                // Subtitle
-                Text(
-                  localizations.tapBodyPartToExplore,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: isDark ? Colors.grey[400] : Colors.grey[600],
-                      ),
-                  textAlign: TextAlign.center,
+                // Instructions list
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.swipe, color: AppColors.orange, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            localizations.tapBodyPartToExplore,
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        const Icon(Icons.zoom_in, color: AppColors.orange, size: 20),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Pinch to zoom or use buttons',
+                            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 24),
