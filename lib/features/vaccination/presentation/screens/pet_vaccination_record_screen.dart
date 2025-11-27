@@ -251,6 +251,9 @@ class _PetVaccinationRecordScreenState
             // Generate annual boosters from series with annualBoosterDate
             final allBoosters = _generateAnnualBoosters(medicalSheet);
 
+            // Calculate completed series count (only series where ALL doses are complete)
+            final completedSeriesCount = _getCompletedSeriesCount(medicalSheet.vaccinationSeries);
+
             // Calculate overdue (only missing required vaccines)
             final missingVaccinesCount = _getMissingVaccinesCount(medicalSheet.vaccinationSeries);
 
@@ -285,7 +288,7 @@ class _PetVaccinationRecordScreenState
                       // Vaccination Summary
                       _buildVaccinationSummary(
                         context,
-                        medicalSheet.completedDosesCount,
+                        completedSeriesCount,
                         totalUpcoming,
                         missingVaccinesCount,
                         isDark,
@@ -668,273 +671,6 @@ class _PetVaccinationRecordScreenState
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildOverdueSection(
-    BuildContext context,
-    List<dynamic> overdueSeries,
-    List<dynamic> vaccinationSeries,
-    bool isDark,
-    Color? cardColor,
-  ) {
-    final loc = AppLocalizations.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.red.withValues(alpha: 0.3),
-          width: 2,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.warning, color: Colors.red, size: 28),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  loc.overdue,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            loc.vaccinesNeverTakenAndOverdue,
-            style: TextStyle(
-              color: isDark ? Colors.grey[300] : Colors.grey[700],
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 16),
-          ...overdueSeries.map((series) {
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.red.withValues(alpha: 0.2),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.vaccines, color: Colors.red, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _formatVaccineName(context, series.vaccineType),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${loc.firstDose} ${loc.overdue}',
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Colors.grey[400],
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildUpcomingSection(
-    BuildContext context,
-    List<Map<String, dynamic>> upcomingDoses,
-    List<dynamic> upcomingBoosters,
-    bool isDark,
-    Color? cardColor,
-  ) {
-    final loc = AppLocalizations.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.blue.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.blue.withValues(alpha: 0.3),
-          width: 2,
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.schedule, color: Colors.blue, size: 28),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  loc.upcoming,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            loc.inProgressVaccinesNeedingNextDose,
-            style: TextStyle(
-              color: isDark ? Colors.grey[300] : Colors.grey[700],
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Upcoming Doses
-          ...upcomingDoses.map((doseData) {
-            final series = doseData['series'];
-            final dose = doseData['dose'];
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.blue.withValues(alpha: 0.2),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.medication, color: Colors.blue, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _formatVaccineName(context, series.vaccineType),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${loc.dose} ${dose.doseNumber} - ${loc.pending}',
-                          style: const TextStyle(
-                            color: Colors.blue,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Colors.grey[400],
-                  ),
-                ],
-              ),
-            );
-          }),
-
-          // Upcoming Boosters
-          ...upcomingBoosters.map((booster) {
-            final dueDate = DateTime.parse(booster.dueDate);
-
-            return Container(
-              margin: const EdgeInsets.only(bottom: 12),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.blue.withValues(alpha: 0.2),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.vaccines, color: Colors.blue, size: 20),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _formatVaccineName(context, booster.vaccineType),
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${loc.annualBoosters} • ${DateFormat('MMM dd, yyyy').format(dueDate)}',
-                          style: const TextStyle(
-                            color: Colors.blue,
-                            fontSize: 13,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(Icons.arrow_forward_ios,
-                    size: 16,
-                    color: Colors.grey[400],
-                  ),
-                ],
-              ),
-            );
-          }),
-        ],
-      ),
     );
   }
 
@@ -2553,26 +2289,7 @@ class _PetVaccinationRecordScreenState
           completedDate: completedDate,
         );
   }
-
-  // Old dialog-based add vaccine methods removed - now using AddVaccinationScreen
-
-  /// Get overdue series (vaccines that were never started)
-  List<dynamic> _getOverdueSeries(List<dynamic> vaccinationSeries) {
-    final overdue = <dynamic>[];
-
-    for (var series in vaccinationSeries) {
-      // Count as overdue if:
-      // 1. No doses have been completed (never started)
-      // 2. Series is not complete
-      if (series.completedDoses == 0 && !series.isComplete) {
-        overdue.add(series);
-      }
-    }
-
-    return overdue;
-  }
-
-  /// Get count of missing required vaccines (Virus, Worms, Insects, Rabies)
+  /// Get count of missing vaccine types in the vaccination series
   int _getMissingVaccinesCount(List<dynamic> vaccinationSeries) {
     int missingCount = 0;
 
@@ -2590,13 +2307,26 @@ class _PetVaccinationRecordScreenState
     return missingCount;
   }
 
+  /// Get count of completed series (only series where ALL doses are complete)
+  int _getCompletedSeriesCount(List<dynamic> vaccinationSeries) {
+    int completedCount = 0;
+
+    for (var series in vaccinationSeries) {
+      if (series.isComplete == true) {
+        completedCount++;
+      }
+    }
+
+    return completedCount;
+  }
+
   /// Get upcoming doses (doses that are pending in active series)
   List<Map<String, dynamic>> _getUpcomingDoses(List<dynamic> vaccinationSeries) {
     final upcomingDoses = <Map<String, dynamic>>[];
 
     for (var series in vaccinationSeries) {
-      // Only look at in-progress series (not complete, has some doses done)
-      if (!series.isComplete && series.completedDoses > 0) {
+      // Look at all series that are not complete
+      if (!series.isComplete) {
         for (var dose in series.doses) {
           if (dose.status == 'PENDING') {
             upcomingDoses.add({
@@ -2611,16 +2341,15 @@ class _PetVaccinationRecordScreenState
     return upcomingDoses;
   }
 
-  /// Get upcoming boosters (boosters due within next 30 days but not overdue)
+  /// Get upcoming boosters (boosters that are not overdue)
   List<dynamic> _getUpcomingBoosters(List<dynamic> allBoosters) {
     final now = DateTime.now();
-    final upcoming30Days = now.add(const Duration(days: 30));
     final upcomingBoosters = <dynamic>[];
 
     for (var booster in allBoosters) {
       final dueDate = DateTime.parse(booster.dueDate);
-      // Only include if due within next 30 days but not overdue
-      if (dueDate.isAfter(now) && dueDate.isBefore(upcoming30Days)) {
+      // Only include if not overdue (due date is today or in the future)
+      if (!dueDate.isBefore(now) || dueDate.isAtSameMomentAs(now)) {
         upcomingBoosters.add(booster);
       }
     }

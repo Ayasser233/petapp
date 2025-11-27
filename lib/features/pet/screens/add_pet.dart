@@ -27,16 +27,17 @@ class _AddPetScreenState extends State<AddPetScreen> {
   final _notesController = TextEditingController();
   final _weightController = TextEditingController();
   final _allergyController = TextEditingController();
+  final _ageController = TextEditingController();
 
   String _selectedSpecies = 'dog';
   String _selectedGender = 'MALE';
-  int _selectedMonth = DateTime.now().month;
-  int _selectedYear = DateTime.now().year - 1; // Default to 1 year ago
+  String _selectedAgeUnit = 'years'; // days, months, years
+
   String _imagePath = 'assets/images/pet_placeholder.jpg';
   bool _isImageFromGallery = false;
   bool _isLoading = false;
   bool _spayNeuterStatus = false;
-  List<String> _allergies = [];
+  final List<String> _allergies = [];
 
   final AuthService _authService = sl<AuthService>();
   final PetController _petController = sl<PetController>();
@@ -101,7 +102,24 @@ class _AddPetScreenState extends State<AddPetScreen> {
     _notesController.dispose();
     _weightController.dispose();
     _allergyController.dispose();
+    _ageController.dispose();
     super.dispose();
+  }
+
+  /// Calculate birthdate from age
+  DateTime _calculateBirthdate() {
+    final now = DateTime.now();
+    final ageValue = int.tryParse(TFormatter.toEnglishNumerals(_ageController.text.trim())) ?? 0;
+
+    switch (_selectedAgeUnit) {
+      case 'days':
+        return now.subtract(Duration(days: ageValue));
+      case 'months':
+        return DateTime(now.year, now.month - ageValue, now.day);
+      case 'years':
+      default:
+        return DateTime(now.year - ageValue, now.month, now.day);
+    }
   }
 
   Future<void> _pickImage() async {
@@ -208,166 +226,6 @@ class _AddPetScreenState extends State<AddPetScreen> {
     );
   }
 
-  String _formatMonthYear(int month, int year) {
-    const monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December'
-    ];
-    return '${monthNames[month - 1]} $year';
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final localizations = AppLocalizations.of(context);
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        int tempMonth = _selectedMonth;
-        int tempYear = _selectedYear;
-
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              backgroundColor: isDark ? Colors.grey[900] : Colors.white,
-              title: Text(
-                'Select Birth Month & Year',
-                style: TextStyle(
-                  color: isDark ? Colors.white : Colors.black,
-                ),
-              ),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Month picker
-                  DropdownButtonFormField<int>(
-                    initialValue: tempMonth,
-                    decoration: InputDecoration(
-                      labelText: 'Month',
-                      labelStyle: TextStyle(
-                        color: isDark ? Colors.white70 : Colors.black87,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-                        ),
-                      ),
-                    ),
-                    dropdownColor: isDark ? Colors.grey[850] : Colors.white,
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black,
-                    ),
-                    items: List.generate(12, (index) {
-                      final monthNum = index + 1;
-                      final monthNames = [
-                        'January',
-                        'February',
-                        'March',
-                        'April',
-                        'May',
-                        'June',
-                        'July',
-                        'August',
-                        'September',
-                        'October',
-                        'November',
-                        'December'
-                      ];
-                      return DropdownMenuItem(
-                        value: monthNum,
-                        child: Text(monthNames[index]),
-                      );
-                    }),
-                    onChanged: (value) {
-                      setState(() {
-                        tempMonth = value!;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  // Year picker
-                  DropdownButtonFormField<int>(
-                    initialValue: tempYear,
-                    decoration: InputDecoration(
-                      labelText: 'Year',
-                      labelStyle: TextStyle(
-                        color: isDark ? Colors.white70 : Colors.black87,
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-                        ),
-                      ),
-                    ),
-                    dropdownColor: isDark ? Colors.grey[850] : Colors.white,
-                    style: TextStyle(
-                      color: isDark ? Colors.white : Colors.black,
-                    ),
-                    items: List.generate(
-                      DateTime.now().year - 2000 + 1,
-                      (index) {
-                        final year = 2000 + index;
-                        return DropdownMenuItem(
-                          value: year,
-                          child: Text(year.toString()),
-                        );
-                      },
-                    ).reversed.toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        tempYear = value!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    localizations.cancel,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    this.setState(() {
-                      _selectedMonth = tempMonth;
-                      _selectedYear = tempYear;
-                    });
-                    Navigator.of(context).pop();
-                  },
-                  child: Text(
-                    localizations.ok,
-                    style: const TextStyle(color: AppColors.orange),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
   Future<void> _savePet() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -396,8 +254,8 @@ class _AddPetScreenState extends State<AddPetScreen> {
       //             ? 'assets/images/cat_silhouette.png'
       //             : 'assets/images/pet_placeholder.jpg';
 
-      // Create date with first day of selected month and year
-      final birthDate = DateTime(_selectedYear, _selectedMonth, 1);
+      // Calculate birthdate from age input
+      final birthDate = _calculateBirthdate();
       final dateString = birthDate.toIso8601String().split('T')[0];
 
       // Create pet data
@@ -648,9 +506,9 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Birthdate
+                    // Age
                     Text(
-                      localizations.birthdate,
+                      localizations.age,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -658,37 +516,105 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    GestureDetector(
-                      onTap: () => _selectDate(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 16),
-                        decoration: BoxDecoration(
-                          color: inputFillColor,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
+                    Builder(
+                      builder: (context) {
+                        final locale = Localizations.localeOf(context);
+                        final isArabic = locale.languageCode == 'ar';
+
+                        return Row(
                           children: [
-                            const Icon(
-                              Icons.calendar_today,
-                              color: AppColors.orange,
-                            ),
-                            const SizedBox(width: 12),
-                            Text(
-                              _formatMonthYear(_selectedMonth, _selectedYear),
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: textColor,
+                            // Age number input
+                            Expanded(
+                              flex: 2,
+                              child: TextFormField(
+                                controller: _ageController,
+                                style: TextStyle(color: textColor),
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                  ArabicNumeralInputFormatter(isArabic),
+                                ],
+                                decoration: InputDecoration(
+                                  hintText: localizations.enterPetAge,
+                                  hintStyle: TextStyle(
+                                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                  ),
+                                  filled: true,
+                                  fillColor: inputFillColor,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  prefixIcon: const Icon(
+                                    Icons.cake,
+                                    color: AppColors.orange,
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return localizations.pleaseEnterValidAge;
+                                  }
+                                  final age = int.tryParse(TFormatter.toEnglishNumerals(value));
+                                  if (age == null || age <= 0) {
+                                    return localizations.pleaseEnterValidAge;
+                                  }
+                                  return null;
+                                },
                               ),
                             ),
-                            const Spacer(),
-                            Icon(
-                              Icons.arrow_drop_down,
-                              color: isDark ? Colors.grey[400] : Colors.grey,
+                            const SizedBox(width: 12),
+                            // Age unit dropdown
+                            Expanded(
+                              flex: 1,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: inputFillColor,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: DropdownButtonFormField<String>(
+                                  initialValue: _selectedAgeUnit,
+                                  decoration: InputDecoration(
+                                    filled: true,
+                                    fillColor: inputFillColor,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 16,
+                                    ),
+                                  ),
+                                  dropdownColor: isDark ? Colors.grey[850] : Colors.white,
+                                  style: TextStyle(
+                                    color: textColor,
+                                    fontSize: 16,
+                                  ),
+                                  items: [
+                                    DropdownMenuItem(
+                                      value: 'days',
+                                      child: Text(localizations.days),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'months',
+                                      child: Text(localizations.months),
+                                    ),
+                                    DropdownMenuItem(
+                                      value: 'years',
+                                      child: Text(localizations.years),
+                                    ),
+                                  ],
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _selectedAgeUnit = value!;
+                                    });
+                                  },
+                                ),
+                              ),
                             ),
                           ],
-                        ),
-                      ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 20),
 

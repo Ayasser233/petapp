@@ -93,8 +93,12 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     );
   }
 
-  /// Get filtered appointments by status
-  Future<void> getFilteredAppointments({String? status}) async {
+  /// Get filtered appointments by status and date
+  Future<void> getFilteredAppointments({
+    String? status,
+    String? dateFilter,
+    int? year,
+  }) async {
     emit(const AppointmentsLoading());
 
     final filter = status ?? 'All';
@@ -119,6 +123,18 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
           filteredAppointments = appointments.where((appointment) {
             return appointment.status.toUpperCase() == filter.toUpperCase() &&
                 !appointment.isExpired;
+          }).toList();
+        }
+
+        // Apply date filtering
+        if (dateFilter == 'last3Months') {
+          final threeMonthsAgo = DateTime.now().subtract(const Duration(days: 90));
+          filteredAppointments = filteredAppointments.where((appointment) {
+            return appointment.startTime.isAfter(threeMonthsAgo);
+          }).toList();
+        } else if (dateFilter == 'byYear' && year != null) {
+          filteredAppointments = filteredAppointments.where((appointment) {
+            return appointment.startTime.year == year;
           }).toList();
         }
 

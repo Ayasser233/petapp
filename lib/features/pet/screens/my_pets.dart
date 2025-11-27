@@ -302,12 +302,15 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          pet.name,
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: textColor,
+                        Flexible(
+                          child: Text(
+                            pet.name,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         const SizedBox(width: 8),

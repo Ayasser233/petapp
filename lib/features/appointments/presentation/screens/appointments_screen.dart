@@ -19,7 +19,8 @@ class AppointmentsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => sl<AppointmentsCubit>()..getFilteredAppointments(),
+      create: (context) => sl<AppointmentsCubit>()
+        ..getFilteredAppointments(), // API automatically filters by authenticated user
       child: const _AppointmentsScreenContent(),
     );
   }
@@ -36,6 +37,8 @@ class _AppointmentsScreenContent extends StatefulWidget {
 class _AppointmentsScreenContentState
     extends State<_AppointmentsScreenContent> {
   String _selectedFilter = 'All';
+  String? _selectedDateFilter; // 'last3Months' or 'byYear'
+  int? _selectedYear;
 
   void _onFilterChanged(String filter) {
     setState(() {
@@ -43,7 +46,26 @@ class _AppointmentsScreenContentState
     });
 
     final status = filter == 'All' ? null : filter.toUpperCase();
-    context.read<AppointmentsCubit>().getFilteredAppointments(status: status);
+    context.read<AppointmentsCubit>().getFilteredAppointments(
+          status: status,
+          dateFilter: _selectedDateFilter,
+          year: _selectedYear,
+        );
+  }
+
+  void _onDateFilterChanged(String? dateFilter, {int? year}) {
+    setState(() {
+      _selectedDateFilter = dateFilter;
+      _selectedYear = year;
+    });
+
+    final status =
+        _selectedFilter == 'All' ? null : _selectedFilter.toUpperCase();
+    context.read<AppointmentsCubit>().getFilteredAppointments(
+          status: status,
+          dateFilter: dateFilter,
+          year: year,
+        );
   }
 
   void _onAppointmentTap(AppointmentEntity appointment) {
@@ -198,6 +220,9 @@ class _AppointmentsScreenContentState
                     selectedFilter: _selectedFilter,
                     onFilterChanged: _onFilterChanged,
                   ),
+                  const SizedBox(height: 12),
+                  // Date filter row
+                  _buildDateFilterRow(context),
                   const SizedBox(height: 16),
                   Expanded(
                     child: _buildContent(state),
@@ -209,6 +234,159 @@ class _AppointmentsScreenContentState
         );
       },
     );
+  }
+
+  Widget _buildDateFilterRow(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Row(
+      children: [
+        Icon(
+          Icons.calendar_today,
+          size: 16,
+          color: isDark ? Colors.grey[400] : Colors.grey[600],
+        ),
+        const SizedBox(width: 8),
+        Text(
+          AppLocalizations.of(context).timeFilter,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isDark ? Colors.grey[400] : Colors.grey[600],
+                fontWeight: FontWeight.w500,
+              ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                // All button
+                _buildDateFilterChip(
+                  context,
+                  label: AppLocalizations.of(context).all,
+                  isSelected: _selectedDateFilter == null,
+                  onTap: () => _onDateFilterChanged(null),
+                ),
+                const SizedBox(width: 8),
+                // Last 3 Months button
+                _buildDateFilterChip(
+                  context,
+                  label: AppLocalizations.of(context).last3Months,
+                  isSelected: _selectedDateFilter == 'last3Months',
+                  onTap: () => _onDateFilterChanged('last3Months'),
+                ),
+                const SizedBox(width: 8),
+                // By Year button
+                _buildDateFilterChip(
+                  context,
+                  label: _selectedYear != null
+                      ? '$_selectedYear'
+                      : AppLocalizations.of(context).byYear,
+                  isSelected: _selectedDateFilter == 'byYear',
+                  onTap: () => _showYearPicker(context),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDateFilterChip(
+    BuildContext context, {
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.15)
+              : (isDark ? Colors.grey[800] : Colors.grey[200]),
+          borderRadius: BorderRadius.circular(16),
+          border: isSelected
+              ? Border.all(
+                  color: Theme.of(context).colorScheme.primary,
+                  width: 1.5,
+                )
+              : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : (isDark ? Colors.grey[300] : Colors.grey[700]),
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showYearPicker(BuildContext context) async {
+    final currentYear = DateTime.now().year;
+    const appPublishedYear = 2024; // Year when the app was published
+    final yearCount = currentYear - appPublishedYear + 1;
+    final years = List.generate(yearCount, (index) => currentYear - index);
+
+    final selected = await showDialog<int>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context).selectYear),
+          content: SizedBox(
+            width: double.minPositive,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: years.length,
+              itemBuilder: (context, index) {
+                final year = years[index];
+                final isSelected = year == _selectedYear;
+                return ListTile(
+                  title: Text(
+                    year.toString(),
+                    style: TextStyle(
+                      fontWeight:
+                          isSelected ? FontWeight.bold : FontWeight.normal,
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primary
+                          : null,
+                    ),
+                  ),
+                  trailing: isSelected
+                      ? Icon(
+                          Icons.check,
+                          color: Theme.of(context).colorScheme.primary,
+                        )
+                      : null,
+                  onTap: () {
+                    Navigator.of(dialogContext).pop(year);
+                  },
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(AppLocalizations.of(context).cancel),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (selected != null && mounted) {
+      _onDateFilterChanged('byYear', year: selected);
+    }
   }
 
   Widget _buildContent(AppointmentsState state) {

@@ -702,6 +702,18 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['petType'] ?? 'Pet Type';
   String get birthdate =>
       _localizedValues[locale.languageCode]?['birthdate'] ?? 'Birthdate';
+  String get age =>
+      _localizedValues[locale.languageCode]?['age'] ?? 'Age';
+  String get enterPetAge =>
+      _localizedValues[locale.languageCode]?['enterPetAge'] ?? 'Enter your pet\'s age';
+  String get days =>
+      _localizedValues[locale.languageCode]?['days'] ?? 'days';
+  String get months =>
+      _localizedValues[locale.languageCode]?['months'] ?? 'months';
+  String get years =>
+      _localizedValues[locale.languageCode]?['years'] ?? 'years';
+  String get pleaseEnterValidAge =>
+      _localizedValues[locale.languageCode]?['pleaseEnterValidAge'] ?? 'Please enter a valid age';
   String get weightKg =>
       _localizedValues[locale.languageCode]?['weightKg'] ?? 'Weight (kg)';
   String get kg => _localizedValues[locale.languageCode]?['kg'] ?? 'kg';
@@ -1480,6 +1492,16 @@ class AppLocalizations {
   String get bookingFailed =>
       _localizedValues[locale.languageCode]?['bookingFailed'] ??
       'Booking failed. Please try again.';
+  // Appointment date filter options
+  String get last3Months =>
+      _localizedValues[locale.languageCode]?['last3Months'] ?? 'Last 3 Months';
+  String get byYear =>
+      _localizedValues[locale.languageCode]?['byYear'] ?? 'By Year';
+  String get selectYear =>
+      _localizedValues[locale.languageCode]?['selectYear'] ?? 'Select Year';
+  String get timeFilter =>
+      _localizedValues[locale.languageCode]?['timeFilter'] ?? 'Time Filter';
+
   // Add these getters to your AppLocalizations class
   String get favorite =>
       _localizedValues[locale.languageCode]?['favorite'] ?? 'Favorite';
@@ -2299,6 +2321,12 @@ class AppLocalizations {
       'pleaseEnterPetName': 'Please enter your pet\'s name',
       'petType': 'Pet Type',
       'birthdate': 'Birthdate',
+      'age': 'Age',
+      'enterPetAge': 'Enter your pet\'s age',
+      'days': 'days',
+      'months': 'months',
+      'years': 'years',
+      'pleaseEnterValidAge': 'Please enter a valid age',
       'weightKg': 'Weight (kg)',
       'kg': 'kg',
       'allergies': 'Allergies',
@@ -2557,6 +2585,10 @@ class AppLocalizations {
       'confirmed': 'Confirmed',
       'completed': 'Completed',
       'cancelled': 'Cancelled',
+      'last3Months': 'Last 3 Months',
+      'byYear': 'By Year',
+      'selectYear': 'Select Year',
+      'timeFilter': 'Time Filter',
       'vetDetails': 'vet Details',
       'report': 'Report',
       'minutes': 'minutes',
@@ -3743,6 +3775,12 @@ class AppLocalizations {
       'pleaseEnterPetName': 'يرجى إدخال اسم حيوانك الأليف',
       'petType': 'نوع الحيوان الأليف',
       'birthdate': 'تاريخ الميلاد',
+      'age': 'العمر',
+      'enterPetAge': 'أدخل عمر حيوانك الأليف',
+      'days': 'أيام',
+      'months': 'أشهر',
+      'years': 'سنوات',
+      'pleaseEnterValidAge': 'يرجى إدخال عمر صالح',
       'weightKg': 'الوزن (كجم)',
       'kg': 'كجم',
       'allergies': 'الحساسية',
@@ -3982,7 +4020,11 @@ class AppLocalizations {
       'pending': 'قيد الانتظار',
       'confirmed': 'مؤكد',
       'completed': 'مكتمل',
-      'cancelled': 'ملغي',
+      'cancelled': 'ملغى',
+      'last3Months': 'آخر 3 أشهر',
+      'byYear': 'حسب السنة',
+      'selectYear': 'اختر السنة',
+      'timeFilter': 'تصفية الوقت',
       'rescheduled': 'مُعاد جدولته',
       'reschedule': 'إعادة جدولة',
       'writeReview': 'كتابة تقييم',

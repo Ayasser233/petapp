@@ -44,7 +44,7 @@ class AppointmentModel {
   });
 
   factory AppointmentModel.fromJson(Map<String, dynamic> json) {
-    // API returns times in UTC, we need to convert to local timezone for display
+    // Parse appointment times exactly as stored without timezone conversion
     final startTimeStr = json['startTime'] as String;
     final endTimeStr = json['endTime'] as String;
 
@@ -52,14 +52,17 @@ class AppointmentModel {
     print('   Raw startTime from API: $startTimeStr');
     print('   Raw endTime from API: $endTimeStr');
 
-    // Parse as UTC and convert to local timezone
-    final parsedStart = DateTime.parse(startTimeStr).toLocal();
-    final parsedEnd = DateTime.parse(endTimeStr).toLocal();
+    // Parse times without timezone conversion to keep exact booking time
+    // Remove 'Z' suffix if present and parse as local time
+    final cleanStartTime = startTimeStr.replaceAll('Z', '');
+    final cleanEndTime = endTimeStr.replaceAll('Z', '');
 
-    print('   Parsed startTime (UTC): ${DateTime.parse(startTimeStr)}');
-    print('   Converted to local: $parsedStart');
-    print('   Parsed endTime (UTC): ${DateTime.parse(endTimeStr)}');
-    print('   Converted to local: $parsedEnd');
+    final parsedStart = DateTime.parse(cleanStartTime);
+    final parsedEnd = DateTime.parse(cleanEndTime);
+
+    print('   Parsed without conversion (keeping exact time)');
+    print('   Final startTime: $parsedStart (${parsedStart.hour}:${parsedStart.minute})');
+    print('   Final endTime: $parsedEnd (${parsedEnd.hour}:${parsedEnd.minute})');
 
     return AppointmentModel(
       id: json['id'] ?? '',
@@ -77,7 +80,7 @@ class AppointmentModel {
       rating: json['rating'],
       reviewComment: json['reviewComment'],
       reviewedAt: json['reviewedAt'] != null
-          ? DateTime.parse(json['reviewedAt'] as String).toLocal()
+          ? DateTime.parse((json['reviewedAt'] as String).replaceAll('Z', ''))
           : null,
       coupons: json['coupons'],
       couponDiscount: (json['couponDiscount'] ?? 0).toDouble(),
