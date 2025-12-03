@@ -86,13 +86,42 @@ class AuthCubit extends Cubit<AuthState> {
       await _tokenService.saveToken(response.accessToken);
       await _tokenService.saveRefreshToken(response.refreshToken);
 
+      // If login is successful (200/201), we assume email is verified
+      // because backend returns 422 for unverified accounts
+      debugPrint('✅ Login successful - email is verified');
       emit(AuthLoginSuccess(response.accessToken));
     } on DioException catch (e) {
+      debugPrint('🔴 Login DioException: ${e.response?.statusCode}');
+
+      // Handle 422 - Email not verified
+      if (e.response?.statusCode == 422) {
+        final responseData = e.response?.data;
+        debugPrint('🔴 422 Response data: $responseData');
+
+        // Check if the error is about email verification
+        if (responseData != null && responseData is Map) {
+          final message = responseData['message']?.toString() ?? '';
+
+          if (message.toLowerCase().contains('not yet verified') ||
+              message.toLowerCase().contains('verification code')) {
+            // Extract email from identifier (it could be email or phone)
+            String email = identifier;
+
+            debugPrint('✉️ Email not verified, redirecting to verification for: $email');
+
+            // Emit unverified state
+            emit(AuthLoginUnverified(email: email));
+            return;
+          }
+        }
+      }
+
       emit(AuthFailure(
         message: _formatDioError(e, isSignup: false),
         errorCode: e.response?.statusCode,
       ));
     } catch (e) {
+      debugPrint('🔴 Login general error: $e');
       emit(AuthFailure(
           message:
               'Unable to login. Please check your credentials and try again.',

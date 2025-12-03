@@ -119,8 +119,8 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundColor: AppColors.orange.withOpacity(0.2),
-              child: Icon(
+              backgroundColor: AppColors.orange.withValues(alpha: 0.2),
+              child: const Icon(
                 Icons.local_hospital,
                 color: AppColors.orange,
                 size: 30,

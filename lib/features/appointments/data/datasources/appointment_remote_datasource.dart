@@ -156,11 +156,10 @@ class AppointmentRemoteDataSource {
   }) async {
     try {
       final requestBody = {
-        'qrCode': qrCode,
+        'completionHash': qrCode, // API expects 'completionHash', not 'qrCode'
       };
 
-      final response = await apiClient.patch(
-        '${ApiConstants.appointmentsEndpoint}/$appointmentId/complete-qr',
+      final response = await apiClient.post(ApiConstants.appointmentCompleteEndpoint(appointmentId),
         data: requestBody,
       );
 

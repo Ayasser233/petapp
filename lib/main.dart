@@ -111,8 +111,6 @@ Future<void> initServices() async {
   // Initialize controllers
   Get.lazyPut(() => sl<PetController>());
   Get.lazyPut(() => sl<ProfileController>());
-
-  print('✅ All services initialized with lifecycle management');
 }
 
 class MyApp extends StatefulWidget {

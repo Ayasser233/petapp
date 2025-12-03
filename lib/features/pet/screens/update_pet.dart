@@ -144,7 +144,7 @@ class _UpdatePetScreenState extends State<UpdatePetScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => Container(
+      builder: (dialogContext) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -153,7 +153,7 @@ class _UpdatePetScreenState extends State<UpdatePetScreen> {
               leading: const Icon(Icons.photo_library),
               title: Text(localizations.chooseFromGallery),
               onTap: () async {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
                 final XFile? image =
                     await picker.pickImage(source: ImageSource.gallery);
                 if (image != null) {
@@ -168,7 +168,7 @@ class _UpdatePetScreenState extends State<UpdatePetScreen> {
               leading: const Icon(Icons.camera_alt),
               title: Text(localizations.takeAPhoto),
               onTap: () async {
-                Navigator.pop(context);
+                Navigator.pop(dialogContext);
                 final XFile? image =
                     await picker.pickImage(source: ImageSource.camera);
                 if (image != null) {
@@ -404,9 +404,18 @@ class _UpdatePetScreenState extends State<UpdatePetScreen> {
       if (_notesController.text.trim().isNotEmpty) {
         petData['notes'] = _notesController.text.trim();
       }
-      final success = await _petController.updatePet(widget.pet.id, petData);
+      // Pass image path if user selected a new image
+      final String? imagePathToSend = _isImageFromGallery ? _imagePath : null;
+
+      final success = await _petController.updatePet(
+        widget.pet.id,
+        petData,
+        imagePath: imagePathToSend,
+      );
 
       if (success) {
+        // Refresh the pets list to show updated data
+        await _petController.refreshPets();
         Get.back(result: true);
         Get.snackbar(
           localizations.success,
@@ -416,14 +425,24 @@ class _UpdatePetScreenState extends State<UpdatePetScreen> {
           backgroundColor: Colors.green[100],
           colorText: Colors.green[800],
         );
+      } else {
+        // Show error when success is false
+        Get.snackbar(
+          localizations.error,
+          localizations.failedToUpdatePet,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[100],
+          colorText: Colors.red[800],
+        );
       }
     } catch (e) {
       Get.snackbar(
         localizations.error,
-        localizations.failedToUpdatePet,
+        '${localizations.failedToUpdatePet}: $e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red[100],
         colorText: Colors.red[800],
+        duration: const Duration(seconds: 5),
       );
     } finally {
       setState(() => _isLoading = false);
@@ -593,14 +612,17 @@ class _UpdatePetScreenState extends State<UpdatePetScreen> {
                     ),
                     const SizedBox(height: 12),
                     Row(
-                      children: _allowedSpecies.map((species) {
-                        return Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(right: 8),
-                            child: _buildSpeciesOption(species, isDark),
+                      children: [
+                        for (int i = 0; i < _allowedSpecies.length; i++)
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.only(
+                                right: i < _allowedSpecies.length - 1 ? 8 : 0,
+                              ),
+                              child: _buildSpeciesOption(_allowedSpecies[i], isDark),
+                            ),
                           ),
-                        );
-                      }).toList(),
+                      ],
                     ),
                     const SizedBox(height: 20),
 

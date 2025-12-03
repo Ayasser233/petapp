@@ -49,7 +49,6 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       _isProcessing = true;
     });
 
-    print('🔍 QR Code scanned: $qrCode');
 
     // Complete appointment using the scanned QR code
     context.read<AppointmentsCubit>().completeAppointmentByQr(
@@ -178,7 +177,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
             Text(
               AppLocalizations.of(context).pointCameraAtQrCode,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.grey,
                 fontSize: 14,
               ),
@@ -211,7 +210,7 @@ class ScannerOverlayPainter extends CustomPainter {
 
     canvas.drawPath(
       path,
-      Paint()..color = Colors.black.withOpacity(0.7),
+      Paint()..color = Colors.black.withValues(alpha: 0.7),
     );
 
     // Draw scan area border
@@ -229,8 +228,8 @@ class ScannerOverlayPainter extends CustomPainter {
     );
 
     // Draw corner markers
-    final double cornerLength = 30;
-    final double cornerWidth = 4;
+    const double cornerLength = 30;
+    const double cornerWidth = 4;
     final Paint cornerPaint = Paint()
       ..color = AppColors.orange
       ..strokeWidth = cornerWidth

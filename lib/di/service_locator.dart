@@ -39,6 +39,10 @@ import 'package:petapp/features/vaccination/domain/usecases/delete_vaccination_s
 import 'package:petapp/features/vaccination/domain/usecases/get_medical_sheet_usecase.dart';
 import 'package:petapp/features/vaccination/presentation/cubit/vaccination_cubit.dart';
 
+// Vets
+import 'package:petapp/features/vets/services/vet_service.dart';
+import 'package:get/get.dart' as getx;
+
 final sl = GetIt.instance;
 
 Future<void> setupServiceLocator() async {
@@ -91,6 +95,12 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton<VoucherRepository>(
     () => VoucherRepository(),
   );
+
+  // Vets Feature
+  final vetService = VetService();
+  sl.registerLazySingleton<VetService>(() => vetService);
+  // Also register with GetX for Get.find() support
+  getx.Get.put<VetService>(vetService);
 
   // Appointments Feature - Clean Architecture
   // Data sources

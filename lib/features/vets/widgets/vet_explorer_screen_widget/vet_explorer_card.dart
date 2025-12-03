@@ -39,7 +39,7 @@ class VetExplorerCard extends StatelessWidget {
       totalReviews: vet.reviews,
       yearsExperience: vet.yearsExperience,
       services: vet.services,
-      isOpen: vet.isCurrentlyOpen,
+      isOpen: vet.hasAvailableSlots, // Use API-based availability
       openingStatus: vet.openingStatus,
       phone: vet.phone,
       onTap: () => controller.navigateToVetDetail(vet),
@@ -48,6 +48,7 @@ class VetExplorerCard extends StatelessWidget {
       showDistance: locationService.isPermissionGranted,
       showActionButtons: true,
       compact: false,
+      discount: vet.discount,
     );
   }
 

@@ -1,3 +1,62 @@
+/// Model for vet schedule slot from API
+class VetScheduleSlot {
+  final String id;
+  final String dayOfWeek;
+  final String startTime;
+  final String endTime;
+  final bool isFull;
+  final bool isActive;
+  final int availableSpots;
+  final bool isAvailableCurrentWeek;
+  final bool isAvailableNextWeek;
+
+  VetScheduleSlot({
+    required this.id,
+    required this.dayOfWeek,
+    required this.startTime,
+    required this.endTime,
+    required this.isFull,
+    required this.isActive,
+    required this.availableSpots,
+    required this.isAvailableCurrentWeek,
+    required this.isAvailableNextWeek,
+  });
+
+  factory VetScheduleSlot.fromJson(Map<String, dynamic> json) {
+    return VetScheduleSlot(
+      id: json['id']?.toString() ?? '',
+      dayOfWeek: json['dayOfWeek']?.toString() ?? '',
+      startTime: json['startTime']?.toString() ?? '',
+      endTime: json['endTime']?.toString() ?? '',
+      isFull: json['isFull'] ?? false,
+      isActive: json['isActive'] ?? false,
+      availableSpots: json['availableSpots'] ?? 0,
+      isAvailableCurrentWeek: json['isAvailableCurrentWeek'] ?? false,
+      isAvailableNextWeek: json['isAvailableNextWeek'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'dayOfWeek': dayOfWeek,
+      'startTime': startTime,
+      'endTime': endTime,
+      'isFull': isFull,
+      'isActive': isActive,
+      'availableSpots': availableSpots,
+      'isAvailableCurrentWeek': isAvailableCurrentWeek,
+      'isAvailableNextWeek': isAvailableNextWeek,
+    };
+  }
+
+  /// Check if this slot is available (active and has spots)
+  bool get isAvailable => isActive && !isFull && availableSpots > 0;
+
+  /// Get formatted time range (e.g., "6:00 - 7:00")
+  String get timeRange => '$startTime - $endTime';
+}
+
 class VetScheduleModel {
   final String id;
   final String date;

@@ -52,7 +52,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
 
       // Strip country code from phone number for display
       String displayPhone = profile.phone;
-      print('🔍 Original phone from profile: "$displayPhone"');
 
       if (displayPhone.startsWith('+200')) {
         // Backend sometimes returns +200 instead of +20
@@ -74,7 +73,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
         }
       }
 
-      print('🔍 Display phone after processing: "$displayPhone"');
       _phoneController.text = displayPhone;
     } else {
       // Handle null profile case - Load from storage or show defaults
@@ -154,18 +152,11 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
             ? nameParts.sublist(1).join(' ')
             : null;
 
-    print('🔍 ACCOUNT DETAILS SCREEN: Preparing save data');
-    print('   Name Controller: "${_nameController.text}"');
-    print('   Email Controller: "${_emailController.text}"');
-    print('   Phone Controller: "${_phoneController.text}"');
-    print('   Parsed firstName: "$firstName"');
-    print('   Parsed lastName: "$lastName"');
 
     // Convert Arabic numerals to English for phone number
     String phoneText =
         TFormatter.toEnglishNumerals(_phoneController.text.trim());
     final phoneValue = phoneText.isNotEmpty ? phoneText : null;
-    print('   Phone value being sent: "$phoneValue"');
 
     try {
       final success = await _profileController.updateProfile(

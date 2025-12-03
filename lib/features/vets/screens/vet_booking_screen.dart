@@ -67,19 +67,16 @@ class VetBookingController extends GetxController {
   void _getVetIdFromArguments() {
     final args = Get.arguments as Map<String, dynamic>?;
     vetId = args?['vet']?['id']?.toString();
-    print('🏥 Vet ID from arguments: $vetId');
   }
 
   /// Fetch available time slots from API
   Future<void> _fetchTimeSlots() async {
     if (vetId == null || vetId!.isEmpty) {
-      print('⚠️ No vet ID available, skipping time slot fetch');
       return;
     }
 
     try {
       isLoadingTimeSlots.value = true;
-      print('🔄 Fetching time slots for vet: $vetId on ${selectedDay.value}');
 
       final slots =
           await _vetService.getVetTimeSlots(vetId!, selectedDay.value);
@@ -87,14 +84,12 @@ class VetBookingController extends GetxController {
       availableTimeSlots.value = slots;
       _categorizeTimeSlots(slots);
 
-      print('✅ Loaded ${slots.length} time slots');
     } catch (e) {
-      print('❌ Error fetching time slots: $e');
       Get.snackbar(
         'Error',
         'Failed to load available time slots',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withOpacity(0.8),
+        backgroundColor: Colors.red.withValues(alpha: 0.8),
         colorText: Colors.white,
         margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
         icon: const Icon(Icons.error_outline, color: Colors.white, size: 24),
@@ -112,12 +107,9 @@ class VetBookingController extends GetxController {
     eveningSlots.clear();
 
     for (final slot in slots) {
-      print(
-          '🕐 Raw slot data: ID=${slot.id}, start=${slot.startTime}, end=${slot.endTime}, display=${slot.displayTime}, bookable=${slot.isBookable}, expired=${slot.isExpired(selectedDay.value)}');
 
       // Skip slots that are not bookable or have expired
       if (!slot.isBookableForDate(selectedDay.value)) {
-        print('   ⏭️  Skipping slot - not bookable or expired');
         continue;
       }
 
@@ -136,8 +128,6 @@ class VetBookingController extends GetxController {
       }
     }
 
-    print(
-        '📊 Time slots categorized: ${morningSlots.length} morning, ${afternoonSlots.length} afternoon, ${eveningSlots.length} evening');
   }
 
   /// Update selected day and fetch new time slots
@@ -153,7 +143,6 @@ class VetBookingController extends GetxController {
   void updateTimeSlot(TimeSlotModel slot) {
     selectedTimeSlot.value = slot.displayTime;
     selectedTimeSlotId.value = slot.id;
-    print('✅ Selected time slot: ${slot.formattedTime} (ID: ${slot.id})');
   }
 
   /// Add pet to selection

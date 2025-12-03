@@ -5,6 +5,7 @@ import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/services/location_service.dart';
+import 'package:petapp/core/constants/egypt_regions.dart';
 import 'package:petapp/features/vets/models/vet_model.dart';
 import 'package:petapp/features/vets/services/vet_service.dart';
 import '../widgets/vet_explorer_screen_widget/vet_explorer_header.dart';
@@ -148,11 +149,9 @@ class VetExplorerController extends GetxController {
 
       final vets = response['vets'] as List<VetModel>;
 
-      print('📋 Controller - Received vets: ${vets.length}');
 
       // Update vets with calculated distances
       final vetsWithDistances = await _updateVetsWithDistances(vets);
-      print('📍 Controller - Updated vets with distances');
 
       if (currentPage.value == 1) {
         allVets.value = vetsWithDistances;
@@ -160,7 +159,6 @@ class VetExplorerController extends GetxController {
         allVets.addAll(vetsWithDistances);
       }
 
-      print('📋 Controller - allVets count: ${allVets.length}');
 
       totalVets.value = response['total'] as int;
       totalPages.value = response['totalPages'] as int;
@@ -177,7 +175,6 @@ class VetExplorerController extends GetxController {
       // Apply initial filters
       applyFilters();
 
-      print('📋 Controller - filteredVets count: ${filteredVets.length}');
     } catch (e) {
       Get.snackbar(
         AppLocalizations.of(Get.context!).error,
@@ -199,48 +196,56 @@ class VetExplorerController extends GetxController {
     await loadData();
   }
 
-  /// Update regions list with hierarchical structure based on clinic locations
+  /// Update regions list with Egypt's 28 governorates and parse clinic addresses
   void _updateRegions() {
+    // Start with Egypt's governorates
     final Map<String, Set<String>> governoratesCities = {};
-    final Set<String> allUniqueRegions = {};
 
-    // Add default options
+    // Initialize with Egypt's governorates and their cities using current locale
+    final isArabic = EgyptRegions.isArabic;
+    final governoratesMap = isArabic ? EgyptRegions.governorates : EgyptRegions.governoratesEn;
+
+    for (final entry in governoratesMap.entries) {
+      governoratesCities[entry.key] = entry.value.toSet();
+    }
+
+    // Add additional cities from vet addresses if not already present
+    for (final vet in allVets) {
+      final parsed = EgyptRegions.parseAddress(vet.location);
+
+      if (parsed != null) {
+        final governorate = parsed['governorate'];
+        final city = parsed['city'];
+
+        if (governorate != null) {
+          if (!governoratesCities.containsKey(governorate)) {
+            governoratesCities[governorate] = <String>{};
+          }
+
+          if (city != null && !governoratesCities[governorate]!.contains(city)) {
+            governoratesCities[governorate]!.add(city);
+          }
+        }
+      }
+    }
+
+    // Build regions list with default options
     regions.value = [
       'allRegions',
       if (_locationService.isPermissionGranted) 'nearbyAutoDetect',
     ];
 
-    // Parse vet locations to extract governorates and cities
-    for (final vet in allVets) {
-      final locationParts = vet.location.split(',');
-
-      if (locationParts.length >= 2) {
-        final city = locationParts[0].trim();
-        final governorate = locationParts[1].trim();
-
-        if (!governoratesCities.containsKey(governorate)) {
-          governoratesCities[governorate] = <String>{};
-        }
-
-        governoratesCities[governorate]!.add(city);
-        allUniqueRegions.add(governorate);
-        allUniqueRegions.add(vet.location);
-      } else {
-        allUniqueRegions.add(vet.location);
-      }
-    }
+    // Add all governorates (sorted)
+    final governorateList = governoratesCities.keys.toList()..sort();
+    regions.addAll(governorateList);
 
     // Build hierarchy map
     final Map<String, List<String>> hierarchy = {};
-
     governoratesCities.forEach((governorate, cities) {
-      if (cities.length > 1) {
-        hierarchy[governorate] = cities.toList()..sort();
-      }
+      hierarchy[governorate] = cities.toList()..sort();
     });
 
     regionHierarchy.value = hierarchy;
-    regions.addAll(allUniqueRegions.toList()..sort());
   }
 
   /// Update vets with calculated distances from current location
@@ -249,17 +254,13 @@ class VetExplorerController extends GetxController {
       final currentPosition = _locationService.currentPosition;
 
       if (currentPosition == null) {
-        print('⚠️ No current position available for distance calculation');
         return vets;
       }
 
-      print(
-          '📍 Calculating distances from: ${currentPosition.latitude}, ${currentPosition.longitude}');
 
       return vets.map((vet) {
         try {
           if (vet.latitude == null || vet.longitude == null) {
-            print('⚠️ Vet "${vet.name}" has no coordinates');
             return vet;
           }
 
@@ -272,15 +273,12 @@ class VetExplorerController extends GetxController {
               ? _locationService.formatDistance(distance)
               : 'Unknown';
 
-          print('✅ Vet "${vet.name}": $formattedDistance');
           return vet.copyWith(distance: formattedDistance);
         } catch (e) {
-          print('❌ Error calculating distance for "${vet.name}": $e');
           return vet;
         }
       }).toList();
     } catch (e) {
-      print('❌ _updateVetsWithDistances error: $e');
       return vets;
     }
   }
@@ -294,9 +292,7 @@ class VetExplorerController extends GetxController {
       categories.insert(0, 'All');
 
       availableCategories.value = categories;
-      print('📋 Extracted categories from API: ${categories.join(", ")}');
     } catch (e) {
-      print('❌ Error extracting categories: $e');
       availableCategories.value = ['All'];
     }
   }
@@ -311,60 +307,50 @@ class VetExplorerController extends GetxController {
       }
 
       availableServices.value = services.toList()..sort();
-      print('📋 Extracted ${services.length} unique services from API data');
     } catch (e) {
-      print('❌ Error extracting services: $e');
       availableServices.value = [];
     }
   }
 
   /// Get cities for a specific governorate
   List<String> getCitiesForGovernorate(String governorate) {
-    return regionHierarchy[governorate] ?? [];
+    return regionHierarchy[governorate] ?? EgyptRegions.getCitiesForGovernorate(governorate);
   }
 
   /// Check if a region is a governorate (has sub-cities)
   bool isGovernorate(String region) {
-    return regionHierarchy.containsKey(region);
+    return EgyptRegions.isGovernorate(region) || regionHierarchy.containsKey(region);
   }
 
   /// Apply all filters
   Future<void> applyFilters() async {
     try {
       List<VetModel> filtered = List.from(allVets);
-      print('🔍 applyFilters - Starting with ${filtered.length} vets');
 
       // Ensure distances are updated for all clinics if location is available
       if (_locationService.isPermissionGranted &&
           _locationService.currentPosition != null) {
         filtered = await _updateVetsWithDistances(filtered);
-        print('📍 applyFilters - Updated all clinics with distances');
       }
 
       // Apply search filter (search within API data only)
       if (searchQuery.value.isNotEmpty) {
         filtered = _applySearchFilter(filtered, searchQuery.value);
-        print('🔍 applyFilters - After search: ${filtered.length} vets');
       }
 
       // Apply category filter
       filtered = _applyCategoryFilter(filtered);
-      print('🔍 applyFilters - After category filter: ${filtered.length} vets');
 
       // Apply region/location filter
       filtered = await _applyLocationFilter(filtered);
-      print('🔍 applyFilters - After location filter: ${filtered.length} vets');
 
       // Apply service filter
       filtered = _applyServiceFilter(filtered);
-      print('🔍 applyFilters - After service filter: ${filtered.length} vets');
 
       // Apply sorting
       filtered = await _applySorting(filtered);
-      print('🔍 applyFilters - After sorting: ${filtered.length} vets');
 
       filteredVets.value = filtered;
-      print('🔍 applyFilters - Final filteredVets: ${filteredVets.length}');
     } catch (e) {
       Get.snackbar(
         AppLocalizations.of(Get.context!).error,
@@ -404,7 +390,7 @@ class VetExplorerController extends GetxController {
     }
   }
 
-  /// Apply location/region filter with hierarchical support
+  /// Apply location/region filter with hierarchical support and Egypt governorates
   Future<List<VetModel>> _applyLocationFilter(List<VetModel> vets) async {
     if (selectedRegion.value == 'allRegions') {
       return vets;
@@ -435,21 +421,28 @@ class VetExplorerController extends GetxController {
       return vets;
     }
 
+    // Check if it's a governorate filter
     if (isGovernorate(selectedRegion.value)) {
       return vets.where((vet) {
-        final locationParts = vet.location.split(',');
-        if (locationParts.length >= 2) {
-          final governorate = locationParts[1].trim();
-          return governorate == selectedRegion.value;
+        final parsed = EgyptRegions.parseAddress(vet.location);
+        if (parsed != null && parsed['governorate'] != null) {
+          return parsed['governorate'] == selectedRegion.value;
         }
-        return false;
+
+        // Fallback: check if location contains governorate name
+        return vet.location.toLowerCase().contains(selectedRegion.value.toLowerCase());
       }).toList();
     } else {
-      return vets
-          .where((vet) =>
-              vet.location == selectedRegion.value ||
-              vet.location.contains(selectedRegion.value))
-          .toList();
+      // Filter by specific city/district
+      return vets.where((vet) {
+        final parsed = EgyptRegions.parseAddress(vet.location);
+        if (parsed != null && parsed['city'] != null) {
+          return parsed['city'] == selectedRegion.value;
+        }
+
+        // Fallback: check if location contains city name
+        return vet.location.toLowerCase().contains(selectedRegion.value.toLowerCase());
+      }).toList();
     }
   }
 

@@ -84,8 +84,28 @@ class PetModel {
 
   factory PetModel.fromMap(Map<String, dynamic> map) {
     // Get image URL from API if available
-    String? apiImageUrl = map['imageUrl'] ?? map['image_url'] ?? map['image'];
+    // Handle both single image URL and images array
+    String? apiImageUrl;
 
+    if (map['imageUrl'] != null) {
+      apiImageUrl = _convertImagePath(map['imageUrl'].toString());
+    } else if (map['image_url'] != null) {
+      apiImageUrl = _convertImagePath(map['image_url'].toString());
+    } else if (map['image'] != null) {
+      if (map['image'] is List && (map['image'] as List).isNotEmpty) {
+        // If image is an array, take the first one
+        apiImageUrl = _convertImagePath((map['image'] as List).first.toString());
+      } else if (map['image'] is String) {
+        apiImageUrl = _convertImagePath(map['image'].toString());
+      }
+    } else if (map['images'] != null) {
+      if (map['images'] is List && (map['images'] as List).isNotEmpty) {
+        // If images is an array, take the first one
+        apiImageUrl = _convertImagePath((map['images'] as List).first.toString());
+      } else if (map['images'] is String) {
+        apiImageUrl = _convertImagePath(map['images'].toString());
+      }
+    }
     // Determine fallback image based on species
     String imageAsset = 'assets/images/pet1.jpg'; // Default image
     if (map['species'] != null) {
@@ -122,6 +142,48 @@ class PetModel {
       image: imageAsset, // Fallback image for UI compatibility
       imageUrl: apiImageUrl, // Image URL from API
     );
+  }
+
+  /// Convert relative image paths to full URLs
+  /// Similar to VetModel's _convertImagePath method
+  static String _convertImagePath(String imagePath) {
+    // If already a full URL or asset path, return as is
+    if (imagePath.startsWith('http://') ||
+        imagePath.startsWith('https://') ||
+        imagePath.startsWith('assets/')) {
+      return imagePath;
+    }
+
+    // If it's a relative API path starting with /api/
+    if (imagePath.startsWith('/api/')) {
+      final url = 'https://api.aleefy-app.com$imagePath';
+      return url;
+    }
+
+    // If it starts with just /, assume it's relative to base domain
+    if (imagePath.startsWith('/')) {
+      final url = 'https://api.aleefy-app.com$imagePath';
+      return url;
+    }
+
+    // For paths like "pets/abc.jpg" or just "abc.jpg"
+    // Images are served from MinIO storage
+    const minioBaseUrl = 'https://minio-api.aleefy-app.com/uploads';
+    String cleanPath = imagePath;
+
+    // Remove "uploads/" prefix if present (since we'll add it back)
+    if (cleanPath.startsWith('uploads/')) {
+      cleanPath = cleanPath.substring('uploads/'.length);
+    }
+
+    // Ensure "pets/" prefix is present
+    if (!cleanPath.startsWith('pets/')) {
+      cleanPath = 'pets/$cleanPath';
+    }
+
+    // Build the URL with MinIO base URL
+    final url = '$minioBaseUrl/$cleanPath';
+    return url;
   }
 }
 

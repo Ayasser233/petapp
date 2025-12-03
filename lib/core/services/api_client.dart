@@ -292,7 +292,7 @@ class ApiClient {
   Future<Response> changePassword(
       String currentPassword, String newPassword) async {
     try {
-      final response = await _dio.post(ApiConstants.changePasswordEndpoint,
+      final response = await _dio.patch(ApiConstants.changePasswordEndpoint,
           data: {
             'currentPassword': currentPassword,
             'newPassword': newPassword

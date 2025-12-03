@@ -231,7 +231,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     focusedBorder: focusedFieldStyle(),
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 16.0, horizontal: 16.0),
-                    errorStyle: const TextStyle(height: 0.8),
+                    errorStyle: const TextStyle(height: 1.2),
+                    errorMaxLines: 2,
                   ),
                   autovalidateMode: AutovalidateMode.onUserInteraction,
                   validator: _validateEmail,

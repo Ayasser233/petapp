@@ -33,7 +33,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
   String _selectedGender = 'MALE';
   String _selectedAgeUnit = 'years'; // days, months, years
 
-  String _imagePath = 'assets/images/pet_placeholder.jpg';
+  String? _imagePath;
   bool _isImageFromGallery = false;
   bool _isLoading = false;
   bool _spayNeuterStatus = false;
@@ -155,7 +155,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     icon: Icons.camera_alt,
                     label: dialogLocalizations.camera,
                     onTap: () async {
-                      Navigator.pop(context);
+                      Navigator.pop(dialogContext);
                       final XFile? image =
                           await picker.pickImage(source: ImageSource.camera);
                       if (image != null) {
@@ -170,7 +170,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                     icon: Icons.photo_library,
                     label: dialogLocalizations.gallery,
                     onTap: () async {
-                      Navigator.pop(context);
+                      Navigator.pop(dialogContext);
                       final XFile? image =
                           await picker.pickImage(source: ImageSource.gallery);
                       if (image != null) {
@@ -280,9 +280,18 @@ class _AddPetScreenState extends State<AddPetScreen> {
             : null,
       };
 
-      final success = await _petController.createPet(petData);
+      // Pass image path if user selected an image
+      final String? imagePathToSend = _isImageFromGallery ? _imagePath : null;
+
+      final success = await _petController.createPet(
+        petData,
+        imagePath: imagePathToSend,
+      );
 
       if (success) {
+        // Refresh the pets list to show the new pet
+        await _petController.refreshPets();
+
         // Go back to My Pets screen after successful addition
         Get.back();
         Get.snackbar(
@@ -378,14 +387,21 @@ class _AddPetScreenState extends State<AddPetScreen> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(60),
-                            child: _isImageFromGallery
+                            child: _isImageFromGallery && _imagePath != null
                                 ? Image.file(
-                                    File(_imagePath),
+                                    File(_imagePath!),
                                     fit: BoxFit.cover,
                                   )
-                                : Image.asset(
-                                    _imagePath,
-                                    fit: BoxFit.cover,
+                                : Container(
+                                    decoration: BoxDecoration(
+                                      color: AppColors.orange.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(60),
+                                    ),
+                                    child: const Icon(
+                                      Icons.pets,
+                                      size: 60,
+                                      color: AppColors.orange,
+                                    ),
                                   ),
                           ),
                         ),

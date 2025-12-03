@@ -302,6 +302,12 @@ class AppLocalizations {
   String get wrongCredentials =>
       _localizedValues[locale.languageCode]?['wrongCredentials'] ??
       'Wrong email or password';
+  String get emailNotVerified =>
+      _localizedValues[locale.languageCode]?['emailNotVerified'] ??
+      'Email Not Verified';
+  String get pleaseVerifyYourEmail =>
+      _localizedValues[locale.languageCode]?['pleaseVerifyYourEmail'] ??
+      'Please verify your email to continue';
 
   // Forgot Password screen getters
   String get resetYourPassword =>
@@ -1043,6 +1049,18 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['grooming'] ?? 'Grooming';
   String get emergency =>
       _localizedValues[locale.languageCode]?['emergency'] ?? 'Emergency';
+  String get selectLocation =>
+      _localizedValues[locale.languageCode]?['selectLocation'] ?? 'Select Location';
+  String get selectGovernorateOrCity =>
+      _localizedValues[locale.languageCode]?['selectGovernorateOrCity'] ?? 'Select Governorate or City';
+  String get searchGovernorate =>
+      _localizedValues[locale.languageCode]?['searchGovernorate'] ?? 'Search governorate...';
+  String get selectCity =>
+      _localizedValues[locale.languageCode]?['selectCity'] ?? 'Select City';
+  String get searchCity =>
+      _localizedValues[locale.languageCode]?['searchCity'] ?? 'Search city...';
+  String get selectEntireGovernorate =>
+      _localizedValues[locale.languageCode]?['selectEntireGovernorate'] ?? 'Select entire governorate';
   // Add these getters to your AppLocalizations class
   String get bookVetVisit =>
       _localizedValues[locale.languageCode]?['bookVetVisit'] ??
@@ -1978,6 +1996,18 @@ class AppLocalizations {
         '$years years';
   }
 
+  String citiesCount(int count) {
+    return _localizedValues[locale.languageCode]?['citiesCount']
+            ?.replaceAll('{count}', count.toString()) ??
+        '$count cities';
+  }
+
+  String allCitiesIn(String governorate) {
+    return _localizedValues[locale.languageCode]?['allCitiesIn']
+            ?.replaceAll('{governorate}', governorate) ??
+        'All $governorate';
+  }
+
   String callingNumber(String phone) {
     return _localizedValues[locale.languageCode]?['callingNumber']
             ?.replaceAll('{phone}', phone) ??
@@ -2257,6 +2287,8 @@ class AppLocalizations {
       'signInWithApple': 'Sign in with Apple',
       'dontHaveAccount': 'Don\'t have an account?',
       'wrongCredentials': 'Wrong email or password',
+      'emailNotVerified': 'Email Not Verified',
+      'pleaseVerifyYourEmail': 'Please verify your email to continue',
       'validatingVoucherCode': 'Validating voucher code: {code}',
       'voucherAddedSuccessfully': 'Voucher "{code}" added successfully!',
       'invalidVoucherCode': 'Invalid voucher code: "{code}"',
@@ -2691,6 +2723,14 @@ class AppLocalizations {
       'availableSlots': '({count} available)',
       'favorite': 'Favorite',
       'addedToFavorites': 'Added to favorites',
+      'selectLocation': 'Select Location',
+      'selectGovernorateOrCity': 'Select Governorate or City',
+      'searchGovernorate': 'Search governorate...',
+      'citiesCount': '{count} cities',
+      'selectCity': 'Select City',
+      'searchCity': 'Search city...',
+      'allCitiesIn': 'All {governorate}',
+      'selectEntireGovernorate': 'Select entire governorate',
       'cannotOpenMaps':
           'Cannot open maps. Please check if Google Maps is installed.',
       'viewLocation': 'View Location',
@@ -3666,6 +3706,8 @@ class AppLocalizations {
       'signInWithApple': 'تسجيل الدخول باستخدام Apple',
       'dontHaveAccount': 'ليس لديك حساب؟',
       'wrongCredentials': 'بريد إلكتروني أو كلمة مرور خاطئة',
+      'emailNotVerified': 'البريد الإلكتروني غير مؤكد',
+      'pleaseVerifyYourEmail': 'يرجى تأكيد بريدك الإلكتروني للمتابعة',
       // Signup screen translations
       'createAccount': 'إنشاء حسابك',
       'accountCreationSubtitle': 'املأ بياناتك لإنشاء حسابك',
@@ -4125,6 +4167,14 @@ class AppLocalizations {
       'checkup': 'فحص',
       'grooming': 'تنظيف',
       'emergency': 'طوارئ',
+      'selectLocation': 'اختر الموقع',
+      'selectGovernorateOrCity': 'اختر المحافظة أو المدينة',
+      'searchGovernorate': 'البحث عن المحافظة...',
+      'citiesCount': '{count} مدن',
+      'selectCity': 'اختر المدينة',
+      'searchCity': 'البحث عن المدينة...',
+      'allCitiesIn': 'كل {governorate}',
+      'selectEntireGovernorate': 'اختر المحافظة بأكملها',
       'bookVetVisit': 'حجز زيارة العيادة',
       'resetBooking': 'إعادة تعيين الحجز',
       'bookingDetails': 'تفاصيل الحجز',

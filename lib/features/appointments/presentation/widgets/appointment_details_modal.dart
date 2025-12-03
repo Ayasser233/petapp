@@ -165,12 +165,63 @@ class AppointmentDetailsModal extends StatelessWidget {
             '${(appointment.endTime.difference(appointment.startTime).inMinutes / 2).round()} mins',
             isDark,
           ),
-          _buildDetailRow(
-            context,
-            AppLocalizations.of(context).fee,
-            AppointmentUtils.formatCurrency(appointment.finalAmount),
-            isDark,
-          ),
+
+          // Show pricing breakdown if there are discounts
+          if (appointment.discount > 0 ||
+              appointment.couponDiscount > 0 ||
+              appointment.pointsDiscount > 0) ...[
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+            _buildDetailRow(
+              context,
+              'Original Fee',
+              AppointmentUtils.formatCurrency(appointment.consultationFee),
+              isDark,
+            ),
+            if (appointment.discount > 0)
+              _buildDetailRow(
+                context,
+                'Discount',
+                '- ${AppointmentUtils.formatCurrency(appointment.discount)}',
+                isDark,
+                valueColor: Colors.green,
+              ),
+            if (appointment.couponDiscount > 0)
+              _buildDetailRow(
+                context,
+                'Coupon Discount',
+                '- ${AppointmentUtils.formatCurrency(appointment.couponDiscount)}',
+                isDark,
+                valueColor: Colors.green,
+              ),
+            if (appointment.pointsDiscount > 0)
+              _buildDetailRow(
+                context,
+                'Points Discount',
+                '- ${AppointmentUtils.formatCurrency(appointment.pointsDiscount)}',
+                isDark,
+                valueColor: Colors.green,
+              ),
+            const SizedBox(height: 8),
+            const Divider(),
+            const SizedBox(height: 8),
+            _buildDetailRow(
+              context,
+              AppLocalizations.of(context).fee,
+              AppointmentUtils.formatCurrency(appointment.finalAmount),
+              isDark,
+              valueColor: AppColors.orange,
+              isBold: true,
+            ),
+          ] else
+            _buildDetailRow(
+              context,
+              AppLocalizations.of(context).fee,
+              AppointmentUtils.formatCurrency(appointment.finalAmount),
+              isDark,
+            ),
+
           if (appointment.pointsUsed > 0)
             _buildDetailRow(
               context,
@@ -217,7 +268,13 @@ class AppointmentDetailsModal extends StatelessWidget {
   }
 
   Widget _buildDetailRow(
-      BuildContext context, String label, String value, bool isDark) {
+    BuildContext context,
+    String label,
+    String value,
+    bool isDark, {
+    Color? valueColor,
+    bool isBold = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -237,8 +294,8 @@ class AppointmentDetailsModal extends StatelessWidget {
             child: Text(
               value,
               style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: isDark ? Colors.white : Colors.black,
+                fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+                color: valueColor ?? (isDark ? Colors.white : Colors.black),
               ),
             ),
           ),

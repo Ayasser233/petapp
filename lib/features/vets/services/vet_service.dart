@@ -17,391 +17,10 @@ class VetService {
   LocationService get _locationService => Get.find<LocationService>();
   ApiClient get _apiClient => Get.find<ApiClient>();
 
-  // Extended vet database with more entries and coordinates
-  final List<VetModel> _allVets = [
-    VetModel(
-      id: '1',
-      name: 'PetPals',
-      category: 'Veterinary Clinic',
-      location: 'El-Basatin Sharkeya, Cairo',
-      distance: 'Calculating...',
-      images: const [
-        'assets/images/pet_hospital.jpg',
-        'assets/images/pet_hospital2.jpg',
-        'assets/images/pet_hospital3.jpg',
-      ],
-      description:
-          'Banfield Pet Hospital is a network of specialized animal hospitals that offer emergency and specialist services. They focus on the care of pets that require specialized medical attention.',
-      rating: 4.8,
-      reviews: 178,
-      patients: 709,
-      yearsExperience: 5,
-      latitude: 29.98294,
-      longitude: 31.28259,
-      phone: '+201113888368',
-      email: 'info@banfield.com',
-      services: const [
-        'Emergency Care',
-        'Surgery',
-        'Dental Care',
-        'Vaccination',
-        'X-Ray',
-        'Laboratory'
-      ],
-      openingHours: const {
-        'Monday': '8:00 AM - 6:00 PM',
-        'Tuesday': '8:00 AM - 6:00 PM',
-        'Wednesday': '8:00 AM - 6:00 PM',
-        'Thursday': '8:00 AM - 6:00 PM',
-        'Friday': '8:00 AM - 6:00 PM',
-        'Saturday': '9:00 AM - 4:00 PM',
-        'Sunday': '10:00 AM - 2:00 PM',
-      },
-    ),
-    VetModel(
-      id: '2',
-      name: 'VCA Animal Hospital',
-      category: 'Hospital',
-      location: 'Brooklyn, NY',
-      distance: 'Calculating...',
-      images: const [
-        'assets/images/pet_hospital2.jpg',
-        'assets/images/pet_hospital3.jpg',
-        'assets/images/pet_hospital.jpg',
-      ],
-      description:
-          'VCA Animal Hospital provides a full range of general medical and surgical services as well as specialized treatments for companion animals.',
-      rating: 4.6,
-      reviews: 287,
-      patients: 583,
-      yearsExperience: 12,
-      latitude: 40.6782,
-      longitude: -73.9442,
-      phone: '+1 (555) 987-6543',
-      email: 'contact@vca.com',
-      services: const [
-        'General Check-up',
-        'Vaccination',
-        'Grooming',
-        'Surgery',
-        'Pharmacy'
-      ],
-      openingHours: const {
-        'Monday': '7:00 AM - 7:00 PM',
-        'Tuesday': '7:00 AM - 7:00 PM',
-        'Wednesday': '7:00 AM - 7:00 PM',
-        'Thursday': '7:00 AM - 7:00 PM',
-        'Friday': '7:00 AM - 7:00 PM',
-        'Saturday': '8:00 AM - 5:00 PM',
-        'Sunday': 'Closed',
-      },
-    ),
-    VetModel(
-      id: '3',
-      name: 'BluePearl Pet Hospital',
-      category: 'Emergency',
-      location: 'Healdsburg, CA',
-      distance: 'Calculating...',
-      images: const [
-        'assets/images/pet_hospital3.jpg',
-        'assets/images/pet_hospital.jpg',
-        'assets/images/pet_hospital2.jpg',
-      ],
-      description:
-          'BluePearl Pet Hospital specializes in emergency and specialty care for pets when they need it most.',
-      rating: 4.7,
-      reviews: 127,
-      patients: 709,
-      yearsExperience: 15,
-      latitude: 38.6104,
-      longitude: -122.8695,
-      phone: '+1 (555) 456-7890',
-      email: 'info@bluepearlvet.com',
-      services: const [
-        'Emergency Care',
-        'Specialty Care',
-        'Surgery',
-        'Diagnostics',
-        '24/7 Care'
-      ],
-      openingHours: const {
-        'Monday': '24 Hours',
-        'Tuesday': '24 Hours',
-        'Wednesday': '24 Hours',
-        'Thursday': '24 Hours',
-        'Friday': '24 Hours',
-        'Saturday': '24 Hours',
-        'Sunday': '24 Hours',
-      },
-    ),
-    VetModel(
-      id: '4',
-      name: 'PetSmart Veterinary Services',
-      category: 'Clinic',
-      location: 'Phoenix, AZ',
-      distance: 'Calculating...',
-      images: const [
-        'assets/images/pet_hospital.jpg',
-        'assets/images/pet_hospital2.jpg',
-        'assets/images/pet_hospital3.jpg',
-      ],
-      description:
-          'Convenient veterinary care with grooming and pharmacy services all in one location.',
-      rating: 4.3,
-      reviews: 156,
-      patients: 425,
-      yearsExperience: 8,
-      latitude: 33.4484,
-      longitude: -112.0740,
-      phone: '+1 (555) 321-9876',
-      email: 'vet@petsmart.com',
-      services: const [
-        'Check-up',
-        'Vaccination',
-        'Grooming',
-        'Pharmacy',
-        'Nail Trimming'
-      ],
-      openingHours: const {
-        'Monday': '9:00 AM - 8:00 PM',
-        'Tuesday': '9:00 AM - 8:00 PM',
-        'Wednesday': '9:00 AM - 8:00 PM',
-        'Thursday': '9:00 AM - 8:00 PM',
-        'Friday': '9:00 AM - 8:00 PM',
-        'Saturday': '9:00 AM - 6:00 PM',
-        'Sunday': '10:00 AM - 6:00 PM',
-      },
-    ),
-    VetModel(
-      id: '5',
-      name: 'Animal Specialty Center',
-      category: 'Specialty',
-      location: 'Miami, FL',
-      distance: 'Calculating...',
-      images: const [
-        'assets/images/pet_hospital2.jpg',
-        'assets/images/pet_hospital3.jpg',
-        'assets/images/pet_hospital.jpg',
-      ],
-      description:
-          'Advanced specialty care including cardiology, oncology, and orthopedic surgery.',
-      rating: 4.9,
-      reviews: 89,
-      patients: 312,
-      yearsExperience: 20,
-      latitude: 25.7617,
-      longitude: -80.1918,
-      phone: '+1 (555) 654-3210',
-      email: 'info@animalspecialty.com',
-      services: const [
-        'Cardiology',
-        'Oncology',
-        'Orthopedics',
-        'Neurology',
-        'Advanced Surgery'
-      ],
-      openingHours: const {
-        'Monday': '8:00 AM - 5:00 PM',
-        'Tuesday': '8:00 AM - 5:00 PM',
-        'Wednesday': '8:00 AM - 5:00 PM',
-        'Thursday': '8:00 AM - 5:00 PM',
-        'Friday': '8:00 AM - 5:00 PM',
-        'Saturday': 'By Appointment',
-        'Sunday': 'Emergency Only',
-      },
-    ),
-    VetModel(
-      id: '6',
-      name: 'Happy Paws Grooming & Wellness',
-      category: 'Grooming',
-      location: 'Seattle, WA',
-      distance: 'Calculating...',
-      images: const [
-        'assets/images/pet_hospital3.jpg',
-        'assets/images/pet_hospital.jpg',
-        'assets/images/pet_hospital2.jpg',
-      ],
-      description:
-          'Full-service grooming with basic wellness checks and preventive care.',
-      rating: 4.4,
-      reviews: 203,
-      patients: 567,
-      yearsExperience: 6,
-      latitude: 47.6062,
-      longitude: -122.3321,
-      phone: '+1 (555) 789-0123',
-      email: 'hello@happypaws.com',
-      services: const [
-        'Full Grooming',
-        'Bath & Brush',
-        'Nail Care',
-        'Wellness Check',
-        'Flea Treatment'
-      ],
-      openingHours: const {
-        'Monday': '9:00 AM - 6:00 PM',
-        'Tuesday': '9:00 AM - 6:00 PM',
-        'Wednesday': '9:00 AM - 6:00 PM',
-        'Thursday': '9:00 AM - 6:00 PM',
-        'Friday': '9:00 AM - 6:00 PM',
-        'Saturday': '8:00 AM - 4:00 PM',
-        'Sunday': 'Closed',
-      },
-    ),
-    VetModel(
-      id: '7',
-      name: 'Metropolitan Animal Hospital',
-      category: 'Hospital',
-      location: 'Chicago, IL',
-      distance: 'Calculating...',
-      images: const [
-        'assets/images/pet_hospital.jpg',
-        'assets/images/pet_hospital2.jpg',
-        'assets/images/pet_hospital3.jpg',
-      ],
-      description:
-          'Full-service animal hospital serving the Chicago metropolitan area with comprehensive care.',
-      rating: 4.5,
-      reviews: 412,
-      patients: 890,
-      yearsExperience: 18,
-      latitude: 41.8781,
-      longitude: -87.6298,
-      phone: '+1 (555) 246-8135',
-      email: 'info@metroanimalhospital.com',
-      services: const [
-        'Emergency Care',
-        'Surgery',
-        'Dental Care',
-        'Vaccination',
-        'Boarding'
-      ],
-      openingHours: const {
-        'Monday': '7:00 AM - 8:00 PM',
-        'Tuesday': '7:00 AM - 8:00 PM',
-        'Wednesday': '7:00 AM - 8:00 PM',
-        'Thursday': '7:00 AM - 8:00 PM',
-        'Friday': '7:00 AM - 8:00 PM',
-        'Saturday': '8:00 AM - 6:00 PM',
-        'Sunday': '10:00 AM - 4:00 PM',
-      },
-    ),
-    VetModel(
-      id: '8',
-      name: 'Countryside Veterinary Clinic',
-      category: 'Clinic',
-      location: 'Austin, TX',
-      distance: 'Calculating...',
-      images: const [
-        'assets/images/pet_hospital2.jpg',
-        'assets/images/pet_hospital3.jpg',
-        'assets/images/pet_hospital.jpg',
-      ],
-      description:
-          'Family-owned veterinary vet providing personalized care for pets in a comfortable environment.',
-      rating: 4.7,
-      reviews: 268,
-      patients: 534,
-      yearsExperience: 10,
-      latitude: 30.2672,
-      longitude: -97.7431,
-      phone: '+1 (555) 369-2580',
-      email: 'care@countrysidevet.com',
-      services: const [
-        'General Check-up',
-        'Vaccination',
-        'Surgery',
-        'Dental Care',
-        'Microchipping'
-      ],
-      openingHours: const {
-        'Monday': '8:00 AM - 6:00 PM',
-        'Tuesday': '8:00 AM - 6:00 PM',
-        'Wednesday': '8:00 AM - 6:00 PM',
-        'Thursday': '8:00 AM - 6:00 PM',
-        'Friday': '8:00 AM - 6:00 PM',
-        'Saturday': '9:00 AM - 3:00 PM',
-        'Sunday': 'Closed',
-      },
-    ),
-    VetModel(
-      id: '9',
-      name: 'Coastal Pet Emergency Center',
-      category: 'Emergency',
-      location: 'San Diego, CA',
-      distance: 'Calculating...',
-      images: const [
-        'assets/images/pet_hospital3.jpg',
-        'assets/images/pet_hospital.jpg',
-        'assets/images/pet_hospital2.jpg',
-      ],
-      description:
-          '24/7 emergency veterinary care for critical and urgent pet medical needs.',
-      rating: 4.6,
-      reviews: 178,
-      patients: 623,
-      yearsExperience: 12,
-      latitude: 32.7157,
-      longitude: -117.1611,
-      phone: '+1 (555) 147-8520',
-      email: 'emergency@coastalpet.com',
-      services: const [
-        'Emergency Care',
-        'Critical Care',
-        'Surgery',
-        'Diagnostics',
-        'Intensive Care'
-      ],
-      openingHours: const {
-        'Monday': '24 Hours',
-        'Tuesday': '24 Hours',
-        'Wednesday': '24 Hours',
-        'Thursday': '24 Hours',
-        'Friday': '24 Hours',
-        'Saturday': '24 Hours',
-        'Sunday': '24 Hours',
-      },
-    ),
-    VetModel(
-      id: '10',
-      name: 'Paws & Claws Veterinary Pharmacy',
-      category: 'Pharmacy',
-      location: 'Denver, CO',
-      distance: 'Calculating...',
-      images: const [
-        'assets/images/pet_hospital.jpg',
-        'assets/images/pet_hospital2.jpg',
-        'assets/images/pet_hospital3.jpg',
-      ],
-      description:
-          'Specialized veterinary pharmacy with consultation services and medication delivery.',
-      rating: 4.2,
-      reviews: 94,
-      patients: 312,
-      yearsExperience: 5,
-      latitude: 39.7392,
-      longitude: -104.9903,
-      phone: '+1 (555) 963-7410',
-      email: 'pharmacy@pawsclaws.com',
-      services: const [
-        'Pharmacy',
-        'Medication Consultation',
-        'Prescription Delivery',
-        'Compounding'
-      ],
-      openingHours: const {
-        'Monday': '9:00 AM - 7:00 PM',
-        'Tuesday': '9:00 AM - 7:00 PM',
-        'Wednesday': '9:00 AM - 7:00 PM',
-        'Thursday': '9:00 AM - 7:00 PM',
-        'Friday': '9:00 AM - 7:00 PM',
-        'Saturday': '10:00 AM - 5:00 PM',
-        'Sunday': 'Closed',
-      },
-    ),
-  ];
-
   /// Get all vets with location-based distances
+
+  // Extended vet database with more entries and coordinates
+  final List<VetModel> _allVets = [];
   Future<List<VetModel>> getAllVets() async {
     try {
       return await _updateVetsWithDistances(_allVets);
@@ -413,7 +32,6 @@ class VetService {
   /// Get nearby vets (sorted by distance) from API
   Future<List<VetModel>> getNearByVets({int limit = 3}) async {
     try {
-      print('🔄 Attempting to fetch vets from API...');
 
       final response = await getVets(
         page: 1,
@@ -421,7 +39,6 @@ class VetService {
       );
 
       final vets = response['vets'] as List<VetModel>;
-      print('✅ Successfully fetched ${vets.length} vets from API');
 
       // Update with calculated distances if location available
       final currentPosition = _locationService.currentPosition;
@@ -444,7 +61,6 @@ class VetService {
 
       return vets;
     } catch (e) {
-      print('❌ API Error in getNearByVets: ${e.toString()}');
       // No fallback - if API fails, return empty list
       return [];
     }
@@ -597,19 +213,13 @@ class VetService {
       final currentPosition = _locationService.currentPosition;
 
       if (currentPosition == null) {
-        print('⚠️ _updateVetsWithDistances: No current position available');
-        print('   Permission granted: ${_locationService.isPermissionGranted}');
         return vets;
       }
 
-      print(
-          '📍 _updateVetsWithDistances: Current position: ${currentPosition.latitude}, ${currentPosition.longitude}');
-      print('   Updating distances for ${vets.length} vets');
 
       return vets.map((vet) {
         try {
           if (vet.latitude == null || vet.longitude == null) {
-            print('⚠️ Clinic "${vet.name}" has no coordinates');
             return vet.copyWith(distance: 'Unknown');
           }
 
@@ -622,15 +232,12 @@ class VetService {
               ? _locationService.formatDistance(distance)
               : 'Unknown';
 
-          print('✅ Clinic "${vet.name}": ${formattedDistance}');
           return vet.copyWith(distance: formattedDistance);
         } catch (e) {
-          print('❌ Error calculating distance for "${vet.name}": $e');
           return vet.copyWith(distance: 'Unknown');
         }
       }).toList();
     } catch (e) {
-      print('❌ _updateVetsWithDistances error: $e');
       throw Exception('Failed to update vets with distances: ${e.toString()}');
     }
   }
@@ -785,31 +392,52 @@ class VetService {
         queryParams['minExperience'] = minExperience;
       }
 
-      print('📡 Making API request to: ${ApiConstants.vetsEndpoint}');
-      print('📡 Query params: $queryParams');
 
       final response = await _apiClient.get(
         ApiConstants.vetsEndpoint,
         queryParameters: queryParams,
       );
 
-      print('📡 Response received: ${response.data}');
 
       // API response structure: {"success":true,"message":"...","data":[...],"meta":{...}}
       final data = response.data['data'] as List<dynamic>?;
       final meta = response.data['meta'] as Map<String, dynamic>?;
 
-      print('🔍 API Response - Data count: ${data?.length ?? 0}');
-      print('🔍 API Response - Meta: $meta');
 
       final vets = (data)
               ?.map((vet) => VetModel.fromJson(vet as Map<String, dynamic>))
               .toList() ??
           [];
 
-      print('🔍 Parsed vets count: ${vets.length}');
       if (vets.isNotEmpty) {
-        print('🔍 First vet: ${vets.first.name}');
+        // Fetch schedule slots for each vet to get accurate opening status
+        final vetsWithSchedule = await Future.wait(
+          vets.map((vet) async {
+            try {
+              final scheduleSlots = await getVetScheduleSlots(vet.id);
+              final openingInfo = await getVetOpeningInfo(vet.id);
+
+              return vet.copyWith(
+                scheduleSlots: scheduleSlots,
+                isAvailable: openingInfo['isOpen'] as bool?,
+                openingDaysText: openingInfo['openingDays'] != null && (openingInfo['openingDays'] as List).isNotEmpty
+                    ? (openingInfo['openingDays'] as List<String>).join(', ')
+                    : null,
+              );
+            } catch (e) {
+              // Return vet without schedule info if fetch fails
+              return vet;
+            }
+          }),
+        );
+
+        return {
+          'vets': vetsWithSchedule,
+          'total': meta?['total'] ?? 0,
+          'page': meta?['page'] ?? page,
+          'limit': meta?['limit'] ?? limit,
+          'totalPages': meta?['lastPage'] ?? 1,
+        };
       }
 
       return {
@@ -819,9 +447,7 @@ class VetService {
         'limit': meta?['limit'] ?? limit,
         'totalPages': meta?['lastPage'] ?? 1,
       };
-    } catch (e, stackTrace) {
-      print('❌ Error in getVets: $e');
-      print('❌ Stack trace: $stackTrace');
+    } catch (e) {
       throw VetServiceException(
         'Failed to fetch vets',
         originalError: e,
@@ -889,8 +515,6 @@ class VetService {
     DateTime date,
   ) async {
     try {
-      print(
-          '🔄 Fetching time slots for vet: $vetId on ${date.toIso8601String()}');
 
       final response = await _apiClient.get(
         ApiConstants.vetScheduleEndpoint(vetId),
@@ -899,12 +523,10 @@ class VetService {
         },
       );
 
-      print('✅ Time slots response: ${response.data}');
 
       final data = response.data['data'] as List<dynamic>?;
 
       if (data == null || data.isEmpty) {
-        print('⚠️ No time slots available');
         return [];
       }
 
@@ -912,16 +534,175 @@ class VetService {
           .map((slot) => TimeSlotModel.fromJson(slot as Map<String, dynamic>))
           .toList();
 
-      print('✅ Parsed ${timeSlots.length} time slots');
       return timeSlots;
-    } catch (e, stackTrace) {
-      print('❌ Error fetching time slots: $e');
-      print('❌ Stack trace: $stackTrace');
+    } catch (e) {
       throw VetServiceException(
         'Failed to fetch time slots',
         originalError: e,
       );
     }
+  }
+
+  /// Get vet schedule slots (all days with availability info)
+  Future<List<VetScheduleSlot>> getVetScheduleSlots(String vetId) async {
+    try {
+      final response = await _apiClient.get(
+        ApiConstants.vetScheduleEndpoint(vetId),
+      );
+
+      final data = response.data['data'] as List<dynamic>?;
+
+      if (data == null || data.isEmpty) {
+        return [];
+      }
+
+      final scheduleSlots = data
+          .map((slot) => VetScheduleSlot.fromJson(slot as Map<String, dynamic>))
+          .toList();
+
+      return scheduleSlots;
+    } catch (e) {
+      throw VetServiceException(
+        'Failed to fetch vet schedule slots',
+        originalError: e,
+      );
+    }
+  }
+
+  /// Get vet opening days and times
+  Future<Map<String, dynamic>> getVetOpeningInfo(String vetId) async {
+    try {
+      final scheduleSlots = await getVetScheduleSlots(vetId);
+
+      if (scheduleSlots.isEmpty) {
+        return {
+          'isOpen': false,
+          'openingDays': <String>[],
+          'openingStatus': 'Closed',
+        };
+      }
+
+      // Get current day of week
+      final now = DateTime.now();
+      final currentDayName = _getDayNameFromDateTime(now);
+
+      // Filter active slots available for current week
+      final activeSlots = scheduleSlots.where((slot) =>
+        slot.isActive &&
+        slot.isAvailableCurrentWeek &&
+        !slot.isFull
+      ).toList();
+
+      // Check if open today
+      final todaySlots = activeSlots.where((slot) =>
+        slot.dayOfWeek == currentDayName
+      ).toList();
+
+      // Get unique days with available slots
+      final openingDays = activeSlots
+          .map((slot) => slot.dayOfWeek)
+          .toSet()
+          .toList();
+
+      // Determine opening status
+      String openingStatus = 'Closed';
+      bool isOpen = false;
+
+      if (todaySlots.isNotEmpty) {
+        // Check if currently within operating hours
+        final currentTime = now.hour * 60 + now.minute;
+
+        for (final slot in todaySlots) {
+          final startMinutes = _parseTimeToMinutes(slot.startTime);
+          final endMinutes = _parseTimeToMinutes(slot.endTime);
+
+          if (currentTime >= startMinutes && currentTime <= endMinutes) {
+            openingStatus = 'Open Now';
+            isOpen = true;
+            break;
+          }
+        }
+
+        // If not currently open but has slots today
+        if (!isOpen && todaySlots.isNotEmpty) {
+          final firstSlot = todaySlots.first;
+          openingStatus = 'Closed • Opens at ${firstSlot.startTime}';
+        }
+      } else if (openingDays.isNotEmpty) {
+        // Find next available day
+        openingStatus = 'Closed • Opens ${_getNextAvailableDay(openingDays, currentDayName)}';
+      }
+
+      return {
+        'isOpen': isOpen,
+        'openingDays': openingDays,
+        'openingStatus': openingStatus,
+        'scheduleSlots': activeSlots,
+      };
+    } catch (e) {
+      return {
+        'isOpen': false,
+        'openingDays': <String>[],
+        'openingStatus': 'Closed',
+      };
+    }
+  }
+
+  /// Parse time string (e.g., "14:30") to minutes since midnight
+  int _parseTimeToMinutes(String timeStr) {
+    try {
+      final parts = timeStr.split(':');
+      if (parts.length != 2) return 0;
+
+      final hours = int.parse(parts[0]);
+      final minutes = int.parse(parts[1]);
+
+      return hours * 60 + minutes;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /// Get day name from DateTime
+  String _getDayNameFromDateTime(DateTime date) {
+    const days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
+    return days[date.weekday - 1];
+  }
+
+  /// Get next available day text
+  String _getNextAvailableDay(List<String> openingDays, String currentDay) {
+    const dayOrder = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
+
+    final currentIndex = dayOrder.indexOf(currentDay);
+
+    // Find next day in the week
+    for (int i = 1; i <= 7; i++) {
+      final nextIndex = (currentIndex + i) % 7;
+      final nextDay = dayOrder[nextIndex];
+
+      if (openingDays.contains(nextDay)) {
+        if (i == 1) return 'tomorrow';
+        return 'on $nextDay';
+      }
+    }
+
+    return openingDays.isNotEmpty ? 'on ${openingDays.first}' : '';
   }
 }
 

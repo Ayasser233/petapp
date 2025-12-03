@@ -54,6 +54,16 @@ class AuthLoginSuccess extends AuthState {
   List<Object?> get props => [accessToken];
 }
 
+// Login successful but email not verified
+class AuthLoginUnverified extends AuthState {
+  final String email;
+
+  const AuthLoginUnverified({required this.email});
+
+  @override
+  List<Object?> get props => [email];
+}
+
 // Email verification was successful
 class AuthVerificationSuccess extends AuthState {
   const AuthVerificationSuccess();

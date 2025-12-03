@@ -7,11 +7,14 @@ import 'package:lottie/lottie.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/services/api_client.dart';
+import 'package:petapp/core/services/auth_service.dart';
+import 'package:petapp/core/services/token_service.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/arabic_numeral_formatter.dart';
 import 'package:petapp/core/utils/formatters.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/widgets/success_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
   const VerifyEmailScreen({super.key, required String email});
@@ -168,21 +171,53 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
       // Check if the response is successful
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Show success dialog
-        if (mounted) {
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) => SuccessDialog(
-              title: localizations.emailVerifiedSuccessfully,
-              message: localizations.youCanNowContinueToTheApp,
-              buttonText: localizations.continueText,
-              animationPath: 'assets/animations/success.json',
-              onButtonPressed: () {
-                Get.offAllNamed(AppRoutes.login);
-              },
-            ),
-          );
+        // Check if user has tokens (came from login) or not (came from signup)
+        final tokenService = Get.find<TokenService>();
+        final hasToken = await tokenService.getToken();
+
+        if (hasToken != null && hasToken.isNotEmpty) {
+          // User came from login - they already have tokens, go to home
+          final authService = Get.find<AuthService>();
+          authService.setAuthenticated();
+          await authService.clearGuestMode();
+
+          // Set login flag
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+
+          // Show success dialog and navigate to home
+          if (mounted) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => SuccessDialog(
+                title: localizations.emailVerifiedSuccessfully,
+                message: localizations.youCanNowContinueToTheApp,
+                buttonText: localizations.continueText,
+                animationPath: 'assets/animations/success.json',
+                onButtonPressed: () {
+                  Get.offAllNamed(AppRoutes.home);
+                },
+              ),
+            );
+          }
+        } else {
+          // User came from signup - no tokens yet, go to login
+          if (mounted) {
+            showDialog(
+              context: context,
+              barrierDismissible: false,
+              builder: (_) => SuccessDialog(
+                title: localizations.emailVerifiedSuccessfully,
+                message: localizations.youCanNowContinueToTheApp,
+                buttonText: localizations.continueText,
+                animationPath: 'assets/animations/success.json',
+                onButtonPressed: () {
+                  Get.offAllNamed(AppRoutes.login);
+                },
+              ),
+            );
+          }
         }
       }
     } on DioException catch (e) {
@@ -224,24 +259,28 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     final localizations = AppLocalizations.of(context);
     final isDark = THelperFunctions.isDarkMode(context);
 
-    return Scaffold(
-      backgroundColor: isDark ? Colors.black : Colors.white,
-      appBar: AppBar(
+    return PopScope(
+      canPop: false, // Prevent back navigation
+      onPopInvokedWithResult: (didPop, result) {
+        // Show a message when user tries to go back
+        if (!didPop) {
+          Get.snackbar(
+            localizations.emailNotVerified,
+            localizations.pleaseVerifyYourEmail,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.orange.withValues(alpha: 0.1),
+            colorText: AppColors.orange,
+            duration: const Duration(seconds: 2),
+          );
+        }
+      },
+      child: Scaffold(
         backgroundColor: isDark ? Colors.black : Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: isDark ? Colors.white : Colors.black),
-          onPressed: () => Get.back(),
+        appBar: AppBar(
+          backgroundColor: isDark ? Colors.black : Colors.white,
+          elevation: 0,
+          automaticallyImplyLeading: false, // Remove back button
         ),
-        actions: [
-          IconButton(
-            onPressed: () => Get.offAllNamed(AppRoutes.login),
-            icon:
-                Icon(Icons.clear, color: isDark ? Colors.white : Colors.black),
-          )
-        ],
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -471,6 +510,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
           ],
         ),
       ),
+      ), // Close PopScope
     );
   }
 }

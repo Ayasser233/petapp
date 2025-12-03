@@ -324,6 +324,8 @@ class _LoginFormState extends State<LoginForm> {
 
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) async {
+        debugPrint('🔔 Login state changed: ${state.runtimeType}');
+
         if (state is AuthLoginSuccess) {
           // Use TokenService directly
           final tokenService = Get.find<TokenService>();
@@ -344,6 +346,22 @@ class _LoginFormState extends State<LoginForm> {
 
           // Navigate to home
           Get.offAllNamed(AppRoutes.home);
+        } else if (state is AuthLoginUnverified) {
+          debugPrint('✉️ Handling unverified email: ${state.email}');
+
+          // Email not verified, navigate to verification screen
+          Get.snackbar(
+            AppLocalizations.of(context).emailNotVerified,
+            AppLocalizations.of(context).pleaseVerifyYourEmail,
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.orange.withValues(alpha: 0.1),
+            colorText: AppColors.orange,
+            duration: const Duration(seconds: 3),
+          );
+
+          // Navigate to verification screen with email
+          debugPrint('📧 Navigating to verify email with: ${state.email}');
+          Get.toNamed(AppRoutes.verifyEmail, arguments: state.email);
         } else if (state is AuthGoogleLoginSuccess) {
           // Handle Google login success
           final tokenService = Get.find<TokenService>();

@@ -286,7 +286,8 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                     focusedBorder: focusedFieldStyle(),
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 16.0, horizontal: 16.0),
-                    errorStyle: const TextStyle(height: 0.8),
+                    errorStyle: const TextStyle(height: 1.2),
+                    errorMaxLines: 2,
                   ),
                   validator: _validatePassword,
                   autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -336,7 +337,8 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                     focusedBorder: focusedFieldStyle(),
                     contentPadding: const EdgeInsets.symmetric(
                         vertical: 16.0, horizontal: 16.0),
-                    errorStyle: const TextStyle(height: 0.8),
+                    errorStyle: const TextStyle(height: 1.2),
+                    errorMaxLines: 2,
                   ),
                   validator: _validateConfirmPassword,
                   autovalidateMode: AutovalidateMode.onUserInteraction,

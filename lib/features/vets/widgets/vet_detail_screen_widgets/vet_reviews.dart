@@ -138,7 +138,7 @@ class VetReviews extends StatelessWidget {
             // User Avatar
             CircleAvatar(
               radius: 20,
-              backgroundColor: AppColors.orange.withOpacity(0.2),
+              backgroundColor: AppColors.orange.withValues(alpha: 0.2),
               backgroundImage:
                   review.userImage != null && review.userImage!.isNotEmpty
                       ? AssetImage(review.userImage!)

@@ -172,65 +172,166 @@ class AppointmentCard extends StatelessWidget {
   }
 
   Widget _buildServiceInfo(BuildContext context, bool isDark) {
-    return Row(
+    // Calculate if there are any discounts
+    final hasDiscount = appointment.discount > 0 ||
+                       appointment.couponDiscount > 0 ||
+                       appointment.pointsDiscount > 0;
+    final totalDiscount = appointment.discount +
+                         appointment.couponDiscount +
+                         appointment.pointsDiscount;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(
-          Icons.payments,
-          size: 16,
-          color: isDark ? Colors.grey[400] : Colors.grey[600],
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            AppointmentUtils.formatCurrency(appointment.finalAmount),
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isDark ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.bold,
+        // Price Row
+        Row(
+          children: [
+            Icon(
+              Icons.payments,
+              size: 16,
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Show original price if discount applied
+                  if (hasDiscount)
+                    Text(
+                      AppointmentUtils.formatCurrency(appointment.consultationFee),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: isDark ? Colors.grey[500] : Colors.grey[600],
+                            decoration: TextDecoration.lineThrough,
+                            fontSize: 11,
+                          ),
+                    ),
+                  // Final price
+                  Text(
+                    AppointmentUtils.formatCurrency(appointment.finalAmount),
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: isDark ? Colors.white : Colors.black87,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            if (appointment.pointsUsed > 0) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: isDark ? 0.2 : 0.1),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-          ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.star,
+                      size: 14,
+                      color: Colors.green[700],
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${appointment.pointsUsed}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.green[700],
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+            if (appointment.pet != null) ...[
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.orange.withValues(alpha: isDark ? 0.2 : 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  appointment.pet!.name,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.orange,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ],
+          ],
         ),
-        if (appointment.pointsUsed > 0) ...[
-          const SizedBox(width: 8),
+
+        // Discount breakdown if any
+        if (hasDiscount) ...[
+          const SizedBox(height: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.green.withValues(alpha: isDark ? 0.2 : 0.1),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.green.withValues(alpha: isDark ? 0.15 : 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: Colors.green.withValues(alpha: isDark ? 0.3 : 0.2),
+              ),
             ),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
-                  Icons.star,
-                  size: 14,
+                  Icons.local_offer,
+                  size: 16,
                   color: Colors.green[700],
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Total Savings',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.green[700],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                      ),
+                      if (appointment.discount > 0)
+                        Text(
+                          'Vet Discount: ${AppointmentUtils.formatCurrency(appointment.discount)}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: isDark ? Colors.grey[400] : Colors.grey[700],
+                                fontSize: 10,
+                              ),
+                        ),
+                      if (appointment.couponDiscount > 0)
+                        Text(
+                          'Coupon: ${AppointmentUtils.formatCurrency(appointment.couponDiscount)}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: isDark ? Colors.grey[400] : Colors.grey[700],
+                                fontSize: 10,
+                              ),
+                        ),
+                      if (appointment.pointsDiscount > 0)
+                        Text(
+                          'Points: ${AppointmentUtils.formatCurrency(appointment.pointsDiscount)}',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: isDark ? Colors.grey[400] : Colors.grey[700],
+                                fontSize: 10,
+                              ),
+                        ),
+                    ],
+                  ),
+                ),
                 Text(
-                  '${appointment.pointsUsed}',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  '-${AppointmentUtils.formatCurrency(totalDiscount)}',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.green[700],
                         fontWeight: FontWeight.bold,
                       ),
                 ),
               ],
-            ),
-          ),
-        ],
-        if (appointment.pet != null) ...[
-          const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.orange.withValues(alpha: isDark ? 0.2 : 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              appointment.pet!.name,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.orange,
-                    fontWeight: FontWeight.bold,
-                  ),
             ),
           ),
         ],

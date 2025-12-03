@@ -4,6 +4,7 @@ import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import '../../screens/vet_explorer_screen.dart';
+import '../../screens/governorate_city_selector_screen.dart';
 
 class VetExplorerFilterSheet extends StatelessWidget {
   final VetExplorerController controller;
@@ -114,83 +115,208 @@ class VetExplorerFilterSheet extends StatelessWidget {
               ),
         ),
         const SizedBox(height: 12),
-        Obx(() => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[300]!),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: DropdownButton<String>(
-                value: controller.selectedRegion.value,
-                isExpanded: true,
-                underline: const SizedBox(),
-                items: _buildRegionDropdownItems(context, textColor),
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    controller.selectedRegion.value = newValue;
-                  }
+        Obx(() {
+          final selectedRegion = controller.selectedRegion.value;
+
+          return Column(
+            children: [
+              // Default options
+              _buildRegionOption(
+                context: context,
+                textColor: textColor,
+                subTextColor: subTextColor,
+                value: 'allRegions',
+                label: AppLocalizations.of(context).allRegions,
+                icon: Icons.public,
+                isSelected: selectedRegion == 'allRegions',
+                onTap: () {
+                  controller.selectedRegion.value = 'allRegions';
                 },
               ),
-            )),
+              const SizedBox(height: 8),
+              _buildRegionOption(
+                context: context,
+                textColor: textColor,
+                subTextColor: subTextColor,
+                value: 'nearbyAutoDetect',
+                label: AppLocalizations.of(context).nearbyAutoDetect,
+                icon: Icons.my_location,
+                isSelected: selectedRegion == 'nearbyAutoDetect',
+                onTap: () {
+                  controller.selectedRegion.value = 'nearbyAutoDetect';
+                },
+              ),
+              const SizedBox(height: 16),
+              // Divider
+              Divider(
+                color: subTextColor?.withValues(alpha: 0.3),
+                height: 1,
+              ),
+              const SizedBox(height: 16),
+              // Specific location selector
+              _buildLocationSelector(
+                context: context,
+                textColor: textColor,
+                subTextColor: subTextColor,
+                currentSelection: selectedRegion == 'allRegions' ||
+                        selectedRegion == 'nearbyAutoDetect'
+                    ? null
+                    : selectedRegion,
+              ),
+            ],
+          );
+        }),
       ],
     );
   }
 
-  /// Build region dropdown items
-  List<DropdownMenuItem<String>> _buildRegionDropdownItems(
-      BuildContext context, Color textColor) {
-    final items = <DropdownMenuItem<String>>[];
+  /// Build a region option card
+  Widget _buildRegionOption({
+    required BuildContext context,
+    required Color textColor,
+    required Color? subTextColor,
+    required String value,
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    final isDark = THelperFunctions.isDarkMode(context);
 
-    for (final region in controller.regions) {
-      String displayText;
-
-      switch (region) {
-        case 'allRegions':
-          displayText = AppLocalizations.of(context).allRegions;
-          break;
-        case 'nearbyAutoDetect':
-          displayText = AppLocalizations.of(context).nearbyAutoDetect;
-          break;
-        default:
-          displayText = region;
-      }
-
-      items.add(
-        DropdownMenuItem<String>(
-          value: region,
-          child: Text(
-            displayText,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: textColor,
-                ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.orange.withValues(alpha: 0.1)
+              : (isDark ? Colors.grey[800] : Colors.grey[100]),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected
+                ? AppColors.orange
+                : (isDark ? Colors.grey[700]! : Colors.grey[300]!),
+            width: isSelected ? 2 : 1,
           ),
         ),
-      );
-
-      // Add cities for governorates
-      if (controller.isGovernorate(region)) {
-        final cities = controller.getCitiesForGovernorate(region);
-        for (final city in cities) {
-          items.add(
-            DropdownMenuItem<String>(
-              value: city,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 16),
-                child: Text(
-                  '• $city',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: textColor,
-                      ),
+        child: Row(
+          children: [
+            Icon(
+              icon,
+              color: isSelected ? AppColors.orange : textColor,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 15,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
             ),
-          );
-        }
-      }
-    }
-
-    return items;
+            if (isSelected)
+              const Icon(
+                Icons.check_circle,
+                color: AppColors.orange,
+                size: 20,
+              ),
+          ],
+        ),
+      ),
+    );
   }
+
+  /// Build location selector that opens the city selector screen
+  Widget _buildLocationSelector({
+    required BuildContext context,
+    required Color textColor,
+    required Color? subTextColor,
+    required String? currentSelection,
+  }) {
+    final isDark = THelperFunctions.isDarkMode(context);
+
+    return InkWell(
+      onTap: () async {
+        // Open the governorate/city selector screen
+        final result = await Get.to<String>(
+          () => const GovernorateCitySelectorScreen(),
+          transition: Transition.rightToLeft,
+        );
+
+        if (result != null) {
+          controller.selectedRegion.value = result;
+        }
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: currentSelection != null
+              ? AppColors.orange.withValues(alpha: 0.1)
+              : (isDark ? Colors.grey[800] : Colors.grey[100]),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: currentSelection != null
+                ? AppColors.orange
+                : (isDark ? Colors.grey[700]! : Colors.grey[300]!),
+            width: currentSelection != null ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: currentSelection != null
+                    ? AppColors.orange
+                    : (isDark ? Colors.grey[700] : Colors.grey[300]),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                currentSelection != null
+                    ? Icons.location_on
+                    : Icons.add_location_alt,
+                color: currentSelection != null
+                    ? Colors.white
+                    : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    currentSelection ?? AppLocalizations.of(context).selectGovernorateOrCity,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 15,
+                      fontWeight: currentSelection != null
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: currentSelection != null ? AppColors.orange : subTextColor,
+              size: 16,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build region dropdown items - REMOVED (no longer needed)
 
   /// Build service filter
   Widget _buildServiceFilter(

@@ -28,21 +28,44 @@ class _ClinicHeaderState extends State<VetHeader> {
   }
 
   List<String> _getVetImages() {
-    // Get images from vet data or use default images
+   // Priority 1: Check for 'images' array from API response
     final images = widget.vet['images'];
 
-    // Debug: Print to see what images we're getting
-    print('🔍 VetHeader - Images from vet data: $images');
-    print('🔍 VetHeader - Images type: ${images.runtimeType}');
+    // Priority 2: Check for profileImage field from API
+    final profileImage = widget.vet['profileImage'];
 
+    List<String> vetImages = [];
+
+    // If images array exists and has items, use them
     if (images != null && images is List && images.isNotEmpty) {
-      return List<String>.from(images);
+      // Filter out empty strings
+      vetImages = List<String>.from(images)
+          .where((img) => img.toString().trim().isNotEmpty)
+          .toList();
     }
 
-    // Check for single image field
-    if (widget.vet['image'] != null &&
-        widget.vet['image'].toString().isNotEmpty) {
-      return [widget.vet['image'].toString()];
+    // If we have a profileImage, add it to the list (prioritize it first)
+    if (profileImage != null && profileImage.toString().trim().isNotEmpty) {
+      final profileImageStr = profileImage.toString();
+
+      // Add profileImage at the beginning if not already in the list
+      if (!vetImages.contains(profileImageStr)) {
+        vetImages.insert(0, profileImageStr);
+      }
+    }
+
+    // If we have images now, return them
+    if (vetImages.isNotEmpty) {
+      return vetImages;
+    }
+
+    // Fallback: Check for any other single image field
+    final singleImage = widget.vet['image']?.toString() ??
+        widget.vet['imageUrl']?.toString() ??
+        widget.vet['photo']?.toString();
+
+    if (singleImage != null && singleImage.trim().isNotEmpty) {
+      return [singleImage];
     }
 
     // Default fallback images
@@ -59,7 +82,6 @@ class _ClinicHeaderState extends State<VetHeader> {
         imagePath.startsWith('https://') ||
         imagePath.startsWith('www.');
 
-    print('🔍 VetHeader - Image path: $imagePath, isNetwork: $isNetworkImage');
 
     if (isNetworkImage) {
       // Load network image
@@ -68,7 +90,9 @@ class _ClinicHeaderState extends State<VetHeader> {
         width: double.infinity,
         fit: BoxFit.cover,
         loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
+          if (loadingProgress == null) {
+            return child;
+          }
           return Container(
             width: double.infinity,
             color: Colors.grey[300],
@@ -84,7 +108,6 @@ class _ClinicHeaderState extends State<VetHeader> {
           );
         },
         errorBuilder: (context, error, stackTrace) {
-          print('❌ Error loading network image: $error');
           return Container(
             width: double.infinity,
             color: Colors.grey[300],
@@ -113,7 +136,6 @@ class _ClinicHeaderState extends State<VetHeader> {
         width: double.infinity,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          print('❌ Error loading asset image: $error');
           return Container(
             width: double.infinity,
             color: Colors.grey[300],

@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/features/vets/models/vet_model.dart';
+import 'package:petapp/features/vets/models/vet_schedule_model.dart';
+import 'package:petapp/features/vets/services/vet_service.dart';
 
 /// Reusable Vet Card Component
 /// Can be used in: Home Screen, Vet Explorer, Search Results, Favorites, etc.
-class VetCard extends StatelessWidget {
+class VetCard extends StatefulWidget {
   final String id;
   final String name;
   final String category;
@@ -24,6 +28,7 @@ class VetCard extends StatelessWidget {
   final bool showDistance;
   final bool showActionButtons;
   final bool compact;
+  final VetDiscount? discount;
 
   const VetCard({
     super.key,
@@ -45,7 +50,208 @@ class VetCard extends StatelessWidget {
     this.showDistance = true,
     this.showActionButtons = true,
     this.compact = false,
+    this.discount,
   });
+
+  @override
+  State<VetCard> createState() => _VetCardState();
+}
+
+class _VetCardState extends State<VetCard> {
+  List<VetScheduleSlot>? _scheduleSlots;
+  bool _isLoadingSchedule = false;
+  String? _dynamicOpeningStatus;
+  bool? _isDynamicallyOpen;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchSchedule();
+  }
+
+  Future<void> _fetchSchedule() async {
+    if (_isLoadingSchedule) return;
+
+
+    setState(() {
+      _isLoadingSchedule = true;
+    });
+
+    try {
+      // Try to get VetService - it should already be registered
+      VetService? vetService;
+
+      try {
+        if (Get.isRegistered<VetService>()) {
+          vetService = Get.find<VetService>();
+        } else {
+          setState(() {
+            _isLoadingSchedule = false;
+          });
+          return;
+        }
+      } catch (e) {
+        setState(() {
+          _isLoadingSchedule = false;
+        });
+        return;
+      }
+
+      final schedule = await vetService.getVetScheduleSlots(widget.id);
+
+
+      if (mounted) {
+        setState(() {
+          _scheduleSlots = schedule;
+          _updateOpeningStatus();
+          _isLoadingSchedule = false;
+        });
+
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingSchedule = false;
+        });
+      }
+    }
+  }
+
+  void _updateOpeningStatus() {
+    if (_scheduleSlots == null || _scheduleSlots!.isEmpty) {
+      _isDynamicallyOpen = null;
+      _dynamicOpeningStatus = null;
+      return;
+    }
+
+    final now = DateTime.now();
+    final currentDayName = _getDayName(now.weekday);
+    final currentTime = now.hour * 60 + now.minute;
+
+    // Filter active slots for current week
+    final activeSlots = _scheduleSlots!
+        .where((slot) =>
+            slot.isActive &&
+            slot.isAvailableCurrentWeek &&
+            !slot.isFull &&
+            slot.availableSpots > 0)
+        .toList();
+
+    if (activeSlots.isEmpty) {
+      _isDynamicallyOpen = false;
+      _dynamicOpeningStatus = 'Closed';
+      return;
+    }
+
+    // Check if open now
+    final todaySlots =
+        activeSlots.where((slot) => slot.dayOfWeek == currentDayName).toList();
+
+    for (final slot in todaySlots) {
+      final startMinutes = _parseScheduleTime(slot.startTime);
+      final endMinutes = _parseScheduleTime(slot.endTime);
+
+      if (currentTime >= startMinutes && currentTime <= endMinutes) {
+        _isDynamicallyOpen = true;
+        _dynamicOpeningStatus = 'Open Now';
+        return;
+      }
+    }
+
+    // If not currently open but has slots today
+    if (todaySlots.isNotEmpty) {
+      final upcomingSlots = todaySlots
+          .where((slot) => _parseScheduleTime(slot.startTime) > currentTime)
+          .toList();
+
+      if (upcomingSlots.isNotEmpty) {
+        final nextSlot = upcomingSlots.first;
+        _isDynamicallyOpen = false;
+        _dynamicOpeningStatus = 'Closed • Opens at ${_formatTime(nextSlot.startTime)}';
+        return;
+      }
+    }
+
+    // Find next available day and time
+    final daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    final currentDayIndex = daysOfWeek.indexOf(currentDayName);
+
+    // Look for slots in the next 7 days
+    for (int i = 1; i <= 7; i++) {
+      final nextDayIndex = (currentDayIndex + i) % 7;
+      final nextDayName = daysOfWeek[nextDayIndex];
+
+      final nextDaySlots = activeSlots
+          .where((slot) => slot.dayOfWeek == nextDayName)
+          .toList();
+
+      if (nextDaySlots.isNotEmpty) {
+        // Sort by start time and get earliest
+        nextDaySlots.sort((a, b) => _parseScheduleTime(a.startTime).compareTo(_parseScheduleTime(b.startTime)));
+        final earliestSlot = nextDaySlots.first;
+
+        _isDynamicallyOpen = false;
+        if (i == 1) {
+          _dynamicOpeningStatus = 'Closed • Opens tomorrow at ${_formatTime(earliestSlot.startTime)}';
+        } else {
+          _dynamicOpeningStatus = 'Closed • Opens on $nextDayName at ${_formatTime(earliestSlot.startTime)}';
+        }
+        return;
+      }
+    }
+
+    _isDynamicallyOpen = false;
+    _dynamicOpeningStatus = 'Closed';
+  }
+
+  String _formatTime(String time24) {
+    try {
+      final parts = time24.split(':');
+      if (parts.length != 2) return time24;
+
+      int hours = int.parse(parts[0]);
+      final minutes = parts[1];
+
+      if (hours == 0) {
+        return '12:$minutes AM';
+      } else if (hours < 12) {
+        return '$hours:$minutes AM';
+      } else if (hours == 12) {
+        return '12:$minutes PM';
+      } else {
+        return '${hours - 12}:$minutes PM';
+      }
+    } catch (e) {
+      return time24;
+    }
+  }
+
+  int _parseScheduleTime(String timeStr) {
+    try {
+      final parts = timeStr.split(':');
+      if (parts.length != 2) return 0;
+
+      final hours = int.parse(parts[0]);
+      final minutes = int.parse(parts[1]);
+
+      return hours * 60 + minutes;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  String _getDayName(int weekday) {
+    const days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
+    return days[weekday - 1];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +270,7 @@ class VetCard extends StatelessWidget {
       shadowColor: isDark ? Colors.black : Colors.grey.withValues(alpha: 0.3),
       elevation: isDark ? 8 : 4,
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         borderRadius: BorderRadius.circular(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -85,9 +291,9 @@ class VetCard extends StatelessWidget {
 
   Widget _buildVetImage(BuildContext context, bool isDark) {
     // Check if it's a network URL or local asset
-    final isNetworkImage = primaryImage.startsWith('http://') ||
-        primaryImage.startsWith('https://') ||
-        primaryImage.startsWith('www.');
+    final isNetworkImage = widget.primaryImage.startsWith('http://') ||
+        widget.primaryImage.startsWith('https://') ||
+        widget.primaryImage.startsWith('www.');
 
     return Stack(
       children: [
@@ -96,15 +302,15 @@ class VetCard extends StatelessWidget {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           child: isNetworkImage
               ? Image.network(
-                  primaryImage,
+                  widget.primaryImage,
                   width: double.infinity,
-                  height: compact ? 120 : 150,
+                  height: widget.compact ? 120 : 150,
                   fit: BoxFit.cover,
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Container(
                       width: double.infinity,
-                      height: compact ? 120 : 150,
+                      height: widget.compact ? 120 : 150,
                       color: Colors.grey[300],
                       child: Center(
                         child: CircularProgressIndicator(
@@ -121,7 +327,7 @@ class VetCard extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       width: double.infinity,
-                      height: compact ? 120 : 150,
+                      height: widget.compact ? 120 : 150,
                       color: Colors.grey[300],
                       child: const Icon(
                         Icons.local_hospital,
@@ -132,14 +338,14 @@ class VetCard extends StatelessWidget {
                   },
                 )
               : Image.asset(
-                  primaryImage,
+                  widget.primaryImage,
                   width: double.infinity,
-                  height: compact ? 120 : 150,
+                  height: widget.compact ? 120 : 150,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       width: double.infinity,
-                      height: compact ? 120 : 150,
+                      height: widget.compact ? 120 : 150,
                       color: Colors.grey[300],
                       child: const Icon(
                         Icons.local_hospital,
@@ -167,7 +373,7 @@ class VetCard extends StatelessWidget {
                 const Icon(Icons.star, color: Colors.amber, size: 14),
                 const SizedBox(width: 4),
                 Text(
-                  '$rating ($totalReviews)',
+                  '${widget.rating} (${widget.totalReviews})',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w500,
@@ -189,7 +395,7 @@ class VetCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
-              category,
+              widget.category,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -200,14 +406,14 @@ class VetCard extends StatelessWidget {
         ),
 
         // Distance Badge (Bottom Right) - Only show if enabled and available
-        if (showDistance && distance != null && distance!.isNotEmpty)
+        if (widget.showDistance && widget.distance != null && widget.distance!.isNotEmpty)
           Positioned(
             bottom: 8,
             right: 8,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.9),
+                color: Colors.green.withValues(alpha: 0.9),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -217,11 +423,58 @@ class VetCard extends StatelessWidget {
                       color: Colors.white, size: 12),
                   const SizedBox(width: 4),
                   Text(
-                    distance!,
+                    widget.distance!,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w500,
                           fontSize: 11,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+        // Discount Banner (Bottom Left) - Show if discount is active
+        if (widget.discount != null && widget.discount!.isActive)
+          Positioned(
+            bottom: 8,
+            left: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Colors.red.shade600,
+                    Colors.red.shade400,
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.red.withValues(alpha: 0.4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.local_offer,
+                    color: Colors.white,
+                    size: 14,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    widget.discount!.formattedDiscount,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                         ),
                   ),
                 ],
@@ -239,14 +492,18 @@ class VetCard extends StatelessWidget {
     Color? subTextColor,
     Color? chipBgColor,
   ) {
+    // Use dynamic status if available
+    final isOpen = _isDynamicallyOpen ?? widget.isOpen;
+    final openingStatus = _dynamicOpeningStatus ?? widget.openingStatus;
+
     return Padding(
-      padding: EdgeInsets.all(compact ? 12 : 16),
+      padding: EdgeInsets.all(widget.compact ? 12 : 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Vet Name
           Text(
-            name,
+            widget.name,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: textColor,
@@ -263,7 +520,7 @@ class VetCard extends StatelessWidget {
               const SizedBox(width: 4),
               Expanded(
                 child: Text(
-                  location,
+                  widget.location,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: subTextColor,
                         fontSize: 13,
@@ -274,7 +531,7 @@ class VetCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '$yearsExperience ${AppLocalizations.of(context).yearsExp}',
+                '${widget.yearsExperience} ${AppLocalizations.of(context).yearsExp}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: subTextColor,
                     ),
@@ -303,12 +560,12 @@ class VetCard extends StatelessWidget {
           ),
 
           // Services (if not compact)
-          if (!compact && services.isNotEmpty) ...[
+          if (!widget.compact && widget.services.isNotEmpty) ...[
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: services.take(4).map((service) {
+              children: widget.services.take(4).map((service) {
                 return Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -329,13 +586,13 @@ class VetCard extends StatelessWidget {
           ],
 
           // Action Buttons
-          if (showActionButtons) ...[
+          if (widget.showActionButtons) ...[
             const SizedBox(height: 16),
             Row(
               children: [
                 Expanded(
                   child: ElevatedButton(
-                    onPressed: onTap,
+                    onPressed: widget.onTap,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.orange,
                       foregroundColor: Colors.white,
@@ -355,7 +612,7 @@ class VetCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (phone != null && onCallPressed != null) ...[
+                if (widget.phone != null && widget.onCallPressed != null) ...[
                   const SizedBox(width: 12),
                   Container(
                     decoration: BoxDecoration(
@@ -363,7 +620,7 @@ class VetCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: IconButton(
-                      onPressed: onCallPressed,
+                      onPressed: widget.onCallPressed,
                       icon: const Icon(Icons.phone, color: AppColors.orange),
                       tooltip: AppLocalizations.of(context).callVet,
                     ),

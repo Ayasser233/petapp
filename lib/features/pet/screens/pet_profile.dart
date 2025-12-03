@@ -446,40 +446,38 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
     final textColor = isDark ? Colors.white : Colors.grey[800];
     final subTextColor = isDark ? Colors.grey[400] : Colors.grey[600];
 
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: color.withValues(alpha: isDark ? 0.15 : 0.1),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: color, size: 16),
-                const SizedBox(width: 4),
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: subTextColor,
-                    fontSize: 14,
-                  ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.15 : 0.1),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 16),
+              const SizedBox(width: 4),
+              Text(
+                title,
+                style: TextStyle(
+                  color: subTextColor,
+                  fontSize: 14,
                 ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: textColor,
               ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: textColor,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -586,7 +584,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              '${localizations.areYouSureDeletePet.replaceAll('this pet', widget.pet.name)}',
+              localizations.areYouSureDeletePet.replaceAll('this pet', widget.pet.name),
               textAlign: TextAlign.center,
               style: TextStyle(color: textColor),
             ),
@@ -790,7 +788,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
                     const SizedBox(height: 16),
                   ] else ...[
                     Row(
@@ -1056,33 +1054,52 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
 
   /// Build pet image widget that handles API URL, local file, or asset
   Widget _buildPetImage() {
-    // Priority: API imageUrl > local file path > asset fallback
-    if (widget.pet.imageUrl != null && widget.pet.imageUrl!.isNotEmpty) {
-      // Image from API
+
+    // Determine image source
+    final String primaryImage = widget.pet.imageUrl ?? widget.pet.image;
+
+    // Check if it's a network image
+    final isNetworkImage = primaryImage.startsWith('http://') ||
+        primaryImage.startsWith('https://') ||
+        primaryImage.startsWith('www.');
+
+    // Check if it's a local file (not network and not asset)
+    final isLocalFile = !isNetworkImage && !primaryImage.startsWith('assets/');
+
+    if (isNetworkImage) {
+      // Network image from API
       return Image.network(
-        widget.pet.imageUrl!,
+        primaryImage,
+        width: double.infinity,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          // Fallback to asset if network image fails
-          return _buildFallbackImage();
-        },
         loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+          if (loadingProgress == null) {
+            return child;
+          }
+          return Container(
+            width: double.infinity,
+            color: AppColors.orange.withValues(alpha: 0.1),
+            child: Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+                color: AppColors.orange,
+                strokeWidth: 3,
+              ),
             ),
           );
         },
+        errorBuilder: (context, error, stackTrace) {
+          return _buildFallbackImage();
+        },
       );
-    } else if (!widget.pet.image.startsWith('assets/')) {
-      // Local file
+    } else if (isLocalFile) {
+      // Local file from camera/gallery
       return Image.file(
-        File(widget.pet.image),
+        File(primaryImage),
+        width: double.infinity,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
           return _buildFallbackImage();
@@ -1090,30 +1107,31 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
       );
     } else {
       // Asset image
-      return _buildFallbackImage();
+      return Image.asset(
+        primaryImage,
+        width: double.infinity,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return _buildFallbackImage();
+        },
+      );
     }
   }
 
-  /// Build fallback asset image
+  /// Build fallback image when all image loading fails
   Widget _buildFallbackImage() {
-    return Image.asset(
-      widget.pet.image,
-      fit: BoxFit.cover,
-      errorBuilder: (context, error, stackTrace) {
-        // Ultimate fallback - solid color with icon
-        return Container(
-          color: AppColors.orange.withValues(alpha: 0.3),
-          child: Center(
-            child: Icon(
-              widget.pet.species.toLowerCase() == 'dog'
-                  ? Icons.pets
-                  : Icons.pets,
-              size: 100,
-              color: Colors.white.withValues(alpha: 0.5),
-            ),
-          ),
-        );
-      },
+    return Container(
+      width: double.infinity,
+      color: AppColors.orange.withValues(alpha: 0.2),
+      child: Center(
+        child: Icon(
+          widget.pet.species.toLowerCase() == 'dog'
+              ? Icons.pets
+              : Icons.pets,
+          size: 100,
+          color: Colors.white.withValues(alpha: 0.5),
+        ),
+      ),
     );
   }
 }

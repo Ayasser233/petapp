@@ -1,5 +1,66 @@
 import 'package:geolocator/geolocator.dart';
 import '../../../core/utils/api_constants.dart';
+import 'vet_schedule_model.dart';
+
+/// Represents a discount offered by a vet clinic
+class VetDiscount {
+  final String title;
+  final String description;
+  final String type; // 'percentage' or 'fixed'
+  final double value;
+  final bool isActive;
+
+  VetDiscount({
+    required this.title,
+    required this.description,
+    required this.type,
+    required this.value,
+    required this.isActive,
+  });
+
+  factory VetDiscount.fromJson(Map<String, dynamic> json) {
+    return VetDiscount(
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      type: json['type']?.toString() ?? 'percentage',
+      value: (json['value'] is int)
+          ? (json['value'] as int).toDouble()
+          : (json['value'] ?? 0.0).toDouble(),
+      isActive: json['isActive'] ?? false,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'title': title,
+      'description': description,
+      'type': type,
+      'value': value,
+      'isActive': isActive,
+    };
+  }
+
+  /// Calculate discount amount based on original price
+  double calculateDiscount(double originalPrice) {
+    if (!isActive) return 0.0;
+
+    if (type == 'percentage') {
+      return originalPrice * (value / 100);
+    } else {
+      // Fixed amount discount
+      return value > originalPrice ? originalPrice : value;
+    }
+  }
+
+  /// Get formatted discount string for display
+  String get formattedDiscount {
+    if (type == 'percentage') {
+      return '${value.toInt()}% OFF';
+    } else {
+      return '${value.toInt()} EGP OFF';
+    }
+  }
+}
 
 class VetModel {
   final String id;
@@ -23,6 +84,10 @@ class VetModel {
   final String? specialization;
   final String? bio;
   final String? ownerId;
+  final VetDiscount? discount;
+  final bool? isAvailable;  // Whether vet has available slots
+  final List<VetScheduleSlot>? scheduleSlots; // Schedule information from API
+  final String? openingDaysText; // E.g., "Mon - Fri" or "Mon, Wed, Fri"
 
   VetModel({
     required this.id,
@@ -48,6 +113,10 @@ class VetModel {
     this.specialization,
     this.bio,
     this.ownerId,
+    this.discount,
+    this.isAvailable,
+    this.scheduleSlots,
+    this.openingDaysText,
   });
 
   // Helper getter to get the first image (for cards)
@@ -95,6 +164,17 @@ class VetModel {
 
   /// Get opening status text
   String get openingStatus {
+    // Use schedule slots if available for more accurate status
+    if (scheduleSlots != null && scheduleSlots!.isNotEmpty) {
+      return _getStatusFromScheduleSlots();
+    }
+
+    // Fallback to API isAvailable field
+    if (isAvailable != null && !isAvailable!) {
+      return openingDaysText != null ? 'Closed • Opens $openingDaysText' : 'Closed';
+    }
+
+    // Then check opening hours
     if (isCurrentlyOpen) return 'Open Now';
 
     final now = DateTime.now();
@@ -104,10 +184,120 @@ class VetModel {
     if (currentHours == null ||
         currentHours.isEmpty ||
         currentHours == 'Closed') {
-      return 'Closed';
+      return openingDaysText != null ? 'Closed • Opens $openingDaysText' : 'Closed';
     }
 
     return 'Closed • Opens ${currentHours.split(' - ')[0]}';
+  }
+
+  /// Get status from schedule slots
+  String _getStatusFromScheduleSlots() {
+    if (scheduleSlots == null || scheduleSlots!.isEmpty) {
+      return 'Closed';
+    }
+
+    final now = DateTime.now();
+    final currentDayName = _getDayName(now.weekday);
+    final currentTime = now.hour * 60 + now.minute;
+
+    // Filter active slots for current week
+    final activeSlots = scheduleSlots!.where((slot) =>
+      slot.isActive &&
+      slot.isAvailableCurrentWeek &&
+      !slot.isFull &&
+      slot.availableSpots > 0
+    ).toList();
+
+    if (activeSlots.isEmpty) {
+      return 'Closed';
+    }
+
+    // Check if open now
+    final todaySlots = activeSlots.where((slot) =>
+      slot.dayOfWeek == currentDayName
+    ).toList();
+
+    for (final slot in todaySlots) {
+      final startMinutes = _parseScheduleTime(slot.startTime);
+      final endMinutes = _parseScheduleTime(slot.endTime);
+
+      if (currentTime >= startMinutes && currentTime <= endMinutes) {
+        return 'Open Now';
+      }
+    }
+
+    // If not currently open but has slots today
+    if (todaySlots.isNotEmpty) {
+      final firstSlot = todaySlots.first;
+      return 'Closed • Opens at ${firstSlot.startTime}';
+    }
+
+    // Find next available day
+    final openingDays = activeSlots
+        .map((slot) => slot.dayOfWeek)
+        .toSet()
+        .toList();
+
+    if (openingDays.isNotEmpty) {
+      final nextDay = _getNextAvailableDay(openingDays, currentDayName);
+      return 'Closed • Opens $nextDay';
+    }
+
+    return 'Closed';
+  }
+
+  /// Parse schedule time (24-hour format like "14:30") to minutes
+  int _parseScheduleTime(String timeStr) {
+    try {
+      final parts = timeStr.split(':');
+      if (parts.length != 2) return 0;
+
+      final hours = int.parse(parts[0]);
+      final minutes = int.parse(parts[1]);
+
+      return hours * 60 + minutes;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  /// Get next available day text
+  String _getNextAvailableDay(List<String> openingDays, String currentDay) {
+    const dayOrder = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday'
+    ];
+
+    final currentIndex = dayOrder.indexOf(currentDay);
+
+    // Find next day in the week
+    for (int i = 1; i <= 7; i++) {
+      final nextIndex = (currentIndex + i) % 7;
+      final nextDay = dayOrder[nextIndex];
+
+      if (openingDays.contains(nextDay)) {
+        if (i == 1) return 'tomorrow';
+        return 'on $nextDay';
+      }
+    }
+
+    return openingDays.isNotEmpty ? 'on ${openingDays.first}' : '';
+  }
+
+  /// Check if vet has available slots (used in cards)
+  bool get hasAvailableSlots {
+    // Use the API-provided isAvailable field if present
+    if (isAvailable != null) {
+      return isAvailable!;
+    }
+
+    // Fallback to opening hours check
+    return isCurrentlyOpen;
   }
 
   /// Get day name from weekday number
@@ -165,6 +355,10 @@ class VetModel {
     String? specialization,
     String? bio,
     String? ownerId,
+    VetDiscount? discount,
+    bool? isAvailable,
+    List<VetScheduleSlot>? scheduleSlots,
+    String? openingDaysText,
   }) {
     return VetModel(
       id: id ?? this.id,
@@ -188,6 +382,10 @@ class VetModel {
       specialization: specialization ?? this.specialization,
       bio: bio ?? this.bio,
       ownerId: ownerId ?? this.ownerId,
+      discount: discount ?? this.discount,
+      isAvailable: isAvailable ?? this.isAvailable,
+      scheduleSlots: scheduleSlots ?? this.scheduleSlots,
+      openingDaysText: openingDaysText ?? this.openingDaysText,
     );
   }
 
@@ -215,6 +413,7 @@ class VetModel {
       'specialization': specialization,
       'bio': bio,
       'ownerId': ownerId,
+      'discount': discount?.toJson(),
     };
   }
 
@@ -253,17 +452,15 @@ class VetModel {
       specialization: map['specialization'],
       bio: map['bio'],
       ownerId: map['ownerId'],
+      discount: map['discount'] != null
+          ? VetDiscount.fromJson(map['discount'])
+          : null,
     );
   }
 
   /// Create from JSON (API response)
   factory VetModel.fromJson(Map<String, dynamic> json) {
     // Debug: Print the raw JSON to see what the API is sending
-    print('🔍 VetModel.fromJson - Raw JSON: $json');
-    print('🔍 VetModel.fromJson - reviews field: ${json['reviews']}');
-    print('🔍 VetModel.fromJson - patients field: ${json['patients']}');
-    print(
-        '🔍 VetModel.fromJson - yearsExperience field: ${json['yearsExperience']}');
 
     // Handle location object or string
     String locationString = '';
@@ -291,31 +488,36 @@ class VetModel {
 
     // Handle images - support both array and single image
     List<String> imagesList = [];
+
+    // First, handle profileImage - this is the primary display image for cards
+    if (json['profileImage'] != null && json['profileImage'].toString().trim().isNotEmpty) {
+      final profileImagePath = _convertImagePath(json['profileImage'].toString());
+      imagesList.add(profileImagePath);
+    }
+
+    // Then, handle the images array if it exists and has items
     if (json['images'] != null && json['images'] is List) {
-      imagesList = (json['images'] as List)
-          .map((img) => _convertImagePath(img.toString()))
-          .toList();
-      print('🔍 VetModel - Images array found: $imagesList');
-    } else if (json['profileImage'] != null) {
-      // Check for profileImage field first
-      final singleImage = _convertImagePath(json['profileImage'].toString());
-      imagesList = [singleImage];
-      print('🔍 VetModel - ProfileImage found: $singleImage');
-    } else {
-      // Fallback to other single image fields
+      final imagesArray = json['images'] as List;
+      if (imagesArray.isNotEmpty) {
+        final additionalImages = imagesArray
+            .where((img) => img != null && img.toString().trim().isNotEmpty)
+            .map((img) => _convertImagePath(img.toString()))
+            .where((path) => !imagesList.contains(path)) // Avoid duplicates
+            .toList();
+        imagesList.addAll(additionalImages);
+      }
+    }
+
+    // Fallback to other single image fields if both are empty
+    if (imagesList.isEmpty) {
       final singleImage = json['image']?.toString() ??
           json['imageUrl']?.toString() ??
           json['photo']?.toString() ??
           json['picture']?.toString();
       if (singleImage != null && singleImage.isNotEmpty) {
         imagesList = [_convertImagePath(singleImage)];
-        print('🔍 VetModel - Single image found: ${imagesList.first}');
-      } else {
-        print('⚠️ VetModel - No images found in JSON');
       }
     }
-
-    print('🔍 VetModel - Final images list: $imagesList');
 
     return VetModel(
       id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
@@ -393,6 +595,10 @@ class VetModel {
       specialization: json['specialization']?.toString(),
       bio: json['bio']?.toString(),
       ownerId: json['ownerId']?.toString(),
+      discount: json['discount'] != null
+          ? VetDiscount.fromJson(json['discount'])
+          : null,
+      isAvailable: json['isAvailable'] as bool?,
     );
   }
 
@@ -463,6 +669,17 @@ class VetModel {
       return '${ApiConstants.apiBaseUrl}$imagePath';
     }
 
-    return imagePath;
+    // For paths like "users/abc.jpg" or "pets/abc.jpg" or "d5997f53104ccfa3b55e4.png"
+    // Images are served from MinIO storage
+    const minioBaseUrl = 'https://minio-api.aleefy-app.com/uploads';
+    String cleanPath = imagePath;
+
+    // Remove "uploads/" prefix if present (since we'll add it back)
+    if (cleanPath.startsWith('uploads/')) {
+      cleanPath = cleanPath.replaceFirst('uploads/', '');
+    }
+
+    // Build the URL with MinIO base URL
+    return '$minioBaseUrl/$cleanPath';
   }
 }

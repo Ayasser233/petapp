@@ -78,16 +78,8 @@ class PetController extends GetxController {
       // Clear error since we successfully got data (even if empty)
       error.value = '';
 
-      // Log different scenarios for debugging
-      if (fetchedPets.isEmpty) {
-        print('📝 Controller: No pets found - user will see empty state');
-      } else {
-        print('✅ Controller: Fetched ${fetchedPets.length} pets');
-      }
     } catch (e) {
       error.value = 'Failed to load pets: $e';
-      print('❌ Controller: Failed to fetch pets: $e');
-
       // Only show error snackbar for actual failures, not when we have fallback data
       // The repository handles failures gracefully by returning fallback data
       // If we reach this catch block, it means the repository couldn't return any data
@@ -116,14 +108,11 @@ class PetController extends GetxController {
     isLoadingSpecies.value = true;
 
     try {
-      print('🐾 Controller: Fetching allowed species');
 
       final species = await _repository.getAllowedSpecies();
       allowedSpecies.assignAll(species);
 
-      print('✅ Controller: Fetched ${species.length} species');
     } catch (e) {
-      print('❌ Controller: Failed to fetch species: $e');
       // Don't show error for species as it's not critical
     } finally {
       isLoadingSpecies.value = false;
@@ -131,11 +120,10 @@ class PetController extends GetxController {
   }
 
   /// Create a new pet
-  Future<bool> createPet(Map<String, dynamic> petData) async {
+  Future<bool> createPet(Map<String, dynamic> petData, {String? imagePath}) async {
     // Check authentication before creating pet
     final authService = Get.find<AuthService>();
     if (authService.authStatus != AuthStatus.authenticated) {
-      print('🚫 Controller: User not authenticated, cannot create pet');
       Get.snackbar(
         'Login Required',
         'You need to be logged in to add pets',
@@ -150,7 +138,7 @@ class PetController extends GetxController {
     error.value = '';
 
     try {
-      final newPet = await _repository.createPet(petData);
+      final newPet = await _repository.createPet(petData, imagePath: imagePath);
       pets.insert(0, newPet); // Add to beginning of list
 
       // Don't show snackbar here - let the UI screen handle user feedback
@@ -188,11 +176,10 @@ class PetController extends GetxController {
   }
 
   /// Update pet
-  Future<bool> updatePet(String id, Map<String, dynamic> petData) async {
+  Future<bool> updatePet(String id, Map<String, dynamic> petData, {String? imagePath}) async {
     // Check authentication before updating pet
     final authService = Get.find<AuthService>();
     if (authService.authStatus != AuthStatus.authenticated) {
-      print('🚫 Controller: User not authenticated, cannot update pet');
       Get.snackbar(
         'Login Required',
         'You need to be logged in to update pets',
@@ -207,14 +194,14 @@ class PetController extends GetxController {
     error.value = '';
 
     try {
-      print('🐾 Controller: Updating pet $id');
 
-      final updatedPet = await _repository.updatePet(id, petData);
+      final updatedPet = await _repository.updatePet(id, petData, imagePath: imagePath);
 
       // Update in local list
       final index = pets.indexWhere((pet) => pet.id == id);
       if (index != -1) {
         pets[index] = updatedPet;
+        pets.refresh(); // Trigger observable update
       }
 
       // Update selected pet if it's the same
@@ -225,11 +212,9 @@ class PetController extends GetxController {
       // Don't show snackbar here - let the UI screen handle user feedback
       // to avoid duplicate messages
 
-      print('✅ Controller: Pet updated successfully');
       return true;
     } catch (e) {
       error.value = 'Failed to update pet: $e';
-      print('❌ Controller: Failed to update pet: $e');
 
       // Don't show snackbar here - let the UI screen handle user feedback
       // to avoid duplicate messages
@@ -245,7 +230,6 @@ class PetController extends GetxController {
     // Check authentication before deleting pet
     final authService = Get.find<AuthService>();
     if (authService.authStatus != AuthStatus.authenticated) {
-      print('🚫 Controller: User not authenticated, cannot delete pet');
       Get.snackbar(
         'Login Required',
         'You need to be logged in to delete pets',
@@ -260,7 +244,6 @@ class PetController extends GetxController {
     error.value = '';
 
     try {
-      print('🐾 Controller: Deleting pet $id');
 
       await _repository.deletePet(id);
 
@@ -275,11 +258,9 @@ class PetController extends GetxController {
       // Don't show snackbar here - let the UI screen handle user feedback
       // to avoid duplicate messages
 
-      print('✅ Controller: Pet deleted successfully');
       return true;
     } catch (e) {
       error.value = 'Failed to delete pet: $e';
-      print('❌ Controller: Failed to delete pet: $e');
 
       // Don't show snackbar here - let the UI screen handle user feedback
       // to avoid duplicate messages
@@ -295,7 +276,6 @@ class PetController extends GetxController {
     // Check authentication before restoring pet
     final authService = Get.find<AuthService>();
     if (authService.authStatus != AuthStatus.authenticated) {
-      print('🚫 Controller: User not authenticated, cannot restore pet');
       Get.snackbar(
         'Login Required',
         'You need to be logged in to restore pets',
@@ -310,7 +290,6 @@ class PetController extends GetxController {
     error.value = '';
 
     try {
-      print('🐾 Controller: Restoring pet $id');
 
       final restoredPet = await _repository.restorePet(id);
 
@@ -325,11 +304,9 @@ class PetController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
 
-      print('✅ Controller: Pet restored successfully');
       return true;
     } catch (e) {
       error.value = 'Failed to restore pet: $e';
-      print('❌ Controller: Failed to restore pet: $e');
 
       Get.snackbar(
         'Error',
@@ -351,7 +328,6 @@ class PetController extends GetxController {
     error.value = '';
 
     try {
-      print('🐾 Controller: Permanently deleting pet $id');
 
       await _repository.hardDeletePet(id);
 
@@ -371,11 +347,9 @@ class PetController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
 
-      print('✅ Controller: Pet permanently deleted');
       return true;
     } catch (e) {
       error.value = 'Failed to permanently delete pet: $e';
-      print('❌ Controller: Failed to permanently delete pet: $e');
 
       Get.snackbar(
         'Error',
@@ -394,15 +368,12 @@ class PetController extends GetxController {
   /// Get pet with appointments
   Future<void> getPetWithAppointments(String id) async {
     try {
-      print('🐾 Controller: Fetching pet with appointments for ID: $id');
 
       final petData = await _repository.getPetWithAppointments(id);
       petWithAppointments.value = petData;
 
-      print('✅ Controller: Pet with appointments fetched successfully');
     } catch (e) {
       error.value = 'Failed to load pet appointments: $e';
-      print('❌ Controller: Failed to fetch pet with appointments: $e');
 
       _handleError(e, 'fetch pet appointments');
     }

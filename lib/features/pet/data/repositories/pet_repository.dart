@@ -23,11 +23,10 @@ class PetRepository {
   }
 
   /// Create a new pet - Limited to cats and dogs only
-  Future<PetModel> createPet(Map<String, dynamic> petData) async {
+  Future<PetModel> createPet(Map<String, dynamic> petData, {String? imagePath}) async {
     // Check authentication before creating pet
     final authService = Get.find<AuthService>();
     if (authService.authStatus != AuthStatus.authenticated) {
-      print('🚫 Repository: User not authenticated, cannot create pet');
       throw Exception('Authentication required to create pets');
     }
 
@@ -39,7 +38,7 @@ class PetRepository {
       }
       PetConstants.validateSpecies(species, operation: 'create pet');
 
-      return await _apiService.createPet(petData);
+      return await _apiService.createPet(petData, imagePath: imagePath);
     } catch (error) {
       await _handleAuthError(error);
       // Suppress user notification - let the UI screen handle user feedback to avoid duplicates
@@ -54,14 +53,12 @@ class PetRepository {
     // Check authentication before making API call
     final authService = Get.find<AuthService>();
     if (authService.authStatus != AuthStatus.authenticated) {
-      print('🚫 Repository: User not authenticated, returning empty pets list');
       return [];
     }
 
     try {
       return await _apiService.getUserPets(page: page, limit: limit);
     } catch (e) {
-      print('❌ Repository: Failed to fetch pets from API: $e');
 
       // Handle token expiration or authentication errors
       if (e.toString().contains('401') ||
@@ -74,7 +71,6 @@ class PetRepository {
 
       // Return empty list instead of sample data so users see proper empty state
       // In production, you might want to return cached data from local storage here
-      print('📝 Returning empty list to show proper empty state');
       return [];
     }
   }
@@ -86,14 +82,12 @@ class PetRepository {
 
       // If API returns empty list, use fallback
       if (species.isEmpty) {
-        print('📝 Repository: API returned empty species list, using fallback');
         return _getFallbackSpecies();
       }
 
       return species;
     } catch (error) {
       await _handleAuthError(error);
-      print('❌ Repository: Failed to fetch species, using fallback: $error');
       // Return fallback species list
       return _getFallbackSpecies();
     }
@@ -104,7 +98,6 @@ class PetRepository {
     // Check authentication before making API call
     final authService = Get.find<AuthService>();
     if (authService.authStatus != AuthStatus.authenticated) {
-      print('🚫 Repository: User not authenticated, cannot fetch pet details');
       throw Exception('Authentication required to access pet details');
     }
 
@@ -112,7 +105,6 @@ class PetRepository {
       return await _apiService.getPetById(id);
     } catch (e) {
       await _handleAuthError(e);
-      print('❌ Repository: Failed to fetch pet $id, using fallback: $e');
       // Return a fallback pet if we can't get it from the API
       final fallbackPets = _getFallbackPets();
       final pet = fallbackPets.firstWhere((pet) => pet.id == id,
@@ -122,22 +114,23 @@ class PetRepository {
   }
 
   /// Update a pet's details - Limited to cats and dogs only
-  Future<PetModel> updatePet(String id, Map<String, dynamic> petData) async {
+  Future<PetModel> updatePet(String id, Map<String, dynamic> petData, {String? imagePath}) async {
     // Check authentication before updating pet
     final authService = Get.find<AuthService>();
     if (authService.authStatus != AuthStatus.authenticated) {
-      print('🚫 Repository: User not authenticated, cannot update pet');
       throw Exception('Authentication required to update pets');
     }
 
     try {
+
       // Validate species if being updated - only allow cats and dogs
       final species = petData['species']?.toString();
       if (species != null) {
         PetConstants.validateSpecies(species, operation: 'update pet');
       }
 
-      return await _apiService.updatePet(id, petData);
+      final result = await _apiService.updatePet(id, petData, imagePath: imagePath);
+      return result;
     } catch (error) {
       await _handleAuthError(error);
       // Suppress user notification - let the UI screen handle user feedback to avoid duplicates
@@ -152,7 +145,6 @@ class PetRepository {
     // Check authentication before deleting pet
     final authService = Get.find<AuthService>();
     if (authService.authStatus != AuthStatus.authenticated) {
-      print('🚫 Repository: User not authenticated, cannot delete pet');
       throw Exception('Authentication required to delete pets');
     }
 
@@ -172,7 +164,6 @@ class PetRepository {
     // Check authentication before restoring pet
     final authService = Get.find<AuthService>();
     if (authService.authStatus != AuthStatus.authenticated) {
-      print('🚫 Repository: User not authenticated, cannot restore pet');
       throw Exception('Authentication required to restore pets');
     }
 

@@ -249,13 +249,11 @@ class ProfileController extends GetxController {
       }
       if (phone != null && phone.trim().isNotEmpty) {
         String phoneNumber = phone.trim();
-        print('🔍 PROFILE CONTROLLER: Original phone input: "$phoneNumber"');
 
         // Add +20 country code if not already present
         if (!phoneNumber.startsWith('+')) {
           // DO NOT remove leading 0 - backend expects it
           phoneNumber = '+20$phoneNumber';
-          print('🔍 PROFILE CONTROLLER: Added +20 prefix: "$phoneNumber"');
         }
         profileData['mobile'] = phoneNumber; // API expects 'mobile' not 'phone'
       }
@@ -270,15 +268,11 @@ class ProfileController extends GetxController {
       }
       // if (username != null) profileData['username'] = username.trim().toLowerCase();
 
-      print('📋 ProfileController: Final profile data to send: $profileData');
 
-      print('📝 Updating profile with validated data: $profileData');
 
       final updatedProfile =
           await _profileRepository.updateProfile(profileData);
 
-      print(
-          '✅ Profile update successful. Updated profile: ${updatedProfile.toJson()}');
       _userProfile.value = updatedProfile;
 
       Get.snackbar(
@@ -290,7 +284,6 @@ class ProfileController extends GetxController {
 
       return true;
     } catch (e) {
-      print('❌ Profile update failed: $e');
 
       // Error already handled by ErrorHandlerService
       return false;
