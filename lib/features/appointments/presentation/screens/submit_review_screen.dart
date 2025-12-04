@@ -34,7 +34,7 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
     if (_rating == 0) {
       AppointmentDialogs.showErrorSnackBar(
         context,
-        'Please select a rating',
+        AppLocalizations.of(context).pleaseSelectRating,
       );
       return;
     }
@@ -42,7 +42,7 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
     if (_commentController.text.trim().isEmpty) {
       AppointmentDialogs.showErrorSnackBar(
         context,
-        'Please enter a review comment',
+        AppLocalizations.of(context).pleaseEnterReviewComment,
       );
       return;
     }
@@ -65,7 +65,7 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
         if (state is AppointmentActionSuccess && state.action == 'review') {
           AppointmentDialogs.showSuccessSnackBar(
             context,
-            'Review submitted successfully!',
+            AppLocalizations.of(context).reviewSubmittedSuccessfully,
           );
           Navigator.of(context).pop(true);
         } else if (state is AppointmentsError) {
@@ -127,19 +127,21 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
               ),
             ),
             const SizedBox(width: 16),
-            Expanded(
+              Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.appointment.vet?.branchName ?? 'Veterinary Clinic',
+                    widget.appointment.vet?.branchName ??
+                        AppLocalizations.of(context).veterinaryClinic,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    widget.appointment.reasonForVisit ?? 'Appointment',
+                    widget.appointment.reasonForVisit ??
+                        AppLocalizations.of(context).appointment,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.grey[600],
                         ),
@@ -160,7 +162,7 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'How was your experience?',
+          AppLocalizations.of(context).howWasYourExperience,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -211,15 +213,15 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
   String _getRatingText(int rating) {
     switch (rating) {
       case 1:
-        return 'Poor';
+        return AppLocalizations.of(context).ratingPoor;
       case 2:
-        return 'Fair';
+        return AppLocalizations.of(context).ratingFair;
       case 3:
-        return 'Good';
+        return AppLocalizations.of(context).ratingGood;
       case 4:
-        return 'Very Good';
+        return AppLocalizations.of(context).ratingVeryGood;
       case 5:
-        return 'Excellent';
+        return AppLocalizations.of(context).ratingExcellent;
       default:
         return '';
     }
@@ -230,7 +232,7 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Share your experience',
+          AppLocalizations.of(context).shareYourExperience,
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -242,8 +244,7 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
           maxLines: 6,
           maxLength: 500,
           decoration: InputDecoration(
-            hintText:
-                'Tell us about your experience with the vet and the service provided...',
+            hintText: AppLocalizations.of(context).tellUsAboutExperience,
             hintStyle: TextStyle(color: Colors.grey[400]),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -295,7 +296,7 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
                   const Icon(Icons.send, size: 20),
                   const SizedBox(width: 8),
                   Text(
-                    'Submit Review',
+                    AppLocalizations.of(context).submitReview,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

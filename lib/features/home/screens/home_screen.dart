@@ -939,7 +939,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final balance = await _pointsService.getPointsBalance();
 
       return {
-        'points': balance['balance'] ?? balance['points'] ?? 0,
+        'points': balance['currentBalance'] ?? 0,
         'history': balance['recent'] ?? [],
       };
     } catch (e) {

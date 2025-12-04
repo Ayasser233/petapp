@@ -36,10 +36,23 @@ class SettingsProvider extends ChangeNotifier {
       _themeMode = ThemePreference.system;
     }
     
-    // Load language preference
-    final languageString = _prefs.getString('language') ?? 'english';
-    _language = languageString == 'arabic' ? LanguagePreference.arabic : LanguagePreference.english;
-    
+    // Load language preference with system language as default
+    final languageString = _prefs.getString('language');
+    if (languageString != null) {
+      // User has previously set a language preference
+      _language = languageString == 'arabic' ? LanguagePreference.arabic : LanguagePreference.english;
+    } else {
+      // No saved preference, use system language
+      final systemLocale = Get.deviceLocale;
+      if (systemLocale != null && systemLocale.languageCode == 'ar') {
+        _language = LanguagePreference.arabic;
+      } else {
+        _language = LanguagePreference.english;
+      }
+      // Save the system language as default
+      await _prefs.setString('language', _language.toString().split('.').last);
+    }
+
     // Load notification settings
     _notificationsEnabled = _prefs.getBool('notificationsEnabled') ?? true;
     _emailNotificationsEnabled = _prefs.getBool('emailNotificationsEnabled') ?? true;

@@ -282,7 +282,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
 
       // Pass image path if user selected an image
       final String? imagePathToSend = _isImageFromGallery ? _imagePath : null;
-
+      
       final success = await _petController.createPet(
         petData,
         imagePath: imagePathToSend,

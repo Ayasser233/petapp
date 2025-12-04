@@ -189,7 +189,7 @@ class AppointmentRemoteDataSource {
 
       final requestBody = {
         'rating': rating,
-        if (comment != null && comment.isNotEmpty) 'comment': comment,
+        if (comment != null && comment.isNotEmpty) 'reviewComment': comment,
       };
 
       final response = await apiClient.patch(

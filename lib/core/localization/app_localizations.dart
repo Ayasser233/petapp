@@ -613,6 +613,42 @@ class AppLocalizations {
   String get leaveAReview =>
       _localizedValues[locale.languageCode]?['leaveAReview'] ??
       'Leave a Review';
+  String get howWasYourExperience =>
+      _localizedValues[locale.languageCode]?['howWasYourExperience'] ??
+      'How was your experience?';
+  String get shareYourExperience =>
+      _localizedValues[locale.languageCode]?['shareYourExperience'] ??
+      'Share your experience';
+  String get tellUsAboutExperience =>
+      _localizedValues[locale.languageCode]?['tellUsAboutExperience'] ??
+      'Tell us about your experience with the vet and the service provided...';
+  String get submitReview =>
+      _localizedValues[locale.languageCode]?['submitReview'] ??
+      'Submit Review';
+  String get pleaseSelectRating =>
+      _localizedValues[locale.languageCode]?['pleaseSelectRating'] ??
+      'Please select a rating';
+  String get pleaseEnterReviewComment =>
+      _localizedValues[locale.languageCode]?['pleaseEnterReviewComment'] ??
+      'Please enter a review comment';
+  String get reviewSubmittedSuccessfully =>
+      _localizedValues[locale.languageCode]?['reviewSubmittedSuccessfully'] ??
+      'Review submitted successfully!';
+  String get veterinaryClinic =>
+      _localizedValues[locale.languageCode]?['veterinaryClinic'] ??
+      'Veterinary Clinic';
+  String get ratingPoor =>
+      _localizedValues[locale.languageCode]?['ratingPoor'] ?? 'Poor';
+  String get ratingFair =>
+      _localizedValues[locale.languageCode]?['ratingFair'] ?? 'Fair';
+  String get ratingGood =>
+      _localizedValues[locale.languageCode]?['ratingGood'] ?? 'Good';
+  String get ratingVeryGood =>
+      _localizedValues[locale.languageCode]?['ratingVeryGood'] ?? 'Very Good';
+  String get ratingExcellent =>
+      _localizedValues[locale.languageCode]?['ratingExcellent'] ?? 'Excellent';
+  String get appointment =>
+      _localizedValues[locale.languageCode]?['appointment'] ?? 'Appointment';
   String get deleteAccountConfirmation =>
       _localizedValues[locale.languageCode]?['deleteAccountConfirmation'] ??
       'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost.';
@@ -2314,6 +2350,21 @@ class AppLocalizations {
       'loginRequiredMessage':
           'You need to be logged in to access this feature.',
       'leaveAReview': 'Leave a Review',
+      'howWasYourExperience': 'How was your experience?',
+      'shareYourExperience': 'Share your experience',
+      'tellUsAboutExperience':
+          'Tell us about your experience with the vet and the service provided...',
+      'submitReview': 'Submit Review',
+      'pleaseSelectRating': 'Please select a rating',
+      'pleaseEnterReviewComment': 'Please enter a review comment',
+      'reviewSubmittedSuccessfully': 'Review submitted successfully!',
+      'veterinaryClinic': 'Veterinary Clinic',
+      'ratingPoor': 'Poor',
+      'ratingFair': 'Fair',
+      'ratingGood': 'Good',
+      'ratingVeryGood': 'Very Good',
+      'ratingExcellent': 'Excellent',
+      'appointment': 'Appointment',
       'deleteAccountConfirmation':
           'Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently lost.',
       'accountDetailsUpdatedSuccessfully':
@@ -3779,6 +3830,21 @@ class AppLocalizations {
       'loginRequired': 'تسجيل الدخول مطلوب',
       'loginRequiredMessage': 'يجب تسجيل الدخول للوصول إلى هذه الميزة.',
       'leaveAReview': 'اترك تقييماً',
+      'howWasYourExperience': 'كيف كانت تجربتك؟',
+      'shareYourExperience': 'شارك تجربتك',
+      'tellUsAboutExperience':
+          'أخبرنا عن تجربتك مع الطبيب البيطري والخدمة المقدمة...',
+      'submitReview': 'إرسال التقييم',
+      'pleaseSelectRating': 'يرجى اختيار التقييم',
+      'pleaseEnterReviewComment': 'يرجى إدخال تعليق التقييم',
+      'reviewSubmittedSuccessfully': 'تم إرسال التقييم بنجاح!',
+      'veterinaryClinic': 'عيادة بيطرية',
+      'ratingPoor': 'ضعيف',
+      'ratingFair': 'مقبول',
+      'ratingGood': 'جيد',
+      'ratingVeryGood': 'جيد جداً',
+      'ratingExcellent': 'ممتاز',
+      'appointment': 'موعد',
       'deleteAccountConfirmation':
           'هل أنت متأكد من حذف حسابك؟ لا يمكن التراجع عن هذا الإجراء وسيتم فقدان جميع بياناتك بشكل دائم.',
       'accountDetailsUpdatedSuccessfully': 'تم تحديث تفاصيل الحساب بنجاح!',
