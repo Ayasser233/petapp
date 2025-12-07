@@ -21,7 +21,7 @@ class CreateAppointmentUseCase
       appointmentDate: params.appointmentDate,
       petId: params.petId,
       reasonForVisit: params.reasonForVisit,
-      pointsToUse: params.pointsToUse,
+      pointsToRedeem: params.pointsToRedeem,
       couponCode: params.couponCode,
     );
   }
@@ -33,7 +33,7 @@ class CreateAppointmentParams extends Equatable {
   final DateTime appointmentDate;
   final String? petId;
   final String? reasonForVisit;
-  final int? pointsToUse;
+  final int? pointsToRedeem;
   final String? couponCode;
 
   const CreateAppointmentParams({
@@ -41,7 +41,7 @@ class CreateAppointmentParams extends Equatable {
     required this.appointmentDate,
     this.petId,
     this.reasonForVisit,
-    this.pointsToUse,
+    this.pointsToRedeem,
     this.couponCode,
   });
 
@@ -51,7 +51,7 @@ class CreateAppointmentParams extends Equatable {
         appointmentDate,
         petId,
         reasonForVisit,
-        pointsToUse,
+        pointsToRedeem,
         couponCode,
       ];
 }

@@ -1,10 +1,19 @@
 class ApiConstants {
-  // API URLs
+  // API URLs - Environment based
   static String get apiBaseUrl {
-    // Production API
-    return 'https://api.aleefy-app.com/api/v1';
+    const environment = String.fromEnvironment('ENVIRONMENT', defaultValue: 'prod');
+
+    if (environment == 'dev') {
+      // Development API
+      return 'https://api-dev.aleefy-app.com/api/v1';
+    } else {
+      // Production API
+      return 'https://api.aleefy-app.com/api/v1';
+    }
   }
 
+  static const String prodApiBaseUrl = 'https://api.aleefy-app.com/api/v1';
+  static const String devApiBaseUrl = 'https://api-dev.aleefy-app.com/api/v1';
   static const String fallbackApiBaseUrl = 'https://api.aleefy-app.com/api/v1';
 
   // Timeouts
@@ -68,7 +77,7 @@ class ApiConstants {
   // Points Endpoints
   static const String pointsBalanceEndpoint = '/points/my/balance';
   static const String pointsTransactionsEndpoint = '/points/my/transactions';
-  static const String pointsValidateEndpoint = '/points/validate';
+  static const String pointsRedeemValidateEndpoint = '/points/validate';
 
   // Vaccination Endpoints
   static const String vaccinationEligibleCategoriesEndpoint =

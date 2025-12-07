@@ -68,23 +68,4 @@ class PointsService {
       rethrow;
     }
   }
-
-  /// Validate points for booking
-  Future<Map<String, dynamic>> validatePoints(int points) async {
-    try {
-      final response = await _apiClient.post(
-        ApiConstants.pointsValidateEndpoint,
-        data: {'points': points},
-      );
-
-      if (response.data['success'] == true) {
-        return response.data['data'] as Map<String, dynamic>;
-      } else {
-        throw Exception(
-            response.data['message'] ?? 'Failed to validate points');
-      }
-    } catch (e) {
-      rethrow;
-    }
-  }
 }

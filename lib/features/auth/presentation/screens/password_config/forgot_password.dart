@@ -94,8 +94,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             '1. Backend server is running on port 3000\n'
             '2. Network connection is stable\n'
             '3. Backend logs for errors';
-        print('⚠️ Timeout Error - Backend may not be running');
-        print('🔗 URL: http://10.0.2.2:3000/api/v1/auth/forgot/password');
       }
       // Check for connection errors
       else if (e.type == DioExceptionType.connectionError) {
@@ -104,7 +102,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             '1. Backend is running (npm start or npm run dev)\n'
             '2. Server is listening on port 3000\n'
             '3. No firewall blocking the connection';
-        print('⚠️ Connection Error - Cannot reach backend');
       } else if (e.response != null) {
         // Uncomment when you want to bypass email service errors in development
         if (e.response?.statusCode == 500 &&

@@ -89,38 +89,12 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   }
 
   @override
-  Future<Either<Failure, AppointmentEntity?>> getAppointmentDetails(
-    String appointmentId,
-  ) async {
-    try {
-      final model = await remoteDataSource.getAppointmentDetails(appointmentId);
-      if (model == null) {
-        return const Right(null);
-      }
-      final appointmentModel = AppointmentModel.fromJson(model);
-      return Right(appointmentModel.toEntity());
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
-    } on UnauthorizedException catch (e) {
-      return Left(UnauthorizedFailure(e.message));
-    } on NotFoundException catch (e) {
-      return Left(NotFoundFailure(e.message));
-    } on AppointmentException catch (e) {
-      return Left(AppointmentFailure(e.message));
-    } catch (e) {
-      return Left(UnexpectedFailure('Unexpected error: ${e.toString()}'));
-    }
-  }
-
-  @override
   Future<Either<Failure, AppointmentEntity>> createAppointment({
     required String slotId,
     required DateTime appointmentDate,
     String? petId,
     String? reasonForVisit,
-    int? pointsToUse,
+    int? pointsToRedeem,
     String? couponCode,
   }) async {
     try {
@@ -129,7 +103,7 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
         appointmentDate: appointmentDate,
         petId: petId,
         reasonForVisit: reasonForVisit,
-        pointsToUse: pointsToUse,
+        pointsToRedeem: pointsToRedeem,
         couponCode: couponCode,
       );
 
@@ -170,31 +144,6 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, bool>> completeAppointment(
-    String appointmentId,
-    String completionHash,
-  ) async {
-    try {
-      final result = await remoteDataSource.completeAppointment(
-        appointmentId,
-        completionHash,
-      );
-      return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
-    } on UnauthorizedException catch (e) {
-      return Left(UnauthorizedFailure(e.message));
-    } on NotFoundException catch (e) {
-      return Left(NotFoundFailure(e.message));
-    } on AppointmentException catch (e) {
-      return Left(AppointmentFailure(e.message));
-    } catch (e) {
-      return Left(UnexpectedFailure('Unexpected error: ${e.toString()}'));
-    }
-  }
 
   @override
   Future<Either<Failure, void>> completeAppointmentByQr({
@@ -255,30 +204,15 @@ class AppointmentRepositoryImpl implements AppointmentRepository {
   }
 
   @override
-  Future<Either<Failure, Map<String, dynamic>>> validateCoupon(
-    String couponCode,
-  ) async {
+  Future<Either<Failure, Map<String, dynamic>>> validatePointsRedemption({
+    required String vetId,
+    required int pointsToRedeem,
+  }) async {
     try {
-      final result = await remoteDataSource.validateCoupon(couponCode);
-      return Right(result);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    } on NetworkException catch (e) {
-      return Left(NetworkFailure(e.message));
-    } on UnauthorizedException catch (e) {
-      return Left(UnauthorizedFailure(e.message));
-    } on ValidationException catch (e) {
-      return Left(ValidationFailure(message: e.message, errors: e.errors));
-    } catch (e) {
-      return Left(UnexpectedFailure('Unexpected error: ${e.toString()}'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, Map<String, dynamic>>> validatePoints(
-      int points) async {
-    try {
-      final result = await remoteDataSource.validatePoints(points);
+      final result = await remoteDataSource.validatePointsRedemption(
+        vetId: vetId,
+        pointsToRedeem: pointsToRedeem,
+      );
       return Right(result);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));

@@ -25,6 +25,7 @@ import 'package:petapp/features/appointments/domain/usecases/cancel_appointment_
 import 'package:petapp/features/appointments/domain/usecases/create_appointment_usecase.dart';
 import 'package:petapp/features/appointments/domain/usecases/submit_review_usecase.dart';
 import 'package:petapp/features/appointments/domain/usecases/complete_appointment_by_qr_usecase.dart';
+import 'package:petapp/features/appointments/domain/usecases/validate_points_redemption_usecase.dart';
 import 'package:petapp/features/appointments/presentation/cubit/appointments_cubit.dart';
 
 // Vaccination - Clean Architecture
@@ -120,6 +121,7 @@ Future<void> setupServiceLocator() async {
   sl.registerLazySingleton(() => CreateAppointmentUseCase(sl()));
   sl.registerLazySingleton(() => SubmitReviewUseCase(sl()));
   sl.registerLazySingleton(() => CompleteAppointmentByQrUseCase(sl()));
+  sl.registerLazySingleton(() => ValidatePointsRedemptionUseCase(sl()));
 
   // Vaccination Feature - Clean Architecture
   // Services

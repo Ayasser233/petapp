@@ -637,6 +637,8 @@ class AppLocalizations {
   String get veterinaryClinic =>
       _localizedValues[locale.languageCode]?['veterinaryClinic'] ??
       'Veterinary Clinic';
+  String get rating =>
+      _localizedValues[locale.languageCode]?['rating'] ?? 'Rating';
   String get ratingPoor =>
       _localizedValues[locale.languageCode]?['ratingPoor'] ?? 'Poor';
   String get ratingFair =>
@@ -933,6 +935,12 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['reviews'] ?? 'Reviews';
   String get review =>
       _localizedValues[locale.languageCode]?['review'] ?? 'Review';
+  String get reviewDetails =>
+      _localizedValues[locale.languageCode]?['reviewDetails'] ?? 'Review Details';
+  String get tapToViewDetails =>
+      _localizedValues[locale.languageCode]?['tapToViewDetails'] ?? 'Tap to view details';
+  String get noComment =>
+      _localizedValues[locale.languageCode]?['noComment'] ?? 'No comment provided';
   String get noReviewsYet =>
       _localizedValues[locale.languageCode]?['noReviewsYet'] ??
       'No reviews yet';
@@ -1112,6 +1120,29 @@ class AppLocalizations {
   String get selectTimeSlot =>
       _localizedValues[locale.languageCode]?['selectTimeSlot'] ??
       'Select Time Slot';
+
+  // Points Redemption getters
+  String get redeemPoints =>
+      _localizedValues[locale.languageCode]?['redeemPoints'] ?? 'Redeem Points';
+  String get availablePoints =>
+      _localizedValues[locale.languageCode]?['availablePoints'] ?? 'Available Points';
+  String get pointsToRedeem =>
+      _localizedValues[locale.languageCode]?['pointsToRedeem'] ?? 'Points to Redeem';
+  String get enterPointsAmount =>
+      _localizedValues[locale.languageCode]?['enterPointsAmount'] ?? 'Enter points amount';
+  String get pointsDiscount =>
+      _localizedValues[locale.languageCode]?['pointsDiscount'] ?? 'Points Discount';
+  String get remainingBalance =>
+      _localizedValues[locale.languageCode]?['remainingBalance'] ?? 'Remaining Balance';
+  String get originalPrice =>
+      _localizedValues[locale.languageCode]?['originalPrice'] ?? 'Original Price';
+  String get discount =>
+      _localizedValues[locale.languageCode]?['discount'] ?? 'Discount';
+  String get finalPrice =>
+      _localizedValues[locale.languageCode]?['finalPrice'] ?? 'Final Price';
+  String get pts =>
+      _localizedValues[locale.languageCode]?['pts'] ?? 'pts';
+
   String get morning =>
       _localizedValues[locale.languageCode]?['morning'] ?? 'Morning';
   String get afternoon =>
@@ -2359,6 +2390,7 @@ class AppLocalizations {
       'pleaseEnterReviewComment': 'Please enter a review comment',
       'reviewSubmittedSuccessfully': 'Review submitted successfully!',
       'veterinaryClinic': 'Veterinary Clinic',
+      'rating': 'Rating',
       'ratingPoor': 'Poor',
       'ratingFair': 'Fair',
       'ratingGood': 'Good',
@@ -2677,6 +2709,9 @@ class AppLocalizations {
       'minutes': 'minutes',
       'reviews': 'Reviews',
       'review': 'Review',
+      'reviewDetails': 'Review Details',
+      'tapToViewDetails': 'Tap to view details',
+      'noComment': 'No comment provided',
       'noReviewsYet': 'No reviews yet',
       'patients': 'Patients',
       'yearsExp': 'Years exp.',
@@ -2748,6 +2783,18 @@ class AppLocalizations {
       'vet': 'Vet',
       'price': 'Price',
       'selectTimeSlot': 'Select Time Slot',
+
+      // Points Redemption
+      'redeemPoints': 'Redeem Points',
+      'availablePoints': 'Available Points',
+      'pointsToRedeem': 'Points to Redeem',
+      'enterPointsAmount': 'Enter points amount',
+      'pointsDiscount': 'Points Discount',
+      'remainingBalance': 'Remaining Balance',
+      'originalPrice': 'Original Price',
+      'discount': 'Discount',
+      'finalPrice': 'Final Price',
+      'pts': 'pts',
       'morning': 'Morning',
       'afternoon': 'Afternoon',
       'evening': 'Evening',
@@ -3839,6 +3886,7 @@ class AppLocalizations {
       'pleaseEnterReviewComment': 'يرجى إدخال تعليق التقييم',
       'reviewSubmittedSuccessfully': 'تم إرسال التقييم بنجاح!',
       'veterinaryClinic': 'عيادة بيطرية',
+      'rating': 'التقييم',
       'ratingPoor': 'ضعيف',
       'ratingFair': 'مقبول',
       'ratingGood': 'جيد',
@@ -4162,6 +4210,9 @@ class AppLocalizations {
       'minutes': 'دقائق',
       'reviews': 'التقييمات',
       'review': 'تقييم',
+      'reviewDetails': 'تفاصيل التقييم',
+      'tapToViewDetails': 'اضغط لعرض التفاصيل',
+      'noComment': 'لا يوجد تعليق',
       'noReviewsYet': 'لا توجد تقييمات بعد',
       'patients': 'المرضى',
       'yearsExp': 'سنوات الخبرة',
@@ -4247,6 +4298,18 @@ class AppLocalizations {
       'vet': 'العيادة',
       'price': 'السعر',
       'selectTimeSlot': 'اختر الوقت',
+
+      // Points Redemption
+      'redeemPoints': 'استبدال النقاط',
+      'availablePoints': 'النقاط المتاحة',
+      'pointsToRedeem': 'النقاط للاستبدال',
+      'enterPointsAmount': 'أدخل عدد النقاط',
+      'pointsDiscount': 'خصم النقاط',
+      'remainingBalance': 'الرصيد المتبقي',
+      'originalPrice': 'السعر الأصلي',
+      'discount': 'الخصم',
+      'finalPrice': 'السعر النهائي',
+      'pts': 'نقطة',
       'morning': 'الصباح',
       'afternoon': 'بعد الظهر',
       'evening': 'المساء',

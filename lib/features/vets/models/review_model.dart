@@ -20,31 +20,48 @@ class ReviewModel {
   });
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
+    // Extract customer name from customer object or fallback to userName
+    String userName = 'Anonymous';
+    if (json['customer'] != null && json['customer'] is Map) {
+      final customer = json['customer'] as Map<String, dynamic>;
+      final firstName = customer['firstName']?.toString() ?? '';
+      final lastName = customer['lastName']?.toString() ?? '';
+      if (firstName.isNotEmpty || lastName.isNotEmpty) {
+        userName = '$firstName $lastName'.trim();
+      }
+    } else {
+      userName = json['userName']?.toString() ??
+                json['user_name']?.toString() ??
+                json['name']?.toString() ??
+                'Anonymous';
+    }
+
     return ReviewModel(
       id: json['id']?.toString() ?? '',
       vetId: json['vetId']?.toString() ?? json['vet_id']?.toString() ?? '',
-      userName: json['userName']?.toString() ?? 
-                json['user_name']?.toString() ?? 
-                json['name']?.toString() ?? 
-                'Anonymous',
-      userImage: json['userImage']?.toString() ?? 
+      userName: userName,
+      userImage: json['userImage']?.toString() ??
                  json['user_image']?.toString() ?? 
                  json['avatar']?.toString(),
       rating: (json['rating'] is int) 
           ? (json['rating'] as int).toDouble() 
           : (json['rating'] ?? 0.0).toDouble(),
-      comment: json['comment']?.toString() ?? 
-               json['review']?.toString() ?? 
+      comment: json['reviewComment']?.toString() ??
+               json['comment']?.toString() ??
+               json['review']?.toString() ??
                json['text']?.toString() ?? '',
-      date: json['date']?.toString() ?? 
-            json['createdAt']?.toString() ?? 
+      date: json['reviewedAt']?.toString() ??
+            json['date']?.toString() ??
+            json['createdAt']?.toString() ??
             json['created_at']?.toString() ?? 
             DateTime.now().toString(),
-      createdAt: json['createdAt'] != null 
-          ? DateTime.parse(json['createdAt'].toString())
-          : (json['created_at'] != null 
-              ? DateTime.parse(json['created_at'].toString())
-              : DateTime.now()),
+      createdAt: json['reviewedAt'] != null
+          ? DateTime.parse(json['reviewedAt'].toString())
+          : (json['createdAt'] != null
+              ? DateTime.parse(json['createdAt'].toString())
+              : (json['created_at'] != null
+                  ? DateTime.parse(json['created_at'].toString())
+                  : DateTime.now())),
     );
   }
 
@@ -105,15 +122,22 @@ class ReviewsResponse {
   });
 
   factory ReviewsResponse.fromJson(Map<String, dynamic> json) {
+    // Parse from 'data' array (API format) or fallback to 'reviews'
+    final reviewsList = (json['data'] as List<dynamic>?) ??
+                        (json['reviews'] as List<dynamic>?) ??
+                        [];
+
+    // Parse meta information
+    final meta = json['meta'] as Map<String, dynamic>?;
+
     return ReviewsResponse(
-      reviews: (json['reviews'] as List<dynamic>?)
-              ?.map((review) => ReviewModel.fromJson(review as Map<String, dynamic>))
-              .toList() ??
-          [],
-      total: json['total'] ?? 0,
-      page: json['page'] ?? 1,
-      limit: json['limit'] ?? 10,
-      totalPages: json['totalPages'] ?? 1,
+      reviews: reviewsList
+              .map((review) => ReviewModel.fromJson(review as Map<String, dynamic>))
+              .toList(),
+      total: meta?['total'] ?? json['total'] ?? reviewsList.length,
+      page: meta?['page'] ?? json['page'] ?? 1,
+      limit: meta?['limit'] ?? json['limit'] ?? 10,
+      totalPages: meta?['totalPages'] ?? json['totalPages'] ?? 1,
     );
   }
 

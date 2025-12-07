@@ -30,30 +30,13 @@ abstract class AppointmentRepository {
     String filter,
   );
 
-  /// Get a specific appointment by ID
-  ///
-  /// [appointmentId] - The appointment ID
-  /// Returns AppointmentEntity or null if not found
-  Future<Either<Failure, AppointmentEntity?>> getAppointmentDetails(
-    String appointmentId,
-  );
-
   /// Create a new appointment
-  ///
-  /// [slotId] - Time slot ID
-  /// [appointmentDate] - Date of appointment
-  /// [petId] - Pet ID (optional)
-  /// [reasonForVisit] - Reason for visit
-  /// [pointsToUse] - Loyalty points to use
-  /// [couponCode] - Discount coupon code
-  ///
-  /// Returns created AppointmentEntity
   Future<Either<Failure, AppointmentEntity>> createAppointment({
     required String slotId,
     required DateTime appointmentDate,
     String? petId,
     String? reasonForVisit,
-    int? pointsToUse,
+    int? pointsToRedeem,
     String? couponCode,
   });
 
@@ -62,16 +45,6 @@ abstract class AppointmentRepository {
   /// [appointmentId] - The appointment ID to cancel
   /// Returns true if successful
   Future<Either<Failure, bool>> cancelAppointment(String appointmentId);
-
-  /// Complete an appointment (admin/vet action)
-  ///
-  /// [appointmentId] - The appointment ID to complete
-  /// [completionHash] - The completion hash from QR code
-  /// Returns true if successful
-  Future<Either<Failure, bool>> completeAppointment(
-    String appointmentId,
-    String completionHash,
-  );
 
   /// Complete an appointment by scanning vet's QR code
   ///
@@ -96,19 +69,14 @@ abstract class AppointmentRepository {
     String? comment,
   });
 
-  /// Validate a coupon code
+  /// Validate points redemption for a specific vet
   ///
-  /// [couponCode] - The coupon code to validate
+  /// [vetId] - The vet ID for the booking
+  /// [pointsToRedeem] - Number of points to redeem
   ///
-  /// Returns Map with validation result
-  Future<Either<Failure, Map<String, dynamic>>> validateCoupon(
-    String couponCode,
-  );
-
-  /// Validate points usage
-  ///
-  /// [points] - Number of points to validate
-  ///
-  /// Returns Map with validation result
-  Future<Either<Failure, Map<String, dynamic>>> validatePoints(int points);
+  /// Returns Map with redemption validation details including discount amount
+  Future<Either<Failure, Map<String, dynamic>>> validatePointsRedemption({
+    required String vetId,
+    required int pointsToRedeem,
+  });
 }

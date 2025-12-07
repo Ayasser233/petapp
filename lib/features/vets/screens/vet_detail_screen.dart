@@ -29,6 +29,7 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
   final VetService _vetService = VetService();
   List<ReviewModel> _reviews = [];
   bool _isLoadingReviews = false;
+  int _totalReviews = 0;
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
         final response = await _vetService.getVetReviews(vetId, limit: 20);
         setState(() {
           _reviews = response.reviews;
+          _totalReviews = response.total;
           _isLoadingReviews = false;
         });
       } else {
@@ -86,7 +88,10 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
               const SizedBox(height: 12),
               VetAvailabilityStatus(vet: widget.vet),
               const SizedBox(height: 24),
-              VetStats(vet: widget.vet),
+              VetStats(
+                vet: widget.vet,
+                totalReviews: _totalReviews,
+              ),
               const SizedBox(height: 24),
               VetDescription(vet: widget.vet),
               const SizedBox(height: 24),
@@ -103,6 +108,7 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
               VetReviews(
                 reviews: _reviews,
                 isLoading: _isLoadingReviews,
+                totalReviews: _totalReviews,
               ),
               const SizedBox(height: 80), // Space for bottom button
             ],

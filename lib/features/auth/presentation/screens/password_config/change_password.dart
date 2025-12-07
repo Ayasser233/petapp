@@ -96,9 +96,11 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       _isLoading = true;
     });
 
-    try {
-      final localizations = AppLocalizations.of(context);
+    // Capture BuildContext-dependent values before async gap
+    final localizations = AppLocalizations.of(context);
+    final navigator = Navigator.of(context);
 
+    try {
       // Call the change password API
       final response = await _apiClient.changePassword(
         currentPasswordController.text,
@@ -107,21 +109,35 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
       // Check if the response is successful
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Show success message
+        // Show success snackbar
         Get.snackbar(
-          localizations.passwordResetSuccessfully,
+          localizations.success,
           localizations.passwordChangedMessage,
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withValues(alpha: 0.1),
-          colorText: Colors.green,
+          backgroundColor: Colors.green.withValues(alpha: 0.8),
+          colorText: Colors.white,
           duration: const Duration(seconds: 3),
+          icon: const Icon(Icons.check_circle, color: Colors.white),
+          margin: const EdgeInsets.all(16),
         );
 
-        // Navigate back to account details
-        Get.back();
+        // Wait a moment for the snackbar to show, then navigate back
+        await Future.delayed(const Duration(milliseconds: 2000));
+
+        // Check if mounted before navigation
+        if (mounted) {
+          // Use captured navigator to avoid BuildContext across async gap
+          if (navigator.canPop()) {
+            navigator.pop();
+          } else {
+            Get.back();
+          }
+        }
+      } else {
+        // Handle unexpected success status codes
+        throw Exception('Unexpected response status: ${response.statusCode}');
       }
     } on DioException catch (e) {
-      final localizations = AppLocalizations.of(context);
       String errorMessage = localizations.failedToResetPassword;
 
       // Handle specific error codes
@@ -133,28 +149,37 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         errorMessage = 'Current password is incorrect';
       }
 
-      Get.snackbar(
-        localizations.errorVerifyingCode,
-        errorMessage,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withValues(alpha: 0.1),
-        colorText: Colors.red,
-        duration: const Duration(seconds: 3),
-      );
+      if (mounted) {
+        Get.snackbar(
+          localizations.error,
+          errorMessage,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withValues(alpha: 0.8),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+          icon: const Icon(Icons.error_outline, color: Colors.white),
+          margin: const EdgeInsets.all(16),
+        );
+      }
     } catch (e) {
-      final localizations = AppLocalizations.of(context);
-      Get.snackbar(
-        localizations.errorVerifyingCode,
-        localizations.failedToResetPassword,
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red.withValues(alpha: 0.1),
-        colorText: Colors.red,
-        duration: const Duration(seconds: 3),
-      );
+      if (mounted) {
+        Get.snackbar(
+          localizations.error,
+          localizations.failedToResetPassword,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withValues(alpha: 0.8),
+          colorText: Colors.white,
+          duration: const Duration(seconds: 3),
+          icon: const Icon(Icons.error_outline, color: Colors.white),
+          margin: const EdgeInsets.all(16),
+        );
+      }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 

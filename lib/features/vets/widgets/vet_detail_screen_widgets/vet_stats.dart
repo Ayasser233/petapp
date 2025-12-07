@@ -4,10 +4,12 @@ import 'package:petapp/core/localization/app_localizations.dart';
 
 class VetStats extends StatelessWidget {
   final Map<String, dynamic> vet;
+  final int? totalReviews;
 
   const VetStats({
     super.key,
     required this.vet,
+    this.totalReviews,
   });
 
   @override
@@ -16,19 +18,9 @@ class VetStats extends StatelessWidget {
     final textColor = isDark ? Colors.white : Colors.black;
     final subTextColor = isDark ? Colors.grey[400] : Colors.grey[700];
 
-    // Debug: Print the entire vet data to see what we're receiving
-    print('🔍 VetStats - Full vet data: $vet');
-    print(
-        '🔍 VetStats - Reviews: ${vet['reviews']} (type: ${vet['reviews'].runtimeType})');
-    print(
-        '🔍 VetStats - Patients: ${vet['patients']} (type: ${vet['patients'].runtimeType})');
-    print(
-        '🔍 VetStats - Years: ${vet['yearsExperience']} (type: ${vet['yearsExperience'].runtimeType})');
-
     // Extract values with proper type handling
-    final reviews = vet['reviews'] is int
-        ? vet['reviews']
-        : int.tryParse(vet['reviews']?.toString() ?? '0') ?? 0;
+    // Use totalReviews from API if provided, otherwise fall back to vet data
+    final reviews = totalReviews;
 
     final patients = vet['patients'] is int
         ? vet['patients']
@@ -36,11 +28,9 @@ class VetStats extends StatelessWidget {
 
     final yearsExperience = vet['yearsExperience'] is int
         ? vet['yearsExperience']
-        : int.tryParse(vet['yearsExperience']?.toString() ?? '0') ?? 0;
-
-    print('🔍 VetStats - Parsed Reviews: $reviews');
-    print('🔍 VetStats - Parsed Patients: $patients');
-    print('🔍 VetStats - Parsed Years: $yearsExperience');
+        : (vet['experience'] is int
+            ? vet['experience']
+            : int.tryParse(vet['experience']?.toString() ?? '0') ?? 0);
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),

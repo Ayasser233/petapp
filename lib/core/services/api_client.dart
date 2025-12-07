@@ -294,7 +294,7 @@ class ApiClient {
     try {
       final response = await _dio.patch(ApiConstants.changePasswordEndpoint,
           data: {
-            'currentPassword': currentPassword,
+            'oldPassword': currentPassword,
             'newPassword': newPassword
           });
       return response;
@@ -362,112 +362,6 @@ class ApiClient {
     try {
       final response = await _dio.post(ApiConstants.googleLoginEndpoint);
       await _handleTokenResponse(response);
-      return response;
-    } catch (e) {
-      ErrorHandlerService.instance.handleError(e);
-      rethrow;
-    }
-  }
-
-  // Appointment methods
-  Future<Response> getAppointments({
-    int page = 1,
-    int limit = 10,
-    String? status,
-  }) async {
-    try {
-      final queryParams = {
-        'page': page,
-        'limit': limit,
-        if (status != null) 'status': status,
-      };
-      final response = await _dio.get(
-        ApiConstants.appointmentsEndpoint,
-        queryParameters: queryParams,
-      );
-      return response;
-    } catch (e) {
-      ErrorHandlerService.instance.handleError(e);
-      rethrow;
-    }
-  }
-
-  Future<Response> getAppointmentDetails(String appointmentId) async {
-    try {
-      final response = await _dio.get(
-        ApiConstants.appointmentDetailEndpoint(appointmentId),
-      );
-      return response;
-    } catch (e) {
-      ErrorHandlerService.instance.handleError(e);
-      rethrow;
-    }
-  }
-
-  Future<Response> createAppointment(
-      Map<String, dynamic> appointmentData) async {
-    try {
-      final response = await _dio.post(
-        ApiConstants.appointmentsEndpoint,
-        data: appointmentData,
-      );
-      return response;
-    } catch (e) {
-      ErrorHandlerService.instance.handleError(e);
-      rethrow;
-    }
-  }
-
-  Future<Response> cancelAppointment(String appointmentId) async {
-    try {
-      final response = await _dio.patch(
-        ApiConstants.appointmentCancelEndpoint(appointmentId),
-      );
-      return response;
-    } catch (e) {
-      ErrorHandlerService.instance.handleError(e);
-      rethrow;
-    }
-  }
-
-  Future<Response> completeAppointment(
-    String appointmentId,
-    String completionHash,
-  ) async {
-    try {
-      final response = await _dio.post(
-        ApiConstants.appointmentCompleteEndpoint(appointmentId),
-        data: {'completionHash': completionHash},
-      );
-      return response;
-    } catch (e) {
-      ErrorHandlerService.instance.handleError(e);
-      rethrow;
-    }
-  }
-
-  Future<Response> submitAppointmentReview(
-    String appointmentId,
-    Map<String, dynamic> reviewData,
-  ) async {
-    try {
-      final response = await _dio.post(
-        ApiConstants.appointmentReviewEndpoint(appointmentId),
-        data: reviewData,
-      );
-      return response;
-    } catch (e) {
-      ErrorHandlerService.instance.handleError(e);
-      rethrow;
-    }
-  }
-
-  Future<Response> validatePointsOrCoupon(Map<String, dynamic> data) async {
-    try {
-      final response = await _dio.post(
-        ApiConstants.pointsValidateEndpoint,
-        data: data,
-      );
       return response;
     } catch (e) {
       ErrorHandlerService.instance.handleError(e);

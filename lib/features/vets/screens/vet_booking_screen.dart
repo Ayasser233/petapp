@@ -6,7 +6,9 @@ import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/appointments/domain/usecases/create_appointment_usecase.dart';
+import 'package:petapp/features/appointments/domain/usecases/validate_points_redemption_usecase.dart';
 import 'package:petapp/di/service_locator.dart';
+import 'package:petapp/core/services/points_service.dart';
 import '../models/time_slot_model.dart';
 import '../services/vet_service.dart';
 import '../widgets/vet_booking_screen_widgets/vet_booking_header.dart';
@@ -21,6 +23,9 @@ class VetBookingController extends GetxController {
   final VetService _vetService = VetService();
   final CreateAppointmentUseCase _createAppointmentUseCase =
       sl<CreateAppointmentUseCase>();
+  final ValidatePointsRedemptionUseCase _validatePointsRedemptionUseCase =
+      sl<ValidatePointsRedemptionUseCase>();
+  final PointsService _pointsService = sl<PointsService>();
 
   // Booking state
   final Rx<DateTime> selectedDay = DateTime.now().obs;
@@ -33,6 +38,16 @@ class VetBookingController extends GetxController {
   final RxString bookingReference = ''.obs;
   final RxBool isLoading = false.obs;
   final RxBool isLoadingTimeSlots = false.obs;
+
+  // Points redemption state
+  final RxInt pointsToRedeem = 0.obs;
+  final RxDouble pointsDiscountAmount = 0.0.obs;
+  final RxInt currentPointsBalance = 0.obs;
+  final RxInt remainingPointsBalance = 0.obs;
+  final RxBool isValidatingPoints = false.obs;
+  final RxString pointsValidationMessage = ''.obs;
+  final RxBool isPointsValid = false.obs;
+  final Rxn<Map<String, dynamic>> pointsDetails = Rxn<Map<String, dynamic>>();
 
   // Pet controller
   late final PetController petController;
@@ -52,6 +67,23 @@ class VetBookingController extends GetxController {
     _initializePetController();
     _getVetIdFromArguments();
     _fetchTimeSlots();
+    _fetchUserPointsBalance();
+  }
+
+  /// Fetch user's points balance
+  Future<void> _fetchUserPointsBalance() async {
+    try {
+      final balance = await _pointsService.getPointsBalance();
+      currentPointsBalance.value = (balance['balance'] ?? 0).toInt();
+
+      // Initialize pointsDetails with current balance
+      pointsDetails.value = {
+        'currentBalance': currentPointsBalance.value,
+      };
+    } catch (e) {
+      // Silently fail - points feature is optional
+      currentPointsBalance.value = 0;
+    }
   }
 
   /// Initialize pet controller
@@ -171,6 +203,103 @@ class VetBookingController extends GetxController {
     return selectedPets.any((p) => p.id == pet.id);
   }
 
+  /// Validate points redemption
+  Future<void> validatePointsRedemption(int points) async {
+    if (vetId == null || vetId!.isEmpty) {
+      return;
+    }
+
+    if (points <= 0) {
+      pointsToRedeem.value = 0;
+      pointsDiscountAmount.value = 0.0;
+      isPointsValid.value = false;
+      pointsValidationMessage.value = '';
+      pointsDetails.value = null;
+      return;
+    }
+
+    try {
+      isValidatingPoints.value = true;
+      pointsValidationMessage.value = '';
+
+      final result = await _validatePointsRedemptionUseCase(
+        ValidatePointsRedemptionParams(
+          vetId: vetId!,
+          pointsToRedeem: points,
+        ),
+      );
+
+      result.fold(
+        // Error case
+        (failure) {
+          isPointsValid.value = false;
+          pointsToRedeem.value = 0;
+          pointsDiscountAmount.value = 0.0;
+          pointsValidationMessage.value = failure.message;
+        },
+        // Success case
+        (response) {
+          if (response['eligible'] == true) {
+            isPointsValid.value = true;
+            pointsToRedeem.value = points;
+
+            final details = response['pointsDetails'] as Map<String, dynamic>?;
+            if (details != null) {
+              pointsDiscountAmount.value =
+                  (details['discountAmount'] ?? 0).toDouble();
+              currentPointsBalance.value =
+                  (details['currentBalance'] ?? 0).toInt();
+              remainingPointsBalance.value =
+                  (details['remainingBalance'] ?? 0).toInt();
+              pointsDetails.value = details;
+            }
+
+            pointsValidationMessage.value =
+                response['message']?.toString() ?? 'Points validated successfully';
+          } else {
+            isPointsValid.value = false;
+            pointsToRedeem.value = 0;
+            pointsDiscountAmount.value = 0.0;
+            pointsValidationMessage.value =
+                response['message']?.toString() ?? 'Invalid points amount';
+          }
+        },
+      );
+    } catch (e) {
+      isPointsValid.value = false;
+      pointsToRedeem.value = 0;
+      pointsDiscountAmount.value = 0.0;
+      pointsValidationMessage.value = e.toString();
+
+      Get.snackbar(
+        'Error',
+        'Failed to validate points: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withValues(alpha: 0.8),
+        colorText: Colors.white,
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+        icon: const Icon(Icons.error_outline, color: Colors.white, size: 24),
+        duration: const Duration(seconds: 3),
+      );
+    } finally {
+      isValidatingPoints.value = false;
+    }
+  }
+
+  /// Update points to redeem
+  void updatePointsToRedeem(int points) {
+    validatePointsRedemption(points);
+  }
+
+  /// Clear points redemption
+  void clearPointsRedemption() {
+    pointsToRedeem.value = 0;
+    pointsDiscountAmount.value = 0.0;
+    isPointsValid.value = false;
+    pointsValidationMessage.value = '';
+    pointsDetails.value = null;
+  }
+
   /// Confirm booking
   Future<void> confirmBooking() async {
     // Validate time slot
@@ -197,7 +326,9 @@ class VetBookingController extends GetxController {
           appointmentDate: selectedDay.value,
           petId: selectedPets.isNotEmpty ? selectedPets.first.id : null,
           reasonForVisit: 'Regular checkup', // You can make this dynamic
-          pointsToUse: null, // Don't send if not using points
+          pointsToRedeem: isPointsValid.value && pointsToRedeem.value > 0
+              ? pointsToRedeem.value
+              : null,
           couponCode: null, // Don't send if no coupon
         ),
       );
@@ -269,6 +400,7 @@ class VetBookingController extends GetxController {
     selectedPets.clear();
     isBookingConfirmed.value = false;
     bookingReference.value = '';
+    clearPointsRedemption();
   }
 
   /// Get available time slots for selected day

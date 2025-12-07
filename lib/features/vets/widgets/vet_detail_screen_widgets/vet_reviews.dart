@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/vets/models/review_model.dart';
+import 'package:petapp/features/vets/screens/review_details_screen.dart';
 import 'package:intl/intl.dart';
 
 class VetReviews extends StatelessWidget {
   final List<ReviewModel> reviews;
   final bool isLoading;
+  final int totalReviews;
 
   const VetReviews({
     super.key,
     required this.reviews,
     this.isLoading = false,
+    this.totalReviews = 0,
   });
 
   @override
@@ -49,9 +53,9 @@ class VetReviews extends StatelessWidget {
                     ),
               ),
               const Spacer(),
-              if (reviews.isNotEmpty)
+              if (totalReviews > 0)
                 Text(
-                  '${reviews.length} ${reviews.length == 1 ? AppLocalizations.of(context).review : AppLocalizations.of(context).reviews}',
+                  '$totalReviews ${totalReviews == 1 ? AppLocalizations.of(context).review : AppLocalizations.of(context).reviews}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: subTextColor,
                       ),
@@ -128,82 +132,115 @@ class VetReviews extends StatelessWidget {
     Color textColor,
     Color? subTextColor,
   ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // User Info and Rating
-        Row(
+    return InkWell(
+      onTap: () {
+        // Navigate to review details screen
+        Get.to(() => ReviewDetailsScreen(review: review));
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // User Avatar
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: AppColors.orange.withValues(alpha: 0.2),
-              backgroundImage:
-                  review.userImage != null && review.userImage!.isNotEmpty
-                      ? AssetImage(review.userImage!)
-                      : null,
-              child: review.userImage == null || review.userImage!.isEmpty
-                  ? Text(
-                      review.userName.isNotEmpty
-                          ? review.userName[0].toUpperCase()
-                          : 'U',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: AppColors.orange,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 12),
-
-            // User Name and Date
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    review.userName,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    _formatDate(review.createdAt),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: subTextColor,
-                          fontSize: 11,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-
-            // Rating Stars
+            // User Info and Rating
             Row(
-              children: List.generate(5, (index) {
-                return Icon(
-                  index < review.rating ? Icons.star : Icons.star_border,
-                  color: index < review.rating ? Colors.amber : Colors.grey,
-                  size: 16,
-                );
-              }),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // User Avatar
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppColors.orange.withValues(alpha: 0.2),
+                  backgroundImage:
+                      review.userImage != null && review.userImage!.isNotEmpty
+                          ? AssetImage(review.userImage!)
+                          : null,
+                  child: review.userImage == null || review.userImage!.isEmpty
+                      ? Text(
+                          review.userName.isNotEmpty
+                              ? review.userName[0].toUpperCase()
+                              : 'U',
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: AppColors.orange,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+
+                // User Name and Date
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        review.userName,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: textColor,
+                            ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatDate(review.createdAt),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: subTextColor,
+                              fontSize: 11,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Rating Stars
+                Row(
+                  children: List.generate(5, (index) {
+                    return Icon(
+                      index < review.rating ? Icons.star : Icons.star_border,
+                      color: index < review.rating ? Colors.amber : Colors.grey,
+                      size: 16,
+                    );
+                  }),
+                ),
+              ],
+            ),
+
+            // Review Comment
+            const SizedBox(height: 12),
+            Text(
+              review.comment,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: textColor,
+                    height: 1.5,
+                  ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+
+            // Tap indicator
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  AppLocalizations.of(context).tapToViewDetails,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.orange,
+                        fontSize: 11,
+                      ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: AppColors.orange,
+                  size: 12,
+                ),
+              ],
             ),
           ],
         ),
-
-        // Review Comment
-        const SizedBox(height: 12),
-        Text(
-          review.comment,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: textColor,
-                height: 1.5,
-              ),
-        ),
-      ],
+      ),
     );
   }
 

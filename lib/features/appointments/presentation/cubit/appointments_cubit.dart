@@ -182,7 +182,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     required DateTime appointmentDate,
     String? reasonForVisit,
     String? couponCode,
-    int pointsToUse = 0,
+    int pointsToRedeem = 0,
   }) async {
     emit(const AppointmentsLoading());
 
@@ -193,7 +193,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
         appointmentDate: appointmentDate,
         reasonForVisit: reasonForVisit,
         couponCode: couponCode,
-        pointsToUse: pointsToUse,
+        pointsToRedeem: pointsToRedeem,
       ),
     );
 

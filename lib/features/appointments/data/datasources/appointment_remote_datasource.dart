@@ -70,7 +70,7 @@ class AppointmentRemoteDataSource {
     required DateTime appointmentDate,
     String? petId,
     String? reasonForVisit,
-    int? pointsToUse,
+    int? pointsToRedeem,
     String? couponCode,
   }) async {
     try {
@@ -83,7 +83,7 @@ class AppointmentRemoteDataSource {
         'appointmentDate': dateOnly,
         if (petId != null) 'petId': petId,
         if (reasonForVisit != null) 'reasonForVisit': reasonForVisit,
-        if (pointsToUse != null) 'pointsToUse': pointsToUse,
+        if (pointsToRedeem != null) 'pointsToRedeem': pointsToRedeem,
         if (couponCode != null) 'couponCode': couponCode,
       };
 
@@ -207,51 +207,34 @@ class AppointmentRemoteDataSource {
     }
   }
 
-  /// Validate coupon code
-  Future<Map<String, dynamic>> validateCoupon(String couponCode) async {
-    final response = await apiClient.post(
-      ApiConstants.pointsValidateEndpoint,
-      data: {'couponCode': couponCode},
-    );
+  /// Validate points redemption for a specific vet
+  Future<Map<String, dynamic>> validatePointsRedemption({
+    required String vetId,
+    required int pointsToRedeem,
+  }) async {
+    try {
+      final response = await apiClient.post(
+        ApiConstants.pointsRedeemValidateEndpoint,
+        data: {
+          'vetId': vetId,
+          'pointsToRedeem': pointsToRedeem,
+        },
+      );
 
-    if (response.data['success'] == true) {
-      return {
-        'valid': true,
-        'discount': (response.data['data']['discount'] ?? 0).toDouble(),
-        'message': response.data['message'] ?? 'Coupon is valid',
-      };
-    } else {
-      return {
-        'valid': false,
-        'discount': 0.0,
-        'message': response.data['message'] ?? 'Invalid coupon',
-      };
+      if (response.data['success'] == true && response.data['data'] != null) {
+        return response.data['data'] as Map<String, dynamic>;
+      } else {
+        throw ValidationException(
+          message: response.data['message'] ?? 'Failed to validate points redemption',
+          errors: null,
+        );
+      }
+    } catch (e) {
+      if (e is ValidationException) rethrow;
+      throw ServerException(message: _extractErrorMessage(e));
     }
   }
 
-  /// Validate points
-  Future<Map<String, dynamic>> validatePoints(int points) async {
-    final response = await apiClient.post(
-      ApiConstants.pointsValidateEndpoint,
-      data: {'points': points},
-    );
-
-    if (response.data['success'] == true) {
-      return {
-        'valid': true,
-        'discount': (response.data['data']['discount'] ?? 0).toDouble(),
-        'availablePoints': response.data['data']['availablePoints'] ?? 0,
-        'message': response.data['message'] ?? 'Points are valid',
-      };
-    } else {
-      return {
-        'valid': false,
-        'discount': 0.0,
-        'availablePoints': 0,
-        'message': response.data['message'] ?? 'Invalid points',
-      };
-    }
-  }
 
   /// Extract error message from DioException
   String _extractErrorMessage(dynamic error) {
