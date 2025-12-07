@@ -57,7 +57,6 @@ class VetBookingSummary extends StatelessWidget {
     return Obx(() {
       // Get points discount from controller
       final pointsDiscount = controller.pointsDiscountAmount.value;
-      final totalDiscount = discountAmount + pointsDiscount;
       final finalPriceWithPoints = finalPrice - pointsDiscount;
 
       return Card(
@@ -271,7 +270,6 @@ class VetBookingSummary extends StatelessWidget {
     Color? subTextColor,
   ) {
     return Obx(() {
-      final currentBalance = controller.currentPointsBalance.value;
       final pointsToRedeem = controller.pointsToRedeem.value;
       final isValidating = controller.isValidatingPoints.value;
       final isValid = controller.isPointsValid.value;
@@ -297,7 +295,7 @@ class VetBookingSummary extends StatelessWidget {
           const SizedBox(height: 12),
 
           // Points balance display
-          if (pointsDetails != null && pointsDetails['currentBalance'] != null)
+          if (controller.currentPointsBalance.value > 0)
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -318,7 +316,7 @@ class VetBookingSummary extends StatelessWidget {
                         ),
                   ),
                   Text(
-                    '${pointsDetails['currentBalance']} ${AppLocalizations.of(context).pts}',
+                    '${controller.currentPointsBalance.value} ${AppLocalizations.of(context).pts}',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: AppColors.orange,
                           fontWeight: FontWeight.bold,
