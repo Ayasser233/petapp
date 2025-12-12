@@ -88,6 +88,7 @@ class VetModel {
   final bool? isAvailable;  // Whether vet has available slots
   final List<VetScheduleSlot>? scheduleSlots; // Schedule information from API
   final String? openingDaysText; // E.g., "Mon - Fri" or "Mon, Wed, Fri"
+  final bool hasEmergency; // Whether vet offers emergency services
 
   VetModel({
     required this.id,
@@ -117,6 +118,7 @@ class VetModel {
     this.isAvailable,
     this.scheduleSlots,
     this.openingDaysText,
+    this.hasEmergency = false,
   });
 
   // Helper getter to get the first image (for cards)
@@ -359,6 +361,7 @@ class VetModel {
     bool? isAvailable,
     List<VetScheduleSlot>? scheduleSlots,
     String? openingDaysText,
+    bool? hasEmergency,
   }) {
     return VetModel(
       id: id ?? this.id,
@@ -386,6 +389,7 @@ class VetModel {
       isAvailable: isAvailable ?? this.isAvailable,
       scheduleSlots: scheduleSlots ?? this.scheduleSlots,
       openingDaysText: openingDaysText ?? this.openingDaysText,
+      hasEmergency: hasEmergency ?? this.hasEmergency,
     );
   }
 
@@ -455,6 +459,7 @@ class VetModel {
       discount: map['discount'] != null
           ? VetDiscount.fromJson(map['discount'])
           : null,
+      hasEmergency: map['hasEmergency'] ?? false,
     );
   }
 
@@ -599,6 +604,7 @@ class VetModel {
           ? VetDiscount.fromJson(json['discount'])
           : null,
       isAvailable: json['isAvailable'] as bool?,
+      hasEmergency: json['hasEmergency'] ?? false,
     );
   }
 

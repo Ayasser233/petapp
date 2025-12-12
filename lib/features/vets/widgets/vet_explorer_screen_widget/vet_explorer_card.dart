@@ -49,6 +49,7 @@ class VetExplorerCard extends StatelessWidget {
       showActionButtons: true,
       compact: false,
       discount: vet.discount,
+      hasEmergency: vet.hasEmergency,
     );
   }
 

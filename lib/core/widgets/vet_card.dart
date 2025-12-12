@@ -29,6 +29,7 @@ class VetCard extends StatefulWidget {
   final bool showActionButtons;
   final bool compact;
   final VetDiscount? discount;
+  final bool hasEmergency;
 
   const VetCard({
     super.key,
@@ -51,6 +52,7 @@ class VetCard extends StatefulWidget {
     this.showActionButtons = true,
     this.compact = false,
     this.discount,
+    this.hasEmergency = false,
   });
 
   @override
@@ -404,6 +406,46 @@ class _VetCardState extends State<VetCard> {
             ),
           ),
         ),
+
+        // Emergency Badge (Below Category Badge)
+        if (widget.hasEmergency)
+          Positioned(
+            top: 40,
+            left: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.red.shade600,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.red.withValues(alpha: 0.3),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.emergency,
+                    color: Colors.white,
+                    size: 12,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    AppLocalizations.of(context).emergency,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
 
         // Distance Badge (Bottom Right) - Only show if enabled and available
         if (widget.showDistance && widget.distance != null && widget.distance!.isNotEmpty)

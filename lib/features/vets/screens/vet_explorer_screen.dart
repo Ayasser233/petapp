@@ -105,6 +105,7 @@ class VetExplorerController extends GetxController {
   List<String> getLocalizedCategories(BuildContext context) {
     return [
       'allCategory',
+      'emergency',
       'popular',
       'recommended',
       'latest',
@@ -116,6 +117,8 @@ class VetExplorerController extends GetxController {
     switch (category) {
       case 'allCategory':
         return AppLocalizations.of(context).allCategory;
+      case 'emergency':
+        return AppLocalizations.of(context).emergency;
       case 'popular':
         return AppLocalizations.of(context).popular;
       case 'recommended':
@@ -378,6 +381,8 @@ class VetExplorerController extends GetxController {
   /// Apply category filter
   List<VetModel> _applyCategoryFilter(List<VetModel> vets) {
     switch (selectedCategory.value) {
+      case 'emergency':
+        return vets.where((vet) => vet.hasEmergency).toList();
       case 'popular':
         return vets.where((vet) => vet.rating >= 4.7).toList();
       case 'recommended':

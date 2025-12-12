@@ -7,7 +7,7 @@ class AppTheme {
   static ThemeData lightTheme = ThemeData(
     // surfaceTintColor: AppColors.orange,
     useMaterial3: true,
-    fontFamily: 'Alilato Arabic Regular',
+    fontFamily: 'Tajawal',
     primaryColor: const Color(0xFFEA9249),
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
@@ -19,19 +19,19 @@ class AppTheme {
     brightness: Brightness.light,
     scaffoldBackgroundColor: Colors.white,
     textTheme: AppStyles.lightTextTheme.apply(
-      fontFamily: 'Alilato Arabic Regular',
+      fontFamily: 'Tajawal',
     ),
     elevatedButtonTheme: elevatedButtonTheme.lightElevatedThemeButton,
     inputDecorationTheme: const InputDecorationTheme(
       // Ensure input fields use the same font
-      hintStyle: TextStyle(fontFamily: 'Alilato Arabic Regular'),
-      labelStyle: TextStyle(fontFamily: 'Alilato Arabic Regular'),
+      hintStyle: TextStyle(fontFamily: 'Tajawal'),
+      labelStyle: TextStyle(fontFamily: 'Tajawal'),
     ),
   );
 
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
-    fontFamily: 'Alilato Arabic Regular',
+    fontFamily: 'Tajawal',
     primaryColor: AppColors.orange,
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.black,
@@ -43,13 +43,13 @@ class AppTheme {
     brightness: Brightness.dark,
     scaffoldBackgroundColor: Colors.black,
     textTheme: AppStyles.darkTextTheme.apply(
-      fontFamily: 'Alilato Arabic Regular',
+      fontFamily: 'Tajawal',
     ),
     elevatedButtonTheme: elevatedButtonTheme.darkElevatedThemeButton,
     inputDecorationTheme: const InputDecorationTheme(
       // Ensure input fields use the same font
-      hintStyle: TextStyle(fontFamily: 'Alilato Arabic Regular'),
-      labelStyle: TextStyle(fontFamily: 'Alilato Arabic Regular'),
+      hintStyle: TextStyle(fontFamily: 'Tajawal'),
+      labelStyle: TextStyle(fontFamily: 'Tajawal'),
     ),
   );
 }
