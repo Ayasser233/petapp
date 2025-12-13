@@ -44,7 +44,7 @@ Future<void> setupPushNotifications() async {
   print('User granted permission: ${settings.authorizationStatus}');
 
   // Get the FCM token for this device
-  String? token = await messaging.getToken();
+  String? token = await messaging.getAPNSToken();
   print("FCM Token: $token");
 
   // You can send this token to your backend to store it per user
