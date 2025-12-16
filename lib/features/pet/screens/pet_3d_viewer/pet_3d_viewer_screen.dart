@@ -130,7 +130,7 @@ class _Pet3DViewerScreenState extends State<Pet3DViewerScreen>
         centerTitle: true,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: textColor),
-          onPressed: () => Get.back(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
           IconButton(

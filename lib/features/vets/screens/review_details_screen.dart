@@ -28,8 +28,8 @@ class ReviewDetailsScreen extends StatelessWidget {
         backgroundColor: backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: textColor),
-          onPressed: () => Get.back(),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           AppLocalizations.of(context).reviewDetails,

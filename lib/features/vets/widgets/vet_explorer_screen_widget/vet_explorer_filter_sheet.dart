@@ -93,7 +93,7 @@ class VetExplorerFilterSheet extends StatelessWidget {
                 ),
           ),
           IconButton(
-            onPressed: () => Get.back(),
+            onPressed: () => Navigator.of(context).pop(),
             icon: Icon(Icons.close, color: textColor),
           ),
         ],
@@ -527,7 +527,7 @@ class VetExplorerFilterSheet extends StatelessWidget {
             child: OutlinedButton(
               onPressed: () {
                 controller.clearAllFilters();
-                Get.back();
+                Navigator.of(context).pop();
               },
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.orange,
@@ -551,7 +551,7 @@ class VetExplorerFilterSheet extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 controller.applyFilters();
-                Get.back();
+                Navigator.of(context).pop();
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.orange,

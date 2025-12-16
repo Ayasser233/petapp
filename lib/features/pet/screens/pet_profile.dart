@@ -68,7 +68,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
             backgroundColor: themeColor,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Get.back(),
+              onPressed: () => Navigator.of(context).pop(),
             ),
             actions: [
               IconButton(

@@ -118,8 +118,8 @@ class VetBookingController extends GetxController {
 
     } catch (e) {
       Get.snackbar(
-        'Error',
-        'Failed to load available time slots',
+        AppLocalizations.of(Get.context!).error,
+        AppLocalizations.of(Get.context!).failedToLoadTimeSlots,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.withValues(alpha: 0.8),
         colorText: Colors.white,
@@ -255,13 +255,15 @@ class VetBookingController extends GetxController {
             }
 
             pointsValidationMessage.value =
-                response['message']?.toString() ?? 'Points validated successfully';
+                response['message']?.toString() ??
+                AppLocalizations.of(Get.context!).pointsValidatedSuccessfully;
           } else {
             isPointsValid.value = false;
             pointsToRedeem.value = 0;
             pointsDiscountAmount.value = 0.0;
             pointsValidationMessage.value =
-                response['message']?.toString() ?? 'Invalid points amount';
+                response['message']?.toString() ??
+                AppLocalizations.of(Get.context!).invalidPointsAmount;
           }
         },
       );
@@ -272,8 +274,8 @@ class VetBookingController extends GetxController {
       pointsValidationMessage.value = e.toString();
 
       Get.snackbar(
-        'Error',
-        'Failed to validate points: ${e.toString()}',
+        AppLocalizations.of(Get.context!).error,
+        '${AppLocalizations.of(Get.context!).failedToValidatePoints}: ${e.toString()}',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red.withValues(alpha: 0.8),
         colorText: Colors.white,

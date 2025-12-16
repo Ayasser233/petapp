@@ -6,6 +6,15 @@
 -keep class io.flutter.**  { *; }
 -keep class io.flutter.plugins.**  { *; }
 
+# Keep MainActivity - Required for app to launch
+-keep class com.aleefy.petapp.MainActivity { *; }
+
+# Google Play Core - Flutter references these but we don't use them
+# Tell R8 to ignore missing classes instead of failing the build
+-dontwarn com.google.android.play.core.**
+-dontwarn io.flutter.embedding.android.FlutterPlayStoreSplitApplication
+-dontwarn io.flutter.embedding.engine.deferredcomponents.**
+
 # Gson (for JSON serialization)
 -keepattributes Signature
 -keepattributes *Annotation*

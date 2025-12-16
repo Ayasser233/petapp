@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import '../widgets/vet_detail_screen_widgets/vet_header.dart';
@@ -128,7 +127,7 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
       backgroundColor: isDark ? Colors.black : Colors.white,
       leading: IconButton(
         icon: Icon(Icons.arrow_back, color: textColor),
-        onPressed: () => Get.back(),
+        onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
         AppLocalizations.of(context).vetDetails,

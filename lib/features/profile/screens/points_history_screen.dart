@@ -13,7 +13,8 @@ class PointsHistoryScreen extends StatefulWidget {
   State<PointsHistoryScreen> createState() => _PointsHistoryScreenState();
 }
 
-class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
+class _PointsHistoryScreenState extends State<PointsHistoryScreen>
+    with WidgetsBindingObserver {
   final PointsService _pointsService = sl<PointsService>();
 
   // Balance data
@@ -36,13 +37,31 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadPointsData();
   }
 
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Refresh data when app comes back to foreground
+    if (state == AppLifecycleState.resumed) {
+      _loadPointsData();
+    }
+  }
+
   Future<void> _loadPointsData() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
       _hasError = false;
+      _currentPage = 1; // Reset to first page on refresh
     });
 
     try {
@@ -55,6 +74,8 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
         limit: _limit,
       );
 
+      if (!mounted) return;
+
       setState(() {
         // Update balance
         _currentBalance = balanceData['currentBalance'] ?? 0;
@@ -64,22 +85,39 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
         // Update transactions
         _transactions = List<Map<String, dynamic>>.from(transactionsData);
 
-        // Check if there are more transactions (you'll need to handle pagination metadata)
+        // Check if there are more transactions
         _hasMore = _transactions.length >= _limit;
 
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
+
       setState(() {
         _isLoading = false;
         _hasError = true;
         _errorMessage = e.toString();
       });
+
+      // Show error snackbar
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).errorLoadingPoints),
+            backgroundColor: Colors.red,
+            action: SnackBarAction(
+              label: AppLocalizations.of(context).retry,
+              textColor: Colors.white,
+              onPressed: _loadPointsData,
+            ),
+          ),
+        );
+      }
     }
   }
 
   Future<void> _loadMoreTransactions() async {
-    if (_isLoadingMore || !_hasMore) return;
+    if (_isLoadingMore || !_hasMore || !mounted) return;
 
     setState(() {
       _isLoadingMore = true;
@@ -91,6 +129,8 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
         limit: _limit,
       );
 
+      if (!mounted) return;
+
       setState(() {
         _currentPage++;
         _transactions.addAll(List<Map<String, dynamic>>.from(moreTransactions));
@@ -98,9 +138,22 @@ class _PointsHistoryScreenState extends State<PointsHistoryScreen> {
         _isLoadingMore = false;
       });
     } catch (e) {
+      if (!mounted) return;
+
       setState(() {
         _isLoadingMore = false;
       });
+
+      // Show error snackbar for loading more
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context).errorLoadingMore),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
