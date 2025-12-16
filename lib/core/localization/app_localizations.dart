@@ -22,7 +22,7 @@ class AppLocalizations {
 
   // Retrieve localized strings
   String get appTitle =>
-      _localizedValues[locale.languageCode]?['appTitle'] ?? 'Pet App';
+      _localizedValues[locale.languageCode]?['appTitle'] ?? 'Aleefy';
   String get home => _localizedValues[locale.languageCode]?['home'] ?? 'Home';
   String get myActivity =>
       _localizedValues[locale.languageCode]?['myActivity'] ?? 'My Activity';
@@ -584,6 +584,9 @@ class AppLocalizations {
   String get errorLoadingPoints =>
       _localizedValues[locale.languageCode]?['errorLoadingPoints'] ??
       'Error loading points';
+  String get errorLoadingMore =>
+      _localizedValues[locale.languageCode]?['errorLoadingMore'] ??
+      'Error loading more transactions';
   String get currentBalance =>
       _localizedValues[locale.languageCode]?['currentBalance'] ??
       'Current Balance';
@@ -603,6 +606,18 @@ class AppLocalizations {
   String get noPointsMessage =>
       _localizedValues[locale.languageCode]?['noPointsMessage'] ??
       'You don\'t have any points to redeem yet. Start using our services to earn points!';
+  String get failedToLoadTimeSlots =>
+      _localizedValues[locale.languageCode]?['failedToLoadTimeSlots'] ??
+      'Failed to load available time slots';
+  String get failedToValidatePoints =>
+      _localizedValues[locale.languageCode]?['failedToValidatePoints'] ??
+      'Failed to validate points';
+  String get pointsValidatedSuccessfully =>
+      _localizedValues[locale.languageCode]?['pointsValidatedSuccessfully'] ??
+      'Points validated successfully';
+  String get invalidPointsAmount =>
+      _localizedValues[locale.languageCode]?['invalidPointsAmount'] ??
+      'Invalid points amount';
 
   String get loginRequired =>
       _localizedValues[locale.languageCode]?['loginRequired'] ??
@@ -913,6 +928,40 @@ class AppLocalizations {
   String get scanQrToComplete =>
       _localizedValues[locale.languageCode]?['scanQrToComplete'] ??
       'Scan QR to Complete';
+
+  // Notification getters
+  String get notificationsTitle =>
+      _localizedValues[locale.languageCode]?['Notifications'] ?? 'Notifications';
+  String get markAllAsRead =>
+      _localizedValues[locale.languageCode]?['Mark all as read'] ?? 'Mark all as read';
+  String get notificationNew =>
+      _localizedValues[locale.languageCode]?['new'] ?? 'new';
+  String get noNotificationsYet =>
+      _localizedValues[locale.languageCode]?['No notifications yet'] ?? 'No notifications yet';
+  String get weWillNotifyYou =>
+      _localizedValues[locale.languageCode]?['We\'ll notify you when something arrives'] ??
+      'We\'ll notify you when something arrives';
+  String get notificationDeleted =>
+      _localizedValues[locale.languageCode]?['Notification deleted'] ?? 'Notification deleted';
+  String get justNow =>
+      _localizedValues[locale.languageCode]?['Just now'] ?? 'Just now';
+
+  // Time ago formatters
+  String minutesAgo(int count) {
+    final template = _localizedValues[locale.languageCode]?['m ago'] ?? '@count min ago';
+    return template.replaceAll('@count', count.toString());
+  }
+
+  String hoursAgo(int count) {
+    final template = _localizedValues[locale.languageCode]?['h ago'] ?? '@count hr ago';
+    return template.replaceAll('@count', count.toString());
+  }
+
+  String daysAgo(int count) {
+    final template = _localizedValues[locale.languageCode]?['d ago'] ?? '@count day ago';
+    return template.replaceAll('@count', count.toString());
+  }
+
   // Add these getters to your AppLocalizations class
   String get date => _localizedValues[locale.languageCode]?['date'] ?? 'Date';
   String get time => _localizedValues[locale.languageCode]?['time'] ?? 'Time';
@@ -2368,6 +2417,7 @@ class AppLocalizations {
 
       // Additional Points Translations
       'errorLoadingPoints': 'Error loading points',
+      'errorLoadingMore': 'Error loading more transactions',
       'currentBalance': 'Current Balance',
       'totalEarned': 'Total Earned',
       'totalSpent': 'Total Spent',
@@ -2376,6 +2426,10 @@ class AppLocalizations {
       'noPointsAvailable': 'No Points Available',
       'noPointsMessage':
           'You don\'t have any points to redeem yet. Start using our services to earn points!',
+      'failedToLoadTimeSlots': 'Failed to load available time slots',
+      'failedToValidatePoints': 'Failed to validate points',
+      'pointsValidatedSuccessfully': 'Points validated successfully',
+      'invalidPointsAmount': 'Invalid points amount',
 
       'loginRequired': 'Login Required',
       'loginRequiredMessage':
@@ -3666,9 +3720,21 @@ class AppLocalizations {
       'pointCameraAtQrCode': 'Point your camera at the QR code',
       'appointmentCompletedSuccessfully': 'Appointment completed successfully',
       'scanQrToComplete': 'Scan QR to Complete',
+
+      // Notifications
+      'Notifications': 'Notifications',
+      'Mark all as read': 'Mark all as read',
+      'new': 'new',
+      'No notifications yet': 'No notifications yet',
+      'We\'ll notify you when something arrives': 'We\'ll notify you when something arrives',
+      'Notification deleted': 'Notification deleted',
+      'Just now': 'Just now',
+      'm ago': '@count min ago',
+      'h ago': '@count hr ago',
+      'd ago': '@count day ago',
     },
     'ar': {
-      'appTitle': 'تطبيق الحيوانات الأليفة',
+      'appTitle': 'أليفي',
       'home': 'الرئيسية',
       'myActivity': 'نشاطي',
       'profile': 'الملف الشخصي',
@@ -3865,6 +3931,7 @@ class AppLocalizations {
 
       // Additional Points Translations
       'errorLoadingPoints': 'خطأ في تحميل النقاط',
+      'errorLoadingMore': 'خطأ في تحميل المزيد من المعاملات',
       'currentBalance': 'الرصيد الحالي',
       'totalEarned': 'إجمالي المكتسب',
       'totalSpent': 'إجمالي المصروف',
@@ -3873,6 +3940,10 @@ class AppLocalizations {
       'noPointsAvailable': 'لا توجد نقاط متاحة',
       'noPointsMessage':
           'ليس لديك أي نقاط للاستخدام حتى الآن. ابدأ باستخدام خدماتنا لكسب النقاط!',
+      'failedToLoadTimeSlots': 'فشل تحميل الأوقات المتاحة',
+      'failedToValidatePoints': 'فشل التحقق من النقاط',
+      'pointsValidatedSuccessfully': 'تم التحقق من النقاط بنجاح',
+      'invalidPointsAmount': 'عدد النقاط غير صالح',
 
       'loginRequired': 'تسجيل الدخول مطلوب',
       'loginRequiredMessage': 'يجب تسجيل الدخول للوصول إلى هذه الميزة.',
@@ -6019,6 +6090,18 @@ class AppLocalizations {
       'pointCameraAtQrCode': 'وجّه الكاميرا نحو رمز QR',
       'appointmentCompletedSuccessfully': 'تم إتمام الموعد بنجاح',
       'scanQrToComplete': 'امسح QR للإتمام',
+
+      // Notifications
+      'Notifications': 'الإشعارات',
+      'Mark all as read': 'وضع علامة مقروء للكل',
+      'new': 'جديد',
+      'No notifications yet': 'لا توجد إشعارات حتى الآن',
+      'We\'ll notify you when something arrives': 'سنرسل لك إشعارًا عندما يصل شيء ما',
+      'Notification deleted': 'تم حذف الإشعار',
+      'Just now': 'الآن',
+      'm ago': 'منذ @count د',
+      'h ago': 'منذ @count س',
+      'd ago': 'منذ @count يوم',
     },
   };
 }

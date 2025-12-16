@@ -7,6 +7,8 @@ import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/profile/screens/account_details_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -48,7 +50,7 @@ class ProfileScreen extends StatelessWidget {
                   _buildProfileOption(
                     context,
                     localizations.myAccount,
-                    Icons.person_outline,
+                    FontAwesomeIcons.circleUser,
                     () {
                       try {
                         Navigator.of(context).push(
@@ -73,7 +75,7 @@ class ProfileScreen extends StatelessWidget {
                 _buildProfileOption(
                   context,
                   localizations.myPets,
-                  Icons.pets,
+                  FontAwesomeIcons.paw,
                   () {
                     if (isGuest) {
                       _showLoginRequiredDialog(context);
@@ -91,7 +93,7 @@ class ProfileScreen extends StatelessWidget {
                 _buildProfileOptionWithCount(
                   context,
                   localizations.aleefyPoints,
-                  Icons.stars_rounded,
+                  FontAwesomeIcons.star,
                   () {
                     if (isGuest) {
                       _showLoginRequiredDialog(context);
@@ -129,8 +131,8 @@ class ProfileScreen extends StatelessWidget {
                             color: AppColors.lightorange.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(
-                            Icons.favorite_border,
+                          child: const FaIcon(
+                            FontAwesomeIcons.heart,
                             color: AppColors.orange,
                             size: 22,
                           ),
@@ -146,8 +148,8 @@ class ProfileScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const Icon(
-                          Icons.arrow_forward_ios,
+                        const FaIcon(
+                          FontAwesomeIcons.chevronRight,
                           size: 16,
                           color: Colors.grey,
                         ),
@@ -161,7 +163,7 @@ class ProfileScreen extends StatelessWidget {
                 _buildProfileOption(
                   context,
                   localizations.settings,
-                  Icons.settings_outlined,
+                  FontAwesomeIcons.gear,
                   () {
                     Get.toNamed(AppRoutes.settings);
                   },
@@ -173,7 +175,7 @@ class ProfileScreen extends StatelessWidget {
                 _buildProfileOption(
                   context,
                   localizations.logout,
-                  Icons.logout,
+                  FontAwesomeIcons.arrowRightFromBracket,
                   () async {
                     // Show confirmation dialog
                     final shouldLogout = await showDialog<bool>(
@@ -277,11 +279,26 @@ class ProfileScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _buildSocialIcon(Icons.facebook, context),
+                          _buildSocialIcon(
+                            FontAwesomeIcons.facebook,
+                            context,
+                            'Facebook',
+                            'https://www.facebook.com/aleefyapp',
+                          ),
                           const SizedBox(width: 24),
-                          _buildSocialIcon(Icons.camera_alt_outlined, context),
+                          _buildSocialIcon(
+                            FontAwesomeIcons.instagram,
+                            context,
+                            'Instagram',
+                            'https://instagram.com/aleefy_app',
+                          ),
                           const SizedBox(width: 24),
-                          _buildSocialIcon(Icons.link, context),
+                          _buildSocialIcon(
+                            FontAwesomeIcons.linkedin,
+                            context,
+                            'LinkedIn',
+                            'https://www.linkedin.com/company/aleefy',
+                          ),
                         ],
                       ),
                     ],
@@ -312,7 +329,8 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     TextButton(
                       onPressed: () {
-                        // Navigate to privacy policy
+                        // Navigate to privacy policy in-app screen
+                        Navigator.pushNamed(context, '/privacy-policy');
                       },
                       child: Text(
                         localizations.privacyPolicy,
@@ -372,7 +390,7 @@ class ProfileScreen extends StatelessWidget {
                 color: AppColors.lightorange.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
+              child: FaIcon(
                 icon,
                 color: AppColors.orange,
                 size: 22,
@@ -389,8 +407,8 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const Icon(
-              Icons.arrow_forward_ios,
+            const FaIcon(
+              FontAwesomeIcons.chevronRight,
               size: 16,
               color: Colors.grey,
             ),
@@ -430,7 +448,7 @@ class ProfileScreen extends StatelessWidget {
                 color: AppColors.lightorange.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(
+              child: FaIcon(
                 icon,
                 color: AppColors.orange,
                 size: 22,
@@ -452,8 +470,8 @@ class ProfileScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
-              Icons.arrow_forward_ios,
+            const FaIcon(
+              FontAwesomeIcons.chevronRight,
               size: 16,
               color: Colors.grey,
             ),
@@ -464,17 +482,49 @@ class ProfileScreen extends StatelessWidget {
   }
 
   // Social icon widget
-  Widget _buildSocialIcon(IconData icon, BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppColors.lightorange.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Icon(
-        icon,
-        color: AppColors.orange,
-        size: 22,
+  Widget _buildSocialIcon(
+      IconData icon, BuildContext context, String label, String url) {
+    return InkWell(
+      onTap: () async {
+        try {
+          final Uri uri = Uri.parse(url);
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          } else {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Could not open $label'),
+                  duration: const Duration(seconds: 2),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          }
+        } catch (e) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error opening $label'),
+                duration: const Duration(seconds: 2),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: AppColors.lightorange.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: FaIcon(
+          icon,
+          color: AppColors.orange,
+          size: 22,
+        ),
       ),
     );
   }

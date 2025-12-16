@@ -4,7 +4,8 @@ import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:provider/provider.dart';
-import 'package:petapp/core/localization/app_localizations.dart'; // Add this import
+import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -25,7 +26,7 @@ class SettingsScreen extends StatelessWidget {
               color: AppColors.lightorange.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: FaIcon(
               icon,
               color: AppColors.orange,
               size: 22,
@@ -69,7 +70,7 @@ class SettingsScreen extends StatelessWidget {
             children: [
               // Theme Section
               _buildSectionHeader(
-                  context, localizations.appearance, Icons.palette_outlined),
+                  context, localizations.appearance, FontAwesomeIcons.palette),
               const SizedBox(height: 8),
               _buildThemeSettings(context, cardColor),
 
@@ -77,7 +78,7 @@ class SettingsScreen extends StatelessWidget {
 
               // Language Section
               _buildSectionHeader(
-                  context, localizations.language, Icons.language),
+                  context, localizations.language, FontAwesomeIcons.language),
               const SizedBox(height: 8),
               _buildLanguageSettings(context, cardColor),
 
@@ -85,7 +86,7 @@ class SettingsScreen extends StatelessWidget {
 
               // Notifications Section
               _buildSectionHeader(context, localizations.notifications,
-                  Icons.notifications_outlined),
+                  FontAwesomeIcons.bell),
               const SizedBox(height: 8),
               _buildNotificationSettings(context, cardColor),
 
@@ -93,7 +94,7 @@ class SettingsScreen extends StatelessWidget {
 
               // Privacy Section
               _buildSectionHeader(context, localizations.privacySecurity,
-                  Icons.security_outlined),
+                  FontAwesomeIcons.shield),
               const SizedBox(height: 8),
               _buildPrivacySettings(context, cardColor),
 
@@ -101,7 +102,7 @@ class SettingsScreen extends StatelessWidget {
 
               // About Section
               _buildSectionHeader(
-                  context, localizations.about, Icons.info_outline),
+                  context, localizations.about, FontAwesomeIcons.circleInfo),
               const SizedBox(height: 8),
               _buildAboutSettings(context, cardColor),
 
@@ -143,7 +144,7 @@ class SettingsScreen extends StatelessWidget {
                 settingsProvider.setThemeMode(value);
               }
             },
-            icon: Icons.light_mode_outlined,
+            icon: FontAwesomeIcons.sun,
           ),
           _buildDivider(),
           _buildRadioTile(
@@ -157,7 +158,7 @@ class SettingsScreen extends StatelessWidget {
                 settingsProvider.setThemeMode(value);
               }
             },
-            icon: Icons.dark_mode_outlined,
+            icon: FontAwesomeIcons.moon,
           ),
           _buildDivider(),
           _buildRadioTile(
@@ -171,7 +172,7 @@ class SettingsScreen extends StatelessWidget {
                 settingsProvider.setThemeMode(value);
               }
             },
-            icon: Icons.settings_suggest_outlined,
+            icon: FontAwesomeIcons.circleHalfStroke,
           ),
         ],
       ),
@@ -208,7 +209,7 @@ class SettingsScreen extends StatelessWidget {
                 settingsProvider.setLanguage(value);
               }
             },
-            icon: Icons.language,
+            icon: FontAwesomeIcons.a,
           ),
           _buildDivider(),
           _buildRadioTile(
@@ -222,7 +223,7 @@ class SettingsScreen extends StatelessWidget {
                 settingsProvider.setLanguage(value);
               }
             },
-            icon: Icons.language,
+            icon: FontAwesomeIcons.a,
           ),
         ],
       ),
@@ -262,7 +263,7 @@ class SettingsScreen extends StatelessWidget {
             onChanged: (value) {
               settingsProvider.setNotificationsEnabled(value);
             },
-            icon: Icons.notifications,
+            icon: FontAwesomeIcons.bell,
           ),
           _buildDivider(),
           _buildSwitchTile(
@@ -273,7 +274,7 @@ class SettingsScreen extends StatelessWidget {
             onChanged: (value) {
               settingsProvider.setEmailNotificationsEnabled(value);
             },
-            icon: Icons.email_outlined,
+            icon: FontAwesomeIcons.envelope,
           )
         ],
       ),
@@ -297,7 +298,7 @@ class SettingsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          
+
           _buildActionTile(
             context: context,
             title: localizations.deleteAccount,
@@ -306,7 +307,7 @@ class SettingsScreen extends StatelessWidget {
               // Show delete account confirmation
               _showDeleteAccountDialog(context);
             },
-            icon: Icons.delete_outline,
+            icon: FontAwesomeIcons.trashCan,
             isDestructive: true,
           ),
         ],
@@ -336,7 +337,7 @@ class SettingsScreen extends StatelessWidget {
             title: 'App Version',
             subtitle: 'v1.0.0',
             onTap: () {},
-            icon: Icons.info_outline,
+            icon: FontAwesomeIcons.circleInfo,
             showArrow: false,
           ),
           _buildDivider(),
@@ -347,7 +348,7 @@ class SettingsScreen extends StatelessWidget {
             onTap: () {
               // Navigate to support
             },
-            icon: Icons.support_agent_outlined,
+            icon: FontAwesomeIcons.headset,
           ),
           _buildDivider(),
           _buildActionTile(
@@ -357,7 +358,7 @@ class SettingsScreen extends StatelessWidget {
             onTap: () {
               // Open app store rating
             },
-            icon: Icons.star_border,
+            icon: FontAwesomeIcons.star,
           ),
         ],
       ),
@@ -395,7 +396,7 @@ class SettingsScreen extends StatelessWidget {
                   color: AppColors.lightorange.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: FaIcon(
                   icon,
                   color: AppColors.orange,
                   size: 22,
@@ -478,7 +479,7 @@ class SettingsScreen extends StatelessWidget {
               color: AppColors.lightorange.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: FaIcon(
               icon,
               color: AppColors.orange,
               size: 22,
@@ -553,7 +554,7 @@ class SettingsScreen extends StatelessWidget {
                       : AppColors.lightorange.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: FaIcon(
                   icon,
                   color: isDestructive ? Colors.red : AppColors.orange,
                   size: 22,

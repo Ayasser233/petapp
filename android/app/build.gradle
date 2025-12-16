@@ -7,6 +7,7 @@ plugins {
     id 'com.google.gms.google-services'
 }
 
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
@@ -17,22 +18,37 @@ if (localPropertiesFile.exists()) {
 
 def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
 if (flutterVersionCode == null) {
-    flutterVersionCode = "1"
+    flutterVersionCode = "3"  // Incremented from 2 to 3
 }
 
 def flutterVersionName = localProperties.getProperty("flutter.versionName")
 if (flutterVersionName == null) {
-    flutterVersionName = "1.0"
+    flutterVersionName = "1.0.2"  // Updated version name
+}
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 
 android {
-    namespace = "com.example.petapp"
-    compileSdk = 34  // Updated to latest stable version
+    namespace = "com.aleefy.petapp"
+    compileSdk = 35  // Updated to API level 35 for Google Play requirement
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21  // Updated to Java 21 LTS
         targetCompatibility = JavaVersion.VERSION_21  // Updated to Java 21 LTS
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
     }
     
     kotlinOptions {
@@ -41,11 +57,11 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.petapp"
+        applicationId = "com.aleefy.petapp"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion flutter.minSdkVersion  // Android 5.0 - widely supported
-        targetSdk = 34  // Updated target SDK
+        targetSdk = 35  // Updated to API level 35 for Google Play requirement (December 2025)
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
         
@@ -71,13 +87,15 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.debug
-            
-            // Add these optimizations for better release builds
-            minifyEnabled = false
-            shrinkResources = false
+            // Signing with release key
+            signingConfig signingConfigs.release
+
+            // Enable code shrinking, obfuscation, and optimization with R8
+            minifyEnabled true
+            shrinkResources true
+
+            // ProGuard rules files
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
             signingConfig = signingConfigs.debug
@@ -89,5 +107,11 @@ flutter {
     source = "../.."
 }
 
+dependencies {
 
+    // AndroidX Core
+    implementation 'androidx.core:core-ktx:1.12.0'
 
+    // MultiDex support
+    implementation 'androidx.multidex:multidex:2.0.1'
+}

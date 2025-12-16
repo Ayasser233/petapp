@@ -201,18 +201,23 @@ class VetExplorerController extends GetxController {
 
   /// Update regions list with Egypt's 28 governorates and parse clinic addresses
   void _updateRegions() {
-    // Start with Egypt's governorates
+    // Start with Egypt's governorates (only Cairo and Giza)
     final Map<String, Set<String>> governoratesCities = {};
 
-    // Initialize with Egypt's governorates and their cities using current locale
+    // Initialize with available governorates (Cairo and Giza) and their cities using current locale
     final isArabic = EgyptRegions.isArabic;
     final governoratesMap = isArabic ? EgyptRegions.governorates : EgyptRegions.governoratesEn;
+    final availableGovernorates = EgyptRegions.getAllGovernorates();
 
-    for (final entry in governoratesMap.entries) {
-      governoratesCities[entry.key] = entry.value.toSet();
+    // Only add Cairo and Giza
+    for (final governorate in availableGovernorates) {
+      if (governoratesMap.containsKey(governorate)) {
+        governoratesCities[governorate] = governoratesMap[governorate]!.toSet();
+      }
     }
 
     // Add additional cities from vet addresses if not already present
+    // Only add if the governorate is Cairo or Giza
     for (final vet in allVets) {
       final parsed = EgyptRegions.parseAddress(vet.location);
 
@@ -220,7 +225,7 @@ class VetExplorerController extends GetxController {
         final governorate = parsed['governorate'];
         final city = parsed['city'];
 
-        if (governorate != null) {
+        if (governorate != null && availableGovernorates.contains(governorate)) {
           if (!governoratesCities.containsKey(governorate)) {
             governoratesCities[governorate] = <String>{};
           }

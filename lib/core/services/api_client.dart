@@ -369,6 +369,23 @@ class ApiClient {
     }
   }
 
+  /// Save FCM notification token to the server
+  Future<Response> saveNotificationToken(String fcmToken) async {
+    try {
+      debugPrint('📱 Saving FCM token to server: ${fcmToken.substring(0, 20)}...');
+      final response = await _dio.patch(
+        ApiConstants.notificationTokenEndpoint,
+        data: {'token': fcmToken},
+      );
+      debugPrint('✅ FCM token saved successfully');
+      return response;
+    } catch (e) {
+      debugPrint('❌ Failed to save FCM token: $e');
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
   // Handle possible token in response
   Future<void> _handleTokenResponse(Response response) async {
     if (response.data is Map<String, dynamic>) {

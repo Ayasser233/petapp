@@ -32,6 +32,10 @@ import 'package:petapp/features/profile/screens/vouchers_screen.dart';
 import 'package:petapp/features/profile/screens/favorites_screen.dart';
 // Vaccination imports
 import 'package:petapp/features/vaccination/presentation/screens/select_pet_for_vaccination_screen.dart';
+// Notifications import
+import 'package:petapp/features/notifications/screens/notifications_screen.dart';
+// Privacy Policy import
+import 'package:petapp/features/settings/screens/privacy_policy_screen.dart';
 
 class AppRoutes {
   static const String onboarding = '/onboarding';
@@ -70,6 +74,10 @@ class AppRoutes {
   // Vaccination routes
   static const String selectPetForVaccination = '/select-pet-vaccination';
   static const String petVaccinationRecord = '/pet-vaccination-record';
+  // Notifications route
+  static const String notifications = '/notifications';
+  // Privacy Policy route
+  static const String privacyPolicy = '/privacy-policy';
 
   static List<GetPage> get getPages => [
         GetPage(name: networkSplash, page: () => const NetworkSplashScreen()),
@@ -172,6 +180,20 @@ class AppRoutes {
           transition: Transition.rightToLeft,
           transitionDuration: const Duration(milliseconds: 250),
           middlewares: [AuthMiddleware()],
+        ),
+        // Notifications route
+        GetPage(
+          name: notifications,
+          page: () => const NotificationsScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+        ),
+        // Privacy Policy route
+        GetPage(
+          name: privacyPolicy,
+          page: () => const PrivacyPolicyScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
         ),
       ];
 }
