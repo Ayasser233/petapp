@@ -28,35 +28,29 @@ class _ClinicHeaderState extends State<VetHeader> {
   }
 
   List<String> _getVetImages() {
-   // Priority 1: Check for 'images' array from API response
+    // Get the images array from the vet data
     final images = widget.vet['images'];
-
-    // Priority 2: Check for profileImage field from API
-    final profileImage = widget.vet['profileImage'];
 
     List<String> vetImages = [];
 
     // If images array exists and has items, use them
     if (images != null && images is List && images.isNotEmpty) {
-      // Filter out empty strings
-      vetImages = List<String>.from(images)
-          .where((img) => img.toString().trim().isNotEmpty)
+      // Convert all image paths to proper URLs
+      vetImages = images
+          .where((img) => img != null && img.toString().trim().isNotEmpty)
+          .map((img) => _convertImagePath(img.toString()))
           .toList();
-    }
-
-    // If we have a profileImage, add it to the list (prioritize it first)
-    if (profileImage != null && profileImage.toString().trim().isNotEmpty) {
-      final profileImageStr = profileImage.toString();
-
-      // Add profileImage at the beginning if not already in the list
-      if (!vetImages.contains(profileImageStr)) {
-        vetImages.insert(0, profileImageStr);
-      }
     }
 
     // If we have images now, return them
     if (vetImages.isNotEmpty) {
       return vetImages;
+    }
+
+    // Fallback: Check for profileImage field
+    final profileImage = widget.vet['profileImage'];
+    if (profileImage != null && profileImage.toString().trim().isNotEmpty) {
+      return [_convertImagePath(profileImage.toString())];
     }
 
     // Fallback: Check for any other single image field
@@ -65,7 +59,7 @@ class _ClinicHeaderState extends State<VetHeader> {
         widget.vet['photo']?.toString();
 
     if (singleImage != null && singleImage.trim().isNotEmpty) {
-      return [singleImage];
+      return [_convertImagePath(singleImage)];
     }
 
     // Default fallback images
@@ -76,6 +70,29 @@ class _ClinicHeaderState extends State<VetHeader> {
     ];
   }
 
+  /// Convert image path to full URL - matches VetModel logic
+  String _convertImagePath(String imagePath) {
+    // If already a full URL or asset path, return as is
+    if (imagePath.startsWith('http://') ||
+        imagePath.startsWith('https://') ||
+        imagePath.startsWith('assets/')) {
+      return imagePath;
+    }
+
+    // For paths like "users/abc.jpg" or "vets/abc.jpg"
+    // Images are served from MinIO storage
+    const minioBaseUrl = 'https://minio-api.aleefy-app.com/uploads';
+    String cleanPath = imagePath;
+
+    // Remove "uploads/" prefix if present (since we'll add it back)
+    if (cleanPath.startsWith('uploads/')) {
+      cleanPath = cleanPath.replaceFirst('uploads/', '');
+    }
+
+    // Build the URL with MinIO base URL
+    return '$minioBaseUrl/$cleanPath';
+  }
+
   Widget _buildImage(String imagePath) {
     // Check if it's a network URL or local asset
     final isNetworkImage = imagePath.startsWith('http://') ||
@@ -84,11 +101,16 @@ class _ClinicHeaderState extends State<VetHeader> {
 
 
     if (isNetworkImage) {
-      // Load network image
       return Image.network(
         imagePath,
         width: double.infinity,
         fit: BoxFit.cover,
+        // Add cache control headers
+        headers: const {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) {
             return child;

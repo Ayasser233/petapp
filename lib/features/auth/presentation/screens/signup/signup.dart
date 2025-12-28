@@ -15,12 +15,17 @@ import 'package:petapp/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/formatters.dart';
+import 'package:flutter/foundation.dart'; // added for defaultTargetPlatform
+import 'package:petapp/features/auth/presentation/screens/login/login.dart'; // to reuse SocialBtns & DividerForm
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bool isApplePlatform = defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
+
     return BlocProvider(
       create: (context) => sl<AuthCubit>(),
       child: Scaffold(
@@ -40,6 +45,12 @@ class SignUpScreen extends StatelessWidget {
                 const SizedBox(height: 32.0),
                 // Add your sign-up form here
                 const SignUpForm(),
+
+                // social buttons (conditionally hidden on Apple platforms)
+                const SizedBox(height: 16.0),
+                DividerForm(dividerText: AppLocalizations.of(context).orContinueWith),
+                const SizedBox(height: 12.0),
+                if (!isApplePlatform) const SocialBtns(),
 
                 const SizedBox(height: 16.0),
 
@@ -631,5 +642,3 @@ class SkipSignupButton extends StatelessWidget {
     );
   }
 }
-
-

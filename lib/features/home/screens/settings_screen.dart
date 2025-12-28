@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:petapp/core/providers/settings_provider.dart';
+import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
+import 'package:petapp/core/services/api_client.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:provider/provider.dart';
@@ -621,25 +624,142 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(localizations.deleteAccount),
-        content: Text(localizations.deleteAccountConfirmation),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.red,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Text(localizations.deleteAccount),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              localizations.deleteAccountConfirmation,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Colors.red, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      localizations.deleteAccountRecoveryNote,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.red.shade700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(localizations.cancel),
           ),
-          TextButton(
-            onPressed: () {
-              // Implement account deletion logic
+          ElevatedButton(
+            onPressed: () async {
               Navigator.of(context).pop();
+              await _deleteAccount(context);
             },
-            child: Text(
-              localizations.delete,
-              style: const TextStyle(color: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
             ),
+            child: Text(localizations.delete),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _deleteAccount(BuildContext context) async {
+    final localizations = AppLocalizations.of(context);
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.orange),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                localizations.deletingAccount,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final apiClient = Get.find<ApiClient>();
+      await apiClient.deleteAccount();
+
+      // Close loading dialog
+      if (context.mounted) Navigator.of(context).pop();
+
+      // Show success message
+      Get.snackbar(
+        localizations.success,
+        localizations.accountDeletedSuccessfully,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+        duration: const Duration(seconds: 3),
+      );
+
+      // Navigate to login screen
+      await Future.delayed(const Duration(milliseconds: 500));
+      Get.offAllNamed(AppRoutes.login);
+
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) Navigator.of(context).pop();
+
+      // Show error message
+      Get.snackbar(
+        localizations.error,
+        localizations.failedToDeleteAccount,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+        duration: const Duration(seconds: 3),
+      );
+    }
   }
 }

@@ -97,14 +97,14 @@ class ImageCacheService extends GetxService {
     debugPrint('📊 Image Cache Statistics:');
     debugPrint('   Current Size: $currentCacheSize images');
     debugPrint('   Maximum Size: $maximumCacheSize images');
-    debugPrint('   Current Size (Bytes): ${_formatBytes(currentCacheSizeBytes)}');
-    debugPrint('   Maximum Size (Bytes): ${_formatBytes(maximumCacheSizeBytes)}');
+    debugPrint('   Current Size (Bytes): ${formatBytes(currentCacheSizeBytes)}');
+    debugPrint('   Maximum Size (Bytes): ${formatBytes(maximumCacheSizeBytes)}');
     debugPrint('   Usage: ${cacheUsagePercentage.toStringAsFixed(1)}%');
     debugPrint('   Is Full: $isCacheFull');
   }
 
   /// Format bytes to human-readable format
-  String _formatBytes(int bytes) {
+  String formatBytes(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(2)} KB';
     if (bytes < 1024 * 1024 * 1024) {
@@ -125,7 +125,7 @@ class ImageCacheService extends GetxService {
 
     if (maximumSizeBytes != null) {
       imageCache.maximumSizeBytes = maximumSizeBytes;
-      debugPrint('📝 Image cache maximum size (bytes) set to: ${_formatBytes(maximumSizeBytes)}');
+      debugPrint('📝 Image cache maximum size (bytes) set to: ${formatBytes(maximumSizeBytes)}');
     }
   }
 }

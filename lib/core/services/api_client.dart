@@ -373,14 +373,34 @@ class ApiClient {
   Future<Response> saveNotificationToken(String fcmToken) async {
     try {
       debugPrint('📱 Saving FCM token to server: ${fcmToken.substring(0, 20)}...');
+      debugPrint('📤 Request body: {"notificationToken": "$fcmToken"}');
       final response = await _dio.patch(
         ApiConstants.notificationTokenEndpoint,
-        data: {'token': fcmToken},
+        data: {'notificationToken': fcmToken},
       );
       debugPrint('✅ FCM token saved successfully');
       return response;
     } catch (e) {
       debugPrint('❌ Failed to save FCM token: $e');
+      // Suppress user notification for FCM token errors - not critical
+      ErrorHandlerService.instance.handleError(e, suppressUserNotification: true);
+      rethrow;
+    }
+  }
+
+  /// Delete user account (soft delete)
+  Future<Response> deleteAccount() async {
+    try {
+      debugPrint('🗑️ Deleting user account (soft delete)...');
+      final response = await _dio.delete(ApiConstants.deleteAccountEndpoint);
+
+      // Clear all tokens after successful deletion
+      await tokenService.clearAllTokens();
+
+      debugPrint('✅ Account deleted successfully');
+      return response;
+    } catch (e) {
+      debugPrint('❌ Failed to delete account: $e');
       ErrorHandlerService.instance.handleError(e);
       rethrow;
     }

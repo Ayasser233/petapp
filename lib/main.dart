@@ -12,6 +12,7 @@ import 'package:petapp/core/services/api_client.dart';
 import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/core/services/connectivity_service.dart';
 import 'package:petapp/core/services/error_handler_service.dart';
+import 'package:petapp/core/services/image_cache_service.dart';
 import 'package:petapp/core/services/location_service.dart';
 import 'package:petapp/core/services/token_service.dart';
 import 'package:petapp/core/services/activity_lifecycle_manager.dart';
@@ -59,6 +60,9 @@ void main() async {
 Future<void> initServices() async {
   // Initialize ErrorHandlerService first
   Get.put(ErrorHandlerService());
+
+  // Initialize ImageCacheService
+  Get.put(ImageCacheService());
 
   // Initialize Activity Lifecycle Manager
   final lifecycleManager = Get.put(ActivityLifecycleManager());

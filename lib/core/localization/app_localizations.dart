@@ -176,6 +176,18 @@ class AppLocalizations {
   String get deleteYourAccountPermanently =>
       _localizedValues[locale.languageCode]?['deleteYourAccountPermanently'] ??
       'Delete Your Account Permanently';
+  String get deleteAccountRecoveryNote =>
+      _localizedValues[locale.languageCode]?['deleteAccountRecoveryNote'] ??
+      'This action can be reversed within 30 days by contacting support.';
+  String get deletingAccount =>
+      _localizedValues[locale.languageCode]?['deletingAccount'] ??
+      'Deleting your account...';
+  String get accountDeletedSuccessfully =>
+      _localizedValues[locale.languageCode]?['accountDeletedSuccessfully'] ??
+      'Your account has been deleted successfully';
+  String get failedToDeleteAccount =>
+      _localizedValues[locale.languageCode]?['failedToDeleteAccount'] ??
+      'Failed to delete account. Please try again.';
 
   // New translations for Vouchers Screen
   String get myVouchers =>
@@ -2298,6 +2310,12 @@ class AppLocalizations {
       'readOurPrivacyPolicy': 'Read Our Privacy Policy',
       'readOurTermsOfService': 'Read Our Terms of Service',
       'deleteYourAccountPermanently': 'Delete Your Account Permanently',
+      'deleteAccountRecoveryNote': 'This action can be reversed within 30 days by contacting support.',
+      'deletingAccount': 'Deleting your account...',
+      'accountDeletedSuccessfully': 'Your account has been deleted successfully',
+      'failedToDeleteAccount': 'Failed to delete account. Please try again.',
+      'success': 'Success',
+      'error': 'Error',
       'myVouchers': 'My Vouchers',
       'available': 'Available',
       'used': 'Used',
@@ -2686,8 +2704,6 @@ class AppLocalizations {
       'exploreMoreVets': 'Explore More Vets',
       'removedFromFavorites': 'removed from favorites',
       'loading': 'Loading...',
-      'error': 'Error',
-      'success': 'Success',
       'save': 'Save',
       'delete': 'Delete',
       'edit': 'Edit',
@@ -3910,6 +3926,10 @@ class AppLocalizations {
       'readOurPrivacyPolicy': 'اقرأ سياسة الخصوصية',
       'readOurTermsOfService': 'اقرأ شروط الخدمة',
       'deleteYourAccountPermanently': 'حذف حسابك نهائيا',
+      'deleteAccountRecoveryNote': 'يمكن التراجع عن هذا الإجراء خلال 30 يوماً عن طريق التواصل مع الدعم.',
+      'deletingAccount': 'جاري حذف حسابك...',
+      'accountDeletedSuccessfully': 'تم حذف حسابك بنجاح',
+      'failedToDeleteAccount': 'فشل حذف الحساب. يرجى المحاولة مرة أخرى.',
       'myVouchers': 'قسائمي',
       'available': 'متاحة',
       'used': 'مستخدمة',

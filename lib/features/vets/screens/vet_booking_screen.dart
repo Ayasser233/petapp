@@ -254,16 +254,12 @@ class VetBookingController extends GetxController {
               pointsDetails.value = details;
             }
 
-            pointsValidationMessage.value =
-                response['message']?.toString() ??
-                AppLocalizations.of(Get.context!).pointsValidatedSuccessfully;
+            pointsValidationMessage.value = AppLocalizations.of(Get.context!).pointsValidatedSuccessfully;
           } else {
             isPointsValid.value = false;
             pointsToRedeem.value = 0;
             pointsDiscountAmount.value = 0.0;
-            pointsValidationMessage.value =
-                response['message']?.toString() ??
-                AppLocalizations.of(Get.context!).invalidPointsAmount;
+            pointsValidationMessage.value = AppLocalizations.of(Get.context!).invalidPointsAmount;
           }
         },
       );
