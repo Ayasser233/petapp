@@ -705,10 +705,15 @@ class EgyptRegions {
   };
 
   /// Get all governorate names (uses current app locale by default)
+  /// Note: Only Cairo and Giza are available as our services are limited to these areas
   static List<String> getAllGovernorates({bool? arabic}) {
     final useArabic = arabic ?? isArabic;
-    final map = useArabic ? governorates : governoratesEn;
-    return map.keys.toList()..sort();
+    // Only return Cairo and Giza as our services are limited to these governorates
+    if (useArabic) {
+      return ['القاهرة', 'الجيزة'];
+    } else {
+      return ['Cairo', 'Giza'];
+    }
   }
 
   /// Get cities for a specific governorate (uses current app locale by default)

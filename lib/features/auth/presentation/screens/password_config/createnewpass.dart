@@ -175,7 +175,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => Get.back(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         elevation: 0,
         title: Text(

@@ -22,7 +22,7 @@ class VetBookingHeader extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       leading: IconButton(
         icon: Icon(Icons.arrow_back, color: textColor),
-        onPressed: () => Get.back(),
+        onPressed: () => Navigator.of(context).pop(),
       ),
       title: Text(
         AppLocalizations.of(context).bookVetVisit,

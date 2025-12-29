@@ -13,12 +13,17 @@ import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/core/services/token_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:flutter/foundation.dart'; // added for defaultTargetPlatform
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Detect Apple platforms (iOS / macOS) and hide social sign-in buttons there
+    final bool isApplePlatform = defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
+
     return BlocProvider(
       create: (context) => sl<AuthCubit>(),
       child: Scaffold(
@@ -43,7 +48,8 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 16.0),
                 // footer
                 // Google & Apple Sign In Buttons - Vertical
-                const SocialBtns(),
+                // On Apple platforms we hide/comment-out social sign-in buttons
+                if (!isApplePlatform) const SocialBtns(),
 
                 SignUpText(
                     text: AppLocalizations.of(context).dontHaveAccount,

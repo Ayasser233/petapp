@@ -1,4 +1,4 @@
-  import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/routes/routes.dart';
@@ -13,6 +13,7 @@ import 'package:petapp/core/widgets/rewards_card.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/features/vets/models/vet_model.dart';
 import 'package:petapp/features/vets/services/vet_service.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -137,13 +138,14 @@ class _HomeScreenState extends State<HomeScreen> {
                               AlwaysStoppedAnimation<Color>(AppColors.orange),
                         ),
                       )
-                    : Icon(
+                    : FaIcon(
                         _locationService.isPermissionGranted
-                            ? Icons.location_on
-                            : Icons.location_off,
+                            ? FontAwesomeIcons.locationDot
+                            : FontAwesomeIcons.locationCrosshairs,
                         color: _locationService.isPermissionGranted
                             ? AppColors.orange
                             : Colors.grey,
+                        size: 20,
                       ),
                 tooltip: _locationService.isPermissionGranted
                     ? localizations.refreshLocation
@@ -229,10 +231,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                 horizontal: 16, vertical: 14),
                             child: Row(
                               children: [
-                                Icon(
-                                  Icons.search,
+                                FaIcon(
+                                  FontAwesomeIcons.magnifyingGlass,
                                   color:
                                       isDark ? Colors.grey[400] : Colors.grey,
+                                  size: 18,
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
@@ -294,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                   child: Row(
                                     children: [
-                                      const Icon(Icons.error_outline,
+                                      const FaIcon(FontAwesomeIcons.triangleExclamation,
                                           color: Colors.red),
                                       const SizedBox(width: 12),
                                       Expanded(
@@ -412,8 +415,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: AppColors.orange.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.location_off,
+              child: const FaIcon(
+                FontAwesomeIcons.locationCrosshairs,
                 color: AppColors.orange,
                 size: 18,
               ),
@@ -474,8 +477,8 @@ class _HomeScreenState extends State<HomeScreen> {
               color: AppColors.orange.withValues(alpha: 0.2),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
-              Icons.location_on,
+            child: const FaIcon(
+              FontAwesomeIcons.locationDot,
               color: AppColors.orange,
               size: 18,
             ),
@@ -517,7 +520,7 @@ class _HomeScreenState extends State<HomeScreen> {
           else
             IconButton(
               onPressed: _handleRefresh,
-              icon: const Icon(Icons.refresh, size: 18),
+              icon: const FaIcon(FontAwesomeIcons.arrowsRotate, size: 18),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
               tooltip: localizations.refreshLocation,
@@ -573,8 +576,8 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.location_searching,
+          FaIcon(
+            FontAwesomeIcons.locationCrosshairs,
             size: 48,
             color: isDark ? Colors.grey[500] : Colors.grey[400],
           ),
@@ -728,8 +731,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
-                          Icons.star,
+                        const FaIcon(
+                          FontAwesomeIcons.star,
                           color: Colors.amber,
                           size: 14,
                         ),
@@ -790,8 +793,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Address/Location
                   Row(
                     children: [
-                      Icon(
-                        Icons.location_on,
+                      FaIcon(
+                        FontAwesomeIcons.locationDot,
                         size: 14,
                         color: isDark ? Colors.grey[400] : Colors.grey[600],
                       ),
@@ -856,8 +859,8 @@ class _HomeScreenState extends State<HomeScreen> {
             width: double.infinity,
             height: height,
             color: Colors.grey[300],
-            child: const Icon(
-              Icons.local_hospital,
+            child: const FaIcon(
+              FontAwesomeIcons.houseMedical,
               size: 40,
               color: Colors.grey,
             ),
@@ -875,8 +878,8 @@ class _HomeScreenState extends State<HomeScreen> {
             width: double.infinity,
             height: height,
             color: Colors.grey[300],
-            child: const Icon(
-              Icons.local_hospital,
+            child: const FaIcon(
+              FontAwesomeIcons.houseMedical,
               size: 40,
               color: Colors.grey,
             ),
@@ -894,18 +897,18 @@ class _HomeScreenState extends State<HomeScreen> {
       color: AppColors.orange.withValues(alpha: 0.1),
       child: Row(
         children: [
-          const Icon(
-            Icons.info_outline,
+          const FaIcon(
+            FontAwesomeIcons.circleInfo,
             color: AppColors.orange,
+            size: 20,
           ),
           const SizedBox(width: 10),
-          const Expanded(
+          Expanded(
             child: Text(
-              'You\'re browsing as a guest. Some features require login.',
-              style: TextStyle(
-                color: AppColors.orange,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+              AppLocalizations.of(context).guestBrowsingMessage,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.orange,
+                    fontWeight: FontWeight.normal,
               ),
             ),
           ),
@@ -920,12 +923,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(20),
               ),
             ),
-            child: const Text(
-              'Login',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Text(
+              AppLocalizations.of(context).login,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
+                  ),
             ),
           ),
         ],

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart' hide Trans;
 import 'package:petapp/core/providers/settings_provider.dart';
+import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
+import 'package:petapp/core/services/api_client.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:provider/provider.dart';
-import 'package:petapp/core/localization/app_localizations.dart'; // Add this import
+import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -25,7 +29,7 @@ class SettingsScreen extends StatelessWidget {
               color: AppColors.lightorange.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: FaIcon(
               icon,
               color: AppColors.orange,
               size: 22,
@@ -69,7 +73,7 @@ class SettingsScreen extends StatelessWidget {
             children: [
               // Theme Section
               _buildSectionHeader(
-                  context, localizations.appearance, Icons.palette_outlined),
+                  context, localizations.appearance, FontAwesomeIcons.palette),
               const SizedBox(height: 8),
               _buildThemeSettings(context, cardColor),
 
@@ -77,7 +81,7 @@ class SettingsScreen extends StatelessWidget {
 
               // Language Section
               _buildSectionHeader(
-                  context, localizations.language, Icons.language),
+                  context, localizations.language, FontAwesomeIcons.language),
               const SizedBox(height: 8),
               _buildLanguageSettings(context, cardColor),
 
@@ -85,7 +89,7 @@ class SettingsScreen extends StatelessWidget {
 
               // Notifications Section
               _buildSectionHeader(context, localizations.notifications,
-                  Icons.notifications_outlined),
+                  FontAwesomeIcons.bell),
               const SizedBox(height: 8),
               _buildNotificationSettings(context, cardColor),
 
@@ -93,7 +97,7 @@ class SettingsScreen extends StatelessWidget {
 
               // Privacy Section
               _buildSectionHeader(context, localizations.privacySecurity,
-                  Icons.security_outlined),
+                  FontAwesomeIcons.shield),
               const SizedBox(height: 8),
               _buildPrivacySettings(context, cardColor),
 
@@ -101,7 +105,7 @@ class SettingsScreen extends StatelessWidget {
 
               // About Section
               _buildSectionHeader(
-                  context, localizations.about, Icons.info_outline),
+                  context, localizations.about, FontAwesomeIcons.circleInfo),
               const SizedBox(height: 8),
               _buildAboutSettings(context, cardColor),
 
@@ -143,7 +147,7 @@ class SettingsScreen extends StatelessWidget {
                 settingsProvider.setThemeMode(value);
               }
             },
-            icon: Icons.light_mode_outlined,
+            icon: FontAwesomeIcons.sun,
           ),
           _buildDivider(),
           _buildRadioTile(
@@ -157,7 +161,7 @@ class SettingsScreen extends StatelessWidget {
                 settingsProvider.setThemeMode(value);
               }
             },
-            icon: Icons.dark_mode_outlined,
+            icon: FontAwesomeIcons.moon,
           ),
           _buildDivider(),
           _buildRadioTile(
@@ -171,7 +175,7 @@ class SettingsScreen extends StatelessWidget {
                 settingsProvider.setThemeMode(value);
               }
             },
-            icon: Icons.settings_suggest_outlined,
+            icon: FontAwesomeIcons.circleHalfStroke,
           ),
         ],
       ),
@@ -208,7 +212,7 @@ class SettingsScreen extends StatelessWidget {
                 settingsProvider.setLanguage(value);
               }
             },
-            icon: Icons.language,
+            icon: FontAwesomeIcons.a,
           ),
           _buildDivider(),
           _buildRadioTile(
@@ -222,7 +226,7 @@ class SettingsScreen extends StatelessWidget {
                 settingsProvider.setLanguage(value);
               }
             },
-            icon: Icons.language,
+            icon: FontAwesomeIcons.a,
           ),
         ],
       ),
@@ -262,7 +266,7 @@ class SettingsScreen extends StatelessWidget {
             onChanged: (value) {
               settingsProvider.setNotificationsEnabled(value);
             },
-            icon: Icons.notifications,
+            icon: FontAwesomeIcons.bell,
           ),
           _buildDivider(),
           _buildSwitchTile(
@@ -273,7 +277,7 @@ class SettingsScreen extends StatelessWidget {
             onChanged: (value) {
               settingsProvider.setEmailNotificationsEnabled(value);
             },
-            icon: Icons.email_outlined,
+            icon: FontAwesomeIcons.envelope,
           )
         ],
       ),
@@ -297,7 +301,7 @@ class SettingsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          
+
           _buildActionTile(
             context: context,
             title: localizations.deleteAccount,
@@ -306,7 +310,7 @@ class SettingsScreen extends StatelessWidget {
               // Show delete account confirmation
               _showDeleteAccountDialog(context);
             },
-            icon: Icons.delete_outline,
+            icon: FontAwesomeIcons.trashCan,
             isDestructive: true,
           ),
         ],
@@ -336,7 +340,7 @@ class SettingsScreen extends StatelessWidget {
             title: 'App Version',
             subtitle: 'v1.0.0',
             onTap: () {},
-            icon: Icons.info_outline,
+            icon: FontAwesomeIcons.circleInfo,
             showArrow: false,
           ),
           _buildDivider(),
@@ -347,7 +351,7 @@ class SettingsScreen extends StatelessWidget {
             onTap: () {
               // Navigate to support
             },
-            icon: Icons.support_agent_outlined,
+            icon: FontAwesomeIcons.headset,
           ),
           _buildDivider(),
           _buildActionTile(
@@ -357,7 +361,7 @@ class SettingsScreen extends StatelessWidget {
             onTap: () {
               // Open app store rating
             },
-            icon: Icons.star_border,
+            icon: FontAwesomeIcons.star,
           ),
         ],
       ),
@@ -395,7 +399,7 @@ class SettingsScreen extends StatelessWidget {
                   color: AppColors.lightorange.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: FaIcon(
                   icon,
                   color: AppColors.orange,
                   size: 22,
@@ -478,7 +482,7 @@ class SettingsScreen extends StatelessWidget {
               color: AppColors.lightorange.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: FaIcon(
               icon,
               color: AppColors.orange,
               size: 22,
@@ -553,7 +557,7 @@ class SettingsScreen extends StatelessWidget {
                       : AppColors.lightorange.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: FaIcon(
                   icon,
                   color: isDestructive ? Colors.red : AppColors.orange,
                   size: 22,
@@ -620,25 +624,142 @@ class SettingsScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(localizations.deleteAccount),
-        content: Text(localizations.deleteAccountConfirmation),
+        title: Row(
+          children: [
+            const Icon(
+              Icons.warning_amber_rounded,
+              color: Colors.red,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Text(localizations.deleteAccount),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              localizations.deleteAccountConfirmation,
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline, color: Colors.red, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      localizations.deleteAccountRecoveryNote,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.red.shade700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: Text(localizations.cancel),
           ),
-          TextButton(
-            onPressed: () {
-              // Implement account deletion logic
+          ElevatedButton(
+            onPressed: () async {
               Navigator.of(context).pop();
+              await _deleteAccount(context);
             },
-            child: Text(
-              localizations.delete,
-              style: const TextStyle(color: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
             ),
+            child: Text(localizations.delete),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _deleteAccount(BuildContext context) async {
+    final localizations = AppLocalizations.of(context);
+
+    // Show loading dialog
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => PopScope(
+        canPop: false,
+        child: AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.orange),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                localizations.deletingAccount,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black87,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    try {
+      final apiClient = Get.find<ApiClient>();
+      await apiClient.deleteAccount();
+
+      // Close loading dialog
+      if (context.mounted) Navigator.of(context).pop();
+
+      // Show success message
+      Get.snackbar(
+        localizations.success,
+        localizations.accountDeletedSuccessfully,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+        duration: const Duration(seconds: 3),
+      );
+
+      // Navigate to login screen
+      await Future.delayed(const Duration(milliseconds: 500));
+      Get.offAllNamed(AppRoutes.login);
+
+    } catch (e) {
+      // Close loading dialog
+      if (context.mounted) Navigator.of(context).pop();
+
+      // Show error message
+      Get.snackbar(
+        localizations.error,
+        localizations.failedToDeleteAccount,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+        margin: const EdgeInsets.all(16),
+        borderRadius: 12,
+        duration: const Duration(seconds: 3),
+      );
+    }
   }
 }

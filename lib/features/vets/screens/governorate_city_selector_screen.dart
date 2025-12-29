@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
@@ -49,7 +48,7 @@ class _GovernorateCitySelectorScreenState
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: textColor),
-          onPressed: () => Get.back(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
           AppLocalizations.of(context).selectLocation,
@@ -376,8 +375,8 @@ class _CitySelectorScreenState extends State<CitySelectorScreen> {
     return InkWell(
       onTap: () {
         // Return the governorate as the selection
-        Get.back(); // Close city selector
-        Get.back(result: widget.governorate); // Return to filter with result
+        Navigator.of(context).pop(); // Close city selector
+        Navigator.of(context).pop(widget.governorate); // Return to filter with result
       },
       borderRadius: BorderRadius.circular(12),
       child: Container(
@@ -457,8 +456,8 @@ class _CitySelectorScreenState extends State<CitySelectorScreen> {
       child: ListTile(
         onTap: () {
           // Return the city as the selection
-          Get.back(); // Close city selector
-          Get.back(result: city); // Return to filter with result
+          Navigator.of(context).pop(); // Close city selector
+          Navigator.of(context).pop(city); // Return to filter with result
         },
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,

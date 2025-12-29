@@ -5,6 +5,7 @@ import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CommonBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -47,9 +48,9 @@ class CommonBottomNavBar extends StatelessWidget {
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
           unselectedLabelStyle: const TextStyle(fontSize: 11),
           items: [
-            _buildNavItem(Icons.home_outlined, Icons.home, localizations.home, 0),
+            _buildNavItem(FontAwesomeIcons.house, FontAwesomeIcons.house, localizations.home, 0),
             _buildCenterNavItem(localizations.myActivity, 1),
-            _buildNavItem(Icons.person_outline, Icons.person, localizations.profile, 2),
+            _buildNavItem(FontAwesomeIcons.user, FontAwesomeIcons.solidUser, localizations.profile, 2),
           ],
           onTap: (index) {
             if (index == currentIndex) return;
@@ -83,7 +84,10 @@ class CommonBottomNavBar extends StatelessWidget {
           color: currentIndex == index ? AppColors.lightorange.withValues(alpha: 0.3) : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(currentIndex == index ? activeIcon : inactiveIcon),
+        child: FaIcon(
+          currentIndex == index ? activeIcon : inactiveIcon,
+          size: 20,
+        ),
       ),
       label: label,
     );

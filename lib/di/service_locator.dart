@@ -5,6 +5,7 @@ import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/core/services/connectivity_service.dart';
 import 'package:petapp/core/services/token_service.dart';
 import 'package:petapp/core/services/points_service.dart';
+import 'package:petapp/core/services/notification_service.dart';
 import 'package:petapp/features/auth/data/repositories/auth_repository.dart';
 import 'package:petapp/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:flutter/material.dart';
@@ -69,6 +70,12 @@ Future<void> setupServiceLocator() async {
         errorHandler: sl(),
         tokenService: sl(),
         connectivityService: sl(),
+      ));
+
+  // Notification Service
+  sl.registerLazySingleton(() => NotificationService(
+        apiClient: sl(),
+        authService: sl(),
       ));
 
   // Repositories

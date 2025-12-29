@@ -308,6 +308,12 @@ class _VetCardState extends State<VetCard> {
                   width: double.infinity,
                   height: widget.compact ? 120 : 150,
                   fit: BoxFit.cover,
+                  // Add cache control headers
+                  headers: const {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache',
+                    'Expires': '0',
+                  },
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Container(

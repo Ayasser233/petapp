@@ -75,6 +75,9 @@ class AuthService extends GetxService {
   // Set authenticated state
   void setAuthenticated() {
     _authStatus.value = AuthStatus.authenticated;
+
+    // Trigger FCM token sync after authentication
+    _syncFCMToken();
   }
 
   // Set unauthenticated state (automatic logout handled by listener)
@@ -153,6 +156,18 @@ class AuthService extends GetxService {
         }
       }
 
+      // Delete FCM token
+      try {
+        if (Get.isRegistered<dynamic>(tag: 'NotificationService')) {
+          final notificationService = Get.find(tag: 'NotificationService');
+          if (notificationService != null) {
+            await (notificationService as dynamic).deleteToken();
+          }
+        }
+      } catch (e) {
+        debugPrint('⚠️ Could not delete FCM token: $e');
+      }
+
       // Clear all tokens and local data
       await _tokenService
           .clearAllTokens(); // Clear both access and refresh tokens
@@ -205,5 +220,24 @@ class AuthService extends GetxService {
           ),
         ) ??
         false;
+  }
+
+  // Helper method to sync FCM token with server after login
+  void _syncFCMToken() {
+    // Use a delayed call to avoid circular dependencies
+    Future.delayed(const Duration(milliseconds: 500), () {
+      try {
+        // Try to get NotificationService if it's registered
+        if (Get.isRegistered<dynamic>(tag: 'NotificationService')) {
+          final notificationService = Get.find(tag: 'NotificationService');
+          if (notificationService != null) {
+            (notificationService as dynamic).syncTokenWithServer();
+          }
+        }
+      } catch (e) {
+        // NotificationService might not be initialized yet, ignore
+        debugPrint('⚠️ Could not sync FCM token: $e');
+      }
+    });
   }
 }

@@ -49,6 +49,13 @@ class ErrorHandlerService extends GetxService {
     if (error is DioException) {
       final url = error.requestOptions.uri.toString().toLowerCase();
 
+      // Suppress FCM token errors - not critical for user experience
+      if (url.contains('/notifications/token') ||
+          url.contains('/notification-token') ||
+          url.contains('notification') && url.contains('token')) {
+        return true;
+      }
+
       // Suppress species-related errors
       if (url.contains('species') || url.contains('/pets/species')) {
         return true;
@@ -96,6 +103,18 @@ class ErrorHandlerService extends GetxService {
     }
 
     final data = error.response!.data;
+
+    // Handle HTML responses (like Cloudflare error pages)
+    if (data is String) {
+      // Check if it's HTML content
+      if (data.trim().toLowerCase().startsWith('<!doctype html') ||
+          data.trim().toLowerCase().startsWith('<html')) {
+        // Don't show HTML content - use default message
+        return _getDefaultServerMessage(error.response?.statusCode);
+      }
+      // For non-HTML strings, return as is
+      return data;
+    }
 
     // Handle different JSON structures
     if (data is Map<String, dynamic>) {
@@ -152,11 +171,6 @@ class ErrorHandlerService extends GetxService {
           return errors.first.toString();
         }
       }
-    }
-
-    // Handle string response
-    if (data is String) {
-      return data;
     }
 
     // Only use default message if no server message found
@@ -275,24 +289,34 @@ class ErrorHandlerService extends GetxService {
 
   /// Show error snackbar
   void _showErrorSnackbar(String title, String message, Color color) {
-    Get.snackbar(
-      title,
-      message,
-      snackPosition: SnackPosition.BOTTOM, // Changed from TOP
-      backgroundColor: color,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 4),
-      margin:
-          const EdgeInsets.only(left: 16, right: 16, bottom: 16), // Bottom only
-      borderRadius: 12,
-      isDismissible: true,
-      dismissDirection: DismissDirection.down,
-      icon: const Icon(
-        Icons.error_outline,
-        color: Colors.white,
-        size: 28,
-      ),
-    );
+    // Check if GetX context is available before showing snackbar
+    if (Get.context == null) {
+      debugPrint('⚠️ Cannot show snackbar: GetX context not available yet');
+      return;
+    }
+
+    try {
+      Get.snackbar(
+        title,
+        message,
+        snackPosition: SnackPosition.BOTTOM, // Changed from TOP
+        backgroundColor: color,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 4),
+        margin:
+            const EdgeInsets.only(left: 16, right: 16, bottom: 16), // Bottom only
+        borderRadius: 12,
+        isDismissible: true,
+        dismissDirection: DismissDirection.down,
+        icon: const Icon(
+          Icons.error_outline,
+          color: Colors.white,
+          size: 28,
+        ),
+      );
+    } catch (e) {
+      debugPrint('⚠️ Failed to show error snackbar: $e');
+    }
   }
 
   /// Log error for debugging

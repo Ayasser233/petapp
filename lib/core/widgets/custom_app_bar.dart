@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
-import 'package:petapp/core/utils/app_colors.dart';
+// import 'package:get/get.dart'; // Commented out - only needed for notifications
+// import 'package:font_awesome_flutter/font_awesome_flutter.dart'; // Commented out - only needed for notifications
+// import 'package:petapp/core/utils/app_colors.dart'; // Commented out - only needed for notifications
 import 'package:petapp/core/utils/constants.dart';
+// import 'package:petapp/features/notifications/controllers/notification_controller.dart'; // Commented out - only needed for notifications
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String? title;
   final bool showLogo;
   final bool isDark;
+  final List<Widget>? actions;
 
   const CustomAppBar({
     super.key,
     this.title,
     this.showLogo = false,
-    required this.isDark, required List<Obx> actions,
+    required this.isDark,
+    this.actions,
   });
 
   @override
@@ -45,21 +49,75 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                           color: isDark ? Colors.white : Colors.black87,
                         ),
                   ),
-            // Notification icon
-            Container(
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.lightblack : Colors.grey[100],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: IconButton(
-                icon: Icon(
-                  Icons.notifications_outlined,
-                  color: isDark ? AppColors.orange : Colors.grey[700],
-                ),
-                onPressed: () {
-                  // Handle notification tap
-                },
-              ),
+            // Actions and notification icon
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Custom actions
+                if (actions != null) ...actions!,
+                // if (actions != null) const SizedBox(width: 8),
+                // Notification icon - COMMENTED OUT
+                // GetX<NotificationController>(
+                //   init: NotificationController(),
+                //   builder: (controller) {
+                //     return Stack(
+                //       clipBehavior: Clip.none,
+                //       children: [
+                //         Container(
+                //           decoration: BoxDecoration(
+                //             color: isDark ? AppColors.lightblack : Colors.grey[100],
+                //             borderRadius: BorderRadius.circular(12),
+                //           ),
+                //           child: IconButton(
+                //             icon: FaIcon(
+                //               FontAwesomeIcons.bell,
+                //               color: isDark ? AppColors.orange : AppColors.orange,
+                //               size: 24,
+                //             ),
+                //             onPressed: () {
+                //               Get.toNamed('/notifications');
+                //             },
+                //           ),
+                //         ),
+                //         // Unread badge
+                //         if (controller.unreadCount.value > 0)
+                //           Positioned(
+                //             right: 6,
+                //             top: 6,
+                //             child: Container(
+                //               padding: const EdgeInsets.all(4),
+                //               decoration: BoxDecoration(
+                //                 color: Colors.red,
+                //                 shape: BoxShape.circle,
+                //                 border: Border.all(
+                //                   color: isDark ? Colors.black : Colors.white,
+                //                   width: 2,
+                //                 ),
+                //               ),
+                //               constraints: const BoxConstraints(
+                //                 minWidth: 20,
+                //                 minHeight: 20,
+                //               ),
+                //               child: Center(
+                //                 child: Text(
+                //                   controller.unreadCount.value > 9
+                //                       ? '9+'
+                //                       : '${controller.unreadCount.value}',
+                //                   style: const TextStyle(
+                //                     color: Colors.white,
+                //                     fontSize: 10,
+                //                     fontWeight: FontWeight.bold,
+                //                   ),
+                //                   textAlign: TextAlign.center,
+                //                 ),
+                //               ),
+                //             ),
+                //           ),
+                //       ],
+                //     );
+                //   },
+                // ),
+              ],
             ),
           ],
         ),

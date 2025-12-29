@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
@@ -13,10 +12,12 @@ import 'package:petapp/core/services/api_client.dart';
 import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/core/services/connectivity_service.dart';
 import 'package:petapp/core/services/error_handler_service.dart';
+import 'package:petapp/core/services/image_cache_service.dart';
 import 'package:petapp/core/services/location_service.dart';
 import 'package:petapp/core/services/token_service.dart';
 import 'package:petapp/core/services/activity_lifecycle_manager.dart';
 import 'package:petapp/core/services/app_lifecycle_actions.dart';
+import 'package:petapp/core/services/notification_service.dart';
 import 'package:petapp/core/themes/app_theme.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
@@ -31,31 +32,11 @@ Future<void> resetAppState() async {
   await prefs.setBool('isOnboardingCompleted', false);
 }
 
-Future<void> setupPushNotifications() async {
-  FirebaseMessaging messaging = FirebaseMessaging.instance;
-
-  // Ask for permission (especially on iOS)
-  NotificationSettings settings = await messaging.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
-
-  print('User granted permission: ${settings.authorizationStatus}');
-
-  // Get the FCM token for this device
-  String? token = await messaging.getAPNSToken();
-  print("FCM Token: $token");
-
-  // You can send this token to your backend to store it per user
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await resetAppState();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  await setupPushNotifications();
 
   // Initialize dependencies
   await setupServiceLocator();
@@ -80,6 +61,9 @@ Future<void> initServices() async {
   // Initialize ErrorHandlerService first
   Get.put(ErrorHandlerService());
 
+  // Initialize ImageCacheService
+  Get.put(ImageCacheService());
+
   // Initialize Activity Lifecycle Manager
   final lifecycleManager = Get.put(ActivityLifecycleManager());
   // onInit() is called automatically by GetX, no need to await it
@@ -96,6 +80,9 @@ Future<void> initServices() async {
 
   // Initialize AuthService
   await Get.putAsync(() async => await sl<AuthService>().init());
+
+  // Initialize NotificationService
+  await Get.putAsync(() async => await sl<NotificationService>().init());
 
   // Initialize App Lifecycle Actions
   final authService = Get.find<AuthService>();

@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:1017624066475:android:76f598d7c3f872e63a3aee",
         "android_client_info": {
-          "package_name": "com.example.petapp.dev"
+          "package_name": "com.aleefy.petapp.dev"
         }
       },
       "oauth_client": [],
@@ -28,7 +28,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:1017624066475:android:76f598d7c3f872e63a3aee",
         "android_client_info": {
-          "package_name": "com.example.petapp"
+          "package_name": "com.aleefy.petapp"
         }
       },
       "oauth_client": [],
