@@ -60,11 +60,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyArhEZ0V5bP4CwniZtFrc-ddboKl2fOdPs',
-    appId: '1:1017624066475:ios:d1d8fa8ffe39ee563a3aee',
+    appId: '1:1017624066475:ios:93e9f607e0b8f3923a3aee',
     messagingSenderId: '1017624066475',
     projectId: 'aleefyapp-bb4fd',
     storageBucket: 'aleefyapp-bb4fd.firebasestorage.app',
-    iosBundleId: 'com.example.petapp',
+    iosBundleId: 'com.aleefy.petapp',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(

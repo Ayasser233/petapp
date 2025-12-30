@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:petapp/core/utils/app_colors.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:petapp/core/utils/app_colors.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class PrivacyPolicyScreen extends StatefulWidget {
   const PrivacyPolicyScreen({super.key});
@@ -38,7 +37,8 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
         ),
       )
       ..loadRequest(
-        Uri.parse('https://ayasser233.github.io/privacy-policy/privacy-policy.html'),
+        Uri.parse(
+            'https://ayasser233.github.io/privacy-policy/privacy-policy.html'),
       );
   }
 
@@ -64,7 +64,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: isDark ? Colors.white : Colors.black87,
-          ),
+              ),
         ),
         actions: [
           IconButton(
@@ -93,4 +93,3 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
     );
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
@@ -36,7 +37,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await resetAppState();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
+  await FirebaseMessaging.instance
+      .getAPNSToken()
+      .then(
+        (value) => print("FCM: $value"),
+      )
+      .catchError((e) => print("FCM error $e"));
 
   // Initialize dependencies
   await setupServiceLocator();

@@ -5,11 +5,34 @@
 		<!-- Location permissions -->
 		<key>NSLocationWhenInUseUsageDescription</key>
 		<string>Aleefy App needs access to your location to find nearby veterinary clinics and provide personalized services.</string>
+		<key>NSLocationAlwaysUsageDescription</key>
+		<string>Aleefy App needs access to your location to find nearby veterinary clinics and provide personalized services.</string>
 		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+		<string>Aleefy App needs access to your location to find nearby veterinary clinics and provide personalized services.</string>
+		<key>NSLocationUsageDescription</key>
 		<string>Aleefy App needs access to your location to find nearby veterinary clinics and provide personalized services.</string>
 		<!-- Camera permission for QR code scanning -->
 		<key>NSCameraUsageDescription</key>
 		<string>Aleefy App needs access to your camera to scan QR codes for completing appointments.</string>
+		<!-- Notifications -->
+		<key>UIBackgroundModes</key>
+		<array>
+   			 <string>fetch</string>
+    		<string>remote-notification</string>
+		</array>
+		<!-- Url Lancher -->
+		<key>LSApplicationQueriesSchemes</key>
+		<array>
+			<string>https</string>
+			<string>sms</string>
+			<string>tel</string>
+		</array>
+		<!-- Image picker -->
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>Aleefy media library used to upload and download attachments</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Aleefy media library used to upload and download attachments</string>
+		<!--  -->
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
