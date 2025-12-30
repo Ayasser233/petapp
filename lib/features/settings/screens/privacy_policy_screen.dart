@@ -38,7 +38,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
         ),
       )
       ..loadRequest(
-        Uri.parse('https://ayasser233.github.io/privacy-policy/privacy-policy.html'),
+        Uri.parse('https://ayasser233.github.io/privacy-policy/index.html'),
       );
   }
 
