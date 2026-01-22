@@ -34,7 +34,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.aleefy.petapp"
-    compileSdk = 35  // Updated to API level 35 for Google Play requirement
+    compileSdk = 36  // Updated to API level 35 for Google Play requirement
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

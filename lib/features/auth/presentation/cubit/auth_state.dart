@@ -123,6 +123,20 @@ class AuthGoogleLoginSuccess extends AuthState {
   List<Object?> get props => [accessToken, user];
 }
 
+// Apple login was successful
+class AuthAppleLoginSuccess extends AuthState {
+  final String accessToken;
+  final UserModel user;
+
+  const AuthAppleLoginSuccess({
+    required this.accessToken,
+    required this.user,
+  });
+
+  @override
+  List<Object?> get props => [accessToken, user];
+}
+
 // Logout was successful
 class AuthLogoutSuccess extends AuthState {}
 

@@ -23,9 +23,6 @@ class SignUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isApplePlatform = defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS;
-
     return BlocProvider(
       create: (context) => sl<AuthCubit>(),
       child: Scaffold(
@@ -46,11 +43,11 @@ class SignUpScreen extends StatelessWidget {
                 // Add your sign-up form here
                 const SignUpForm(),
 
-                // social buttons (conditionally hidden on Apple platforms)
+                // social buttons
                 const SizedBox(height: 16.0),
                 DividerForm(dividerText: AppLocalizations.of(context).orContinueWith),
                 const SizedBox(height: 12.0),
-                if (!isApplePlatform) const SocialBtns(),
+                const SocialBtns(),
 
                 const SizedBox(height: 16.0),
 

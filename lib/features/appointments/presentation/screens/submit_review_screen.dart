@@ -228,6 +228,8 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
   }
 
   Widget _buildCommentSection() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -243,24 +245,35 @@ class _SubmitReviewScreenState extends State<SubmitReviewScreen> {
           enabled: !_isSubmitting,
           maxLines: 6,
           maxLength: 500,
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+          ),
           decoration: InputDecoration(
             hintText: AppLocalizations.of(context).tellUsAboutExperience,
-            hintStyle: TextStyle(color: Colors.grey[400]),
+            hintStyle: TextStyle(
+              color: isDark ? Colors.grey[500] : Colors.grey[400],
+            ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: BorderSide(
+                color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+              ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey[300]!),
+              borderSide: BorderSide(
+                color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: AppColors.orange, width: 2),
             ),
             filled: true,
-            fillColor: Colors.grey[50],
-            counterStyle: TextStyle(color: Colors.grey[600]),
+            fillColor: isDark ? Colors.grey[850] : Colors.grey[50],
+            counterStyle: TextStyle(
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
+            ),
           ),
         ),
       ],
