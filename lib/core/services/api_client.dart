@@ -358,12 +358,41 @@ class ApiClient {
     }
   }
 
-  Future<Response> googleLogin() async {
+  Future<Response> googleLogin(String idToken) async {
     try {
-      final response = await _dio.post(ApiConstants.googleLoginEndpoint);
+      debugPrint('🔐 Attempting Google login with token...');
+      final response = await _dio.post(
+        ApiConstants.googleLoginEndpoint,
+        data: {'idToken': idToken},
+      );
+      debugPrint('✅ Google login successful');
       await _handleTokenResponse(response);
       return response;
     } catch (e) {
+      debugPrint('❌ Google login failed: $e');
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> appleLogin(String identityToken, {String? authorizationCode}) async {
+    try {
+      debugPrint('🍎 Attempting Apple login with token...');
+      final data = {
+        'identityToken': identityToken,
+      };
+      if (authorizationCode != null) {
+        data['authorizationCode'] = authorizationCode;
+      }
+      final response = await _dio.post(
+        ApiConstants.appleLoginEndpoint,
+        data: data,
+      );
+      debugPrint('✅ Apple login successful');
+      await _handleTokenResponse(response);
+      return response;
+    } catch (e) {
+      debugPrint('❌ Apple login failed: $e');
       ErrorHandlerService.instance.handleError(e);
       rethrow;
     }

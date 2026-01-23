@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:petapp/core/services/auth_service.dart';
+import 'package:petapp/core/services/social_auth_service.dart';
 import 'package:petapp/core/styles/input_styles.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
@@ -20,10 +21,6 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Detect Apple platforms (iOS / macOS) and hide social sign-in buttons there
-    final bool isApplePlatform = defaultTargetPlatform == TargetPlatform.iOS ||
-        defaultTargetPlatform == TargetPlatform.macOS;
-
     return BlocProvider(
       create: (context) => sl<AuthCubit>(),
       child: Scaffold(
@@ -48,8 +45,7 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 16.0),
                 // footer
                 // Google & Apple Sign In Buttons - Vertical
-                // On Apple platforms we hide/comment-out social sign-in buttons
-                if (!isApplePlatform) const SocialBtns(),
+                const SocialBtns(),
 
                 SignUpText(
                     text: AppLocalizations.of(context).dontHaveAccount,
@@ -136,6 +132,69 @@ class SkipLoginButton extends StatelessWidget {
 class SocialBtns extends StatelessWidget {
   const SocialBtns({super.key});
 
+  Future<void> _handleGoogleSignIn(BuildContext context) async {
+    try {
+      final socialAuthService = SocialAuthService();
+      
+      // Get the Google ID token
+      final idToken = await socialAuthService.signInWithGoogle();
+      
+      if (idToken == null) {
+        // User cancelled the sign-in
+        return;
+      }
+
+      // Call the AuthCubit with the token
+      if (context.mounted) {
+        context.read<AuthCubit>().googleLogin(idToken);
+      }
+    } catch (e) {
+      debugPrint('❌ Google Sign-In error: $e');
+      if (context.mounted) {
+        Get.snackbar(
+          AppLocalizations.of(context).error,
+          'Failed to sign in with Google. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withValues(alpha: 0.1),
+          colorText: Colors.red,
+        );
+      }
+    }
+  }
+
+  Future<void> _handleAppleSignIn(BuildContext context) async {
+    try {
+      final socialAuthService = SocialAuthService();
+      
+      // Get the Apple credentials
+      final credentials = await socialAuthService.signInWithApple();
+      
+      if (credentials == null || credentials['identityToken']?.isEmpty == true) {
+        // User cancelled or failed
+        return;
+      }
+
+      // Call the AuthCubit with the credentials
+      if (context.mounted) {
+        context.read<AuthCubit>().appleLogin(
+          credentials['identityToken']!,
+          authorizationCode: credentials['authorizationCode'],
+        );
+      }
+    } catch (e) {
+      debugPrint('❌ Apple Sign-In error: $e');
+      if (context.mounted) {
+        Get.snackbar(
+          AppLocalizations.of(context).error,
+          'Failed to sign in with Apple. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withValues(alpha: 0.1),
+          colorText: Colors.red,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -143,10 +202,7 @@ class SocialBtns extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: () {
-              // Handle Google Sign-in using the AuthCubit
-              context.read<AuthCubit>().googleLogin();
-            },
+            onPressed: () => _handleGoogleSignIn(context),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14.0),
               shape: RoundedRectangleBorder(
@@ -171,10 +227,7 @@ class SocialBtns extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: () {
-              // Handle Apple Sign-in using the AuthCubit
-              // context.read<AuthCubit>().signInWithApple();
-            },
+            onPressed: () => _handleAppleSignIn(context),
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14.0),
               shape: RoundedRectangleBorder(
@@ -370,6 +423,26 @@ class _LoginFormState extends State<LoginForm> {
           Get.toNamed(AppRoutes.verifyEmail, arguments: state.email);
         } else if (state is AuthGoogleLoginSuccess) {
           // Handle Google login success
+          final tokenService = Get.find<TokenService>();
+          final authService = Get.find<AuthService>();
+
+          // Save token and mark as authenticated
+          await tokenService.saveToken(state.accessToken);
+
+          // Set authenticated status
+          authService.setAuthenticated();
+
+          // Clear guest mode if it was set
+          await authService.clearGuestMode();
+
+          // Set login flag
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+
+          // Navigate to home
+          Get.offAllNamed(AppRoutes.home);
+        } else if (state is AuthAppleLoginSuccess) {
+          // Handle Apple login success
           final tokenService = Get.find<TokenService>();
           final authService = Get.find<AuthService>();
 

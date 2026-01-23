@@ -1203,6 +1203,14 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['finalPrice'] ?? 'Final Price';
   String get pts =>
       _localizedValues[locale.languageCode]?['pts'] ?? 'pts';
+  String get totalSavings =>
+      _localizedValues[locale.languageCode]?['totalSavings'] ?? 'Total Savings';
+  String get vetDiscount =>
+      _localizedValues[locale.languageCode]?['vetDiscount'] ?? 'Vet Discount';
+  String get coupon =>
+      _localizedValues[locale.languageCode]?['coupon'] ?? 'Coupon';
+  String get points =>
+      _localizedValues[locale.languageCode]?['points'] ?? 'Points';
 
   String get morning =>
       _localizedValues[locale.languageCode]?['morning'] ?? 'Morning';
@@ -2865,6 +2873,10 @@ class AppLocalizations {
       'discount': 'Discount',
       'finalPrice': 'Final Price',
       'pts': 'pts',
+      'totalSavings': 'Total Savings',
+      'vetDiscount': 'Vet Discount',
+      'coupon': 'Coupon',
+      'points': 'Points',
       'morning': 'Morning',
       'afternoon': 'Afternoon',
       'evening': 'Evening',
@@ -4401,6 +4413,10 @@ class AppLocalizations {
       'discount': 'الخصم',
       'finalPrice': 'السعر النهائي',
       'pts': 'نقطة',
+      'totalSavings': 'إجمالي التوفير',
+      'vetDiscount': 'خصم العيادة',
+      'coupon': 'كوبون',
+      'points': 'نقاط',
       'morning': 'الصباح',
       'afternoon': 'بعد الظهر',
       'evening': 'المساء',

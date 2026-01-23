@@ -21,6 +21,7 @@ class AppointmentEntity extends Equatable {
   final String? coupons;
   final double couponDiscount;
   final double pointsDiscount;
+  final double vetDiscount;
   final String? hash; // Verification code for vet users
   final AppointmentPetEntity? pet;
   final AppointmentVetEntity? vet;
@@ -42,6 +43,7 @@ class AppointmentEntity extends Equatable {
     this.coupons,
     required this.couponDiscount,
     required this.pointsDiscount,
+    required this.vetDiscount,
     this.hash,
     this.pet,
     this.vet,
@@ -64,7 +66,9 @@ class AppointmentEntity extends Equatable {
         reviewedAt,
         coupons,
         couponDiscount,
+        vetDiscount,
         pointsDiscount,
+        vetDiscount,
         hash,
         pet,
         vet,

@@ -363,27 +363,59 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> googleLogin() async {
+  Future<void> googleLogin(String idToken) async {
     emit(AuthLoading());
     try {
-      final response = await _authRepository.googleLogin();
+      debugPrint('🔐 Starting Google login with token...');
+      final response = await _authRepository.googleLogin(idToken);
       final user = response.user;
 
       // Save tokens
       await _tokenService.saveToken(response.accessToken);
       await _tokenService.saveRefreshToken(response.refreshToken);
 
+      debugPrint('✅ Google login successful, tokens saved');
       emit(AuthGoogleLoginSuccess(
         accessToken: response.accessToken,
         user: user,
       ));
     } on DioException catch (e) {
+      debugPrint('❌ Google login failed: ${e.message}');
       emit(AuthFailure(
         message: _formatDioError(e),
         errorCode: e.response?.statusCode,
       ));
     } catch (e) {
-      emit(const AuthFailure(message: 'An unexpected error occurred'));
+      debugPrint('❌ Google login unexpected error: $e');
+      emit(const AuthFailure(message: 'An unexpected error occurred during Google sign-in'));
+    }
+  }
+
+  Future<void> appleLogin(String identityToken, {String? authorizationCode}) async {
+    emit(AuthLoading());
+    try {
+      debugPrint('🍎 Starting Apple login with token...');
+      final response = await _authRepository.appleLogin(identityToken, authorizationCode: authorizationCode);
+      final user = response.user;
+
+      // Save tokens
+      await _tokenService.saveToken(response.accessToken);
+      await _tokenService.saveRefreshToken(response.refreshToken);
+
+      debugPrint('✅ Apple login successful, tokens saved');
+      emit(AuthAppleLoginSuccess(
+        accessToken: response.accessToken,
+        user: user,
+      ));
+    } on DioException catch (e) {
+      debugPrint('❌ Apple login failed: ${e.message}');
+      emit(AuthFailure(
+        message: _formatDioError(e),
+        errorCode: e.response?.statusCode,
+      ));
+    } catch (e) {
+      debugPrint('❌ Apple login unexpected error: $e');
+      emit(const AuthFailure(message: 'An unexpected error occurred during Apple sign-in'));
     }
   }
 }

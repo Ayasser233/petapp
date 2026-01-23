@@ -17,6 +17,7 @@ class AppointmentModel {
   final String? coupons;
   final double couponDiscount;
   final double pointsDiscount;
+  final double vetDiscount;
   final String? hash; // Verification code for vet users
   final AppointmentPet? pet;
   final AppointmentVet? vet;
@@ -38,6 +39,7 @@ class AppointmentModel {
     this.coupons,
     required this.couponDiscount,
     required this.pointsDiscount,
+    required this.vetDiscount,
     this.hash,
     this.pet,
     this.vet,
@@ -84,6 +86,7 @@ class AppointmentModel {
           : null,
       coupons: json['coupons'],
       couponDiscount: (json['couponDiscount'] ?? 0).toDouble(),
+      vetDiscount: (json['vetDiscount'] ?? 0).toDouble(),
       pointsDiscount: (json['pointsDiscount'] ?? 0).toDouble(),
       hash: json['hash']?.toString(),
       pet: json['pet'] != null ? AppointmentPet.fromJson(json['pet']) : null,
@@ -108,6 +111,7 @@ class AppointmentModel {
       'reviewedAt': reviewedAt?.toIso8601String(),
       'coupons': coupons,
       'couponDiscount': couponDiscount,
+      'vetDiscount': vetDiscount,
       'pointsDiscount': pointsDiscount,
       'hash': hash,
       'pet': pet?.toJson(),
@@ -195,6 +199,7 @@ class AppointmentModel {
     DateTime? reviewedAt,
     String? coupons,
     double? couponDiscount,
+    double? vetDiscount,
     double? pointsDiscount,
     String? hash,
     AppointmentPet? pet,
@@ -216,6 +221,7 @@ class AppointmentModel {
       reviewedAt: reviewedAt ?? this.reviewedAt,
       coupons: coupons ?? this.coupons,
       couponDiscount: couponDiscount ?? this.couponDiscount,
+      vetDiscount: vetDiscount ?? this.vetDiscount,
       pointsDiscount: pointsDiscount ?? this.pointsDiscount,
       hash: hash ?? this.hash,
       pet: pet ?? this.pet,
@@ -242,6 +248,7 @@ class AppointmentModel {
       coupons: coupons,
       couponDiscount: couponDiscount,
       pointsDiscount: pointsDiscount,
+      vetDiscount: vetDiscount,
       hash: hash,
       pet: pet != null
           ? AppointmentPetEntity(
@@ -276,10 +283,11 @@ class AppointmentModel {
       pointsEarned: entity.pointsEarned,
       rating: entity.rating,
       reviewComment: entity.reviewComment,
-      reviewedAt: entity.reviewedAt,
       coupons: entity.coupons,
       couponDiscount: entity.couponDiscount,
       pointsDiscount: entity.pointsDiscount,
+      vetDiscount: entity.vetDiscount,
+      hash: entity.hash,
       pet: entity.pet != null
           ? AppointmentPet(
               id: entity.pet!.id,

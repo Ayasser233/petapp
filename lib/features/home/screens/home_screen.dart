@@ -551,7 +551,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 12),
               Text(
-                'Loading vets...',
+                AppLocalizations.of(context).loadingVets,
                 style: TextStyle(
                   color: isDark ? Colors.grey[400] : Colors.grey[600],
                   fontSize: 14,

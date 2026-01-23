@@ -109,9 +109,18 @@ class AuthRepository {
     }
   }
 
-  Future<AuthResponse> googleLogin() async {
+  Future<AuthResponse> googleLogin(String idToken) async {
     try {
-      final response = await _apiClient.googleLogin();
+      final response = await _apiClient.googleLogin(idToken);
+      return AuthResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<AuthResponse> appleLogin(String identityToken, {String? authorizationCode}) async {
+    try {
+      final response = await _apiClient.appleLogin(identityToken, authorizationCode: authorizationCode);
       return AuthResponse.fromJson(response.data);
     } catch (e) {
       rethrow;

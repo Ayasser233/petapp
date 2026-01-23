@@ -172,13 +172,16 @@ class AppointmentCard extends StatelessWidget {
   }
 
   Widget _buildServiceInfo(BuildContext context, bool isDark) {
+    final localizations = AppLocalizations.of(context);
+    
     // Calculate if there are any discounts
-    final hasDiscount = appointment.discount > 0 ||
+    // Note: discount field contains total discount amount
+    // vetDiscount contains the vet's clinic discount
+    // couponDiscount contains coupon redemption discount
+    // pointsDiscount contains points redemption discount
+    final hasDiscount = appointment.vetDiscount > 0 ||
                        appointment.couponDiscount > 0 ||
                        appointment.pointsDiscount > 0;
-    final totalDiscount = appointment.discount +
-                         appointment.couponDiscount +
-                         appointment.pointsDiscount;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,16 +293,16 @@ class AppointmentCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Total Savings',
+                        localizations.totalSavings,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.green[700],
                               fontWeight: FontWeight.bold,
                               fontSize: 11,
                             ),
                       ),
-                      if (appointment.discount > 0)
+                      if (appointment.vetDiscount > 0)
                         Text(
-                          'Vet Discount: ${AppointmentUtils.formatCurrency(appointment.discount)}',
+                          '${localizations.vetDiscount}: ${AppointmentUtils.formatCurrency(appointment.vetDiscount)}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: isDark ? Colors.grey[400] : Colors.grey[700],
                                 fontSize: 10,
@@ -307,7 +310,7 @@ class AppointmentCard extends StatelessWidget {
                         ),
                       if (appointment.couponDiscount > 0)
                         Text(
-                          'Coupon: ${AppointmentUtils.formatCurrency(appointment.couponDiscount)}',
+                          '${localizations.coupon}: ${AppointmentUtils.formatCurrency(appointment.couponDiscount)}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: isDark ? Colors.grey[400] : Colors.grey[700],
                                 fontSize: 10,
@@ -315,7 +318,7 @@ class AppointmentCard extends StatelessWidget {
                         ),
                       if (appointment.pointsDiscount > 0)
                         Text(
-                          'Points: ${AppointmentUtils.formatCurrency(appointment.pointsDiscount)}',
+                          '${localizations.points}: ${AppointmentUtils.formatCurrency(appointment.pointsDiscount)}',
                           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                 color: isDark ? Colors.grey[400] : Colors.grey[700],
                                 fontSize: 10,
@@ -325,7 +328,7 @@ class AppointmentCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  '-${AppointmentUtils.formatCurrency(totalDiscount)}',
+                  '-${AppointmentUtils.formatCurrency(appointment.discount)}',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: Colors.green[700],
                         fontWeight: FontWeight.bold,
