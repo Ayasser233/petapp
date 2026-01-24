@@ -6,7 +6,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/providers/settings_provider.dart';
 import 'package:petapp/core/routes/routes.dart';
