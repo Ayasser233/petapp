@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:petapp/core/services/api_client.dart';
 import 'package:petapp/features/auth/data/models/user_model.dart';
 import 'package:petapp/features/auth/data/models/auth_request_models.dart';

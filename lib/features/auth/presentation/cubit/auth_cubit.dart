@@ -367,6 +367,17 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthLoading());
     try {
       debugPrint('🔐 Starting Google login with token...');
+      debugPrint('📝 Token length: ${idToken.length} characters');
+      
+      // Validate token is not empty
+      if (idToken.isEmpty) {
+        debugPrint('❌ ERROR: idToken is EMPTY!');
+        emit(const AuthFailure(message: 'Invalid authentication token'));
+        return;
+      }
+      
+      debugPrint('✅ Token validation passed, sending to backend...');
+      
       final response = await _authRepository.googleLogin(idToken);
       final user = response.user;
 
@@ -375,14 +386,29 @@ class AuthCubit extends Cubit<AuthState> {
       await _tokenService.saveRefreshToken(response.refreshToken);
 
       debugPrint('✅ Google login successful, tokens saved');
+      debugPrint('👤 User: ${user.email}');
+      
       emit(AuthGoogleLoginSuccess(
         accessToken: response.accessToken,
         user: user,
       ));
     } on DioException catch (e) {
       debugPrint('❌ Google login failed: ${e.message}');
+      debugPrint('📊 Status code: ${e.response?.statusCode}');
+      debugPrint('📄 Response data: ${e.response?.data}');
+      
+      // Provide more context for specific errors
+      String errorMessage = _formatDioError(e);
+      if (e.response?.statusCode == 422) {
+        final responseData = e.response?.data;
+        if (responseData is Map && responseData['message'] != null) {
+          errorMessage = responseData['message'].toString();
+        }
+        debugPrint('⚠️  Backend validation error: $errorMessage');
+      }
+      
       emit(AuthFailure(
-        message: _formatDioError(e),
+        message: errorMessage,
         errorCode: e.response?.statusCode,
       ));
     } catch (e) {

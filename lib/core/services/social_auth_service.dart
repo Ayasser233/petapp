@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -8,22 +10,28 @@ class SocialAuthService {
   factory SocialAuthService() => _instance;
   SocialAuthService._internal();
 
+  // IMPORTANT: The serverClientId MUST match the OAuth 2.0 Web Client ID
+  // that your backend is configured to verify. If you get "Wrong recipient" or
+  // "payload audience != requiredAudience" errors, verify this ID matches
+  // the backend configuration.
+  // 
+  // This should be the Web Client ID from Google Cloud Console, NOT the 
+  // Android or iOS client ID.
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email', 'profile'],
     // Use the Web Client ID (OAuth 2.0 client) for backend verification
+    // This MUST match the client ID configured in your backend
+    // This is the client_type: 3 (Web) from your google-services.json
     serverClientId: '1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91.apps.googleusercontent.com',
   );
 
   /// Sign in with Google and return the ID token
   Future<String?> signInWithGoogle() async {
     try {
-      debugPrint('🔐 Starting Google Sign-In...');
-      
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
       if (googleUser == null) {
-        debugPrint('❌ Google Sign-In cancelled by user');
         return null;
       }
 
@@ -36,28 +44,41 @@ class SocialAuthService {
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) {
-        debugPrint('❌ Failed to get Google ID token');
         return null;
       }
 
-      debugPrint('✅ Google ID token obtained');
-      debugPrint('📝 Token preview: ${idToken.substring(0, 50)}...');
+      // Decode the token to see the audience claim (for debugging)
+      try {
+        final parts = idToken.split('.');
+        if (parts.length == 3) {
+          final payload = parts[1];
+          // Add padding if needed
+          var normalizedPayload = payload.replaceAll('-', '+').replaceAll('_', '/');
+          while (normalizedPayload.length % 4 != 0) {
+            normalizedPayload += '=';
+          }
+          final decoded = utf8.decode(base64.decode(normalizedPayload));
+          final json = jsonDecode(decoded);
+          debugPrint('📋 Token audience (aud): ${json['aud']}');
+          debugPrint('📋 Token issuer (iss): ${json['iss']}');
+          debugPrint('📧 Token email: ${json['email']}');
+        }
+      } catch (e) {
+        throw Exception('Failed to decode ID token: $e');
+      }
       
       return idToken;
     } catch (e) {
-      debugPrint('❌ Error during Google Sign-In: $e');
-      rethrow;
+      throw Exception('Google Sign-In failed: $e');
     }
   }
 
   /// Sign in with Apple and return the identity token
   Future<Map<String, String>?> signInWithApple() async {
     try {
-      debugPrint('🍎 Starting Apple Sign-In...');
 
       // Check if Apple Sign In is available
       if (!await SignInWithApple.isAvailable()) {
-        debugPrint('❌ Apple Sign-In not available on this device');
         throw Exception('Apple Sign-In is not available on this device');
       }
 
@@ -69,15 +90,13 @@ class SocialAuthService {
         ],
       );
 
-      debugPrint('✅ Apple credentials obtained');
 
       // Return both identity token and authorization code
       return {
-        'identityToken': credential.identityToken ?? '',
-        'authorizationCode': credential.authorizationCode ?? '',
+        'identityToken': credential.identityToken!,
+        'authorizationCode': credential.authorizationCode,
       };
     } catch (e) {
-      debugPrint('❌ Error during Apple Sign-In: $e');
       rethrow;
     }
   }
@@ -86,9 +105,8 @@ class SocialAuthService {
   Future<void> signOutGoogle() async {
     try {
       await _googleSignIn.signOut();
-      debugPrint('✅ Signed out from Google');
     } catch (e) {
-      debugPrint('❌ Error signing out from Google: $e');
+      rethrow;
     }
   }
 

@@ -14,7 +14,15 @@
       },
       "oauth_client": [
         {
-          "client_id": "1017624066475-sdfa2gutpn2k7qd0rufvf0i7m4iasq4s.apps.googleusercontent.com",
+          "client_id": "1017624066475-02aujvc0hf3nhagd9nnkk9f03hevifd3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aleefy.petapp",
+            "certificate_hash": "3f7330d2a010586bc3be11ea149f50905177b63a"
+          }
+        },
+        {
+          "client_id": "1017624066475-4lp590s8iqosdeqjou9el3tr6c1nqsdm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.aleefy.petapp",
@@ -35,7 +43,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1017624066475-bbsgcfhvc3an0s7nollp24bklll964gd.apps.googleusercontent.com",
+              "client_id": "1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91.apps.googleusercontent.com",
               "client_type": 3
             },
             {
@@ -51,12 +59,28 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1017624066475:android:76f598d7c3f872e63a3aee",
+        "mobilesdk_app_id": "1:1017624066475:android:3e28d9c8c2a139933a3aee",
         "android_client_info": {
-          "package_name": "com.example.petapp"
+          "package_name": "com.aleefy.petapp.dev"
         }
       },
       "oauth_client": [
+        {
+          "client_id": "1017624066475-96odrknc96k9fb5ado57elk6rg6bsahp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aleefy.petapp.dev",
+            "certificate_hash": "3076e6bb76c24c6354406aa1c88ead44407b6d74"
+          }
+        },
+        {
+          "client_id": "1017624066475-dd6b08appskm1qi6k15u3h5l03bfhoru.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.aleefy.petapp.dev",
+            "certificate_hash": "3f7330d2a010586bc3be11ea149f50905177b63a"
+          }
+        },
         {
           "client_id": "1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91.apps.googleusercontent.com",
           "client_type": 3
@@ -71,7 +95,7 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1017624066475-bbsgcfhvc3an0s7nollp24bklll964gd.apps.googleusercontent.com",
+              "client_id": "1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91.apps.googleusercontent.com",
               "client_type": 3
             },
             {

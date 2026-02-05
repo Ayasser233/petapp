@@ -372,6 +372,7 @@ class VetService {
     double? minPrice,
     double? maxPrice,
     int? minExperience,
+    bool? hasEmergency,
   }) async {
     try {
       final queryParams = <String, dynamic>{
@@ -390,6 +391,9 @@ class VetService {
       }
       if (minExperience != null) {
         queryParams['minExperience'] = minExperience;
+      }
+      if (hasEmergency != null) {
+        queryParams['hasEmergency'] = hasEmergency;
       }
 
 
