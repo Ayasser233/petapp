@@ -37,6 +37,7 @@ class VetExplorerController extends GetxController {
   final RxInt totalPages = 1.obs;
   final RxInt totalVets = 0.obs;
   final RxBool hasMorePages = false.obs;
+  final RxBool isLoadingMore = false.obs;
 
   // Price filter properties
   final RxDouble minPrice = 0.0.obs;
@@ -45,6 +46,7 @@ class VetExplorerController extends GetxController {
 
   final TextEditingController searchController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
+  final ScrollController scrollController = ScrollController();
 
   // Hierarchical regions data structure
   final RxMap<String, List<String>> regionHierarchy =
@@ -61,12 +63,26 @@ class VetExplorerController extends GetxController {
     // Listen to search changes with debounce
     debounce(searchQuery, (_) => applyFilters(),
         time: const Duration(milliseconds: 500));
+    
+    // Add scroll listener for pagination
+    scrollController.addListener(_onScroll);
+  }
+  
+  /// Handle scroll events for pagination
+  void _onScroll() {
+    if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 200) {
+      // User is near bottom, load more if available
+      if (hasMorePages.value && !isLoadingMore.value && !isLoading.value) {
+        loadMorePages();
+      }
+    }
   }
 
   @override
   void onClose() {
     searchController.dispose();
     searchFocusNode.dispose();
+    scrollController.dispose();
     super.onClose();
   }
 
@@ -140,6 +156,9 @@ class VetExplorerController extends GetxController {
     try {
       isLoading.value = true;
 
+      // Determine if filtering by emergency (from category tab)
+      final bool? filterEmergency = selectedCategory.value == 'emergency' ? true : null;
+
       // Load vets from API
       final response = await _vetService.getVets(
         page: currentPage.value,
@@ -148,6 +167,7 @@ class VetExplorerController extends GetxController {
         minPrice: minPrice.value > 0 ? minPrice.value : null,
         maxPrice: maxPrice.value < 5000 ? maxPrice.value : null,
         minExperience: minExperience.value > 0 ? minExperience.value : null,
+        hasEmergency: filterEmergency,
       );
 
       final vets = response['vets'] as List<VetModel>;
@@ -193,10 +213,23 @@ class VetExplorerController extends GetxController {
 
   /// Load more pages (pagination)
   Future<void> loadMorePages() async {
-    if (!hasMorePages.value || isLoading.value) return;
+    if (!hasMorePages.value || isLoading.value || isLoadingMore.value) return;
 
-    currentPage.value++;
-    await loadData();
+    try {
+      isLoadingMore.value = true;
+      currentPage.value++;
+      await loadDataFromApi();
+    } catch (e) {
+      // Revert page increment on error
+      currentPage.value--;
+      Get.snackbar(
+        AppLocalizations.of(Get.context!).error,
+        'Failed to load more vets',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isLoadingMore.value = false;
+    }
   }
 
   /// Update regions list with Egypt's 28 governorates and parse clinic addresses
@@ -387,6 +420,8 @@ class VetExplorerController extends GetxController {
   List<VetModel> _applyCategoryFilter(List<VetModel> vets) {
     switch (selectedCategory.value) {
       case 'emergency':
+        // Emergency filter is handled by API, so no local filtering needed
+        // But we can still filter here as a fallback for already loaded data
         return vets.where((vet) => vet.hasEmergency).toList();
       case 'popular':
         return vets.where((vet) => vet.rating >= 4.7).toList();
@@ -520,9 +555,19 @@ class VetExplorerController extends GetxController {
   }
 
   /// Update category selection
-  void updateCategory(String category) {
+  void updateCategory(String category) async {
+    final previousCategory = selectedCategory.value;
     selectedCategory.value = category;
-    applyFilters();
+    
+    // If switching between emergency and non-emergency categories, reload from API
+    // This ensures we get the right dataset
+    if (category == 'emergency' || 
+        (previousCategory == 'emergency' && category != 'emergency')) {
+      currentPage.value = 1; // Reset to first page
+      await loadData(); // Reload data from API with correct filter
+    } else {
+      applyFilters(); // For other categories, apply filters locally
+    }
   }
 
   /// Update filters and apply
@@ -602,6 +647,7 @@ class VetExplorerScreen extends StatelessWidget {
           onRefresh: controller.refreshData,
           color: AppColors.orange,
           child: CustomScrollView(
+            controller: controller.scrollController,
             slivers: [
               // Location status banner
               SliverToBoxAdapter(
@@ -639,6 +685,9 @@ class VetExplorerScreen extends StatelessWidget {
 
               // Vet list
               Obx(() => _buildVetSliverList(context, controller)),
+              
+              // Loading indicator at bottom
+              Obx(() => _buildLoadingMoreIndicator(controller)),
             ],
           ),
         ),
@@ -768,6 +817,23 @@ class VetExplorerScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Build loading more indicator at bottom
+  Widget _buildLoadingMoreIndicator(VetExplorerController controller) {
+    if (!controller.isLoadingMore.value) {
+      return const SliverToBoxAdapter(child: SizedBox.shrink());
+    }
+
+    return SliverToBoxAdapter(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        alignment: Alignment.center,
+        child: const CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(AppColors.orange),
         ),
       ),
     );

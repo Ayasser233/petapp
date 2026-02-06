@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:petapp/core/services/auth_service.dart';
+import 'package:petapp/core/services/token_service.dart';
 import 'package:petapp/core/styles/input_styles.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/app_fonts.dart';
@@ -15,8 +16,8 @@ import 'package:petapp/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/formatters.dart';
-import 'package:flutter/foundation.dart'; // added for defaultTargetPlatform
 import 'package:petapp/features/auth/presentation/screens/login/login.dart'; // to reuse SocialBtns & DividerForm
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -167,7 +168,7 @@ class _SignUpFormState extends State<SignUpForm> {
     final isDark = THelperFunctions.isDarkMode(context);
 
     return BlocListener<AuthCubit, AuthState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         // Reset field errors
         setState(() {
           _firstNameError = null;
@@ -207,6 +208,46 @@ class _SignUpFormState extends State<SignUpForm> {
 
           // Navigate to verification screen
           Get.toNamed(AppRoutes.verifyEmail, arguments: state.email);
+        } else if (state is AuthGoogleLoginSuccess) {
+          // Handle Google login success
+          final tokenService = Get.find<TokenService>();
+          final authService = Get.find<AuthService>();
+
+          // Save token and mark as authenticated
+          await tokenService.saveToken(state.accessToken);
+
+          // Set authenticated status
+          authService.setAuthenticated();
+
+          // Clear guest mode if it was set
+          await authService.clearGuestMode();
+
+          // Set login flag
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+
+          // Navigate to home
+          Get.offAllNamed(AppRoutes.home);
+        } else if (state is AuthAppleLoginSuccess) {
+          // Handle Apple login success
+          final tokenService = Get.find<TokenService>();
+          final authService = Get.find<AuthService>();
+
+          // Save token and mark as authenticated
+          await tokenService.saveToken(state.accessToken);
+
+          // Set authenticated status
+          authService.setAuthenticated();
+
+          // Clear guest mode if it was set
+          await authService.clearGuestMode();
+
+          // Set login flag
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setBool('isLoggedIn', true);
+
+          // Navigate to home
+          Get.offAllNamed(AppRoutes.home);
         } else if (state is AuthFailure) {
           // Handle field-specific errors if available
           if (state.fieldErrors != null && state.fieldErrors!.isNotEmpty) {

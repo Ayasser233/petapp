@@ -140,13 +140,54 @@ class SocialBtns extends StatelessWidget {
       final idToken = await socialAuthService.signInWithGoogle();
       
       if (idToken == null) {
-        // User cancelled the sign-in
+        debugPrint('❌ Google Sign-In cancelled by user');
         return;
       }
+
+      if (idToken.isEmpty) {
+        debugPrint('❌ Google ID token is empty!');
+        if (context.mounted) {
+          Get.snackbar(
+            AppLocalizations.of(context).error,
+            'Failed to get authentication token. Please try again.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red.withValues(alpha: 0.1),
+            colorText: Colors.red,
+          );
+        }
+        return;
+      }
+
+      debugPrint('✅ Got valid ID token, length: ${idToken.length}');
+      debugPrint('📤 Sending Google ID token to backend...');
 
       // Call the AuthCubit with the token
       if (context.mounted) {
         context.read<AuthCubit>().googleLogin(idToken);
+      }
+    } on Exception catch (e) {
+      debugPrint('❌ Google Sign-In error: $e');
+      if (context.mounted) {
+        String errorMessage = 'Failed to sign in with Google. Please try again.';
+        
+        // Provide more specific error messages for common issues
+        final errorString = e.toString().toLowerCase();
+        if (errorString.contains('network') || errorString.contains('connection')) {
+          errorMessage = 'Network error. Please check your internet connection.';
+        } else if (errorString.contains('audience') || errorString.contains('recipient')) {
+          errorMessage = 'Configuration error. Please contact support.';
+        } else if (errorString.contains('422')) {
+          errorMessage = 'Authentication error. Please try again or contact support.';
+        }
+        
+        Get.snackbar(
+          AppLocalizations.of(context).error,
+          errorMessage,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withValues(alpha: 0.1),
+          colorText: Colors.red,
+          duration: const Duration(seconds: 5),
+        );
       }
     } catch (e) {
       debugPrint('❌ Google Sign-In error: $e');
@@ -197,8 +238,12 @@ class SocialBtns extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Check if running on iOS using defaultTargetPlatform
+    final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
+    
     return Column(
       children: [
+        // Google Sign-In (Available on all platforms)
         SizedBox(
           width: double.infinity,
           child: OutlinedButton(
@@ -223,34 +268,38 @@ class SocialBtns extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: double.infinity,
-          child: OutlinedButton(
-            onPressed: () => _handleAppleSignIn(context),
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              side: const BorderSide(color: Colors.grey),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.apple,
-                    color: THelperFunctions.isDarkMode(context)
-                        ? Colors.white
-                        : Colors.black),
-                const SizedBox(width: 8),
-                Text(
-                  AppLocalizations.of(context).signInWithApple,
-                  style: Theme.of(context).textTheme.bodyMedium,
+        
+        // Apple Sign-In (Only on iOS)
+        if (isIOS) ...[
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => _handleAppleSignIn(context),
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14.0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              ],
+                side: const BorderSide(color: Colors.grey),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.apple,
+                      color: THelperFunctions.isDarkMode(context)
+                          ? Colors.white
+                          : Colors.black),
+                  const SizedBox(width: 8),
+                  Text(
+                    AppLocalizations.of(context).signInWithApple,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
+        ],
       ],
     );
   }

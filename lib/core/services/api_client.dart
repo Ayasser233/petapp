@@ -79,8 +79,6 @@ class ApiClient {
       onError: (DioException error, handler) async {
         // Handle 401 Unauthorized - Token expired
         if (error.response?.statusCode == 401) {
-          debugPrint('🔄 Token expired, attempting to refresh...');
-
           // Try to refresh the token
           final newToken = await _refreshAccessToken();
 
@@ -101,11 +99,10 @@ class ApiClient {
               return handler.resolve(response);
             } catch (e) {
               // If retry fails, continue with error handling
-              debugPrint('❌ Retry after refresh failed: $e');
+              throw Exception('Retry after token refresh failed: $e');
             }
           } else {
             // Token refresh failed, user needs to login again
-            debugPrint('❌ Token refresh failed, logging out...');
             await tokenService.clearAllTokens();
           }
         }
@@ -361,9 +358,15 @@ class ApiClient {
   Future<Response> googleLogin(String idToken) async {
     try {
       debugPrint('🔐 Attempting Google login with token...');
+      debugPrint('📝 Token length: ${idToken.length}');
+      debugPrint('📝 Token preview: ${idToken.substring(0, idToken.length > 100 ? 100 : idToken.length)}...');
+      
+      final requestData = {'idToken': idToken};
+      debugPrint('📤 Request data: $requestData');
+      
       final response = await _dio.post(
         ApiConstants.googleLoginEndpoint,
-        data: {'idToken': idToken},
+        data: requestData,
       );
       debugPrint('✅ Google login successful');
       await _handleTokenResponse(response);
