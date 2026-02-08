@@ -10,6 +10,9 @@
 		<!-- Camera permission for QR code scanning -->
 		<key>NSCameraUsageDescription</key>
 		<string>Aleefy App needs access to your camera to scan QR codes for completing appointments.</string>
+		<!-- Photo Library permission -->
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Aleefy App needs access to your photo library to select pet photos.</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
@@ -67,7 +70,7 @@
 				<key>CFBundleURLSchemes</key>
 				<array>
 					<!-- Reversed client ID from GoogleService-Info.plist -->
-					<string>com.googleusercontent.apps.1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91</string>
+					<string>com.googleusercontent.apps.1017624066475-ntai924471ifb03p9v5g31i4kdf8g1tu</string>
 				</array>
 			</dict>
 		</array>
