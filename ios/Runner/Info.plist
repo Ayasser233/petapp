@@ -57,5 +57,26 @@
 		<false/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<true/>
+		
+		<!-- Google Sign-In Configuration -->
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<!-- Reversed client ID from GoogleService-Info.plist -->
+					<string>com.googleusercontent.apps.1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91</string>
+				</array>
+			</dict>
+		</array>
+		
+		<!-- Allow Google Sign-In to query installed apps -->
+		<key>LSApplicationQueriesSchemes</key>
+		<array>
+			<string>googlechromes</string>
+			<string>googlechrome</string>
+		</array>
 	</dict>
 </plist>

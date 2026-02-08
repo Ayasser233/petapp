@@ -28,10 +28,20 @@ class SocialAuthService {
   /// Sign in with Google and return the ID token
   Future<String?> signInWithGoogle() async {
     try {
+      debugPrint('🔐 Starting Google Sign-In...');
+      
+      // Check if running on iOS without proper configuration
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        debugPrint('📱 Platform: iOS');
+      } else if (defaultTargetPlatform == TargetPlatform.android) {
+        debugPrint('📱 Platform: Android');
+      }
+      
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
       if (googleUser == null) {
+        debugPrint('❌ Google Sign-In cancelled by user');
         return null;
       }
 
@@ -44,6 +54,7 @@ class SocialAuthService {
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) {
+        debugPrint('❌ ID token is null!');
         return null;
       }
 
@@ -64,11 +75,14 @@ class SocialAuthService {
           debugPrint('📧 Token email: ${json['email']}');
         }
       } catch (e) {
-        throw Exception('Failed to decode ID token: $e');
+        debugPrint('⚠️  Failed to decode ID token for debugging: $e');
+        // Don't throw here, token might still be valid
       }
       
       return idToken;
     } catch (e) {
+      debugPrint('❌ Google Sign-In exception: $e');
+      debugPrint('❌ Exception type: ${e.runtimeType}');
       throw Exception('Google Sign-In failed: $e');
     }
   }
