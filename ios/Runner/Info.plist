@@ -80,5 +80,20 @@
 		<false/>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
 		<true/>
+		<key>CFBundleURLTypes</key>
+<array>
+  <dict>
+    <key>CFBundleTypeRole</key>
+    <string>Editor</string>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>com.googleusercontent.apps.1017624066475-ntai924471ifb03p9v5g31i4kdf8g1tu</string>
+    </array>
+  </dict>
+</array>
+
+<key>GIDClientID</key>
+<string>1017624066475-ntai924471ifb03p9v5g31i4kdf8g1tu.apps.googleusercontent.com</string>
+
 	</dict>
 </plist>
