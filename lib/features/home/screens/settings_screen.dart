@@ -101,14 +101,6 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 8),
               _buildPrivacySettings(context, cardColor),
 
-              const SizedBox(height: 24),
-
-              // About Section
-              _buildSectionHeader(
-                  context, localizations.about, FontAwesomeIcons.circleInfo),
-              const SizedBox(height: 8),
-              _buildAboutSettings(context, cardColor),
-
               const SizedBox(height: 110),
             ],
           ),
@@ -268,17 +260,6 @@ class SettingsScreen extends StatelessWidget {
             },
             icon: FontAwesomeIcons.bell,
           ),
-          // _buildDivider(),
-          // _buildSwitchTile(
-          //   context: context,
-          //   title: localizations.emailNotifications,
-          //   subtitle: localizations.receiveEmailUpdates,
-          //   value: settingsProvider.emailNotificationsEnabled,
-          //   onChanged: (value) {
-          //     settingsProvider.setEmailNotificationsEnabled(value);
-          //   },
-          //   icon: FontAwesomeIcons.envelope,
-          // )
         ],
       ),
     );
@@ -312,56 +293,6 @@ class SettingsScreen extends StatelessWidget {
             },
             icon: FontAwesomeIcons.trashCan,
             isDestructive: true,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAboutSettings(BuildContext context, Color cardColor) {
-    AppLocalizations.of(context); // Get localizations
-
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          _buildActionTile(
-            context: context,
-            title: 'App Version',
-            subtitle: 'v1.0.0',
-            onTap: () {},
-            icon: FontAwesomeIcons.circleInfo,
-            showArrow: false,
-          ),
-          _buildDivider(),
-          _buildActionTile(
-            context: context,
-            title: 'Contact Support',
-            subtitle: 'Get help with the app',
-            onTap: () {
-              // Navigate to support
-            },
-            icon: FontAwesomeIcons.headset,
-          ),
-          _buildDivider(),
-          _buildActionTile(
-            context: context,
-            title: 'Rate the App',
-            subtitle: 'Leave a review on the store',
-            onTap: () {
-              // Open app store rating
-            },
-            icon: FontAwesomeIcons.star,
           ),
         ],
       ),
