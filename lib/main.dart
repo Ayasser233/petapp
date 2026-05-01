@@ -167,12 +167,7 @@ class _MyAppState extends State<MyApp> {
       initialRoute: AppRoutes.networkSplash, // Always start with the splash
       getPages: AppRoutes.getPages,
       builder: (context, child) {
-        return MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              padding: EdgeInsets.zero,
-            ),
-            child: child!,
-        );
+        return child!;
         // Wrap the entire app to automatically convert numbers to Arabic numerals
         return _ArabicNumeralWrapper(child: child ?? const SizedBox.shrink());
       },

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
@@ -63,9 +64,32 @@ class VetExplorerController extends GetxController {
     // Listen to search changes with debounce
     debounce(searchQuery, (_) => applyFilters(),
         time: const Duration(milliseconds: 500));
-    
+
     // Add scroll listener for pagination
     scrollController.addListener(_onScroll);
+
+    // ── Reactive location listeners ──────────────────────────────────────────
+    // When the GPS position first arrives (or updates), recalculate every
+    // vet's distance and re-sort the list immediately — no manual refresh needed.
+    ever(_locationService.currentPositionRx, (_) async {
+      if (allVets.isEmpty) return;
+      allVets.value = await _updateVetsWithDistances(allVets.toList());
+      applyFilters();
+    });
+
+    // When location permission is granted after the screen is open, refresh
+    // the regions list (adds "Nearby" option), switch to nearby and re-sort.
+    ever(_locationService.isPermissionGrantedRx, (bool granted) {
+      if (granted) {
+        // Auto-select nearby region now that we have permission
+        if (selectedRegion.value == 'allRegions') {
+          selectedRegion.value = 'nearbyAutoDetect';
+        }
+        sortOption.value = 'nearby';
+        _updateRegions();
+        applyFilters();
+      }
+    });
   }
   
   /// Handle scroll events for pagination
@@ -89,9 +113,15 @@ class VetExplorerController extends GetxController {
   /// Initialize default values
   void _initializeDefaults() {
     selectedCategory.value = 'allCategory';
-    selectedRegion.value = 'allRegions';
     selectedService.value = 'allServices';
-    sortOption.value = 'default';
+    sortOption.value = 'nearby';
+
+    // Default to nearby region immediately if location permission is already granted
+    if (_locationService.isPermissionGranted) {
+      selectedRegion.value = 'nearbyAutoDetect';
+    } else {
+      selectedRegion.value = 'allRegions';
+    }
   }
 
   /// Initialize data from navigation arguments
@@ -154,10 +184,14 @@ class VetExplorerController extends GetxController {
   /// Load data from API
   Future<void> loadDataFromApi() async {
     try {
-      isLoading.value = true;
+      // Only show full-screen spinner on fresh loads, not when paginating
+      if (!isLoadingMore.value) isLoading.value = true;
 
       // Determine if filtering by emergency (from category tab)
       final bool? filterEmergency = selectedCategory.value == 'emergency' ? true : null;
+
+      // Include user coordinates so the server can sort by nearest distance
+      final pos = _locationService.currentPosition;
 
       // Load vets from API
       final response = await _vetService.getVets(
@@ -168,6 +202,8 @@ class VetExplorerController extends GetxController {
         maxPrice: maxPrice.value < 5000 ? maxPrice.value : null,
         minExperience: minExperience.value > 0 ? minExperience.value : null,
         hasEmergency: filterEmergency,
+        latitude: pos?.latitude,
+        longitude: pos?.longitude,
       );
 
       final vets = response['vets'] as List<VetModel>;
@@ -205,7 +241,7 @@ class VetExplorerController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
     } finally {
-      isLoading.value = false;
+      if (!isLoadingMore.value) isLoading.value = false;
     }
   }
 
@@ -292,34 +328,25 @@ class VetExplorerController extends GetxController {
   /// Update vets with calculated distances from current location
   Future<List<VetModel>> _updateVetsWithDistances(List<VetModel> vets) async {
     try {
-      final currentPosition = _locationService.currentPosition;
-
-      if (currentPosition == null) {
-        return vets;
-      }
-
+      if (!_locationService.isPermissionGranted) return vets;
+      final pos = _locationService.currentPosition;
+      if (pos == null) return vets;
 
       return vets.map((vet) {
-        try {
-          if (vet.latitude == null || vet.longitude == null) {
-            return vet;
-          }
+        final lat = vet.latitude;
+        final lng = vet.longitude;
+        if (lat == null || lng == null) return vet;
 
-          final distance = vet.calculateDistanceFromCurrentLocation(
-            currentPosition.latitude,
-            currentPosition.longitude,
-          );
+        final meters = Geolocator.distanceBetween(
+            pos.latitude, pos.longitude, lat, lng);
 
-          final formattedDistance = distance != null
-              ? _locationService.formatDistance(distance)
-              : 'Unknown';
+        final formatted = meters < 1000
+            ? '${meters.round()} م'
+            : '${(meters / 1000).toStringAsFixed(1)} كم';
 
-          return vet.copyWith(distance: formattedDistance);
-        } catch (e) {
-          return vet;
-        }
+        return vet.copyWith(distance: formatted);
       }).toList();
-    } catch (e) {
+    } catch (_) {
       return vets;
     }
   }
@@ -437,58 +464,59 @@ class VetExplorerController extends GetxController {
 
   /// Apply location/region filter with hierarchical support and Egypt governorates
   Future<List<VetModel>> _applyLocationFilter(List<VetModel> vets) async {
-    if (selectedRegion.value == 'allRegions') {
-      return vets;
-    }
-
-    if (selectedRegion.value == 'nearbyAutoDetect') {
-      if (!_locationService.isPermissionGranted) {
-        final granted = await _locationService.requestLocationPermission();
-        if (!granted) {
-          return vets;
-        }
-      }
-
-      // Filter by distance using current position (from API data only)
-      final currentPosition = _locationService.currentPosition;
-      if (currentPosition != null) {
-        return vets.where((vet) {
-          if (vet.latitude == null || vet.longitude == null) {
-            return false;
+    // ── Specific governorate / city ──────────────────────────────────────────
+    if (selectedRegion.value != 'allRegions' &&
+        selectedRegion.value != 'nearbyAutoDetect') {
+      if (isGovernorate(selectedRegion.value)) {
+        vets = vets.where((vet) {
+          final parsed = EgyptRegions.parseAddress(vet.location);
+          if (parsed?['governorate'] != null) {
+            return parsed!['governorate'] == selectedRegion.value;
           }
-          final distance = vet.calculateDistanceFromCurrentLocation(
-            currentPosition.latitude,
-            currentPosition.longitude,
-          );
-          return distance != null && distance / 1000 <= maxDistance.value;
+          return vet.location
+              .toLowerCase()
+              .contains(selectedRegion.value.toLowerCase());
+        }).toList();
+      } else {
+        vets = vets.where((vet) {
+          final parsed = EgyptRegions.parseAddress(vet.location);
+          if (parsed?['city'] != null) {
+            return parsed!['city'] == selectedRegion.value;
+          }
+          return vet.location
+              .toLowerCase()
+              .contains(selectedRegion.value.toLowerCase());
         }).toList();
       }
-      return vets;
     }
 
-    // Check if it's a governorate filter
-    if (isGovernorate(selectedRegion.value)) {
-      return vets.where((vet) {
-        final parsed = EgyptRegions.parseAddress(vet.location);
-        if (parsed != null && parsed['governorate'] != null) {
-          return parsed['governorate'] == selectedRegion.value;
-        }
+    // ── Distance cap ─────────────────────────────────────────────────────────
+    // Applied when:
+    //  • region = nearbyAutoDetect  → always cap to maxDistance
+    //  • region = allRegions        → cap only when location is known AND
+    //                                 user moved the slider below its maximum
+    final bool applyDistanceCap = selectedRegion.value == 'nearbyAutoDetect' ||
+        (selectedRegion.value == 'allRegions' &&
+            maxDistance.value < 100.0 &&
+            _locationService.isPermissionGranted);
 
-        // Fallback: check if location contains governorate name
-        return vet.location.toLowerCase().contains(selectedRegion.value.toLowerCase());
-      }).toList();
-    } else {
-      // Filter by specific city/district
-      return vets.where((vet) {
-        final parsed = EgyptRegions.parseAddress(vet.location);
-        if (parsed != null && parsed['city'] != null) {
-          return parsed['city'] == selectedRegion.value;
-        }
+    if (applyDistanceCap &&
+        _locationService.isPermissionGranted &&
+        _locationService.currentPosition != null) {
+      final pos = _locationService.currentPosition!;
+      final maxMeters = maxDistance.value * 1000;
 
-        // Fallback: check if location contains city name
-        return vet.location.toLowerCase().contains(selectedRegion.value.toLowerCase());
+      vets = vets.where((vet) {
+        final lat = vet.latitude;
+        final lng = vet.longitude;
+        if (lat == null || lng == null) return true; // keep if coords unknown
+        final meters =
+            Geolocator.distanceBetween(pos.latitude, pos.longitude, lat, lng);
+        return meters <= maxMeters;
       }).toList();
     }
+
+    return vets;
   }
 
   /// Apply service filter
@@ -504,36 +532,65 @@ class VetExplorerController extends GetxController {
 
   /// Apply sorting
   Future<List<VetModel>> _applySorting(List<VetModel> vets) async {
+    // You already store a formatted distance string on each vet (e.g. "13km", "500m", "2.5 km").
+    // We parse it robustly into meters for correct ordering.
+    double parseDistanceMeters(String distanceStr) {
+      final raw = distanceStr.trim();
+      if (raw.isEmpty || raw == 'unknown' || raw == 'calculating...') {
+        return double.maxFinite;
+      }
+
+      // Supports Arabic units (كم / م) AND Latin units (km / m)
+      // e.g. "1.3 كم", "500 م", "2.5km", "300m"
+      final match = RegExp(
+        r'([0-9]+(?:[.,][0-9]+)?)\s*(كم|km|م|m)',
+        caseSensitive: false,
+      ).firstMatch(raw.replaceAll(',', '.'));
+      if (match == null) return double.maxFinite;
+
+      final value = double.tryParse(match.group(1) ?? '');
+      final unit = match.group(2);
+      if (value == null || unit == null) return double.maxFinite;
+
+      if (unit == 'كم' || unit.toLowerCase() == 'km') return value * 1000;
+      return value; // metres
+    }
+
+    int compareByDistance(VetModel a, VetModel b) {
+      return parseDistanceMeters(a.distance).compareTo(parseDistanceMeters(b.distance));
+    }
+
+    // Emergency priority time window: 10pm -> 7am Africa/Cairo.
+    bool shouldPrioritizeEmergencyNow() {
+      final nowUtc = DateTime.now().toUtc();
+      final cairoNow = nowUtc.add(const Duration(hours: 2));
+      final hour = cairoNow.hour;
+      return hour >= 22 || hour < 7;
+    }
+
+    List<VetModel> applyTimeBasedEmergencyPriorityIfNeeded(List<VetModel> list) {
+      if (!shouldPrioritizeEmergencyNow()) {
+        list.sort(compareByDistance);
+        return list;
+      }
+
+      final emergency = <VetModel>[];
+      final nonEmergency = <VetModel>[];
+
+      for (final vet in list) {
+        (vet.hasEmergency ? emergency : nonEmergency).add(vet);
+      }
+
+      emergency.sort(compareByDistance);
+      nonEmergency.sort(compareByDistance);
+
+      return [...emergency, ...nonEmergency];
+    }
+
     switch (sortOption.value) {
       case 'nearby':
-        if (_locationService.isPermissionGranted &&
-            _locationService.currentPosition != null) {
-          // Sort by distance (already calculated in vets from API data)
-          vets.sort((a, b) {
-            // Extract numeric value from distance string (e.g., "2.5 km" -> 2.5)
-            double getDistanceValue(String distanceStr) {
-              if (distanceStr == 'Unknown' || distanceStr == 'Calculating...') {
-                return double.maxFinite;
-              }
-              final parts = distanceStr.split(' ');
-              if (parts.isEmpty) return double.maxFinite;
-              try {
-                final value = double.parse(parts[0]);
-                // Convert meters to km if needed
-                if (parts.length > 1 && parts[1].toLowerCase() == 'm') {
-                  return value / 1000;
-                }
-                return value;
-              } catch (e) {
-                return double.maxFinite;
-              }
-            }
-
-            return getDistanceValue(a.distance)
-                .compareTo(getDistanceValue(b.distance));
-          });
-        }
-        return vets;
+      case 'default': // default → nearest first
+        return applyTimeBasedEmergencyPriorityIfNeeded(vets);
       case 'rating':
         vets.sort((a, b) => b.rating.compareTo(a.rating));
         return vets;
@@ -544,8 +601,7 @@ class VetExplorerController extends GetxController {
         vets.sort((a, b) => a.name.compareTo(b.name));
         return vets;
       default:
-        vets.sort((a, b) => b.rating.compareTo(a.rating));
-        return vets;
+        return applyTimeBasedEmergencyPriorityIfNeeded(vets);
     }
   }
 
@@ -558,15 +614,17 @@ class VetExplorerController extends GetxController {
   void updateCategory(String category) async {
     final previousCategory = selectedCategory.value;
     selectedCategory.value = category;
-    
-    // If switching between emergency and non-emergency categories, reload from API
-    // This ensures we get the right dataset
-    if (category == 'emergency' || 
+
+    // Reload from API whenever:
+    //  - switching TO emergency (needs hasEmergency=true filter)
+    //  - switching FROM emergency (emergency dataset only had hasEmergency vets;
+    //    we need the full "all vets" pool back)
+    if (category == 'emergency' ||
         (previousCategory == 'emergency' && category != 'emergency')) {
-      currentPage.value = 1; // Reset to first page
-      await loadData(); // Reload data from API with correct filter
+      currentPage.value = 1;
+      await loadData();
     } else {
-      applyFilters(); // For other categories, apply filters locally
+      applyFilters();
     }
   }
 
@@ -581,7 +639,7 @@ class VetExplorerController extends GetxController {
     if (service != null) selectedService.value = service;
     if (sort != null) sortOption.value = sort;
     if (distance != null) maxDistance.value = distance;
-    applyFilters();
+    applyFilters(); // fire-and-forget is fine here
   }
 
   /// Focus search field
@@ -605,7 +663,8 @@ class VetExplorerController extends GetxController {
 
   /// Refresh data including location
   Future<void> refreshData() async {
-    currentPage.value = 1; // Reset to first page
+    currentPage.value = 1;
+    // Refresh location first so distances are up-to-date immediately after reload
     await _locationService.refreshLocation();
     await loadData();
   }
@@ -623,9 +682,10 @@ class VetExplorerController extends GetxController {
   void clearAllFilters() {
     searchQuery.value = '';
     selectedCategory.value = 'allCategory';
-    selectedRegion.value = 'allRegions';
+    selectedRegion.value =
+        _locationService.isPermissionGranted ? 'nearbyAutoDetect' : 'allRegions';
     selectedService.value = 'allServices';
-    sortOption.value = 'default';
+    sortOption.value = 'nearby';
     searchController.clear();
     applyFilters();
   }

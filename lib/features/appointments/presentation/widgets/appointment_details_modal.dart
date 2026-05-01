@@ -339,6 +339,10 @@ class AppointmentDetailsModal extends StatelessWidget {
 
   String _getLocalizedStatus(BuildContext context, String status) {
     switch (status.toLowerCase()) {
+      case 'pending':
+        return AppLocalizations.of(context).pending;
+      case 'confirmed':
+        return AppLocalizations.of(context).confirmed;
       case 'upcoming':
         return AppLocalizations.of(context).upcoming;
       case 'completed':

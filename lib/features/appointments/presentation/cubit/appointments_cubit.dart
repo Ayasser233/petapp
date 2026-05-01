@@ -5,22 +5,32 @@ import 'package:petapp/features/appointments/domain/usecases/cancel_appointment_
 import 'package:petapp/features/appointments/domain/usecases/complete_appointment_by_qr_usecase.dart';
 import 'package:petapp/features/appointments/domain/usecases/create_appointment_usecase.dart';
 import 'package:petapp/features/appointments/domain/usecases/get_appointments_usecase.dart';
-import 'package:petapp/features/appointments/domain/usecases/get_filtered_appointments_usecase.dart';
 import 'package:petapp/features/appointments/domain/usecases/submit_review_usecase.dart';
 import 'package:petapp/features/appointments/presentation/cubit/appointments_state.dart';
 
 /// Cubit for managing appointments state
 class AppointmentsCubit extends Cubit<AppointmentsState> {
   final GetAppointmentsUseCase getAppointmentsUseCase;
-  final GetFilteredAppointmentsUseCase getFilteredAppointmentsUseCase;
   final CancelAppointmentUseCase cancelAppointmentUseCase;
   final CreateAppointmentUseCase createAppointmentUseCase;
   final SubmitReviewUseCase submitReviewUseCase;
   final CompleteAppointmentByQrUseCase completeAppointmentByQrUseCase;
 
+  // Stored filter state for pagination
+  String? _storedStatus;
+  String? _storedDateFilter;
+  int? _storedYear;
+  int _storedPage = 1;
+  bool _hasNextPage = false;
+  bool _isLoadingMore = false;
+
+  static const int _pageLimit = 10;
+
+  bool get hasNextPage => _hasNextPage;
+  bool get isLoadingMore => _isLoadingMore;
+
   AppointmentsCubit({
     required this.getAppointmentsUseCase,
-    required this.getFilteredAppointmentsUseCase,
     required this.cancelAppointmentUseCase,
     required this.createAppointmentUseCase,
     required this.submitReviewUseCase,
@@ -93,63 +103,121 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     );
   }
 
-  /// Get filtered appointments by status and date
+  /// Get filtered appointments by status and date — page 1, limit 10
   Future<void> getFilteredAppointments({
     String? status,
     String? dateFilter,
     int? year,
   }) async {
+    // Store filters for subsequent pages
+    _storedStatus = status;
+    _storedDateFilter = dateFilter;
+    _storedYear = year;
+    _storedPage = 1;
+    _hasNextPage = false;
+
     emit(const AppointmentsLoading());
 
-    final filter = status ?? 'All';
-    final result = await getFilteredAppointmentsUseCase(
-      GetFilteredAppointmentsParams(filter: filter),
+    final apiStatus = (status != null && status.toUpperCase() != 'ALL') ? status.toUpperCase() : null;
+
+    final result = await getAppointmentsUseCase(
+      GetAppointmentsParams(page: 1, limit: _pageLimit, status: apiStatus),
     );
 
     result.fold(
       (failure) => emit(AppointmentsError(message: failure.message)),
-      (appointments) {
-        // Apply client-side filtering to include expired appointments in Cancelled filter
-        List<AppointmentEntity> filteredAppointments = appointments;
+      (data) {
+        List<AppointmentEntity> appointments = List<AppointmentEntity>.from(data['data']);
+        appointments = _applyClientFilters(appointments, status, dateFilter, year);
 
-        if (filter.toUpperCase() == 'CANCELLED') {
-          // Include both actually cancelled and expired appointments
-          filteredAppointments = appointments.where((appointment) {
-            return appointment.status.toUpperCase() == 'CANCELLED' ||
-                appointment.isExpired;
-          }).toList();
-        } else if (filter.toUpperCase() != 'ALL') {
-          // For other filters, exclude expired appointments
-          filteredAppointments = appointments.where((appointment) {
-            return appointment.status.toUpperCase() == filter.toUpperCase() &&
-                !appointment.isExpired;
-          }).toList();
-        }
-
-        // Apply date filtering
-        if (dateFilter == 'last3Months') {
-          final threeMonthsAgo = DateTime.now().subtract(const Duration(days: 90));
-          filteredAppointments = filteredAppointments.where((appointment) {
-            return appointment.startTime.isAfter(threeMonthsAgo);
-          }).toList();
-        } else if (dateFilter == 'byYear' && year != null) {
-          filteredAppointments = filteredAppointments.where((appointment) {
-            return appointment.startTime.year == year;
-          }).toList();
-        }
-
-        // Sort appointments by date: most recent first (descending order)
-        filteredAppointments.sort((a, b) {
-          return b.startTime.compareTo(a.startTime);
-        });
+        _hasNextPage = data['hasNextPage'] as bool? ?? false;
 
         emit(AppointmentsLoaded(
-          appointments: filteredAppointments,
-          hasNextPage: false,
+          appointments: appointments,
+          hasNextPage: _hasNextPage,
           currentPage: 1,
         ));
       },
     );
+  }
+
+  /// Load next page using stored filters (called on scroll to bottom)
+  Future<void> loadNextPage() async {
+    if (!_hasNextPage || _isLoadingMore) return;
+    final currentState = state;
+    if (currentState is! AppointmentsLoaded) return;
+
+    _isLoadingMore = true;
+    _storedPage++;
+
+    // Emit loading-more state to keep current list visible
+    emit(AppointmentsLoadingMore(
+      currentAppointments: currentState.appointments,
+      currentPage: currentState.currentPage,
+    ));
+
+    final apiStatus = (_storedStatus != null && _storedStatus!.toUpperCase() != 'ALL')
+        ? _storedStatus!.toUpperCase()
+        : null;
+
+    final result = await getAppointmentsUseCase(
+      GetAppointmentsParams(page: _storedPage, limit: _pageLimit, status: apiStatus),
+    );
+
+    result.fold(
+      (failure) {
+        _storedPage--;
+        _isLoadingMore = false;
+        emit(AppointmentsLoaded(
+          appointments: currentState.appointments,
+          hasNextPage: _hasNextPage,
+          currentPage: currentState.currentPage,
+        ));
+      },
+      (data) {
+        List<AppointmentEntity> newItems = List<AppointmentEntity>.from(data['data']);
+        newItems = _applyClientFilters(newItems, _storedStatus, _storedDateFilter, _storedYear);
+
+        _hasNextPage = data['hasNextPage'] as bool? ?? false;
+        _isLoadingMore = false;
+
+        emit(AppointmentsLoaded(
+          appointments: [...currentState.appointments, ...newItems],
+          hasNextPage: _hasNextPage,
+          currentPage: _storedPage,
+        ));
+      },
+    );
+  }
+
+  /// Apply client-side date and expired filters
+  List<AppointmentEntity> _applyClientFilters(
+    List<AppointmentEntity> appointments,
+    String? status,
+    String? dateFilter,
+    int? year,
+  ) {
+    List<AppointmentEntity> filtered = appointments;
+
+    final upperStatus = status?.toUpperCase() ?? 'ALL';
+
+    if (upperStatus == 'CANCELLED') {
+      filtered = filtered.where((a) =>
+          a.status.toUpperCase() == 'CANCELLED' || a.isExpired).toList();
+    } else if (upperStatus != 'ALL') {
+      filtered = filtered.where((a) =>
+          a.status.toUpperCase() == upperStatus && !a.isExpired).toList();
+    }
+
+    if (dateFilter == 'last3Months') {
+      final threeMonthsAgo = DateTime.now().subtract(const Duration(days: 90));
+      filtered = filtered.where((a) => a.startTime.isAfter(threeMonthsAgo)).toList();
+    } else if (dateFilter == 'byYear' && year != null) {
+      filtered = filtered.where((a) => a.startTime.year == year).toList();
+    }
+
+    filtered.sort((a, b) => b.startTime.compareTo(a.startTime));
+    return filtered;
   }
 
   /// Cancel an appointment

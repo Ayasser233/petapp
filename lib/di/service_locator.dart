@@ -157,7 +157,6 @@ Future<void> setupServiceLocator() async {
 
   sl.registerFactory(() => AppointmentsCubit(
         getAppointmentsUseCase: sl(),
-        getFilteredAppointmentsUseCase: sl(),
         cancelAppointmentUseCase: sl(),
         createAppointmentUseCase: sl(),
         submitReviewUseCase: sl(),

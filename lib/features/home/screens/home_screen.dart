@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
@@ -39,6 +40,13 @@ class _HomeScreenState extends State<HomeScreen> {
     _locationService = Get.put(LocationService());
     _isGuestUser = _authService.authStatus == AuthStatus.guest;
     _initializeHomeScreen();
+
+    // Re-sort whenever GPS delivers (or updates) the position
+    _locationService.currentPositionRx.listen((_) {
+      if (mounted && nearbyVets.isNotEmpty) {
+        _sortAndUpdateNearbyVets(nearbyVets);
+      }
+    });
   }
 
   /// Initialize home screen with location and vets
@@ -65,30 +73,60 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  /// Load nearby vets
+  /// Load nearby vets, calculate distances, and sort nearest-first
   Future<void> _loadNearbyVets() async {
     if (!mounted) return;
-
-    setState(() {
-      _isLoadingVets = true;
-    });
+    setState(() => _isLoadingVets = true);
 
     try {
-      final vets = await _vetService.getNearByVets();
+      final pos = _locationService.currentPosition;
+
+      // Load a bigger pool so we can pick the truly closest after sorting.
+      // Also send coordinates so the server can pre-sort by nearest distance.
+      final response = await _vetService.getVets(
+        page: 1,
+        limit: 10,
+        latitude: pos?.latitude,
+        longitude: pos?.longitude,
+      );
+      final vets = response['vets'] as List<VetModel>;
       if (mounted) {
-        setState(() {
-          nearbyVets = vets;
-        });
+        _sortAndUpdateNearbyVets(vets);
       }
     } catch (e) {
-      throw Exception('Error loading nearby vets: $e');
+      // silently ignore – empty state will show
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingVets = false;
-        });
-      }
+      if (mounted) setState(() => _isLoadingVets = false);
     }
+  }
+
+  /// Calculate distances for every vet, sort nearest-first, keep top 5
+  void _sortAndUpdateNearbyVets(List<VetModel> vets) {
+    if (!mounted) return;
+
+    final pos = _locationService.currentPosition;
+
+    List<VetModel> updated;
+    if (pos != null) {
+      // Attach computed distance string + raw meters for sorting
+      final withDist = vets.map((vet) {
+        final lat = vet.latitude;
+        final lng = vet.longitude;
+        if (lat == null || lng == null) return (vet: vet, meters: double.maxFinite);
+        final meters = Geolocator.distanceBetween(pos.latitude, pos.longitude, lat, lng);
+        final formatted = meters < 1000
+            ? '${meters.round()} م'
+            : '${(meters / 1000).toStringAsFixed(1)} كم';
+        return (vet: vet.copyWith(distance: formatted), meters: meters);
+      }).toList();
+
+      withDist.sort((a, b) => a.meters.compareTo(b.meters));
+      updated = withDist.take(5).map((e) => e.vet).toList();
+    } else {
+      updated = vets.take(5).toList();
+    }
+
+    setState(() => nearbyVets = updated);
   }
 
   /// Handle refresh
@@ -749,6 +787,41 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
+                // Distance badge
+                if (vet.distance.isNotEmpty &&
+                    vet.distance != 'unknown' &&
+                    _locationService.isPermissionGranted)
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.orange.withValues(alpha: 0.9),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const FaIcon(
+                            FontAwesomeIcons.locationDot,
+                            color: Colors.white,
+                            size: 10,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            vet.distance,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
               ],
             ),
             // Info Section

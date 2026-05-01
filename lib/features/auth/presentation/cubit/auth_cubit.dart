@@ -161,9 +161,8 @@ class AuthCubit extends Cubit<AuthState> {
       case 404:
         return 'Service not found. Please try again later.';
       case 409:
-        return isSignup
-            ? 'Account already exists with this email or phone number.'
-            : 'Account conflict. Please contact support.';
+        return _extractErrorMessage(e.response?.data) ??
+            'An account already exists with this email or phone number.';
       case 422:
         return _extractErrorMessage(e.response?.data) ??
             'Please fix the errors in your submission.';
@@ -173,6 +172,13 @@ class AuthCubit extends Cubit<AuthState> {
       case 501:
       case 502:
       case 503:
+        // Detect duplicate-key DB error (server returns 500 instead of 409)
+        final rawMessage = _extractErrorMessage(e.response?.data) ?? '';
+        if (rawMessage.toLowerCase().contains('duplicate key') ||
+            rawMessage.toLowerCase().contains('unique constraint') ||
+            rawMessage.toLowerCase().contains('already exists')) {
+          return 'An account with this email or phone number already exists.';
+        }
         return 'Server error. Please try again later.';
       default:
         return _extractErrorMessage(e.response?.data) ??
@@ -435,8 +441,20 @@ class AuthCubit extends Cubit<AuthState> {
       ));
     } on DioException catch (e) {
       debugPrint('❌ Apple login failed: ${e.message}');
+      debugPrint('📊 Status code: ${e.response?.statusCode}');
+      debugPrint('📄 Response data: ${e.response?.data}');
+
+      String errorMessage = _formatDioError(e);
+      if (e.response?.statusCode == 409) {
+        final responseData = e.response?.data;
+        if (responseData is Map && responseData['message'] != null) {
+          errorMessage = responseData['message'].toString();
+        }
+        debugPrint('⚠️  Account already exists: $errorMessage');
+      }
+
       emit(AuthFailure(
-        message: _formatDioError(e),
+        message: errorMessage,
         errorCode: e.response?.statusCode,
       ));
     } catch (e) {
