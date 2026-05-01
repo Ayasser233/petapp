@@ -66,44 +66,16 @@ class AppointmentUtils {
     return status.toUpperCase() == 'COMPLETED';
   }
 
-  /// Check if appointment is expired and should be marked as cancelled
+  /// Check if appointment is expired — always false, status is determined by the server
   static bool isExpired(
-      DateTime appointmentDate, String appointmentTime, String status) {
-    // Don't mark already completed or cancelled appointments as expired
-    if (status.toUpperCase() == 'COMPLETED' ||
-        status.toUpperCase() == 'CANCELLED') {
-      return false;
-    }
-
-    try {
-      // Parse time (format: "HH:mm" or "HH:mm:ss")
-      final timeParts = appointmentTime.split(':');
-      final hour = int.parse(timeParts[0]);
-      final minute = int.parse(timeParts[1]);
-
-      // Create DateTime with appointment date and time
-      final appointmentDateTime = DateTime(
-        appointmentDate.year,
-        appointmentDate.month,
-        appointmentDate.day,
-        hour,
-        minute,
-      );
-
-      // Check if appointment date/time is in the past
-      return appointmentDateTime.isBefore(DateTime.now());
-    } catch (e) {
-      print('Error checking if appointment is expired: $e');
-      return false;
-    }
+      DateTime appointmentDate, String appointmentTime, String status,
+      {Duration gracePeriod = const Duration(hours: 4)}) {
+    return false;
   }
 
-  /// Get effective status (returns 'CANCELLED' if expired, otherwise original status)
+  /// Get effective status — returns raw server status directly (no time-based overrides)
   static String getEffectiveStatus(
       DateTime appointmentDate, String appointmentTime, String status) {
-    if (isExpired(appointmentDate, appointmentTime, status)) {
-      return 'CANCELLED';
-    }
     return status;
   }
 

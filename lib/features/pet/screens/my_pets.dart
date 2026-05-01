@@ -286,12 +286,7 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(40),
-                  child: Image.asset(
-                    pet.image,
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
-                  ),
+                  child: _buildPetImage(pet, 80),
                 ),
               ),
               const SizedBox(width: 16),
@@ -398,6 +393,54 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// Renders the pet avatar — network URL first, local asset as fallback
+  Widget _buildPetImage(PetModel pet, double size) {
+    final networkUrl = pet.imageUrl ?? '';
+    final isNetwork = networkUrl.isNotEmpty &&
+        (networkUrl.startsWith('http://') ||
+            networkUrl.startsWith('https://'));
+
+    if (isNetwork) {
+      return Image.network(
+        networkUrl,
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return Container(
+            width: size,
+            height: size,
+            color: Colors.grey[300],
+            child: const Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: AppColors.orange,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, _, __) => _localAssetImage(pet, size),
+      );
+    }
+    return _localAssetImage(pet, size);
+  }
+
+  Widget _localAssetImage(PetModel pet, double size) {
+    return Image.asset(
+      pet.image,
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      errorBuilder: (context, _, __) => Container(
+        width: size,
+        height: size,
+        color: Colors.grey[300],
+        child: const Icon(Icons.pets, color: Colors.grey, size: 36),
       ),
     );
   }

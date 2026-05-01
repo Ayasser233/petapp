@@ -5,10 +5,14 @@ import 'package:petapp/core/localization/app_localizations.dart';
 
 class VetConsultationFee extends StatelessWidget {
   final String price;
+  final double? emergencyPrice;
+  final bool hasEmergency;
 
   const VetConsultationFee({
     super.key,
     required this.price,
+    this.emergencyPrice,
+    this.hasEmergency = false,
   });
 
   @override
@@ -31,6 +35,7 @@ class VetConsultationFee extends StatelessWidget {
       ),
       child: Column(
         children: [
+          // Consultation Fee Row
           Row(
             children: [
               Expanded(
@@ -70,8 +75,46 @@ class VetConsultationFee extends StatelessWidget {
               ),
             ],
           ),
+
+          // Emergency Fee Row
+          if (hasEmergency && emergencyPrice != null) ...[
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: isDark ? 0.15 : 0.08),
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: Colors.red.withValues(alpha: isDark ? 0.4 : 0.25),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.emergency, color: Colors.red, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      AppLocalizations.of(context).emergencyFee,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '${emergencyPrice!.toStringAsFixed(0)} EGP',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+
           const SizedBox(height: 12),
-          // Points earning note without box
+          // Points earning note
           Row(
             children: [
               const Icon(

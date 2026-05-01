@@ -405,17 +405,23 @@ class ApiClient {
   Future<Response> saveNotificationToken(String fcmToken) async {
     try {
       debugPrint('📱 Saving FCM token to server: ${fcmToken.substring(0, 20)}...');
-      debugPrint('📤 Request body: {"notificationToken": "$fcmToken"}');
       final response = await _dio.patch(
         ApiConstants.notificationTokenEndpoint,
         data: {'notificationToken': fcmToken},
       );
       debugPrint('✅ FCM token saved successfully');
       return response;
+    } on DioException catch (e) {
+      // Duplicate-key 500 is handled gracefully upstream — don't log as an error
+      final isDuplicate = e.response?.statusCode == 500 &&
+          (e.response?.data?.toString() ?? '').contains('duplicate key');
+      if (!isDuplicate) {
+        debugPrint('❌ Failed to save FCM token: $e');
+        ErrorHandlerService.instance.handleError(e, suppressUserNotification: true);
+      }
+      rethrow;
     } catch (e) {
       debugPrint('❌ Failed to save FCM token: $e');
-      // Suppress user notification for FCM token errors - not critical
-      ErrorHandlerService.instance.handleError(e, suppressUserNotification: true);
       rethrow;
     }
   }
@@ -441,7 +447,12 @@ class ApiClient {
   // Handle possible token in response
   Future<void> _handleTokenResponse(Response response) async {
     if (response.data is Map<String, dynamic>) {
-      final data = response.data as Map<String, dynamic>;
+      final topLevel = response.data as Map<String, dynamic>;
+
+      // Tokens may be at the top level or nested inside a 'data' key
+      final data = (topLevel['data'] is Map<String, dynamic>)
+          ? topLevel['data'] as Map<String, dynamic>
+          : topLevel;
 
       // Handle both accessToken and access_token formats
       final accessToken = data['accessToken'] ?? data['access_token'];

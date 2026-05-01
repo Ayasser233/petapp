@@ -1,5 +1,6 @@
 import 'package:geolocator/geolocator.dart';
 import '../../../core/utils/api_constants.dart';
+import '../../../core/utils/map_url_utils.dart';
 import 'vet_schedule_model.dart';
 
 /// Represents a discount offered by a vet clinic
@@ -74,8 +75,6 @@ class VetModel {
   final int reviews;
   final int patients;
   final int yearsExperience;
-  final double? latitude;
-  final double? longitude;
   final String? phone;
   final String? email;
   final List<String> services;
@@ -89,6 +88,13 @@ class VetModel {
   final List<VetScheduleSlot>? scheduleSlots; // Schedule information from API
   final String? openingDaysText; // E.g., "Mon - Fri" or "Mon, Wed, Fri"
   final bool hasEmergency; // Whether vet offers emergency services
+  final double? emergencyPrice; // Emergency service price
+  final String? mapUrl; // Direct Google Maps link from API
+  final String? profileImage; // Vet's profile/avatar image
+
+  /// Coordinates (restored)
+  final double? latitude;
+  final double? longitude;
 
   VetModel({
     required this.id,
@@ -104,8 +110,6 @@ class VetModel {
     required this.reviews,
     required this.patients,
     required this.yearsExperience,
-    this.latitude,
-    this.longitude,
     this.phone,
     this.email,
     this.services = const [],
@@ -119,24 +123,25 @@ class VetModel {
     this.scheduleSlots,
     this.openingDaysText,
     this.hasEmergency = false,
+    this.emergencyPrice,
+    this.mapUrl,
+    this.profileImage,
+    this.latitude,
+    this.longitude,
   });
 
-  // Helper getter to get the first image (for cards)
+  // Helper getter to get the profile/primary image (for cards)
   String get primaryImage =>
-      images.isNotEmpty ? images.first : 'assets/images/pet_hospital.jpg';
+      profileImage ??
+      (images.isNotEmpty ? images.first : 'assets/images/pet_hospital.jpg');
 
   /// Calculate distance from current location
-  double? calculateDistanceFromCurrentLocation(
-      double? currentLat, double? currentLon) {
-    if (latitude == null ||
-        longitude == null ||
-        currentLat == null ||
-        currentLon == null) {
+  double? calculateDistanceFromCurrentLocation(double? currentLat, double? currentLon) {
+    if (latitude == null || longitude == null || currentLat == null || currentLon == null) {
       return null;
     }
 
-    return Geolocator.distanceBetween(
-        currentLat, currentLon, latitude!, longitude!);
+    return Geolocator.distanceBetween(currentLat, currentLon, latitude!, longitude!);
   }
 
   /// Check if clinic is currently open
@@ -342,13 +347,12 @@ class VetModel {
     String? location,
     String? distance,
     List<String>? images,
+    String? profileImage,
     String? description,
     double? rating,
     int? reviews,
     int? patients,
     int? yearsExperience,
-    double? latitude,
-    double? longitude,
     String? phone,
     String? email,
     List<String>? services,
@@ -362,6 +366,10 @@ class VetModel {
     List<VetScheduleSlot>? scheduleSlots,
     String? openingDaysText,
     bool? hasEmergency,
+    double? emergencyPrice,
+    String? mapUrl,
+    double? latitude,
+    double? longitude,
   }) {
     return VetModel(
       id: id ?? this.id,
@@ -370,13 +378,12 @@ class VetModel {
       location: location ?? this.location,
       distance: distance ?? this.distance,
       images: images ?? this.images,
+      profileImage: profileImage ?? this.profileImage,
       description: description ?? this.description,
       rating: rating ?? this.rating,
       reviews: reviews ?? this.reviews,
       patients: patients ?? this.patients,
       yearsExperience: yearsExperience ?? this.yearsExperience,
-      latitude: latitude ?? this.latitude,
-      longitude: longitude ?? this.longitude,
       phone: phone ?? this.phone,
       email: email ?? this.email,
       services: services ?? this.services,
@@ -390,6 +397,10 @@ class VetModel {
       scheduleSlots: scheduleSlots ?? this.scheduleSlots,
       openingDaysText: openingDaysText ?? this.openingDaysText,
       hasEmergency: hasEmergency ?? this.hasEmergency,
+      emergencyPrice: emergencyPrice ?? this.emergencyPrice,
+      mapUrl: mapUrl ?? this.mapUrl,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
     );
   }
 
@@ -402,13 +413,12 @@ class VetModel {
       'location': location,
       'distance': distance,
       'images': images,
+      'profileImage': profileImage,
       'description': description,
       'rating': rating,
       'reviews': reviews,
       'patients': patients,
       'yearsExperience': yearsExperience,
-      'latitude': latitude,
-      'longitude': longitude,
       'phone': phone,
       'email': email,
       'services': services,
@@ -418,6 +428,11 @@ class VetModel {
       'bio': bio,
       'ownerId': ownerId,
       'discount': discount?.toJson(),
+      'hasEmergency': hasEmergency,
+      'emergencyPrice': emergencyPrice,
+      'mapUrl': mapUrl,
+      'latitude': latitude,
+      'longitude': longitude,
     };
   }
 
@@ -425,7 +440,6 @@ class VetModel {
   factory VetModel.fromMap(Map<String, dynamic> map) {
     List<String> imagesList = [];
 
-    // Handle both 'images' array and single 'image' field
     if (map['images'] != null && map['images'] is List) {
       imagesList = List<String>.from(map['images']);
     } else if (map['image'] != null) {
@@ -438,16 +452,13 @@ class VetModel {
       category: map['category'] ?? '',
       location: map['location'] ?? '',
       distance: map['distance'] ?? '',
-      images: imagesList.isNotEmpty
-          ? imagesList
-          : const ['assets/images/pet_hospital.jpg'],
+      images: imagesList,
+      profileImage: map['profileImage']?.toString(),
       description: map['description'] ?? '',
       rating: (map['rating'] ?? 0.0).toDouble(),
       reviews: map['reviews'] ?? 0,
       patients: map['patients'] ?? 0,
       yearsExperience: map['yearsExperience'] ?? 0,
-      latitude: map['latitude']?.toDouble(),
-      longitude: map['longitude']?.toDouble(),
       phone: map['phone'],
       email: map['email'],
       services: List<String>.from(map['services'] ?? []),
@@ -460,6 +471,10 @@ class VetModel {
           ? VetDiscount.fromJson(map['discount'])
           : null,
       hasEmergency: map['hasEmergency'] ?? false,
+      emergencyPrice: _parseDouble(map['emergencyPrice']),
+      mapUrl: map['mapUrl']?.toString(),
+      latitude: _parseDouble(map['latitude']) ?? _parseDouble(map['lat']),
+      longitude: _parseDouble(map['longitude']) ?? _parseDouble(map['lng']),
     );
   }
 
@@ -467,7 +482,7 @@ class VetModel {
   factory VetModel.fromJson(Map<String, dynamic> json) {
     // Debug: Print the raw JSON to see what the API is sending
 
-    // Handle location object or string
+    // Handle location object or string + extract coordinates
     String locationString = '';
     double? lat;
     double? lng;
@@ -478,49 +493,51 @@ class VetModel {
       } else if (json['location'] is Map) {
         final locationMap = json['location'] as Map<String, dynamic>;
         locationString = locationMap['address']?.toString() ??
-            '${locationMap['city'] ?? ''}, ${locationMap['state'] ?? ''}'
-                .trim();
+            '${locationMap['city'] ?? ''}, ${locationMap['state'] ?? ''}'.trim();
 
-        // Extract coordinates from location object
-        if (locationMap['coordinates'] != null) {
-          final coords = locationMap['coordinates'] as Map<String, dynamic>;
-          // Handle coordinates as string or number
-          lat = _parseDouble(coords['lat']);
-          lng = _parseDouble(coords['lng']);
+        // coordinates: {lat: "30...", lng: "31..."}
+        final coordinates = locationMap['coordinates'];
+        if (coordinates is Map) {
+          lat = _parseDouble(coordinates['lat']);
+          lng = _parseDouble(coordinates['lng']);
         }
       }
     }
 
-    // Handle images - support both array and single image
+    // Fallback: try to parse coordinates from mapUrl if API didn't provide them
+    final mapUrl = json['mapUrl']?.toString();
+    if ((lat == null || lng == null) && mapUrl != null && mapUrl.trim().isNotEmpty) {
+      final coords = _tryParseCoordsFromMapUrl(mapUrl.trim());
+      lat ??= coords?.$1;
+      lng ??= coords?.$2;
+    }
+
+    // Handle images - gallery photos only (profileImage is stored separately)
     List<String> imagesList = [];
 
-    // First, handle profileImage - this is the primary display image for cards
-    if (json['profileImage'] != null && json['profileImage'].toString().trim().isNotEmpty) {
-      final profileImagePath = _convertImagePath(json['profileImage'].toString());
-      imagesList.add(profileImagePath);
-    }
+    // Parse profileImage separately
+    final profileImageRaw = json['profileImage']?.toString().trim();
+    final String? parsedProfileImage = (profileImageRaw != null && profileImageRaw.isNotEmpty)
+        ? _convertImagePath(profileImageRaw)
+        : null;
 
-    // Then, handle the images array if it exists and has items
+    // Gallery images from the 'images' array
     if (json['images'] != null && json['images'] is List) {
-      final imagesArray = json['images'] as List;
-      if (imagesArray.isNotEmpty) {
-        final additionalImages = imagesArray
-            .where((img) => img != null && img.toString().trim().isNotEmpty)
-            .map((img) => _convertImagePath(img.toString()))
-            .where((path) => !imagesList.contains(path)) // Avoid duplicates
-            .toList();
-        imagesList.addAll(additionalImages);
-      }
+      final imagesArray = (json['images'] as List)
+          .where((img) => img != null && img.toString().trim().isNotEmpty)
+          .map((img) => _convertImagePath(img.toString()))
+          .toList();
+      imagesList = imagesArray;
     }
 
-    // Fallback to other single image fields if both are empty
-    if (imagesList.isEmpty) {
+    // Fallback to other single image fields if still empty
+    if (imagesList.isEmpty && parsedProfileImage == null) {
       final singleImage = json['image']?.toString() ??
           json['imageUrl']?.toString() ??
           json['photo']?.toString() ??
           json['picture']?.toString();
-      if (singleImage != null && singleImage.isNotEmpty) {
-        imagesList = [_convertImagePath(singleImage)];
+      if (singleImage != null && singleImage.trim().isNotEmpty) {
+        imagesList = [_convertImagePath(singleImage.trim())];
       }
     }
 
@@ -537,7 +554,8 @@ class VetModel {
       distance: json['distance']?.toString() ?? 'Calculating...',
       images: imagesList.isNotEmpty
           ? imagesList
-          : const ['assets/images/pet_hospital.jpg'],
+          : const [],
+      profileImage: parsedProfileImage,
       description: json['description']?.toString() ??
           json['about']?.toString() ??
           json['bio']?.toString() ??
@@ -563,10 +581,6 @@ class VetModel {
           _parseInt(json['experienceYears']) ??
           _parseInt(json['experience_years']) ??
           0,
-      latitude:
-          lat ?? _parseDouble(json['latitude']) ?? _parseDouble(json['lat']),
-      longitude:
-          lng ?? _parseDouble(json['longitude']) ?? _parseDouble(json['lng']),
       phone: json['phone']?.toString() ??
           json['phoneNumber']?.toString() ??
           json['contact']?.toString(),
@@ -605,7 +619,73 @@ class VetModel {
           : null,
       isAvailable: json['isAvailable'] as bool?,
       hasEmergency: json['hasEmergency'] ?? false,
+      emergencyPrice: (json['emergencyPrice'] is int)
+          ? (json['emergencyPrice'] as int).toDouble()
+          : json['emergencyPrice']?.toDouble(),
+      mapUrl: json['mapUrl']?.toString(),
+      latitude: lat ?? _parseDouble(json['latitude']) ?? _parseDouble(json['lat']),
+      longitude: lng ?? _parseDouble(json['longitude']) ?? _parseDouble(json['lng']),
     );
+  }
+
+  /// Try to extract (lat,lng) from a google maps url.
+  /// Supports patterns like:
+  /// - https://www.google.com/maps?q=30.1,31.2
+  /// - https://www.google.com/maps/search/?api=1&query=30.1,31.2
+  /// - .../@30.1,31.2,15z
+  /// - ...?ll=30.1,31.2
+  static (double, double)? _tryParseCoordsFromMapUrl(String url) {
+    try {
+      final uri = Uri.tryParse(url);
+      if (uri == null) return null;
+
+      // 1) query params: q / query / ll
+      for (final key in const ['q', 'query', 'll']) {
+        final raw = uri.queryParameters[key];
+        final coords = _tryParseLatLngPair(raw);
+        if (coords != null) return coords;
+      }
+
+      // 2) path pattern: /@lat,lng,zoom
+      final matchAt = RegExp(r'@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)').firstMatch(url);
+      if (matchAt != null) {
+        final a = double.tryParse(matchAt.group(1)!);
+        final b = double.tryParse(matchAt.group(2)!);
+        if (a != null && b != null) return (a, b);
+      }
+
+      // 3) any lat,lng token in the url (last resort)
+      final matchAny = RegExp(r'(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)').firstMatch(url);
+      if (matchAny != null) {
+        final a = double.tryParse(matchAny.group(1)!);
+        final b = double.tryParse(matchAny.group(2)!);
+        if (a != null && b != null) return (a, b);
+      }
+
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Asynchronously resolve a (possibly shortened) Google Maps URL and extract
+  /// (lat, lng). Returns null if coordinates cannot be determined.
+  static Future<(double, double)?> resolveMapUrlCoords(String url) =>
+      MapUrlUtils.resolveAndParseLatLng(url);
+
+  static (double, double)? _tryParseLatLngPair(String? raw) {
+    if (raw == null) return null;
+    final cleaned = raw.trim();
+    if (cleaned.isEmpty) return null;
+
+    // Some urls may include extra text, keep only the first "lat,lng" pair.
+    final m = RegExp(r'(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)').firstMatch(cleaned);
+    if (m == null) return null;
+
+    final lat = double.tryParse(m.group(1)!);
+    final lng = double.tryParse(m.group(2)!);
+    if (lat == null || lng == null) return null;
+    return (lat, lng);
   }
 
   /// Convert to JSON (for API requests)
@@ -622,8 +702,6 @@ class VetModel {
       'reviews': reviews,
       'patients': patients,
       'yearsExperience': yearsExperience,
-      'latitude': latitude,
-      'longitude': longitude,
       'phone': phone,
       'email': email,
       'services': services,
@@ -635,21 +713,20 @@ class VetModel {
     };
   }
 
-  /// Helper method to parse double from dynamic value (handles string or number)
-  static double? _parseDouble(dynamic value) {
-    if (value == null) return null;
-    if (value is double) return value;
-    if (value is int) return value.toDouble();
-    if (value is String) return double.tryParse(value);
-    return null;
-  }
-
   /// Helper method to parse int from dynamic value (handles string or number)
   static int? _parseInt(dynamic value) {
     if (value == null) return null;
     if (value is int) return value;
     if (value is double) return value.toInt();
     if (value is String) return int.tryParse(value);
+    return null;
+  }
+
+  static double? _parseDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value);
     return null;
   }
 

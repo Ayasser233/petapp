@@ -13,10 +13,14 @@ class AuthResponse {
   });
 
   factory AuthResponse.fromJson(Map<String, dynamic> json) {
+    // Unwrap nested 'data' key if present (e.g. {"success":true,"data":{...}})
+    final d = (json['data'] is Map<String, dynamic>)
+        ? json['data'] as Map<String, dynamic>
+        : json;
     return AuthResponse(
-      accessToken: json['accessToken'] ?? json['access_token'] ?? '',
-      refreshToken: json['refreshToken'] ?? json['refresh_token'] ?? '',
-      user: UserModel.fromJson(json['user'] ?? {}),
+      accessToken: d['accessToken'] ?? d['access_token'] ?? '',
+      refreshToken: d['refreshToken'] ?? d['refresh_token'] ?? '',
+      user: UserModel.fromJson(d['user'] ?? {}),
     );
   }
 
@@ -48,11 +52,14 @@ class RegisterResponse {
   });
 
   factory RegisterResponse.fromJson(Map<String, dynamic> json) {
+    final d = (json['data'] is Map<String, dynamic>)
+        ? json['data'] as Map<String, dynamic>
+        : json;
     return RegisterResponse(
-      message: json['message'] ?? 'Registration successful',
-      user: json['user'] != null ? UserModel.fromJson(json['user']) : null,
-      accessToken: json['accessToken'] ?? json['access_token'],
-      refreshToken: json['refreshToken'] ?? json['refresh_token'],
+      message: json['message'] ?? d['message'] ?? 'Registration successful',
+      user: d['user'] != null ? UserModel.fromJson(d['user']) : null,
+      accessToken: d['accessToken'] ?? d['access_token'],
+      refreshToken: d['refreshToken'] ?? d['refresh_token'],
     );
   }
 
@@ -178,9 +185,12 @@ class RefreshTokenResponse {
   });
 
   factory RefreshTokenResponse.fromJson(Map<String, dynamic> json) {
+    final d = (json['data'] is Map<String, dynamic>)
+        ? json['data'] as Map<String, dynamic>
+        : json;
     return RefreshTokenResponse(
-      accessToken: json['accessToken'] ?? json['access_token'] ?? '',
-      refreshToken: json['refreshToken'] ?? json['refresh_token'] ?? '',
+      accessToken: d['accessToken'] ?? d['access_token'] ?? '',
+      refreshToken: d['refreshToken'] ?? d['refresh_token'] ?? '',
     );
   }
 

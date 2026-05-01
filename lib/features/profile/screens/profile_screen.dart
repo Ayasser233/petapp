@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:in_app_review/in_app_review.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/services/auth_service.dart';
@@ -7,6 +8,7 @@ import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/profile/screens/account_details_screen.dart';
+import 'package:petapp/core/services/whatsapp_launcher_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -45,131 +47,72 @@ class ProfileScreen extends StatelessWidget {
                 // Guest user banner
                 if (isGuest) _buildGuestProfileBanner(context, isDark),
 
-                if (!isGuest)
-                  // Profile options list
-                  _buildProfileOption(
-                    context,
-                    localizations.myAccount,
-                    FontAwesomeIcons.circleUser,
-                    () {
-                      try {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const AccountDetailsScreen(),
-                          ),
-                        );
-                      } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
+                // ── Grouped section: Account / My Pets / Aleefy Points ──────
+                _buildSectionCard(
+                  context,
+                  isDark: isDark,
+                  cardColor: cardColor,
+                  items: [
+                    if (!isGuest)
+                      _SectionItem(
+                        icon: FontAwesomeIcons.circleUser,
+                        label: localizations.myAccount,
+                        onTap: () {
+                          try {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => const AccountDetailsScreen(),
+                            ));
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: Text(
-                                  localizations.errorOpeningAccountDetails)),
-                        );
-                      }
-                    },
-                    isDark: isDark,
-                    cardColor: cardColor,
-                  ),
-
-                if (!isGuest) const SizedBox(height: 12),
-
-                _buildProfileOption(
-                  context,
-                  localizations.myPets,
-                  FontAwesomeIcons.paw,
-                  () {
-                    if (isGuest) {
-                      _showLoginRequiredDialog(context);
-                    } else {
-                      Get.toNamed(AppRoutes.myPets);
-                    }
-                  },
-                  isDark: isDark,
-                  cardColor: cardColor,
+                                  localizations.errorOpeningAccountDetails),
+                            ));
+                          }
+                        },
+                      ),
+                    _SectionItem(
+                      icon: FontAwesomeIcons.paw,
+                      label: localizations.myPets,
+                      onTap: () => isGuest
+                          ? _showLoginRequiredDialog(context)
+                          : Get.toNamed(AppRoutes.myPets),
+                    ),
+                    _SectionItem(
+                      icon: FontAwesomeIcons.star,
+                      label: localizations.aleefyPoints,
+                      onTap: () => isGuest
+                          ? _showLoginRequiredDialog(context)
+                          : Get.toNamed(AppRoutes.pointsHistory),
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 12),
 
-                // Aleefy Points option
-                _buildProfileOptionWithCount(
+                // ── Grouped section: Settings / Rate the App / Contact Support ──
+                _buildSectionCard(
                   context,
-                  localizations.aleefyPoints,
-                  FontAwesomeIcons.star,
-                  () {
-                    if (isGuest) {
-                      _showLoginRequiredDialog(context);
-                    } else {
-                      Get.toNamed(AppRoutes.pointsHistory);
-                    }
-                  },
                   isDark: isDark,
                   cardColor: cardColor,
+                  items: [
+                    _SectionItem(
+                      icon: FontAwesomeIcons.gear,
+                      label: localizations.settings,
+                      onTap: () => Get.toNamed(AppRoutes.settings),
+                    ),
+                    _SectionItem(
+                      icon: FontAwesomeIcons.solidStar,
+                      label: 'Rate the App',
+                      onTap: () => _rateApp(context),
+                    ),
+                    _SectionItem(
+                      icon: FontAwesomeIcons.headset,
+                      label: 'Contact Support',
+                      onTap: () => _showSupportOptions(context),
+                    ),
+                  ],
                 ),
 
-                const SizedBox(height: 12),
-
-                /*InkWell(
-                  onTap: () => Get.toNamed(AppRoutes.favorites),
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-                    decoration: BoxDecoration(
-                      color: cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.lightorange.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const FaIcon(
-                            FontAwesomeIcons.heart,
-                            color: AppColors.orange,
-                            size: 22,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Text(
-                            localizations.favorites,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              color: textColor,
-                            ),
-                          ),
-                        ),
-                        const FaIcon(
-                          FontAwesomeIcons.chevronRight,
-                          size: 16,
-                          color: Colors.grey,
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-                
-                const SizedBox(height: 12),*/
-
-                _buildProfileOption(
-                  context,
-                  localizations.settings,
-                  FontAwesomeIcons.gear,
-                  () {
-                    Get.toNamed(AppRoutes.settings);
-                  },
-                  isDark: isDark,
-                  cardColor: cardColor,
-                ),
                 const SizedBox(height: 12),
 
                 _buildProfileOption(
@@ -294,10 +237,10 @@ class ProfileScreen extends StatelessWidget {
                           ),
                           const SizedBox(width: 24),
                           _buildSocialIcon(
-                            FontAwesomeIcons.linkedin,
+                            FontAwesomeIcons.globe,
                             context,
-                            'LinkedIn',
-                            'https://www.linkedin.com/company/aleefy',
+                            'Website',
+                            'https://aleefy.app',
                           ),
                         ],
                       ),
@@ -360,7 +303,252 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Profile option widget
+  // ── Grouped section card ──────────────────────────────────────────────────
+
+  Widget _buildSectionCard(
+    BuildContext context, {
+    required bool isDark,
+    required Color cardColor,
+    required List<_SectionItem> items,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          for (int i = 0; i < items.length; i++) ...[
+            _buildSectionTile(context, items[i], isDark: isDark),
+            if (i < items.length - 1)
+              Divider(
+                height: 1,
+                indent: 56,
+                endIndent: 16,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.07)
+                    : Colors.black.withValues(alpha: 0.06),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTile(
+    BuildContext context,
+    _SectionItem item, {
+    required bool isDark,
+  }) {
+    final textColor = isDark ? Colors.white : Colors.black87;
+    return InkWell(
+      onTap: item.onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.lightorange.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: FaIcon(item.icon, color: AppColors.orange, size: 20),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                item.label,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: textColor,
+                ),
+              ),
+            ),
+            const FaIcon(FontAwesomeIcons.chevronRight,
+                size: 14, color: Colors.grey),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Support bottom sheet ──────────────────────────────────────────────────
+
+  void _showSupportOptions(BuildContext context) {
+    final isDark = THelperFunctions.isDarkMode(context);
+    final sheetBg = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: sheetBg,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // drag handle
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              Text(
+                'Contact Support',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Choose how you\'d like to reach us',
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+              ),
+              const SizedBox(height: 20),
+
+              // WhatsApp option
+              _buildSheetOption(
+                context: ctx,
+                icon: FontAwesomeIcons.whatsapp,
+                iconColor: const Color(0xFF25D366),
+                label: 'WhatsApp',
+                subtitle: 'Chat with us directly',
+                onTap: () {
+                  Navigator.pop(ctx);
+                  WhatsAppLauncherService.openSupportChat(context: context);
+                },
+                isDark: isDark,
+              ),
+
+              const SizedBox(height: 10),
+
+              // Email option
+              _buildSheetOption(
+                context: ctx,
+                icon: FontAwesomeIcons.envelope,
+                iconColor: AppColors.orange,
+                label: 'Email',
+                subtitle: 'Send us an email',
+                onTap: () {
+                  Navigator.pop(ctx);
+                  WhatsAppLauncherService.openSupportEmail(context: context);
+                },
+                isDark: isDark,
+              ),
+
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSheetOption({
+    required BuildContext context,
+    required IconData icon,
+    required Color iconColor,
+    required String label,
+    required String subtitle,
+    required VoidCallback onTap,
+    required bool isDark,
+  }) {
+    final cardColor = isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF7F7F7);
+    final textColor = isDark ? Colors.white : Colors.black87;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: FaIcon(icon, color: iconColor, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label,
+                      style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: textColor)),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      style: TextStyle(
+                          fontSize: 12, color: Colors.grey.shade500)),
+                ],
+              ),
+            ),
+            FaIcon(FontAwesomeIcons.chevronRight,
+                size: 13, color: Colors.grey.shade400),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ── Rate the App ──────────────────────────────────────────────────────────
+
+  Future<void> _rateApp(BuildContext context) async {
+    final inAppReview = InAppReview.instance;
+    try {
+      if (await inAppReview.isAvailable()) {
+        await inAppReview.requestReview();
+      } else {
+        await inAppReview.openStoreListing(
+          appStoreId: '6757188379',          // iOS App Store
+          microsoftStoreId: null,
+        );
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Unable to open the store right now.'),
+            behavior: SnackBarBehavior.floating,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+    }
+  }
+
+  // ── Existing helpers (unchanged) ─────────────────────────────────────────
+
   Widget _buildProfileOption(
       BuildContext context, String title, IconData icon, VoidCallback onTap,
       {bool isDark = false, Color cardColor = Colors.white, Color? textColor}) {
@@ -390,11 +578,7 @@ class ProfileScreen extends StatelessWidget {
                 color: AppColors.lightorange.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: FaIcon(
-                icon,
-                color: AppColors.orange,
-                size: 22,
-              ),
+              child: FaIcon(icon, color: AppColors.orange, size: 22),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -407,81 +591,14 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
             ),
-            const FaIcon(
-              FontAwesomeIcons.chevronRight,
-              size: 16,
-              color: Colors.grey,
-            ),
+            const FaIcon(FontAwesomeIcons.chevronRight,
+                size: 16, color: Colors.grey),
           ],
         ),
       ),
     );
   }
 
-  // Profile option with count display
-  Widget _buildProfileOptionWithCount(
-      BuildContext context, String title, IconData icon, VoidCallback onTap,
-      {bool isDark = false, Color cardColor = Colors.white, Color? textColor}) {
-    final defaultTextColor = isDark ? Colors.white : Colors.black87;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 5,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: AppColors.lightorange.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: FaIcon(
-                icon,
-                color: AppColors.orange,
-                size: 22,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: textColor ?? defaultTextColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const FaIcon(
-              FontAwesomeIcons.chevronRight,
-              size: 16,
-              color: Colors.grey,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // Social icon widget
   Widget _buildSocialIcon(
       IconData icon, BuildContext context, String label, String url) {
     return InkWell(
@@ -492,24 +609,20 @@ class ProfileScreen extends StatelessWidget {
             await launchUrl(uri, mode: LaunchMode.externalApplication);
           } else {
             if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Could not open $label'),
-                  duration: const Duration(seconds: 2),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text('Could not open $label'),
+                duration: const Duration(seconds: 2),
+                backgroundColor: Colors.red,
+              ));
             }
           }
         } catch (e) {
           if (context.mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Error opening $label'),
-                duration: const Duration(seconds: 2),
-                backgroundColor: Colors.red,
-              ),
-            );
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text('Error opening $label'),
+              duration: const Duration(seconds: 2),
+              backgroundColor: Colors.red,
+            ));
           }
         }
       },
@@ -520,16 +633,11 @@ class ProfileScreen extends StatelessWidget {
           color: AppColors.lightorange.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: FaIcon(
-          icon,
-          color: AppColors.orange,
-          size: 22,
-        ),
+        child: FaIcon(icon, color: AppColors.orange, size: 22),
       ),
     );
   }
 
-  // Show login required dialog
   void _showLoginRequiredDialog(BuildContext context) {
     final localizations = AppLocalizations.of(context);
     showDialog(
@@ -539,9 +647,7 @@ class ProfileScreen extends StatelessWidget {
         content: Text(localizations.loginRequiredMessage),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
+            onPressed: () => Navigator.of(context).pop(),
             child: Text(localizations.cancel),
           ),
           ElevatedButton(
@@ -549,9 +655,8 @@ class ProfileScreen extends StatelessWidget {
               Navigator.of(context).pop();
               Get.toNamed(AppRoutes.login);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.orange,
-            ),
+            style:
+                ElevatedButton.styleFrom(backgroundColor: AppColors.orange),
             child: Text(localizations.login),
           ),
         ],
@@ -559,7 +664,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  // Build guest profile banner
   Widget _buildGuestProfileBanner(BuildContext context, bool isDark) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -571,50 +675,52 @@ class ProfileScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const Icon(
-            Icons.person_outline,
-            size: 48,
-            color: AppColors.orange,
-          ),
+          const Icon(Icons.person_outline, size: 48, color: AppColors.orange),
           const SizedBox(height: 12),
           const Text(
             'You\'re browsing as a guest',
             style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.orange,
-            ),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColors.orange),
           ),
           const SizedBox(height: 8),
           const Text(
             'Create an account to access all features',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-            ),
+            style: TextStyle(fontSize: 14),
           ),
           const SizedBox(height: 16),
           ElevatedButton(
-            onPressed: () {
-              Get.toNamed(AppRoutes.login);
-            },
+            onPressed: () => Get.toNamed(AppRoutes.login),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.orange,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+                  borderRadius: BorderRadius.circular(8)),
             ),
             child: const Text(
               'Login or Register',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+// ── Private data class for section tiles ─────────────────────────────────────
+
+class _SectionItem {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _SectionItem({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 }
