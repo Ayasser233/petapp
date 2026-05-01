@@ -268,17 +268,17 @@ class SettingsScreen extends StatelessWidget {
             },
             icon: FontAwesomeIcons.bell,
           ),
-          _buildDivider(),
-          _buildSwitchTile(
-            context: context,
-            title: localizations.emailNotifications,
-            subtitle: localizations.receiveEmailUpdates,
-            value: settingsProvider.emailNotificationsEnabled,
-            onChanged: (value) {
-              settingsProvider.setEmailNotificationsEnabled(value);
-            },
-            icon: FontAwesomeIcons.envelope,
-          )
+          // _buildDivider(),
+          // _buildSwitchTile(
+          //   context: context,
+          //   title: localizations.emailNotifications,
+          //   subtitle: localizations.receiveEmailUpdates,
+          //   value: settingsProvider.emailNotificationsEnabled,
+          //   onChanged: (value) {
+          //     settingsProvider.setEmailNotificationsEnabled(value);
+          //   },
+          //   icon: FontAwesomeIcons.envelope,
+          // )
         ],
       ),
     );
