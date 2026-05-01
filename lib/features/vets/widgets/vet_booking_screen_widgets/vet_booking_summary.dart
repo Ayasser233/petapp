@@ -26,6 +26,7 @@ class VetBookingSummary extends StatelessWidget {
     final vetName = args?['vet']?['name'];
     final serviceName = args?['service'];
     final priceStr = args?['price'];
+    final isEmergency = args?['isEmergency'] == true;
 
     // Parse discount from vet data
     VetDiscount? discount;
@@ -96,14 +97,16 @@ class VetBookingSummary extends StatelessWidget {
               subTextColor,
             ),
             const SizedBox(height: 12),
-            _buildSummaryRow(
-              context,
-              Icons.attach_money,
-              AppLocalizations.of(context).price,
-              priceStr,
-              textColor,
-              subTextColor,
-            ),
+            isEmergency
+                ? _buildEmergencyPriceRow(context, priceStr, textColor, subTextColor)
+                : _buildSummaryRow(
+                    context,
+                    Icons.attach_money,
+                    AppLocalizations.of(context).price,
+                    priceStr,
+                    textColor,
+                    subTextColor,
+                  ),
 
             // Points redemption section
             const SizedBox(height: 16),
@@ -452,6 +455,49 @@ class VetBookingSummary extends StatelessWidget {
         ],
       );
     });
+  }
+
+  /// Build emergency price row with red styling
+  Widget _buildEmergencyPriceRow(
+    BuildContext context,
+    String price,
+    Color textColor,
+    Color? subTextColor,
+  ) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.emergency, color: Colors.red, size: 20),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  AppLocalizations.of(context).emergencyFee,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Colors.red.withValues(alpha: 0.8),
+                      ),
+                ),
+                Text(
+                  price,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   /// Build summary row

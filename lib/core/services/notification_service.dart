@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -136,6 +137,22 @@ class NotificationService extends GetxService {
       await prefs.setString(_fcmTokenKey, token);
 
       debugPrint('✅ FCM token synced with server successfully');
+    } on DioException catch (e) {
+      // The server has a unique constraint on (user, token).
+      // A 500 "duplicate key" means the token is already registered — treat as success.
+      final isDuplicate = e.response?.statusCode == 500 &&
+          (e.response?.data?.toString() ?? '').contains('duplicate key');
+
+      if (isDuplicate) {
+        debugPrint('✅ FCM token already registered on server (duplicate key — OK)');
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setBool(_fcmTokenSentKey, true);
+        await prefs.setString(_fcmTokenKey, token);
+        return;
+      }
+
+      debugPrint('❌ Failed to save FCM token to server: $e');
+      // Don't throw error - notification token sync is not critical
     } catch (e) {
       debugPrint('❌ Failed to save FCM token to server: $e');
       // Don't throw error - notification token sync is not critical

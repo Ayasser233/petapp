@@ -67,7 +67,11 @@ class TimeSlotModel {
   }
 
   /// Check if the time slot has expired (for today's date only)
-  bool isExpired(DateTime selectedDate) {
+  ///
+  /// A slot should not expire exactly at its start time; users may still need time
+  /// to confirm/complete booking. We consider it expired only after the slot END
+  /// time plus a grace period.
+  bool isExpired(DateTime selectedDate, {Duration gracePeriod = const Duration(hours: 4)}) {
     // Only check expiration for today's date
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
@@ -79,15 +83,15 @@ class TimeSlotModel {
       return false;
     }
 
-    // Parse start time and check if it has passed
+    // Parse end time and check if it has passed + grace period
     try {
-      final parts = startTime.split(':');
+      final parts = endTime.split(':');
       if (parts.isEmpty) return false;
 
       final hour = int.tryParse(parts[0]) ?? 0;
       final minute = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
 
-      final slotDateTime = DateTime(
+      final slotEndDateTime = DateTime(
         now.year,
         now.month,
         now.day,
@@ -95,8 +99,8 @@ class TimeSlotModel {
         minute,
       );
 
-      // Slot is expired if start time has passed
-      return now.isAfter(slotDateTime);
+      // Slot is expired only after end time + grace.
+      return now.isAfter(slotEndDateTime.add(gracePeriod));
     } catch (e) {
       return false;
     }

@@ -28,46 +28,37 @@ class _ClinicHeaderState extends State<VetHeader> {
   }
 
   List<String> _getVetImages() {
-    // Get the images array from the vet data
+    // Gallery images only (vets/... paths)
     final images = widget.vet['images'];
-
     List<String> vetImages = [];
 
-    // If images array exists and has items, use them
     if (images != null && images is List && images.isNotEmpty) {
-      // Convert all image paths to proper URLs
       vetImages = images
           .where((img) => img != null && img.toString().trim().isNotEmpty)
           .map((img) => _convertImagePath(img.toString()))
           .toList();
     }
 
-    // If we have images now, return them
-    if (vetImages.isNotEmpty) {
-      return vetImages;
-    }
+    if (vetImages.isNotEmpty) return vetImages;
 
-    // Fallback: Check for profileImage field
-    final profileImage = widget.vet['profileImage'];
-    if (profileImage != null && profileImage.toString().trim().isNotEmpty) {
-      return [_convertImagePath(profileImage.toString())];
-    }
-
-    // Fallback: Check for any other single image field
+    // Fallback to any single image field
     final singleImage = widget.vet['image']?.toString() ??
         widget.vet['imageUrl']?.toString() ??
         widget.vet['photo']?.toString();
-
     if (singleImage != null && singleImage.trim().isNotEmpty) {
       return [_convertImagePath(singleImage)];
     }
 
-    // Default fallback images
     return [
       'assets/images/pet_hospital.jpg',
-      'assets/images/pet_hospital2.jpg',
-      'assets/images/pet_hospital3.jpg',
     ];
+  }
+
+  /// Returns the profile/avatar image URL (separate from gallery)
+  String? _getProfileImage() {
+    final raw = widget.vet['profileImage']?.toString().trim();
+    if (raw != null && raw.isNotEmpty) return _convertImagePath(raw);
+    return null;
   }
 
   /// Convert image path to full URL - matches VetModel logic
@@ -178,32 +169,29 @@ class _ClinicHeaderState extends State<VetHeader> {
     final textColor = isDark ? Colors.white : Colors.black;
     final subTextColor = isDark ? Colors.grey[400] : Colors.grey[700];
     final vetImages = _getVetImages();
+    final profileImageUrl = _getProfileImage();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Photo Slider
+        // ── Gallery slider + profile avatar overlay ──────────────
         Stack(
+          clipBehavior: Clip.none,
           children: [
+            // Gallery slider
             ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: SizedBox(
-                height: 250,
+                height: 220,
                 child: PageView.builder(
                   controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                  },
+                  onPageChanged: (index) => setState(() => _currentPage = index),
                   itemCount: vetImages.length,
-                  itemBuilder: (context, index) {
-                    return _buildImage(vetImages[index]);
-                  },
+                  itemBuilder: (context, index) => _buildImage(vetImages[index]),
                 ),
               ),
             ),
-            // Page Indicator
+            // Page indicator dots
             if (vetImages.length > 1)
               Positioned(
                 bottom: 12,
@@ -227,7 +215,7 @@ class _ClinicHeaderState extends State<VetHeader> {
                   ),
                 ),
               ),
-            // Navigation Arrows
+            // Navigation arrows
             if (vetImages.length > 1) ...[
               Positioned(
                 left: 8,
@@ -241,10 +229,7 @@ class _ClinicHeaderState extends State<VetHeader> {
                         color: Colors.black.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.chevron_left,
-                        color: Colors.white,
-                      ),
+                      child: const Icon(Icons.chevron_left, color: Colors.white),
                     ),
                     onPressed: () {
                       if (_currentPage > 0) {
@@ -269,10 +254,7 @@ class _ClinicHeaderState extends State<VetHeader> {
                         color: Colors.black.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.chevron_right,
-                        color: Colors.white,
-                      ),
+                      child: const Icon(Icons.chevron_right, color: Colors.white),
                     ),
                     onPressed: () {
                       if (_currentPage < vetImages.length - 1) {
@@ -286,14 +268,13 @@ class _ClinicHeaderState extends State<VetHeader> {
                 ),
               ),
             ],
-            // Image Counter
+            // Image counter
             if (vetImages.length > 1)
               Positioned(
                 top: 12,
                 right: 12,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.6),
                     borderRadius: BorderRadius.circular(20),
@@ -308,11 +289,41 @@ class _ClinicHeaderState extends State<VetHeader> {
                   ),
                 ),
               ),
+            // ── Profile avatar (bottom-left, overlapping gallery) ──
+            if (profileImageUrl != null)
+              Positioned(
+                bottom: -28,
+                left: 16,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: isDark ? Colors.grey[900]! : Colors.white,
+                      width: 3,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 32,
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: NetworkImage(profileImageUrl),
+                    onBackgroundImageError: (_, __) {},
+                  ),
+                ),
+              ),
           ],
         ),
-        const SizedBox(height: 16),
 
-        // Vet Name and Favorite Button
+        // Space to account for avatar overflow
+        SizedBox(height: profileImageUrl != null ? 44 : 16),
+
+        // ── Name and Favorite Button ────────────────────────────
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -330,30 +341,20 @@ class _ClinicHeaderState extends State<VetHeader> {
                 isFavorite ? Icons.favorite : Icons.favorite_border,
                 color: AppColors.orange,
               ),
-              onPressed: () {
-                setState(() {
-                  isFavorite = !isFavorite;
-                });
-              },
+              onPressed: () => setState(() => isFavorite = !isFavorite),
             ),
           ],
         ),
 
-        // Interactive Location
+        // ── Interactive Location ────────────────────────────────
         GestureDetector(
           onTap: () => _openGoogleMaps(),
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
             child: Row(
               children: [
-                const Icon(
-                  Icons.location_on,
-                  color: AppColors.orange,
-                  size: 16,
-                ),
+                const Icon(Icons.location_on, color: AppColors.orange, size: 16),
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
@@ -365,18 +366,21 @@ class _ClinicHeaderState extends State<VetHeader> {
                   ),
                 ),
                 const SizedBox(width: 4),
-                Text(
-                  '• ${widget.vet['distance'] ?? '11 ${AppLocalizations.of(context).minutes}'}',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: subTextColor,
-                      ),
-                ),
+                Builder(builder: (context) {
+                  final dist = widget.vet['distance']?.toString() ?? '';
+                  final show = dist.isNotEmpty &&
+                      dist != 'Calculating...' &&
+                      dist != 'null';
+                  if (!show) return const SizedBox.shrink();
+                  return Text(
+                    '• $dist',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: subTextColor,
+                        ),
+                  );
+                }),
                 const SizedBox(width: 4),
-                const Icon(
-                  Icons.open_in_new,
-                  color: AppColors.orange,
-                  size: 14,
-                ),
+                const Icon(Icons.open_in_new, color: AppColors.orange, size: 14),
               ],
             ),
           ),
@@ -387,50 +391,20 @@ class _ClinicHeaderState extends State<VetHeader> {
 
   /// Open Google Maps - Best Practice Implementation
   Future<void> _openGoogleMaps() async {
-    // Get coordinates from vet data
-    final double? latitude = widget.vet['latitude']?.toDouble();
-    final double? longitude = widget.vet['longitude']?.toDouble();
-    final String? mapUrl = widget.vet['mapUrl']; // Direct link option
+    final String? mapUrl = widget.vet['mapUrl']?.toString();
 
     try {
-      // Option 1: Use direct map URL if provided
-      if (mapUrl != null && mapUrl.isNotEmpty) {
-        await _launchUrl(mapUrl);
+      if (mapUrl != null && mapUrl.trim().isNotEmpty) {
+        await _launchUrl(mapUrl.trim());
         return;
       }
 
-      // Option 2: Use coordinates if available
-      if (latitude != null && longitude != null) {
-        await _launchWithCoordinates(latitude, longitude);
-        return;
-      }
-
-      // Option 3: Fallback to location name
+      // Fallback: location name/address search (no coordinates)
       final String location = widget.vet['location'] ?? 'Healdsburg, CA';
       await _launchWithLocationName(location);
     } catch (e) {
       _showErrorMessage();
     }
-  }
-
-  /// Launch with coordinates (most accurate)
-  Future<void> _launchWithCoordinates(double latitude, double longitude) async {
-    final urls = [
-      // Google Maps app (Android)
-      'geo:$latitude,$longitude?q=$latitude,$longitude',
-      // Google Maps web
-      'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
-      // Apple Maps (iOS)
-      'http://maps.apple.com/?ll=$latitude,$longitude',
-    ];
-
-    for (String url in urls) {
-      if (await _launchUrl(url)) {
-        return;
-      }
-    }
-
-    throw Exception('Could not launch any map URL');
   }
 
   /// Launch with location name
