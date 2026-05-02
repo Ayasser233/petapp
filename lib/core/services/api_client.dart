@@ -359,14 +359,10 @@ class ApiClient {
     try {
       debugPrint('🔐 Attempting Google login with token...');
       debugPrint('📝 Token length: ${idToken.length}');
-      debugPrint('📝 Token preview: ${idToken.substring(0, idToken.length > 100 ? 100 : idToken.length)}...');
-      
-      final requestData = {'idToken': idToken};
-      debugPrint('📤 Request data: $requestData');
-      
+
       final response = await _dio.post(
         ApiConstants.googleLoginEndpoint,
-        data: requestData,
+        data: {'idToken': idToken},
       );
       debugPrint('✅ Google login successful');
       await _handleTokenResponse(response);
