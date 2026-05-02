@@ -25,7 +25,7 @@ android/vendor/
 *.keystore
 *.jks
 key.properties
-
+pubspec.lock
 # ========================
 # iOS
 # ========================
