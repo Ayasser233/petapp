@@ -1040,6 +1040,9 @@ class AppLocalizations {
   String get consultationFee =>
       _localizedValues[locale.languageCode]?['consultationFee'] ??
       'Consultation Fee';
+  String get emergencyFee =>
+      _localizedValues[locale.languageCode]?['emergencyFee'] ??
+      'Emergency Fee';
   String get initialExaminationFee =>
       _localizedValues[locale.languageCode]?['initialExaminationFee'] ??
       'Initial examination fee';

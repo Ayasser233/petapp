@@ -121,9 +121,7 @@ class AppointmentCard extends StatelessWidget {
             ),
           ),
           child: Text(
-            appointment.isExpired
-                ? 'Cancelled (Expired)'
-                : _getLocalizedStatus(context, effectiveStatus),
+            _getLocalizedStatus(context, effectiveStatus),
             style: TextStyle(
               color: AppointmentUtils.getStatusColor(effectiveStatus),
               fontSize: 12,

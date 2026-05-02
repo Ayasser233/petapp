@@ -8,30 +8,48 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 class SocialAuthService {
   static final SocialAuthService _instance = SocialAuthService._internal();
   factory SocialAuthService() => _instance;
-  SocialAuthService._internal();
+  SocialAuthService._internal() {
+    _initializeGoogleSignIn();
+  }
 
-  // IMPORTANT: The serverClientId MUST match the OAuth 2.0 Web Client ID
-  // that your backend is configured to verify. If you get "Wrong recipient" or
-  // "payload audience != requiredAudience" errors, verify this ID matches
-  // the backend configuration.
-  // 
-  // This should be the Web Client ID from Google Cloud Console, NOT the 
-  // Android or iOS client ID.
-  final GoogleSignIn _googleSignIn = GoogleSignIn(
-    scopes: ['email', 'profile'],
-    // Use the Web Client ID (OAuth 2.0 client) for backend verification
-    // This MUST match the client ID configured in your backend
-    // This is the client_type: 3 (Web) from your google-services.json
-    serverClientId: '1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91.apps.googleusercontent.com',
-  );
+  // IMPORTANT: For iOS, GoogleService-Info.plist handles the client ID automatically.
+  // For Android, we need to specify the serverClientId (Web Client ID) for backend verification.
+  // The serverClientId MUST match the OAuth 2.0 Web Client ID that your backend expects.
+  late final GoogleSignIn _googleSignIn;
+
+  void _initializeGoogleSignIn() {
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // For iOS, don't specify serverClientId - it will use the CLIENT_ID from GoogleService-Info.plist
+      // and the backend should accept the iOS client ID
+      _googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+        // iOS will automatically use the CLIENT_ID from GoogleService-Info.plist
+        // which is: 1017624066475-ntai924471ifb03p9v5g31i4kdf8g1tu.apps.googleusercontent.com
+      );
+    } else {
+      // For Android, use the Web Client ID for backend verification
+      _googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+        serverClientId: '1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91.apps.googleusercontent.com',
+      );
+    }
+  }
 
   /// Sign in with Google and return the ID token
   Future<String?> signInWithGoogle() async {
     try {
+      debugPrint('🔐 Starting Google Sign-In...');
+      debugPrint('📱 Platform: ${defaultTargetPlatform.name}');
+      
+      // Sign out first to ensure clean state (helps prevent iOS crashes)
+      await _googleSignIn.signOut();
+      debugPrint('🔄 Signed out previous session');
+      
       // Trigger the authentication flow
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       
       if (googleUser == null) {
+        debugPrint('❌ Google Sign-In cancelled by user');
         return null;
       }
 
@@ -44,7 +62,8 @@ class SocialAuthService {
       final String? idToken = googleAuth.idToken;
 
       if (idToken == null) {
-        return null;
+        debugPrint('❌ ID token is null!');
+        throw Exception('Failed to get ID token from Google Sign-In');
       }
 
       // Decode the token to see the audience claim (for debugging)
@@ -64,11 +83,23 @@ class SocialAuthService {
           debugPrint('📧 Token email: ${json['email']}');
         }
       } catch (e) {
-        throw Exception('Failed to decode ID token: $e');
+        debugPrint('⚠️  Failed to decode ID token for debugging: $e');
+        // Don't throw here, token might still be valid
       }
       
+      debugPrint('✅ Returning ID token successfully');
       return idToken;
+    } on Exception catch (e) {
+      debugPrint('❌ Google Sign-In exception: $e');
+      debugPrint('❌ Exception type: ${e.runtimeType}');
+      // Sign out to clean up state
+      await _googleSignIn.signOut().catchError((_) => null);
+      rethrow;
     } catch (e) {
+      debugPrint('❌ Unexpected Google Sign-In error: $e');
+      debugPrint('❌ Error type: ${e.runtimeType}');
+      // Sign out to clean up state
+      await _googleSignIn.signOut().catchError((_) => null);
       throw Exception('Google Sign-In failed: $e');
     }
   }
@@ -104,7 +135,8 @@ class SocialAuthService {
   /// Sign out from Google
   Future<void> signOutGoogle() async {
     try {
-      await _googleSignIn.signOut();
+      final googleSignIn = _googleSignIn;
+      await googleSignIn.signOut();
     } catch (e) {
       rethrow;
     }
@@ -112,6 +144,7 @@ class SocialAuthService {
 
   /// Check if user is currently signed in with Google
   Future<bool> isSignedInWithGoogle() async {
-    return _googleSignIn.isSignedIn();
+    final googleSignIn = _googleSignIn;
+    return googleSignIn.isSignedIn();
   }
 }

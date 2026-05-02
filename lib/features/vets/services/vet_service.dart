@@ -1,10 +1,8 @@
-import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import '../models/vet_model.dart';
 import '../models/vet_schedule_model.dart';
 import '../models/review_model.dart';
 import '../models/time_slot_model.dart';
-import '../../../core/services/location_service.dart';
 import '../../../core/services/api_client.dart';
 import '../../../core/utils/api_constants.dart';
 
@@ -14,7 +12,6 @@ class VetService {
   VetService._internal();
 
   // Use lazy getters instead of eager initialization
-  LocationService get _locationService => Get.find<LocationService>();
   ApiClient get _apiClient => Get.find<ApiClient>();
 
   /// Get all vets with location-based distances
@@ -32,33 +29,12 @@ class VetService {
   /// Get nearby vets (sorted by distance) from API
   Future<List<VetModel>> getNearByVets({int limit = 3}) async {
     try {
-
       final response = await getVets(
         page: 1,
         limit: limit,
       );
 
       final vets = response['vets'] as List<VetModel>;
-
-      // Update with calculated distances if location available
-      final currentPosition = _locationService.currentPosition;
-      if (currentPosition != null) {
-        return vets.map((vet) {
-          if (vet.latitude != null && vet.longitude != null) {
-            final distance = Geolocator.distanceBetween(
-              currentPosition.latitude,
-              currentPosition.longitude,
-              vet.latitude!,
-              vet.longitude!,
-            );
-            return vet.copyWith(
-              distance: _locationService.formatDistance(distance),
-            );
-          }
-          return vet;
-        }).toList();
-      }
-
       return vets;
     } catch (e) {
       // No fallback - if API fails, return empty list
@@ -75,7 +51,6 @@ class VetService {
   }) async {
     try {
       List<VetModel> filteredVets = await getAllVets();
-      final currentPosition = _locationService.currentPosition;
 
       // Apply text search filter
       if (query != null && query.isNotEmpty) {
@@ -87,17 +62,13 @@ class VetService {
         filteredVets = _filterByCategory(filteredVets, category);
       }
 
-      // Apply distance filter if location is available
-      if (currentPosition != null && maxDistanceKm != null) {
-        filteredVets =
-            _filterByDistance(filteredVets, currentPosition, maxDistanceKm);
+      // Distance-based filtering requires coordinates, which we no longer keep on the client.
+      // If you need this, implement it server-side.
+      if (maxDistanceKm != null) {
+        // no-op
       }
 
-      // Apply sorting
-      if (currentPosition != null) {
-        filteredVets = _sortVets(filteredVets, sortBy!, currentPosition);
-      }
-
+      // Sorting is also handled in the UI layer (or by backend).
       return filteredVets;
     } catch (e) {
       throw Exception('Failed to search vets: ${e.toString()}');
@@ -119,20 +90,8 @@ class VetService {
 
   /// Get vets within specified distance
   Future<List<VetModel>> getVetsWithinDistance(double maxDistanceKm) async {
-    try {
-      final allVets = await getAllVets();
-      final currentPosition = _locationService.currentPosition;
-
-      if (currentPosition == null) {
-        throw Exception(
-            'Location service not available or permission not granted');
-      }
-
-      return _filterByDistance(allVets, currentPosition, maxDistanceKm);
-    } catch (e) {
-      throw Exception(
-          'Failed to get vets within ${maxDistanceKm}km: ${e.toString()}');
-    }
+    // Distance filtering requires coordinates; implement server-side if needed.
+    return getAllVets();
   }
 
   /// Get popular vets (high rating and reviews)
@@ -169,12 +128,6 @@ class VetService {
         throw Exception('No emergency vets found');
       }
 
-      // Sort by distance if location available
-      final currentPosition = _locationService.currentPosition;
-      if (currentPosition != null) {
-        return _sortVetsByDistance(emergencyVets, currentPosition);
-      }
-
       return emergencyVets;
     } catch (e) {
       throw Exception('Failed to get emergency vets: ${e.toString()}');
@@ -209,37 +162,8 @@ class VetService {
 
   /// Update vets with calculated distances
   Future<List<VetModel>> _updateVetsWithDistances(List<VetModel> vets) async {
-    try {
-      final currentPosition = _locationService.currentPosition;
-
-      if (currentPosition == null) {
-        return vets;
-      }
-
-
-      return vets.map((vet) {
-        try {
-          if (vet.latitude == null || vet.longitude == null) {
-            return vet.copyWith(distance: 'Unknown');
-          }
-
-          final distance = vet.calculateDistanceFromCurrentLocation(
-            currentPosition.latitude,
-            currentPosition.longitude,
-          );
-
-          final formattedDistance = distance != null
-              ? _locationService.formatDistance(distance)
-              : 'Unknown';
-
-          return vet.copyWith(distance: formattedDistance);
-        } catch (e) {
-          return vet.copyWith(distance: 'Unknown');
-        }
-      }).toList();
-    } catch (e) {
-      throw Exception('Failed to update vets with distances: ${e.toString()}');
-    }
+    // Distance calculation is handled by VetExplorerController using LocationService.
+    return vets;
   }
 
   /// Filter vets by search query
@@ -276,92 +200,6 @@ class VetService {
     }
   }
 
-  /// Filter vets by distance
-  List<VetModel> _filterByDistance(
-      List<VetModel> vets, Position currentPosition, double maxDistanceKm) {
-    try {
-      if (maxDistanceKm <= 0) {
-        throw ArgumentError('Maximum distance must be greater than 0');
-      }
-
-      return vets.where((vet) {
-        try {
-          final distance = vet.calculateDistanceFromCurrentLocation(
-            currentPosition.latitude,
-            currentPosition.longitude,
-          );
-          return distance != null && distance / 1000 <= maxDistanceKm;
-        } catch (e) {
-          throw Exception(
-              'Failed to calculate distance for vet "${vet.name}": ${e.toString()}');
-        }
-      }).toList();
-    } catch (e) {
-      throw Exception(
-          'Failed to filter vets by distance ${maxDistanceKm}km: ${e.toString()}');
-    }
-  }
-
-  /// Sort vets by distance
-  List<VetModel> _sortVetsByDistance(
-      List<VetModel> vets, Position currentPosition) {
-    try {
-      vets.sort((a, b) {
-        try {
-          final distanceA = a.calculateDistanceFromCurrentLocation(
-            currentPosition.latitude,
-            currentPosition.longitude,
-          );
-          final distanceB = b.calculateDistanceFromCurrentLocation(
-            currentPosition.latitude,
-            currentPosition.longitude,
-          );
-
-          if (distanceA == null && distanceB == null) return 0;
-          if (distanceA == null) return 1;
-          if (distanceB == null) return -1;
-
-          return distanceA.compareTo(distanceB);
-        } catch (e) {
-          throw Exception(
-              'Failed to compare distances for vets "${a.name}" and "${b.name}": ${e.toString()}');
-        }
-      });
-
-      return vets;
-    } catch (e) {
-      throw Exception('Failed to sort vets by distance: ${e.toString()}');
-    }
-  }
-
-  /// Sort vets by various criteria
-  List<VetModel> _sortVets(
-      List<VetModel> vets, String sortBy, Position currentPosition) {
-    try {
-      switch (sortBy.toLowerCase()) {
-        case 'distance':
-          return _sortVetsByDistance(vets, currentPosition);
-        case 'rating':
-          vets.sort((a, b) => b.rating.compareTo(a.rating));
-          break;
-        case 'reviews':
-          vets.sort((a, b) => b.reviews.compareTo(a.reviews));
-          break;
-        case 'name':
-          vets.sort((a, b) => a.name.compareTo(b.name));
-          break;
-        case 'experience':
-          vets.sort((a, b) => b.yearsExperience.compareTo(a.yearsExperience));
-          break;
-        default:
-          return _sortVetsByDistance(vets, currentPosition);
-      }
-      return vets;
-    } catch (e) {
-      throw Exception('Failed to sort vets by "$sortBy": ${e.toString()}');
-    }
-  }
-
   // ========== NEW API METHODS ==========
 
   /// Get vets from API with filters and pagination
@@ -373,6 +211,8 @@ class VetService {
     double? maxPrice,
     int? minExperience,
     bool? hasEmergency,
+    double? latitude,
+    double? longitude,
   }) async {
     try {
       final queryParams = <String, dynamic>{
@@ -395,18 +235,20 @@ class VetService {
       if (hasEmergency != null) {
         queryParams['hasEmergency'] = hasEmergency;
       }
-
+      // Send user coordinates so the server can sort/filter by distance
+      if (latitude != null && longitude != null) {
+        queryParams['lat'] = latitude;
+        queryParams['lng'] = longitude;
+      }
 
       final response = await _apiClient.get(
         ApiConstants.vetsEndpoint,
         queryParameters: queryParams,
       );
 
-
       // API response structure: {"success":true,"message":"...","data":[...],"meta":{...}}
       final data = response.data['data'] as List<dynamic>?;
       final meta = response.data['meta'] as Map<String, dynamic>?;
-
 
       final vets = (data)
               ?.map((vet) => VetModel.fromJson(vet as Map<String, dynamic>))
@@ -421,12 +263,28 @@ class VetService {
               final scheduleSlots = await getVetScheduleSlots(vet.id);
               final openingInfo = await getVetOpeningInfo(vet.id);
 
+              // Resolve coordinates from mapUrl if lat/lng missing
+              double? resolvedLat = vet.latitude;
+              double? resolvedLng = vet.longitude;
+              if ((resolvedLat == null || resolvedLng == null) &&
+                  vet.mapUrl != null &&
+                  vet.mapUrl!.isNotEmpty) {
+                final coords =
+                    await VetModel.resolveMapUrlCoords(vet.mapUrl!);
+                if (coords != null) {
+                  resolvedLat = coords.$1;
+                  resolvedLng = coords.$2;
+                }
+              }
+
               return vet.copyWith(
                 scheduleSlots: scheduleSlots,
                 isAvailable: openingInfo['isOpen'] as bool?,
                 openingDaysText: openingInfo['openingDays'] != null && (openingInfo['openingDays'] as List).isNotEmpty
                     ? (openingInfo['openingDays'] as List<String>).join(', ')
                     : null,
+                latitude: resolvedLat,
+                longitude: resolvedLng,
               );
             } catch (e) {
               // Return vet without schedule info if fetch fails

@@ -85,32 +85,14 @@ extension AppointmentEntityExtension on AppointmentEntity {
     return endTime.isBefore(DateTime.now());
   }
 
-  /// Check if appointment is expired (past and not completed/cancelled)
-  bool get isExpired {
-    // Don't mark already completed or cancelled appointments as expired
-    if (status.toUpperCase() == 'COMPLETED' ||
-        status.toUpperCase() == 'CANCELLED') {
-      return false;
-    }
-    // Check if appointment time has passed
-    return startTime.isBefore(DateTime.now());
-  }
+  /// Always false — status is determined by the server, not locally by time
+  bool get isExpired => false;
 
-  /// Get effective status (returns 'CANCELLED' if expired, otherwise original status)
-  String get effectiveStatus {
-    if (isExpired) {
-      return 'CANCELLED';
-    }
-    return status;
-  }
+  /// Returns the raw API status directly (no time-based overrides)
+  String get effectiveStatus => status;
 
   /// Get effective status display text
-  String get effectiveStatusDisplayText {
-    if (isExpired) {
-      return 'Cancelled (Expired)';
-    }
-    return statusDisplayText;
-  }
+  String get effectiveStatusDisplayText => statusDisplayText;
 
   /// Check if appointment is upcoming
   bool get isUpcoming {

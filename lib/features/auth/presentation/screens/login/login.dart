@@ -511,10 +511,29 @@ class _LoginFormState extends State<LoginForm> {
           // Navigate to home
           Get.offAllNamed(AppRoutes.home);
         } else if (state is AuthFailure) {
-          // Show red error message below password field
-          setState(() {
-            _errorMessage = AppLocalizations.of(context).wrongCredentials;
-          });
+          final msg = state.message.isNotEmpty
+              ? state.message
+              : AppLocalizations.of(context).wrongCredentials;
+
+          // For social (Google/Apple) login errors show a snackbar, otherwise
+          // show inline below the password field.
+          if (state.errorCode == 409 ||
+              msg.toLowerCase().contains('already exists') ||
+              msg.toLowerCase().contains('google') ||
+              msg.toLowerCase().contains('apple')) {
+            Get.snackbar(
+              AppLocalizations.of(context).error,
+              msg,
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red.withValues(alpha: 0.1),
+              colorText: Colors.red,
+              duration: const Duration(seconds: 5),
+            );
+          } else {
+            setState(() {
+              _errorMessage = msg;
+            });
+          }
         }
       },
       child: Form(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:get/get.dart'; // Add this import
+import 'package:get/get.dart';
+import 'package:petapp/core/services/notification_service.dart';
 
 enum ThemePreference { light, dark, system }
 enum LanguagePreference { english, arabic }
@@ -85,6 +86,21 @@ class SettingsProvider extends ChangeNotifier {
     _notificationsEnabled = value;
     await _prefs.setBool('notificationsEnabled', value);
     notifyListeners();
+
+    // Actually subscribe / unsubscribe from FCM
+    try {
+      final notificationService = Get.find<NotificationService>();
+      if (value) {
+        // Re-request permission (no-op if already granted) and re-sync token
+        await notificationService.requestPermissions();
+        await notificationService.syncTokenWithServer();
+      } else {
+        // Delete FCM token so the server cannot reach this device
+        await notificationService.deleteToken();
+      }
+    } catch (_) {
+      // NotificationService might not be registered in tests — ignore
+    }
   }
   
   Future<void> setEmailNotificationsEnabled(bool value) async {

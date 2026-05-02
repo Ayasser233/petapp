@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:petapp/core/services/location_service.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import '../widgets/vet_detail_screen_widgets/vet_header.dart';
@@ -30,10 +33,53 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
   bool _isLoadingReviews = false;
   int _totalReviews = 0;
 
+  /// A copy of the vet map enriched with the real calculated distance.
+  late Map<String, dynamic> _vet;
+
   @override
   void initState() {
     super.initState();
+    _vet = Map<String, dynamic>.from(widget.vet);
     _loadReviews();
+    _calcDistance();
+  }
+
+  /// Compute the distance between the user and this vet using lat/lng,
+  /// then rebuild so the header shows it.
+  Future<void> _calcDistance() async {
+    try {
+      final locationService = Get.find<LocationService>();
+      if (!locationService.isPermissionGranted) return;
+      final pos = locationService.currentPosition;
+      if (pos == null) return;
+
+      final vetLat = _parseDouble(_vet['latitude']);
+      final vetLng = _parseDouble(_vet['longitude']);
+      if (vetLat == null || vetLng == null) return;
+
+      final meters = Geolocator.distanceBetween(
+          pos.latitude, pos.longitude, vetLat, vetLng);
+
+      final formatted = meters < 1000
+          ? '${meters.round()} م'
+          : '${(meters / 1000).toStringAsFixed(1)} كم';
+
+      if (mounted) {
+        setState(() {
+          _vet = Map<String, dynamic>.from(_vet)..['distance'] = formatted;
+        });
+      }
+    } catch (_) {
+      // best effort
+    }
+  }
+
+  static double? _parseDouble(dynamic v) {
+    if (v == null) return null;
+    if (v is double) return v;
+    if (v is int) return v.toDouble();
+    if (v is String) return double.tryParse(v);
+    return null;
   }
 
   Future<void> _loadReviews() async {
@@ -44,7 +90,7 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
     try {
       final vetId = widget.vet['id']?.toString();
       if (vetId != null && vetId.isNotEmpty) {
-        final response = await _vetService.getVetReviews(vetId, limit: 20);
+        final response = await _vetService.getVetReviews(vetId);
         setState(() {
           _reviews = response.reviews;
           _totalReviews = response.total;
@@ -69,10 +115,17 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
     final backgroundColor = isDark ? Colors.black : Colors.white;
 
     // Get consultation fee from clinic data or use default
-    final consultationFee = widget.vet['consultationFee'];
+    final consultationFee = _vet['consultationFee'];
     final consultationPrice = consultationFee != null
         ? '${consultationFee.toString()} EGP'
         : '75.00 EGP';
+
+    final emergencyPrice = _vet['emergencyPrice'] != null
+        ? (_vet['emergencyPrice'] is int
+            ? (_vet['emergencyPrice'] as int).toDouble()
+            : _vet['emergencyPrice'] as double?)
+        : null;
+    final hasEmergency = _vet['hasEmergency'] == true;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -83,31 +136,37 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              VetHeader(vet: widget.vet),
+              VetHeader(vet: _vet),
               const SizedBox(height: 12),
-              VetAvailabilityStatus(vet: widget.vet),
+              VetAvailabilityStatus(vet: _vet),
               const SizedBox(height: 24),
               VetStats(
-                vet: widget.vet,
+                vet: _vet,
                 totalReviews: _totalReviews,
               ),
               const SizedBox(height: 24),
-              VetDescription(vet: widget.vet),
+              VetDescription(vet: _vet),
               const SizedBox(height: 24),
               VetServices(
-                services: (widget.vet['services'] as List<dynamic>?)
+                services: (_vet['services'] as List<dynamic>?)
                         ?.map((e) => e.toString())
                         .toList() ??
                     [],
               ),
               const SizedBox(height: 24),
-              VetConsultationFee(price: consultationPrice),
+              VetConsultationFee(
+                price: consultationPrice,
+                emergencyPrice: emergencyPrice,
+                hasEmergency: hasEmergency,
+              ),
               const SizedBox(height: 24),
               // Reviews Section
               VetReviews(
                 reviews: _reviews,
                 isLoading: _isLoadingReviews,
                 totalReviews: _totalReviews,
+                vetId: widget.vet['id']?.toString() ?? '',
+                vetName: widget.vet['name']?.toString() ?? '',
               ),
               const SizedBox(height: 80), // Space for bottom button
             ],
@@ -115,7 +174,7 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
         ),
       ),
       bottomNavigationBar: VetActionButton(
-        vet: widget.vet,
+        vet: _vet,
         price: consultationPrice,
       ),
     );

@@ -25,6 +25,7 @@ import 'package:petapp/features/pet/screens/my_pets.dart';
 import 'package:petapp/features/pet/screens/add_pet.dart';
 import 'package:petapp/features/pet/screens/update_pet.dart';
 import 'package:petapp/features/pet/screens/pet_profile.dart';
+import 'package:petapp/features/pet/models/pet_model.dart';
 // Add import for settings screen
 import 'package:petapp/features/home/screens/settings_screen.dart';
 import 'package:petapp/features/profile/screens/points_history_screen.dart';
@@ -98,7 +99,7 @@ class AppRoutes {
         GetPage(name: setLocation, page: () => const SetLocationScreen()),
         GetPage(name: home, page: () => const HomeScreen()),
         GetPage(
-            name: vetDetail, page: () => VetDetailScreen(vet: Get.arguments)),
+            name: vetDetail, page: () => VetDetailScreen(vet: Get.arguments as Map<String, dynamic>)),
         // GetPage(name: checkout, page: () => const CheckoutScreen()),
         GetPage(name: appointments, page: () => const AppointmentsScreen()),
         GetPage(name: profile, page: () => const ProfileScreen()),
@@ -138,14 +139,14 @@ class AppRoutes {
         GetPage(
           name: updatePet,
           page: () => UpdatePetScreen(
-            pet: Get.arguments,
+            pet: Get.arguments as PetModel,
           ),
           middlewares: [AuthMiddleware()],
         ),
         GetPage(
           name: petProfile,
           page: () => PetProfileScreen(
-            pet: Get.arguments,
+            pet: Get.arguments as PetModel,
           ),
           middlewares: [AuthMiddleware()],
         ),

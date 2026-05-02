@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:petapp/features/appointments/presentation/cubit/appointments_cubit.dart';
@@ -37,8 +38,29 @@ class _AppointmentsScreenContent extends StatefulWidget {
 class _AppointmentsScreenContentState
     extends State<_AppointmentsScreenContent> {
   String _selectedFilter = 'All';
-  String? _selectedDateFilter; // 'last3Months' or 'byYear'
+  String? _selectedDateFilter;
   int? _selectedYear;
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      context.read<AppointmentsCubit>().loadNextPage();
+    }
+  }
 
   void _onFilterChanged(String filter) {
     setState(() {
@@ -391,37 +413,54 @@ class _AppointmentsScreenContentState
 
   Widget _buildContent(AppointmentsState state) {
     if (state is AppointmentsLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator(color: AppColors.orange));
     }
+
+    // Keep showing the list while loading more
+    final List<AppointmentEntity> appointments;
+    final bool isLoadingMore;
 
     if (state is AppointmentsLoaded) {
-      if (state.appointments.isEmpty) {
-        return _buildEmptyState();
-      }
+      appointments = state.appointments;
+      isLoadingMore = false;
+    } else if (state is AppointmentsLoadingMore) {
+      appointments = state.currentAppointments;
+      isLoadingMore = true;
+    } else if (state is AppointmentActionLoading) {
+      return const Center(child: CircularProgressIndicator(color: AppColors.orange));
+    } else {
+      return _buildEmptyState();
+    }
 
-      return ListView.builder(
-        itemCount: state.appointments.length,
-        itemBuilder: (context, index) {
-          final appointment = state.appointments[index];
-          return AppointmentCard(
-            appointment: appointment,
-            onTap: () => _onAppointmentTap(appointment),
-            onCancel: _onCancelAppointment,
-            onReschedule: _onRescheduleAppointment,
-            onReview: _onReviewAppointment,
-            onBookAgain: _onBookAgainAppointment,
-            onScanQr: _onScanQrCode,
+    if (appointments.isEmpty) {
+      return _buildEmptyState();
+    }
+
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: appointments.length + (isLoadingMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == appointments.length) {
+          // Loading more indicator at the bottom
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.orange),
+            ),
           );
-        },
-      );
-    }
-
-    if (state is AppointmentActionLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    // Initial or unknown state
-    return _buildEmptyState();
+        }
+        final appointment = appointments[index];
+        return AppointmentCard(
+          appointment: appointment,
+          onTap: () => _onAppointmentTap(appointment),
+          onCancel: _onCancelAppointment,
+          onReschedule: _onRescheduleAppointment,
+          onReview: _onReviewAppointment,
+          onBookAgain: _onBookAgainAppointment,
+          onScanQr: _onScanQrCode,
+        );
+      },
+    );
   }
 
   Widget _buildEmptyState() {
