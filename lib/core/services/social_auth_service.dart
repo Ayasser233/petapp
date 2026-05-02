@@ -18,21 +18,15 @@ class SocialAuthService {
   late final GoogleSignIn _googleSignIn;
 
   void _initializeGoogleSignIn() {
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      // For iOS, don't specify serverClientId - it will use the CLIENT_ID from GoogleService-Info.plist
-      // and the backend should accept the iOS client ID
-      _googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-        // iOS will automatically use the CLIENT_ID from GoogleService-Info.plist
-        // which is: 1017624066475-ntai924471ifb03p9v5g31i4kdf8g1tu.apps.googleusercontent.com
-      );
-    } else {
-      // For Android, use the Web Client ID for backend verification
-      _googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-        serverClientId: '1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91.apps.googleusercontent.com',
-      );
-    }
+    // Always use the Web Client ID as serverClientId on both platforms.
+    // This ensures the token `aud` claim is the web client ID, which is
+    // what the backend expects for verification. Without this on iOS,
+    // the token `aud` defaults to the iOS client ID and the backend
+    // fails to match the existing user → duplicate key 500.
+    _googleSignIn = GoogleSignIn(
+      scopes: ['email', 'profile'],
+      serverClientId: '1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91.apps.googleusercontent.com',
+    );
   }
 
   /// Sign in with Google and return the ID token
