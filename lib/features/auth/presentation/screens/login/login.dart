@@ -135,10 +135,9 @@ class SocialBtns extends StatelessWidget {
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     try {
       final socialAuthService = SocialAuthService();
-      
-      // Get the Google ID token
-      final idToken = await socialAuthService.signInWithGoogle();
-      
+
+      final String? idToken = await socialAuthService.signInWithGoogle();
+
       if (idToken == null) {
         debugPrint('❌ Google Sign-In cancelled by user');
         return;
@@ -161,7 +160,6 @@ class SocialBtns extends StatelessWidget {
       debugPrint('✅ Got valid ID token, length: ${idToken.length}');
       debugPrint('📤 Sending Google ID token to backend...');
 
-      // Call the AuthCubit with the token
       if (context.mounted) {
         context.read<AuthCubit>().googleLogin(idToken);
       }

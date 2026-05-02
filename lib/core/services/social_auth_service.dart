@@ -18,30 +18,32 @@ class SocialAuthService {
   late final GoogleSignIn _googleSignIn;
 
   void _initializeGoogleSignIn() {
-    // Always use the Web Client ID as serverClientId on both platforms.
-    // This ensures the token `aud` claim is the web client ID, which is
-    // what the backend expects for verification. Without this on iOS,
-    // the token `aud` defaults to the iOS client ID and the backend
-    // fails to match the existing user → duplicate key 500.
-    _googleSignIn = GoogleSignIn(
-      scopes: ['email', 'profile'],
-      serverClientId: '1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91.apps.googleusercontent.com',
-    );
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      // On iOS, do NOT set serverClientId — doing so causes idToken to be null.
+      // The iOS client ID from GoogleService-Info.plist is used automatically.
+      _googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+      );
+    } else {
+      // Android: serverClientId makes the token aud = web client ID ✓
+      _googleSignIn = GoogleSignIn(
+        scopes: ['email', 'profile'],
+        serverClientId: '1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91.apps.googleusercontent.com',
+      );
+    }
   }
 
-  /// Sign in with Google and return the ID token
+  /// Sign in with Google and return the ID token string.
   Future<String?> signInWithGoogle() async {
     try {
       debugPrint('🔐 Starting Google Sign-In...');
       debugPrint('📱 Platform: ${defaultTargetPlatform.name}');
-      
-      // Sign out first to ensure clean state (helps prevent iOS crashes)
+
       await _googleSignIn.signOut();
       debugPrint('🔄 Signed out previous session');
-      
-      // Trigger the authentication flow
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      
+
       if (googleUser == null) {
         debugPrint('❌ Google Sign-In cancelled by user');
         return null;
@@ -49,50 +51,38 @@ class SocialAuthService {
 
       debugPrint('✅ Google user signed in: ${googleUser.email}');
 
-      // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
-      // Get the ID token
       final String? idToken = googleAuth.idToken;
 
+      debugPrint('📋 idToken present: ${idToken != null}');
+
       if (idToken == null) {
-        debugPrint('❌ ID token is null!');
         throw Exception('Failed to get ID token from Google Sign-In');
       }
 
-      // Decode the token to see the audience claim (for debugging)
+      // Debug: decode token audience
       try {
         final parts = idToken.split('.');
         if (parts.length == 3) {
-          final payload = parts[1];
-          // Add padding if needed
-          var normalizedPayload = payload.replaceAll('-', '+').replaceAll('_', '/');
-          while (normalizedPayload.length % 4 != 0) {
-            normalizedPayload += '=';
-          }
-          final decoded = utf8.decode(base64.decode(normalizedPayload));
+          var p = parts[1].replaceAll('-', '+').replaceAll('_', '/');
+          while (p.length % 4 != 0) p += '=';
+          final decoded = utf8.decode(base64.decode(p));
           final json = jsonDecode(decoded);
           debugPrint('📋 Token audience (aud): ${json['aud']}');
           debugPrint('📋 Token issuer (iss): ${json['iss']}');
           debugPrint('📧 Token email: ${json['email']}');
         }
-      } catch (e) {
-        debugPrint('⚠️  Failed to decode ID token for debugging: $e');
-        // Don't throw here, token might still be valid
-      }
-      
-      debugPrint('✅ Returning ID token successfully');
+      } catch (_) {}
+
       return idToken;
     } on Exception catch (e) {
       debugPrint('❌ Google Sign-In exception: $e');
-      debugPrint('❌ Exception type: ${e.runtimeType}');
-      // Sign out to clean up state
       await _googleSignIn.signOut().catchError((_) => null);
       rethrow;
     } catch (e) {
       debugPrint('❌ Unexpected Google Sign-In error: $e');
-      debugPrint('❌ Error type: ${e.runtimeType}');
-      // Sign out to clean up state
       await _googleSignIn.signOut().catchError((_) => null);
       throw Exception('Google Sign-In failed: $e');
     }

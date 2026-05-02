@@ -374,16 +374,15 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       debugPrint('🔐 Starting Google login with token...');
       debugPrint('📝 Token length: ${idToken.length} characters');
-      
-      // Validate token is not empty
+
       if (idToken.isEmpty) {
         debugPrint('❌ ERROR: idToken is EMPTY!');
         emit(const AuthFailure(message: 'Invalid authentication token'));
         return;
       }
-      
+
       debugPrint('✅ Token validation passed, sending to backend...');
-      
+
       final response = await _authRepository.googleLogin(idToken);
       final user = response.user;
 
