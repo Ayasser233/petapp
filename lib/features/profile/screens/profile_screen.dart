@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:in_app_review/in_app_review.dart';
@@ -240,7 +241,7 @@ class ProfileScreen extends StatelessWidget {
                             FontAwesomeIcons.globe,
                             context,
                             'Website',
-                            'https://aleefy.app',
+                            'https://aleefy-app.com',
                           ),
                         ],
                       ),
@@ -521,25 +522,40 @@ class ProfileScreen extends StatelessWidget {
 
   // ── Rate the App ──────────────────────────────────────────────────────────
 
+  static const _androidStoreUrl =
+      'https://play.google.com/store/apps/details?id=com.aleefy.petapp';
+  static const _iosStoreUrl =
+      'https://apps.apple.com/app/id6757188379';
+
   Future<void> _rateApp(BuildContext context) async {
     final inAppReview = InAppReview.instance;
     try {
+      // Try the native in-app review dialog first
       if (await inAppReview.isAvailable()) {
         await inAppReview.requestReview();
-      } else {
-        await inAppReview.openStoreListing(
-          appStoreId: '6757188379',          // iOS App Store
-          microsoftStoreId: null,
-        );
+        return;
       }
+    } catch (_) {
+      // Fall through to store URL
+    }
+
+    // Fallback: open store listing via url_launcher
+    await _openStoreListing(context);
+  }
+
+  Future<void> _openStoreListing(BuildContext context) async {
+    final isIOS = Platform.isIOS;
+    final uri = Uri.parse(isIOS ? _iosStoreUrl : _androidStoreUrl);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Unable to open the store right now.'),
             behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12)),
             margin: const EdgeInsets.all(16),
           ),
         );
