@@ -37,7 +37,13 @@ import 'package:petapp/features/vaccination/presentation/screens/select_pet_for_
 import 'package:petapp/features/notifications/screens/notifications_screen.dart';
 // Privacy Policy import
 import 'package:petapp/features/settings/screens/privacy_policy_screen.dart';
-
+// Store imports
+import 'package:petapp/features/store/screens/store_screen.dart';
+import 'package:petapp/features/store/screens/cart_screen.dart';
+import 'package:petapp/features/store/screens/delivery_screen.dart';
+import 'package:petapp/features/store/screens/checkout_screen.dart';
+import 'package:petapp/features/store/controllers/cart_controller.dart';
+import 'package:petapp/features/store/controllers/store_controller.dart';
 class AppRoutes {
   static const String onboarding = '/onboarding';
   static const String networkSplash = '/network-splash';
@@ -53,7 +59,6 @@ class AppRoutes {
   static const String home = '/home';
   static const String vetDetail = '/vet-detail';
   static const String serviceSelection = '/service-selection';
-  static const String checkout = '/checkout';
   static const String appointments = '/appointments';
   static const String profile = '/profile';
   static const String pet3DViewer = '/pet-3d-viewer-screen';
@@ -79,6 +84,11 @@ class AppRoutes {
   static const String notifications = '/notifications';
   // Privacy Policy route
   static const String privacyPolicy = '/privacy-policy';
+  // Store routes
+  static const String store = '/store';
+  static const String cart = '/cart';
+  static const String delivery = '/delivery';
+  static const String checkout = '/checkout';
 
   static List<GetPage> get getPages => [
         GetPage(name: networkSplash, page: () => const NetworkSplashScreen()),
@@ -100,7 +110,6 @@ class AppRoutes {
         GetPage(name: home, page: () => const HomeScreen()),
         GetPage(
             name: vetDetail, page: () => VetDetailScreen(vet: Get.arguments as Map<String, dynamic>)),
-        // GetPage(name: checkout, page: () => const CheckoutScreen()),
         GetPage(name: appointments, page: () => const AppointmentsScreen()),
         GetPage(name: profile, page: () => const ProfileScreen()),
         GetPage(
@@ -195,6 +204,41 @@ class AppRoutes {
           page: () => const PrivacyPolicyScreen(),
           transition: Transition.rightToLeft,
           transitionDuration: const Duration(milliseconds: 250),
+        ),
+        // Store routes
+        GetPage(
+          name: store,
+          page: () => const StoreScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<StoreController>(() => StoreController(), fenix: true);
+            Get.lazyPut<CartController>(() => CartController(), fenix: true);
+          }),
+        ),
+        GetPage(
+          name: cart,
+          page: () => const CartScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<CartController>(() => CartController(), fenix: true);
+          }),
+        ),
+        GetPage(
+          name: delivery,
+          page: () => const DeliveryScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+        ),
+        GetPage(
+          name: checkout,
+          page: () => const CheckoutScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<CartController>(() => CartController(), fenix: true);
+          }),
         ),
       ];
 }

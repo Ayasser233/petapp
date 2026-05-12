@@ -12,6 +12,10 @@ import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/widgets/custom_app_bar.dart';
 import 'package:petapp/core/widgets/rewards_card.dart';
 import 'package:petapp/di/service_locator.dart';
+import 'package:petapp/features/store/controllers/cart_controller.dart';
+import 'package:petapp/features/store/controllers/store_controller.dart';
+import 'package:petapp/features/store/data/mock_products.dart';
+import 'package:petapp/features/store/widgets/product_card.dart';
 import 'package:petapp/features/vets/models/vet_model.dart';
 import 'package:petapp/features/vets/services/vet_service.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -39,6 +43,9 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _locationService = Get.put(LocationService());
     _isGuestUser = _authService.authStatus == AuthStatus.guest;
+    // Ensure store controllers are available globally
+    Get.lazyPut<CartController>(() => CartController(), fenix: true);
+    Get.lazyPut<StoreController>(() => StoreController(), fenix: true);
     _initializeHomeScreen();
 
     // Re-sort whenever GPS delivers (or updates) the position
@@ -153,6 +160,45 @@ class _HomeScreenState extends State<HomeScreen> {
         showLogo: true,
         isDark: isDark,
         actions: [
+          // Cart icon with badge
+          Obx(() {
+            final cartCtrl = Get.find<CartController>();
+            return Stack(
+              children: [
+                IconButton(
+                  onPressed: () => Get.toNamed(AppRoutes.cart),
+                  icon: FaIcon(
+                    FontAwesomeIcons.cartShopping,
+                    size: 20,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+                if (cartCtrl.itemCount > 0)
+                  Positioned(
+                    top: 6,
+                    right: 6,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: const BoxDecoration(
+                        color: AppColors.orange,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${cartCtrl.itemCount}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            );
+          }),
           // Location indicator button
           Obx(() => IconButton(
                 onPressed: () {
@@ -214,40 +260,77 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         const SizedBox(height: 16),
 
-                        // Featured Services Row - All in one row
+                        // ── Promo Banner ──────────────────────────────────
+                        _buildPromoBanner(context, isDark),
+
+                        const SizedBox(height: 20),
+
+                        // ── What are you looking for? ─────────────────────
+                        Text(
+                          'What are you looking for?',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 14),
+
+                        // Services (scrollable horizontal list)
+                        SizedBox(
+                          height: 100,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              _buildServiceItem(context, localizations.vetVisit,
+                                  'assets/icons/icons-01.png', isDark,
+                                  onTap: () => Get.toNamed(AppRoutes.vetExplorer)),
+                              _buildServiceItem(context, 'Aleefy\nPharmacy',
+                                  'assets/icons/icons-03.png', isDark,
+                                  onTap: () => Get.toNamed(AppRoutes.store)),
+                              _buildServiceItem(context, 'Aleefy\nStore',
+                                  'assets/icons/icons-02.png', isDark,
+                                  onTap: () => Get.toNamed(AppRoutes.store),
+                                  highlight: true),
+                              _buildServiceItem(context, 'Emergency',
+                                  'assets/icons/icons-04.png', isDark,
+                                  onTap: () => Get.toNamed(AppRoutes.vetExplorer,
+                                      arguments: {'filter': 'emergency'})),
+                              _buildServiceItem(context, 'Grooming',
+                                  'assets/icons/icons-05.png', isDark,
+                                  onTap: () => Get.toNamed(AppRoutes.vetExplorer)),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // ── Aleefy Picks ────────────────────────────────────
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Expanded(
-                              child: _buildCompactServiceItem(
-                                context,
-                                localizations.vetVisit,
-                                'assets/icons/icons-01.png',
-                                isDark,
-                                onTap: () => Get.toNamed(AppRoutes.vetExplorer),
-                              ),
+                            Text(
+                              'Aleefy Picks',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
                             ),
-                            Expanded(
-                              child: _buildCompactServiceItem(
-                                context,
-                                localizations.animalView3D,
-                                'assets/icons/icons-02.png',
-                                isDark,
-                                onTap: () =>
-                                    Get.toNamed(AppRoutes.pet3DModelSelector),
-                              ),
-                            ),
-                            Expanded(
-                              child: _buildCompactServiceItem(
-                                context,
-                                localizations.vaccination,
-                                'assets/icons/icons-03.png',
-                                isDark,
-                                onTap: () => Get.toNamed(
-                                    AppRoutes.selectPetForVaccination),
+                            TextButton(
+                              onPressed: () => Get.toNamed(AppRoutes.store),
+                              child: Text(
+                                'See more',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(color: AppColors.orange),
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 270,
+                          child: _buildAleefyPicks(context, isDark),
                         ),
 
                         const SizedBox(height: 24),
@@ -650,71 +733,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Compact service item for horizontal layout
-  Widget _buildCompactServiceItem(
-      BuildContext context, String title, String icon, bool isDark,
-      {VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 110,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.lightblack : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            if (!isDark)
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.2),
-                blurRadius: 8,
-                spreadRadius: 1,
-                offset: const Offset(0, 2),
-              ),
-          ],
-          border: !isDark
-              ? Border.all(
-                  color: Colors.grey.withValues(alpha: 0.1), width: 1.0)
-              : null,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Image container
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: !isDark
-                  ? BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.orange.withValues(alpha: 0.1),
-                    )
-                  : null,
-              child: Image.asset(
-                icon,
-                width: 45,
-                height: 45,
-              ),
-            ),
-            const SizedBox(height: 6),
-            // Title text
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text(
-                title,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontSize: 11,
-                    ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
   // Build nearby vet card
   Widget _buildNearbyCard(
     BuildContext context, {
@@ -1006,6 +1024,197 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  // ─── Store helpers ──────────────────────────────────────────────────────────
+
+  /// Promotional banner for the store
+  Widget _buildPromoBanner(BuildContext context, bool isDark) {
+    return GestureDetector(
+      onTap: () => Get.toNamed(AppRoutes.store),
+      child: Container(
+        width: double.infinity,
+        height: 180,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFEA9249), Color(0xFFF5C518)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(18),
+        ),
+        child: Stack(
+          children: [
+            // Background paw print decorations
+            Positioned(
+              right: -10,
+              top: -10,
+              child: Opacity(
+                opacity: 0.12,
+                child: Icon(Icons.pets, size: 100,
+                    color: Colors.white),
+              ),
+            ),
+            Positioned(
+              right: 60,
+              bottom: -5,
+              child: Opacity(
+                opacity: 0.08,
+                child: Icon(Icons.pets, size: 70, color: Colors.white),
+              ),
+            ),
+            // Content
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Never run out of',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                  ),
+                  Text(
+                    'your pet essentials',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 20,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => Get.toNamed(AppRoutes.store),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 28, vertical: 10),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24)),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'SHOP',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, letterSpacing: 1),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Single service icon item (scrollable)
+  Widget _buildServiceItem(
+    BuildContext context,
+    String title,
+    String iconPath,
+    bool isDark, {
+    VoidCallback? onTap,
+    bool highlight = false,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 80,
+        margin: const EdgeInsets.only(right: 12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 60,
+              height: 60,
+              decoration: BoxDecoration(
+                color: highlight
+                    ? AppColors.orange.withValues(alpha: 0.15)
+                    : isDark
+                        ? AppColors.lightblack
+                        : Colors.grey.shade100,
+                shape: BoxShape.circle,
+                border: highlight
+                    ? Border.all(
+                        color: AppColors.orange.withValues(alpha: 0.4),
+                        width: 1.5)
+                    : null,
+              ),
+              child: Center(
+                child: Image.asset(
+                  iconPath,
+                  width: 34,
+                  height: 34,
+                  errorBuilder: (_, __, ___) => Icon(
+                    Icons.pets,
+                    size: 28,
+                    color: highlight ? AppColors.orange : Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    fontSize: 11,
+                    fontWeight:
+                        highlight ? FontWeight.bold : FontWeight.w500,
+                    color: highlight
+                        ? AppColors.orange
+                        : isDark
+                            ? Colors.white
+                            : Colors.black87,
+                  ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Aleefy Picks horizontal product scroll
+  Widget _buildAleefyPicks(BuildContext context, bool isDark) {
+    final cartCtrl = Get.find<CartController>();
+    final storeCtrl = Get.find<StoreController>();
+    final picks = MockProducts.all.take(5).toList();
+
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      itemCount: picks.length,
+      itemBuilder: (ctx, i) {
+        final product = picks[i];
+        return Obx(() {
+          // find live state from storeCtrl (for favorite toggle)
+          final liveProduct = storeCtrl.filteredProducts
+              .cast<dynamic>()
+              .firstWhere(
+                (p) => p.id == product.id,
+                orElse: () => product,
+              );
+          return Padding(
+            padding: EdgeInsets.only(right: i == picks.length - 1 ? 0 : 12),
+            child: ProductCard(
+              product: liveProduct,
+              isFavorite: liveProduct.isFavorite,
+              isInCart: cartCtrl.isInCart(product.id),
+              onAddToCart: () => cartCtrl.addProduct(product),
+              onFavoriteToggle: () => storeCtrl.toggleFavorite(product.id),
+              onTap: () => Get.toNamed(AppRoutes.store),
+              width: 165,
+            ),
+          );
+        });
+      },
     );
   }
 
