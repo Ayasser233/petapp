@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/features/home/widgets/home_global_discount_banner.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/appointments/domain/usecases/create_appointment_usecase.dart';
@@ -466,11 +467,26 @@ class VetBookingScreen extends StatelessWidget {
   /// Build booking view
   Widget _buildBookingView(
       BuildContext context, VetBookingController controller) {
+    // Extract globalDiscount from the vet arguments (same data passed to detail screen)
+    final args = Get.arguments as Map<String, dynamic>?;
+    final vet = args?['vet'] as Map<String, dynamic>?;
+    final rawGd = vet?['globalDiscount'];
+    final globalDiscount = (rawGd is Map<String, dynamic> &&
+            rawGd['isActive'] == true)
+        ? rawGd
+        : null;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Global discount banner (shown when active) ──────
+          if (globalDiscount != null) ...[
+            HomeGlobalDiscountBanner(discountData: globalDiscount),
+            const SizedBox(height: 20),
+          ],
+
           // Booking summary
           VetBookingSummary(controller: controller),
 

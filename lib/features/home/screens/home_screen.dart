@@ -12,6 +12,8 @@ import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/widgets/custom_app_bar.dart';
 import 'package:petapp/core/widgets/rewards_card.dart';
 import 'package:petapp/di/service_locator.dart';
+import 'package:petapp/core/services/global_discount_cache.dart';
+import 'package:petapp/features/home/widgets/home_global_discount_banner.dart';
 import 'package:petapp/features/vets/models/vet_model.dart';
 import 'package:petapp/features/vets/services/vet_service.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -33,12 +35,22 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoadingVets = true;
   bool _locationDialogShown = false;
   bool _isGuestUser = false;
+  /// App-level global discount fetched alongside the vets list.
+  Map<String, dynamic>? _globalDiscount;
 
   @override
   void initState() {
     super.initState();
     _locationService = Get.put(LocationService());
     _isGuestUser = _authService.authStatus == AuthStatus.guest;
+
+    // ── Show cached discount immediately (before any API call) ──
+    GlobalDiscountCache.load().then((cached) {
+      if (mounted && cached != null) {
+        setState(() => _globalDiscount = cached);
+      }
+    });
+
     _initializeHomeScreen();
 
     // Re-sort whenever GPS delivers (or updates) the position
@@ -90,6 +102,19 @@ class _HomeScreenState extends State<HomeScreen> {
         longitude: pos?.longitude,
       );
       final vets = response['vets'] as List<VetModel>;
+      // Capture app-level global discount returned alongside vets
+      final gd = response['globalDiscount'] as Map<String, dynamic>?;
+      if (mounted) {
+        if (gd != null) {
+          // Active discount — update UI and persist to cache
+          setState(() => _globalDiscount = gd);
+          GlobalDiscountCache.save(gd);
+        } else {
+          // Discount was removed from the dashboard — clear cache and hide banner
+          setState(() => _globalDiscount = null);
+          GlobalDiscountCache.clear();
+        }
+      }
       if (mounted) {
         _sortAndUpdateNearbyVets(vets);
       }
@@ -295,6 +320,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
 
                         const SizedBox(height: 24),
+
+                        // ── Global Discount Banner (app-wide, before rewards) ──
+                        if (_globalDiscount != null) ...[
+                          HomeGlobalDiscountBanner(
+                              discountData: _globalDiscount!),
+                          const SizedBox(height: 20),
+                        ],
 
                         // Rewards Card - Only show for authenticated users
                         if (!_isGuestUser) ...[
