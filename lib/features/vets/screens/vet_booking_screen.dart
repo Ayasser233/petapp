@@ -12,6 +12,7 @@ import 'package:petapp/core/services/points_service.dart';
 import '../models/time_slot_model.dart';
 import '../services/vet_service.dart';
 import '../../../core/services/facebook_event_service.dart';
+import '../../../core/services/review_service.dart';
 import '../widgets/vet_booking_screen_widgets/vet_booking_header.dart';
 import '../widgets/vet_booking_screen_widgets/vet_booking_calendar.dart';
 import '../widgets/vet_booking_screen_widgets/vet_booking_time_slots.dart';
@@ -368,9 +369,18 @@ class VetBookingController extends GetxController {
 
           _showSuccessMessage();
 
-          // Navigate to appointments screen immediately
+          // Mark this as a meaningful positive action for review prompting
+          ReviewService.markMeaningfulActionCompleted();
+
+          // Navigate to appointments screen, then prompt for review after a
+          // short delay so the screen transition feels natural
           Future.delayed(const Duration(milliseconds: 500), () {
             Get.offAllNamed('/appointments');
+            // Prompt 2 seconds after landing on the appointments screen
+            Future.delayed(const Duration(seconds: 2), () {
+              final ctx = Get.context;
+              if (ctx != null) ReviewService.maybePromptForReview(ctx);
+            });
           });
         },
       );

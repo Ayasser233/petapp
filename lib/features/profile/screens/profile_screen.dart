@@ -1,8 +1,7 @@
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:in_app_review/in_app_review.dart';
 import 'package:petapp/core/routes/routes.dart';
+import 'package:petapp/core/services/review_service.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/core/utils/app_colors.dart';
@@ -522,46 +521,10 @@ class ProfileScreen extends StatelessWidget {
 
   // ── Rate the App ──────────────────────────────────────────────────────────
 
-  static const _androidStoreUrl =
-      'https://play.google.com/store/apps/details?id=com.aleefy.petapp';
-  static const _iosStoreUrl =
-      'https://apps.apple.com/app/id6757188379';
-
-  Future<void> _rateApp(BuildContext context) async {
-    final inAppReview = InAppReview.instance;
-    try {
-      // Try the native in-app review dialog first
-      if (await inAppReview.isAvailable()) {
-        await inAppReview.requestReview();
-        return;
-      }
-    } catch (_) {
-      // Fall through to store URL
-    }
-
-    // Fallback: open store listing via url_launcher
-    await _openStoreListing(context);
-  }
-
-  Future<void> _openStoreListing(BuildContext context) async {
-    final isIOS = Platform.isIOS;
-    final uri = Uri.parse(isIOS ? _iosStoreUrl : _androidStoreUrl);
-    try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Unable to open the store right now.'),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12)),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
-      }
-    }
-  }
+  /// The user explicitly tapped "Rate the App" — always show the prompt,
+  /// bypassing cooldown / count guards, and mark as rated afterwards.
+  Future<void> _rateApp(BuildContext context) =>
+      ReviewService.forceOpenStoreListing(context);
 
   // ── Existing helpers (unchanged) ─────────────────────────────────────────
 
