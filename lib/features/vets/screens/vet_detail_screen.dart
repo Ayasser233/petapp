@@ -14,6 +14,7 @@ import '../widgets/vet_detail_screen_widgets/vet_action_button.dart';
 import '../widgets/vet_detail_screen_widgets/vet_reviews.dart';
 import '../models/review_model.dart';
 import '../services/vet_service.dart';
+import '../../../core/services/facebook_event_service.dart';
 
 class VetDetailScreen extends StatefulWidget {
   final Map<String, dynamic> vet;
@@ -42,6 +43,10 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
     _vet = Map<String, dynamic>.from(widget.vet);
     _loadReviews();
     _calcDistance();
+    FacebookEventService.logViewContent(
+      contentId: widget.vet['id']?.toString() ?? '',
+      contentType: 'vet',
+    );
   }
 
   /// Compute the distance between the user and this vet using lat/lng,

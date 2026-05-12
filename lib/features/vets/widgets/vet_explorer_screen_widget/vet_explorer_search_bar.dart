@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import '../../../../core/services/facebook_event_service.dart';
 import '../../screens/vet_explorer_screen.dart';
 
 class VetExplorerSearchBar extends StatelessWidget {
@@ -45,6 +46,14 @@ class VetExplorerSearchBar extends StatelessWidget {
                     ),
               ),
               onChanged: controller.updateSearchQuery,
+              onSubmitted: (value) {
+                if (value.trim().isNotEmpty) {
+                  FacebookEventService.logSearch(
+                    searchString: value.trim(),
+                    contentType: 'vet',
+                  );
+                }
+              },
             ),
           ),
           IconButton(

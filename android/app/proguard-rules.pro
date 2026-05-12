@@ -6,7 +6,12 @@
 -keep class io.flutter.**  { *; }
 -keep class io.flutter.plugins.**  { *; }
 
-# Keep MainActivity - Required for app to launch
+# Facebook SDK
+-keep class com.facebook.** { *; }
+-keep interface com.facebook.** { *; }
+-dontwarn com.facebook.**
+
+# Keep MainActivity and MainApplication - Required for app to launch
 -keep class com.aleefy.petapp.MainActivity { *; }
 
 # Google Play Core - Flutter references these but we don't use them

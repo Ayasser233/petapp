@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Aleefy</string>
+    <string name="facebook_app_id">2143664629534955</string>
+    <string name="facebook_client_token">0629b7968c24c1a6a48c47a6099e0fb5</string>
 </resources>
 

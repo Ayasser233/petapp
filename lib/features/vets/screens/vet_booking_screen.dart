@@ -11,6 +11,7 @@ import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/core/services/points_service.dart';
 import '../models/time_slot_model.dart';
 import '../services/vet_service.dart';
+import '../../../core/services/facebook_event_service.dart';
 import '../widgets/vet_booking_screen_widgets/vet_booking_header.dart';
 import '../widgets/vet_booking_screen_widgets/vet_booking_calendar.dart';
 import '../widgets/vet_booking_screen_widgets/vet_booking_time_slots.dart';
@@ -311,6 +312,20 @@ class VetBookingController extends GetxController {
       );
       return;
     }
+
+    // Log InitiateCheckout when user taps confirm (before API call)
+    final args = Get.arguments as Map<String, dynamic>?;
+    final vet = args?['vet'] as Map<String, dynamic>?;
+    final fee = vet?['consultationFee'];
+    final feeValue = fee != null
+        ? (fee is num ? fee.toDouble() : double.tryParse(fee.toString()) ?? 0.0)
+        : 0.0;
+    FacebookEventService.logInitiateCheckout(
+      contentId: vetId ?? '',
+      contentType: 'vet_appointment',
+      currency: 'EGP',
+      value: feeValue,
+    );
 
     // Pet selection is now optional - no validation needed
 
