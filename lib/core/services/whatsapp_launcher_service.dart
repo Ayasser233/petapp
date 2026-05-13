@@ -93,13 +93,19 @@ class WhatsAppLauncherService {
     String? subject,
     String? body,
   }) async {
-    final Uri emailUri = Uri(
-      scheme: 'mailto',
-      path: AppConstants.supportEmail,
-      queryParameters: {
-        'subject': subject ?? AppConstants.supportEmailSubject,
-        'body': body ?? AppConstants.supportEmailBody,
-      },
+    // ⚠️  Uri(queryParameters:{}) uses '+' for spaces (form-encoding).
+    // mailto: requires '%20', so we encode manually and parse the raw string.
+    final encodedSubject = Uri.encodeComponent(
+      subject ?? AppConstants.supportEmailSubject,
+    );
+    final encodedBody = Uri.encodeComponent(
+      body ?? AppConstants.supportEmailBody,
+    );
+
+    final emailUri = Uri.parse(
+      'mailto:${AppConstants.supportEmail}'
+      '?subject=$encodedSubject'
+      '&body=$encodedBody',
     );
 
     bool launched = false;

@@ -63,7 +63,7 @@ class _HomeGlobalDiscountBannerState extends State<HomeGlobalDiscountBanner>
     final value = (widget.discountData['value'] as num?)?.toDouble() ?? 0;
     return type == 'percentage'
         ? '${value.toStringAsFixed(0)}%\nOFF'
-        : '-${value.toStringAsFixed(0)}\nEGP';
+        : '${value.toStringAsFixed(0)}\nEGP';
   }
 
   String get _description =>
@@ -163,9 +163,9 @@ class _HomeGlobalDiscountBannerState extends State<HomeGlobalDiscountBanner>
             color: Colors.white.withValues(alpha: 0.22),
             borderRadius: BorderRadius.circular(20),
           ),
-          child: Row(
+          child: const Row(
             mainAxisSize: MainAxisSize.min,
-            children: const [
+            children: [
               Icon(Icons.verified_rounded, color: Colors.white, size: 11),
               SizedBox(width: 4),
               Text(
@@ -218,13 +218,13 @@ class _HomeGlobalDiscountBannerState extends State<HomeGlobalDiscountBanner>
             ),
           ],
         ),
-        child: Column(
+        child: const Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.calendar_month_rounded,
+            Icon(Icons.calendar_month_rounded,
                 color: AppColors.orange, size: 20),
-            const SizedBox(height: 3),
-            const Text(
+            SizedBox(height: 3),
+            Text(
               'Book\nNow',
               textAlign: TextAlign.center,
               style: TextStyle(

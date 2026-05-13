@@ -46,7 +46,7 @@ class GlobalDiscount {
 
   /// Human-readable label, e.g. "50% OFF"
   String get badgeLabel =>
-      type == 'percentage' ? '${value.toStringAsFixed(0)}% OFF' : '-${value.toStringAsFixed(0)} EGP';
+      type == 'percentage' ? '${value.toStringAsFixed(0)}% OFF' : '${value.toStringAsFixed(0)} EGP OFF';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
