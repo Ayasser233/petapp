@@ -6,6 +6,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:facebook_app_events/facebook_app_events.dart';
+
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/providers/settings_provider.dart';
 import 'package:petapp/core/routes/routes.dart';
@@ -23,6 +25,7 @@ import 'package:petapp/core/themes/app_theme.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/profile/controllers/profile_controller.dart';
+
 
 import 'firebase_options.dart';
 
@@ -43,6 +46,14 @@ void main() async {
         (value) => print("FCM: $value"),
       )
       .catchError((e) => print("FCM error $e"));
+
+  final facebookAppEvents = FacebookAppEvents();
+  try {
+    await facebookAppEvents.setAutoLogAppEventsEnabled(true);
+    await facebookAppEvents.setAdvertiserTracking(enabled: true);
+  } catch (e) {
+    debugPrint('⚠️ Facebook SDK init skipped: $e');
+  }
 
   // Initialize dependencies
   await setupServiceLocator();

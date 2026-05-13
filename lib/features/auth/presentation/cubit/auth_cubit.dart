@@ -6,7 +6,7 @@ import 'package:petapp/features/auth/data/repositories/auth_repository.dart';
 import 'package:petapp/features/auth/data/models/user_model.dart';
 import 'package:petapp/features/auth/data/models/auth_request_models.dart';
 import 'package:petapp/core/services/token_service.dart';
-
+import '../../../../core/services/facebook_event_service.dart';
 part 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
@@ -45,6 +45,9 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(AuthRegistrationSuccess(
           user: response.user?.name ?? 'User', email: userData['email']));
+      await FacebookEventService.logCompleteRegistration(
+        registrationMethod: 'email',
+      );
     } on DioException catch (e) {
       // Special case: If it's a 500 error related to maildev (email service)
       // the registration might have succeeded, so proceed to verification

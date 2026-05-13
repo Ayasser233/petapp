@@ -8,6 +8,8 @@ import 'package:petapp/features/appointments/domain/usecases/get_appointments_us
 import 'package:petapp/features/appointments/domain/usecases/submit_review_usecase.dart';
 import 'package:petapp/features/appointments/presentation/cubit/appointments_state.dart';
 
+import '../../../../core/services/facebook_event_service.dart';
+
 /// Cubit for managing appointments state
 class AppointmentsCubit extends Cubit<AppointmentsState> {
   final GetAppointmentsUseCase getAppointmentsUseCase;
@@ -287,6 +289,11 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     required int rating,
     String? comment,
   }) async {
+    await FacebookEventService.logRate(
+      maxRatingValue: 5,
+      contentType: 'appointment',
+      valueToSum: rating.toDouble(),
+    );
     emit(AppointmentActionLoading(
       appointmentId: appointmentId,
       action: 'review',

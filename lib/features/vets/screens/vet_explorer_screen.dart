@@ -706,7 +706,7 @@ class VetExplorerScreen extends StatelessWidget {
         child: RefreshIndicator(
           onRefresh: controller.refreshData,
           color: AppColors.orange,
-          child: CustomScrollView(
+          child: Obx(() => CustomScrollView(
             controller: controller.scrollController,
             slivers: [
               // Location status banner
@@ -739,17 +739,17 @@ class VetExplorerScreen extends StatelessWidget {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
-                  child: Obx(() => _buildResultsHeader(context, controller)),
+                  child: _buildResultsHeader(context, controller),
                 ),
               ),
 
               // Vet list
-              Obx(() => _buildVetSliverList(context, controller)),
-              
+              _buildVetSliverList(context, controller),
+
               // Loading indicator at bottom
-              Obx(() => _buildLoadingMoreIndicator(controller)),
+              _buildLoadingMoreIndicator(controller),
             ],
-          ),
+          )),
         ),
       ),
     );
@@ -769,14 +769,6 @@ class VetExplorerScreen extends StatelessWidget {
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: textColor,
-              ),
-        ),
-        Text(
-          AppLocalizations.of(context)
-              .vetsFound(controller.filteredVets.length),
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.orange,
-                fontWeight: FontWeight.bold,
               ),
         ),
       ],

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/features/home/widgets/home_global_discount_banner.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/appointments/domain/usecases/create_appointment_usecase.dart';
@@ -11,6 +12,8 @@ import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/core/services/points_service.dart';
 import '../models/time_slot_model.dart';
 import '../services/vet_service.dart';
+import '../../../core/services/facebook_event_service.dart';
+import '../../../core/services/review_service.dart';
 import '../widgets/vet_booking_screen_widgets/vet_booking_header.dart';
 import '../widgets/vet_booking_screen_widgets/vet_booking_calendar.dart';
 import '../widgets/vet_booking_screen_widgets/vet_booking_time_slots.dart';
@@ -312,6 +315,20 @@ class VetBookingController extends GetxController {
       return;
     }
 
+    // Log InitiateCheckout when user taps confirm (before API call)
+    final args = Get.arguments as Map<String, dynamic>?;
+    final vet = args?['vet'] as Map<String, dynamic>?;
+    final fee = vet?['consultationFee'];
+    final feeValue = fee != null
+        ? (fee is num ? fee.toDouble() : double.tryParse(fee.toString()) ?? 0.0)
+        : 0.0;
+    FacebookEventService.logInitiateCheckout(
+      contentId: vetId ?? '',
+      contentType: 'vet_appointment',
+      currency: 'EGP',
+      value: feeValue,
+    );
+
     // Pet selection is now optional - no validation needed
 
     try {
@@ -353,9 +370,18 @@ class VetBookingController extends GetxController {
 
           _showSuccessMessage();
 
-          // Navigate to appointments screen immediately
+          // Mark this as a meaningful positive action for review prompting
+          ReviewService.markMeaningfulActionCompleted();
+
+          // Navigate to appointments screen, then prompt for review after a
+          // short delay so the screen transition feels natural
           Future.delayed(const Duration(milliseconds: 500), () {
             Get.offAllNamed('/appointments');
+            // Prompt 2 seconds after landing on the appointments screen
+            Future.delayed(const Duration(seconds: 2), () {
+              final ctx = Get.context;
+              if (ctx != null) ReviewService.maybePromptForReview(ctx);
+            });
           });
         },
       );
@@ -441,11 +467,26 @@ class VetBookingScreen extends StatelessWidget {
   /// Build booking view
   Widget _buildBookingView(
       BuildContext context, VetBookingController controller) {
+    // Extract globalDiscount from the vet arguments (same data passed to detail screen)
+    final args = Get.arguments as Map<String, dynamic>?;
+    final vet = args?['vet'] as Map<String, dynamic>?;
+    final rawGd = vet?['globalDiscount'];
+    final globalDiscount = (rawGd is Map<String, dynamic> &&
+            rawGd['isActive'] == true)
+        ? rawGd
+        : null;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Global discount banner (shown when active) ──────
+          if (globalDiscount != null) ...[
+            HomeGlobalDiscountBanner(discountData: globalDiscount),
+            const SizedBox(height: 20),
+          ],
+
           // Booking summary
           VetBookingSummary(controller: controller),
 

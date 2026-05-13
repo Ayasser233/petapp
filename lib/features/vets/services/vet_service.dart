@@ -250,6 +250,17 @@ class VetService {
       final data = response.data['data'] as List<dynamic>?;
       final meta = response.data['meta'] as Map<String, dynamic>?;
 
+      // Extract app-level globalDiscount from the first vet entry (same across all vets)
+      Map<String, dynamic>? globalDiscount;
+      if (data != null && data.isNotEmpty) {
+        final first = data[0];
+        if (first is Map<String, dynamic> &&
+            first['globalDiscount'] is Map<String, dynamic>) {
+          final gd = first['globalDiscount'] as Map<String, dynamic>;
+          if (gd['isActive'] == true) globalDiscount = gd;
+        }
+      }
+
       final vets = (data)
               ?.map((vet) => VetModel.fromJson(vet as Map<String, dynamic>))
               .toList() ??
@@ -299,6 +310,7 @@ class VetService {
           'page': meta?['page'] ?? page,
           'limit': meta?['limit'] ?? limit,
           'totalPages': meta?['lastPage'] ?? 1,
+          'globalDiscount': globalDiscount,
         };
       }
 
@@ -308,6 +320,7 @@ class VetService {
         'page': meta?['page'] ?? page,
         'limit': meta?['limit'] ?? limit,
         'totalPages': meta?['lastPage'] ?? 1,
+        'globalDiscount': globalDiscount,
       };
     } catch (e) {
       throw VetServiceException(

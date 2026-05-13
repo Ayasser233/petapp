@@ -10,10 +10,12 @@ import '../widgets/vet_detail_screen_widgets/vet_stats.dart';
 import '../widgets/vet_detail_screen_widgets/vet_description.dart';
 import '../widgets/vet_detail_screen_widgets/vet_services.dart';
 import '../widgets/vet_detail_screen_widgets/vet_consultation_fee.dart';
+import '../widgets/vet_detail_screen_widgets/vet_global_discount_banner.dart';
 import '../widgets/vet_detail_screen_widgets/vet_action_button.dart';
 import '../widgets/vet_detail_screen_widgets/vet_reviews.dart';
 import '../models/review_model.dart';
 import '../services/vet_service.dart';
+import '../../../core/services/facebook_event_service.dart';
 
 class VetDetailScreen extends StatefulWidget {
   final Map<String, dynamic> vet;
@@ -42,6 +44,10 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
     _vet = Map<String, dynamic>.from(widget.vet);
     _loadReviews();
     _calcDistance();
+    FacebookEventService.logViewContent(
+      contentId: widget.vet['id']?.toString() ?? '',
+      contentType: 'vet',
+    );
   }
 
   /// Compute the distance between the user and this vet using lat/lng,
@@ -127,6 +133,10 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
         : null;
     final hasEmergency = _vet['hasEmergency'] == true;
 
+    // Parse app-level global discount (distinct from any vet-specific discount)
+    final globalDiscount = GlobalDiscount.tryParse(
+        _vet['globalDiscount'] as Map<String, dynamic>?);
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: _buildAppBar(context, isDark, textColor),
@@ -139,6 +149,11 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
               VetHeader(vet: _vet),
               const SizedBox(height: 12),
               VetAvailabilityStatus(vet: _vet),
+              // ── Global discount banner (only when active) ─────────
+              if (globalDiscount != null) ...[
+                const SizedBox(height: 16),
+                VetGlobalDiscountBanner(discount: globalDiscount),
+              ],
               const SizedBox(height: 24),
               VetStats(
                 vet: _vet,
@@ -158,6 +173,7 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
                 price: consultationPrice,
                 emergencyPrice: emergencyPrice,
                 hasEmergency: hasEmergency,
+                globalDiscount: globalDiscount,
               ),
               const SizedBox(height: 24),
               // Reviews Section
