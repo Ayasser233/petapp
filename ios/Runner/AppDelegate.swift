@@ -24,7 +24,8 @@ import FBSDKCoreKit
     ApplicationDelegate.shared.application(
       app,
       open: url,
-      options: options
+      sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String,
+            annotation: options[UIApplication.OpenURLOptionsKey.annotation]
     )
     return super.application(app, open: url, options: options)
   }
