@@ -69,7 +69,7 @@ dependencies:
   firebase_messaging: ^16.0.3
   cloud_firestore: ^6.0.3
   font_awesome_flutter: ^10.7.0
-  google_sign_in: ^6.2.1
+  google_sign_in: ^6.3.0
   sign_in_with_apple: ^6.1.3
   in_app_review: ^2.0.9
   facebook_app_events: ^0.27.2

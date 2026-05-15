@@ -25,6 +25,10 @@ import FBSDKCoreKit
     open url: URL,
     options: [UIApplication.OpenURLOptionsKey : Any] = [:]
   ) -> Bool {
+    // Handle Google Sign-In URL
+      if GIDSignIn.sharedInstance.handle(url) {
+        return true
+      }
 
     ApplicationDelegate.shared.application(
       app,
