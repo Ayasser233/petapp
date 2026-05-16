@@ -1463,6 +1463,7 @@ DEPENDENCIES:
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
+  - GoogleSignIn
   - image_picker_ios (from `.symlinks/plugins/image_picker_ios/ios`)
   - in_app_review (from `.symlinks/plugins/in_app_review/ios`)
   - mobile_scanner (from `.symlinks/plugins/mobile_scanner/darwin`)
@@ -1591,6 +1592,6 @@ SPEC CHECKSUMS:
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
   webview_flutter_wkwebview: 45a041c7831641076618876de3ba75c712860c6b
 
-PODFILE CHECKSUM: c029113520c7e5e9111196cc6294292c91c5c591
+PODFILE CHECKSUM: effab5dcaaf69d7b77632e844381290c0a4b5abf
 
 COCOAPODS: 1.16.2
