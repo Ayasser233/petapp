@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/routes/routes.dart';
@@ -21,11 +22,9 @@ class EnterVerificationCodeScreen extends StatefulWidget {
 
 class _EnterVerificationCodeScreenState
     extends State<EnterVerificationCodeScreen> {
-  // Controllers for OTP fields (changed to 6 digits)
   final List<TextEditingController> _controllers =
       List.generate(6, (_) => TextEditingController());
 
-  // Focus nodes for each field
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
 
   late final ApiClient _apiClient;
@@ -43,29 +42,66 @@ class _EnterVerificationCodeScreenState
     super.initState();
     _apiClient = Get.find<ApiClient>();
     _startResendTimer();
+    _setupBackspaceHandlers();
+    // Try to auto-fill from clipboard after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) => _tryAutoFillFromClipboard());
   }
 
-  @override
-  void dispose() {
-    // Clean up controllers and focus nodes
-    for (final controller in _controllers) {
-      controller.dispose();
+  /// Attach a backspace handler to every focus node so that pressing ⌫ on
+  /// an already-empty field moves focus to the previous field.
+  void _setupBackspaceHandlers() {
+    for (int i = 0; i < _focusNodes.length; i++) {
+      final index = i;
+      _focusNodes[index].onKeyEvent = (_, event) {
+        if (event is KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.backspace &&
+            _controllers[index].text.isEmpty &&
+            index > 0) {
+          _focusNodes[index - 1].requestFocus();
+          // Optionally clear previous field too so the user can retype
+          _controllers[index - 1].clear();
+          return KeyEventResult.handled;
+        }
+        return KeyEventResult.ignored;
+      };
     }
-    for (final node in _focusNodes) {
-      node.dispose();
+  }
+
+  /// Reads the clipboard; if it contains exactly 6 digits, fills all fields
+  /// automatically and triggers verification.
+  Future<void> _tryAutoFillFromClipboard() async {
+    try {
+      final data = await Clipboard.getData(Clipboard.kTextPlain);
+      final text = data?.text?.trim() ?? '';
+      // Accept both English digits and Arabic-Indic digits (٠١٢٣٤٥٦٧٨٩)
+      final normalized = TFormatter.toEnglishNumerals(text).replaceAll(RegExp(r'\D'), '');
+      if (normalized.length == 6) {
+        for (int i = 0; i < 6; i++) {
+          _controllers[i].text = normalized[i];
+        }
+        _focusNodes[5].unfocus();
+        // Auto-submit after a short delay so the user can see the filled code
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (mounted) _handleVerification();
+      }
+    } catch (_) {
+      // Clipboard read failed — ignore silently
     }
-    _timer?.cancel();
-    super.dispose();
   }
 
   // Start countdown timer for resend code
   void _startResendTimer() {
+    _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
       setState(() {
         if (_resendTimer > 0) {
           _resendTimer--;
         } else {
-          _timer?.cancel();
+          timer.cancel();
         }
       });
     });
@@ -160,8 +196,14 @@ class _EnterVerificationCodeScreenState
 
       // Check if the response is successful
       if (response.statusCode == 200 || response.statusCode == 201) {
-        // Extract the resetToken from the response
-        final resetToken = response.data['resetToken'] as String?;
+        // Extract the resetToken — it is nested inside the 'data' key:
+        // { "success": true, "data": { "resetToken": "...", "expiresIn": 300 } }
+        final responseBody = response.data;
+        final dataMap = (responseBody is Map && responseBody['data'] is Map)
+            ? responseBody['data'] as Map
+            : (responseBody is Map ? responseBody : <String, dynamic>{});
+
+        final resetToken = dataMap['resetToken']?.toString();
 
         if (resetToken == null || resetToken.isEmpty) {
           setState(() {

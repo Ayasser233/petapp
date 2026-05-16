@@ -7,7 +7,6 @@ import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/services/auth_service.dart';
 import 'package:petapp/features/profile/controllers/profile_controller.dart';
-import 'package:petapp/core/utils/formatters.dart';
 import 'package:petapp/core/utils/arabic_numeral_formatter.dart';
 
 class AccountDetailsScreen extends StatefulWidget {
@@ -24,9 +23,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
-
-  // Track if fields are being edited
-  bool _isEditing = false;
 
   @override
   void initState() {
@@ -129,100 +125,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
     super.dispose();
   }
 
-  void _toggleEditing() {
-    setState(() {
-      if (_isEditing) {
-        // Save data when switching from edit mode to view mode
-        _saveUserData();
-      } else {
-        // Just enable editing mode
-        _isEditing = true;
-      }
-    });
-  }
-
-  void _saveUserData() async {
-    // Split the name into firstName and lastName
-    final nameParts = _nameController.text.trim().split(' ');
-    final firstName = nameParts.isNotEmpty && nameParts.first.isNotEmpty
-        ? nameParts.first
-        : null;
-    final lastName =
-        nameParts.length > 1 && nameParts.sublist(1).join(' ').isNotEmpty
-            ? nameParts.sublist(1).join(' ')
-            : null;
-
-
-    // Convert Arabic numerals to English for phone number
-    String phoneText =
-        TFormatter.toEnglishNumerals(_phoneController.text.trim());
-    final phoneValue = phoneText.isNotEmpty ? phoneText : null;
-
-    try {
-      final success = await _profileController.updateProfile(
-        firstName: firstName,
-        lastName: lastName,
-        email: _emailController.text.trim().isNotEmpty
-            ? _emailController.text.trim()
-            : null,
-        phone: phoneValue,
-      );
-
-      if (success) {
-        setState(() {
-          _isEditing = false;
-        });
-
-        // Show success message
-        if (mounted) {
-          final localizations = AppLocalizations.of(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Colors.white),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child:
-                        Text(localizations.accountDetailsUpdatedSuccessfully),
-                  ),
-                ],
-              ),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-
-        // Refresh the UI with updated data
-        _initializeWithProfileData();
-      } else {
-        // Keep editing mode if save failed
-        // Error message will be shown by ProfileController
-      }
-    } catch (e) {
-      // Keep editing mode if save failed
-      if (mounted) {
-        final localizations = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.error, color: Colors.white),
-                const SizedBox(width: 12),
-                Expanded(
-                  child:
-                      Text(localizations.failedToUpdateProfile(e.toString())),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -245,26 +147,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
         title: Text(localizations?.myAccount ?? 'My Account'),
         centerTitle: true,
         elevation: 0,
-        actions: [
-          Obx(() => IconButton(
-                icon: _profileController.isLoading ||
-                        _profileController.isUpdating
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(AppColors.orange),
-                        ),
-                      )
-                    : Icon(_isEditing ? Icons.save : Icons.edit),
-                onPressed: _profileController.isLoading ||
-                        _profileController.isUpdating
-                    ? null
-                    : _toggleEditing,
-              )),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -285,23 +167,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                             AssetImage('assets/images/profile.jpg'),
                       ),
                     ),
-                    if (_isEditing)
-                      Positioned(
-                        right: 0,
-                        bottom: 0,
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: AppColors.orange,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.camera_alt,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
@@ -342,7 +207,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                       label: localizations?.name ?? "Name",
                       controller: _nameController,
                       icon: Icons.person,
-                      enabled: _isEditing,
+                      enabled: false,
                       isDark: isDark,
                       cardColor: cardColor,
                     ),
@@ -367,7 +232,7 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                       label: localizations?.phone ?? "Phone",
                       controller: _phoneController,
                       icon: Icons.phone,
-                      enabled: _isEditing,
+                      enabled: false,
                       isDark: isDark,
                       cardColor: cardColor,
                       keyboardType: TextInputType.phone,
