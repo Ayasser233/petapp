@@ -120,27 +120,69 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
 
     emit(const AppointmentsLoading());
 
-    final apiStatus = (status != null && status.toUpperCase() != 'ALL') ? status.toUpperCase() : null;
+    final isAll = status == null || status.toUpperCase() == 'ALL';
 
-    final result = await getAppointmentsUseCase(
-      GetAppointmentsParams(page: 1, limit: _pageLimit, status: apiStatus),
-    );
+    if (isAll) {
+      // For "All" filter, fetch each status separately and merge to ensure
+      // PENDING and CONFIRMED (upcoming) appointments are always included,
+      // since the default endpoint may only return past (completed/cancelled) records.
+      final results = await Future.wait([
+        getAppointmentsUseCase(GetAppointmentsParams(page: 1, limit: 50, status: null)),
+        getAppointmentsUseCase(GetAppointmentsParams(page: 1, limit: 50, status: 'PENDING')),
+        getAppointmentsUseCase(GetAppointmentsParams(page: 1, limit: 50, status: 'CONFIRMED')),
+      ]);
 
-    result.fold(
-      (failure) => emit(AppointmentsError(message: failure.message)),
-      (data) {
-        List<AppointmentEntity> appointments = List<AppointmentEntity>.from(data['data']);
-        appointments = _applyClientFilters(appointments, status, dateFilter, year);
+      // Surface the first error if any call failed
+      for (final r in results) {
+        if (r.isLeft()) {
+          r.fold((f) => emit(AppointmentsError(message: f.message)), (_) {});
+          return;
+        }
+      }
 
-        _hasNextPage = data['hasNextPage'] as bool? ?? false;
+      // Merge and deduplicate by appointment id
+      final seen = <String, AppointmentEntity>{};
+      for (final r in results) {
+        r.fold((_) {}, (data) {
+          final items = List<AppointmentEntity>.from(data['data'] as List);
+          for (final a in items) {
+            seen[a.id] = a;
+          }
+        });
+      }
 
-        emit(AppointmentsLoaded(
-          appointments: appointments,
-          hasNextPage: _hasNextPage,
-          currentPage: 1,
-        ));
-      },
-    );
+      List<AppointmentEntity> appointments = seen.values.toList();
+      appointments = _applyClientFilters(appointments, null, dateFilter, year);
+      _hasNextPage = false;
+
+      emit(AppointmentsLoaded(
+        appointments: appointments,
+        hasNextPage: false,
+        currentPage: 1,
+      ));
+    } else {
+      final apiStatus = status.toUpperCase();
+
+      final result = await getAppointmentsUseCase(
+        GetAppointmentsParams(page: 1, limit: _pageLimit, status: apiStatus),
+      );
+
+      result.fold(
+        (failure) => emit(AppointmentsError(message: failure.message)),
+        (data) {
+          List<AppointmentEntity> appointments = List<AppointmentEntity>.from(data['data']);
+          appointments = _applyClientFilters(appointments, status, dateFilter, year);
+
+          _hasNextPage = data['hasNextPage'] as bool? ?? false;
+
+          emit(AppointmentsLoaded(
+            appointments: appointments,
+            hasNextPage: _hasNextPage,
+            currentPage: 1,
+          ));
+        },
+      );
+    }
   }
 
   /// Load next page using stored filters (called on scroll to bottom)

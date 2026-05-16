@@ -34,10 +34,15 @@ class ProfileRepository {
       final response = await _apiClient.getUserProfile();
       print('✅ ProfileRepository: Get profile API response: ${response.data}');
 
-      // Extract user data from the nested response (if nested) or use direct response
-      final userData = response.data['user'] ?? response.data;
-      print(
-          '📋 ProfileRepository: Extracted user data for get profile: $userData');
+      // API shape: { success, message, data: { id, email, mobile, … } }
+      // Fall through: data → user → top-level (legacy fallback)
+      final body = response.data;
+      final userData = (body is Map && body['data'] is Map)
+          ? body['data'] as Map<String, dynamic>
+          : (body is Map && body['user'] is Map)
+              ? body['user'] as Map<String, dynamic>
+              : (body is Map<String, dynamic> ? body : <String, dynamic>{});
+      print('📋 ProfileRepository: Extracted user data for get profile: $userData');
 
       return UserModel.fromJson(userData);
     } catch (error) {
@@ -63,8 +68,13 @@ class ProfileRepository {
       final response = await _apiClient.updateUserProfile(profileData);
       print('✅ ProfileRepository: Received API response: ${response.data}');
 
-      // Extract user data from the nested response
-      final userData = response.data['user'] ?? response.data;
+      // API shape: { success, message, data: { … } }
+      final body = response.data;
+      final userData = (body is Map && body['data'] is Map)
+          ? body['data'] as Map<String, dynamic>
+          : (body is Map && body['user'] is Map)
+              ? body['user'] as Map<String, dynamic>
+              : (body is Map<String, dynamic> ? body : <String, dynamic>{});
       print('📋 ProfileRepository: Extracted user data: $userData');
 
       final userModel = UserModel.fromJson(userData);
