@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
@@ -936,41 +937,32 @@ class _HomeScreenState extends State<HomeScreen> {
         imagePath.startsWith('www.');
 
     if (isNetworkImage) {
-      return Image.network(
-        imagePath,
+      return CachedNetworkImage(
+        imageUrl: imagePath,
         width: double.infinity,
         height: height,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            width: double.infinity,
-            height: height,
-            color: Colors.grey[300],
-            child: Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-                color: AppColors.orange,
-                strokeWidth: 2,
-              ),
+        placeholder: (context, url) => Container(
+          width: double.infinity,
+          height: height,
+          color: Colors.grey[300],
+          child: Center(
+            child: CircularProgressIndicator(
+              color: AppColors.orange,
+              strokeWidth: 2,
             ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: double.infinity,
-            height: height,
-            color: Colors.grey[300],
-            child: const FaIcon(
-              FontAwesomeIcons.houseMedical,
-              size: 40,
-              color: Colors.grey,
-            ),
-          );
-        },
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          width: double.infinity,
+          height: height,
+          color: Colors.grey[300],
+          child: const FaIcon(
+            FontAwesomeIcons.houseMedical,
+            size: 40,
+            color: Colors.grey,
+          ),
+        ),
       );
     } else {
       return Image.asset(

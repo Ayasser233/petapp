@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:petapp/core/services/api_client.dart';
 import 'package:petapp/core/services/error_handler_service.dart';
 import 'package:petapp/core/services/auth_service.dart';
@@ -47,7 +48,11 @@ import 'package:get/get.dart' as getx;
 
 final sl = GetIt.instance;
 
-Future<void> setupServiceLocator() async {
+Future<void> setupServiceLocator({SharedPreferences? sharedPreferences}) async {
+  // SharedPreferences singleton — initialized once at startup
+  final prefs = sharedPreferences ?? await SharedPreferences.getInstance();
+  sl.registerSingleton<SharedPreferences>(prefs);
+
   // Core services
   final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
   sl.registerSingleton(scaffoldMessengerKey);

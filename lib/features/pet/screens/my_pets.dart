@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
@@ -405,26 +406,23 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
             networkUrl.startsWith('https://'));
 
     if (isNetwork) {
-      return Image.network(
-        networkUrl,
+      return CachedNetworkImage(
+        imageUrl: networkUrl,
         width: size,
         height: size,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, progress) {
-          if (progress == null) return child;
-          return Container(
-            width: size,
-            height: size,
-            color: Colors.grey[300],
-            child: const Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.orange,
-              ),
+        placeholder: (context, url) => Container(
+          width: size,
+          height: size,
+          color: Colors.grey[300],
+          child: const Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppColors.orange,
             ),
-          );
-        },
-        errorBuilder: (context, _, __) => _localAssetImage(pet, size),
+          ),
+        ),
+        errorWidget: (context, url, error) => _localAssetImage(pet, size),
       );
     }
     return _localAssetImage(pet, size);
