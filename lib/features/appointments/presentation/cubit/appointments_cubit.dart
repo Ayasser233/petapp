@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:petapp/core/errors/failures.dart';
 import 'package:petapp/features/appointments/domain/entities/appointment_entity.dart';
 import 'package:petapp/features/appointments/domain/entities/appointment_entity_extensions.dart';
 import 'package:petapp/features/appointments/domain/usecases/cancel_appointment_usecase.dart';
@@ -39,6 +40,15 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     required this.completeAppointmentByQrUseCase,
   }) : super(const AppointmentsInitial());
 
+  /// Maps a Failure to the appropriate state.
+  /// Returns [AppointmentsUnauthorized] for 401 errors, [AppointmentsError] otherwise.
+  AppointmentsState _failureToState(Failure failure) {
+    if (failure is UnauthorizedFailure) {
+      return const AppointmentsUnauthorized();
+    }
+    return AppointmentsError(message: failure.message);
+  }
+
   /// Get appointments with pagination
   Future<void> getAppointments({
     int page = 1,
@@ -56,7 +66,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     );
 
     result.fold(
-      (failure) => emit(AppointmentsError(message: failure.message)),
+      (failure) => emit(_failureToState(failure)),
       (data) {
         emit(AppointmentsLoaded(
           appointments: data['data'],
@@ -90,7 +100,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     );
 
     result.fold(
-      (failure) => emit(AppointmentsError(message: failure.message)),
+      (failure) => emit(_failureToState(failure)),
       (data) {
         final newAppointments = [
           ...currentState.appointments,
@@ -135,7 +145,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       // Surface the first error if any call failed
       for (final r in results) {
         if (r.isLeft()) {
-          r.fold((f) => emit(AppointmentsError(message: f.message)), (_) {});
+          r.fold((f) => emit(_failureToState(f)), (_) {});
           return;
         }
       }
@@ -168,7 +178,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
       );
 
       result.fold(
-        (failure) => emit(AppointmentsError(message: failure.message)),
+        (failure) => emit(_failureToState(failure)),
         (data) {
           List<AppointmentEntity> appointments = List<AppointmentEntity>.from(data['data']);
           appointments = _applyClientFilters(appointments, status, dateFilter, year);
@@ -276,7 +286,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     );
 
     result.fold(
-      (failure) => emit(AppointmentsError(message: failure.message)),
+      (failure) => emit(_failureToState(failure)),
       (_) {
         // Emit success - UI will handle reload with current filter
         emit(const AppointmentActionSuccess(
@@ -310,7 +320,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     );
 
     result.fold(
-      (failure) => emit(AppointmentsError(message: failure.message)),
+      (failure) => emit(_failureToState(failure)),
       (appointment) {
         emit(const AppointmentActionSuccess(
           message: 'Appointment created successfully',
@@ -350,7 +360,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     );
 
     result.fold(
-      (failure) => emit(AppointmentsError(message: failure.message)),
+      (failure) => emit(_failureToState(failure)),
       (_) {
         emit(const AppointmentActionSuccess(
           message: 'Review submitted successfully',
@@ -388,7 +398,7 @@ class AppointmentsCubit extends Cubit<AppointmentsState> {
     );
 
     result.fold(
-      (failure) => emit(AppointmentsError(message: failure.message)),
+      (failure) => emit(_failureToState(failure)),
       (_) {
         // Emit success - UI will handle reload
         emit(const AppointmentActionSuccess(

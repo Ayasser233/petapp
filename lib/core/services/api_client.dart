@@ -524,7 +524,11 @@ class ApiClient {
       );
 
       if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
-        final data = response.data as Map<String, dynamic>;
+        final topLevel = response.data as Map<String, dynamic>;
+        // Tokens may be at the top level or nested inside a 'data' key
+        final data = (topLevel['data'] is Map<String, dynamic>)
+            ? topLevel['data'] as Map<String, dynamic>
+            : topLevel;
         final newAccessToken = data['accessToken'] ?? data['access_token'];
         final newRefreshToken = data['refreshToken'] ?? data['refresh_token'];
 

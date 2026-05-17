@@ -41,8 +41,8 @@ class AppointmentRemoteDataSource {
         );
       }
     } catch (e) {
-      if (e is ServerException) rethrow;
-      throw ServerException(message: _extractErrorMessage(e));
+      if (e is ServerException || e is UnauthorizedException) rethrow;
+      _throwProperException(e);
     }
   }
 
@@ -60,7 +60,8 @@ class AppointmentRemoteDataSource {
       }
       return null;
     } catch (e) {
-      throw ServerException(message: _extractErrorMessage(e));
+      if (e is ServerException || e is UnauthorizedException) rethrow;
+      _throwProperException(e);
     }
   }
 
@@ -100,8 +101,8 @@ class AppointmentRemoteDataSource {
         );
       }
     } catch (e) {
-      if (e is ServerException) rethrow;
-      throw ServerException(message: _extractErrorMessage(e));
+      if (e is ServerException || e is UnauthorizedException) rethrow;
+      _throwProperException(e);
     }
   }
 
@@ -235,6 +236,14 @@ class AppointmentRemoteDataSource {
     }
   }
 
+
+  /// Throw the correct exception based on the error type
+  Never _throwProperException(dynamic error) {
+    if (error is DioException && error.response?.statusCode == 401) {
+      throw UnauthorizedException('Unauthorized');
+    }
+    throw ServerException(message: _extractErrorMessage(error));
+  }
 
   /// Extract error message from DioException
   String _extractErrorMessage(dynamic error) {
