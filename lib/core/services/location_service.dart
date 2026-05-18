@@ -319,7 +319,7 @@ class LocationService extends GetxService {
   Future<bool> showFirstTimeLocationDialog() async {
     if (!_isFirstLaunch.value) return false;
 
-    return await Get.dialog<bool>(
+    final shouldRequestPermission = await Get.dialog<bool>(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
@@ -398,7 +398,9 @@ class LocationService extends GetxService {
         ],
       ),
       barrierDismissible: false,
-    ) ?? true;
+    );
+
+    return shouldRequestPermission == null || shouldRequestPermission;
   }
 
   /// Show settings dialog when permission is denied forever
