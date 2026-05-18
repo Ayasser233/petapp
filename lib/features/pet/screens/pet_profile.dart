@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -1068,32 +1069,21 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
 
     if (isNetworkImage) {
       // Network image from API
-      return Image.network(
-        primaryImage,
+      return CachedNetworkImage(
+        imageUrl: primaryImage,
         width: double.infinity,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) {
-            return child;
-          }
-          return Container(
-            width: double.infinity,
-            color: AppColors.orange.withValues(alpha: 0.1),
-            child: Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-                color: AppColors.orange,
-                strokeWidth: 3,
-              ),
+        placeholder: (context, url) => Container(
+          width: double.infinity,
+          color: AppColors.orange.withValues(alpha: 0.1),
+          child: Center(
+            child: CircularProgressIndicator(
+              color: AppColors.orange,
+              strokeWidth: 3,
             ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return _buildFallbackImage();
-        },
+          ),
+        ),
+        errorWidget: (context, url, error) => _buildFallbackImage(),
       );
     } else if (isLocalFile) {
       // Local file from camera/gallery

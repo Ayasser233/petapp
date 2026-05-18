@@ -6,19 +6,26 @@ class TokenService {
   static const String _userIdKey = 'user_id';
   final FlutterSecureStorage _storage;
 
+  // In-memory cache – avoids a disk read on every API request
+  String? _cachedToken;
+
   TokenService({FlutterSecureStorage? storage})
       : _storage = storage ?? const FlutterSecureStorage();
 
   // Access Token methods
   Future<void> saveToken(String token) async {
+    _cachedToken = token;
     await _storage.write(key: _tokenKey, value: token);
   }
 
   Future<String?> getToken() async {
-    return await _storage.read(key: _tokenKey);
+    if (_cachedToken != null) return _cachedToken;
+    _cachedToken = await _storage.read(key: _tokenKey);
+    return _cachedToken;
   }
 
   Future<void> clearToken() async {
+    _cachedToken = null;
     await _storage.delete(key: _tokenKey);
   }
 

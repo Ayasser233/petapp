@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
@@ -92,55 +93,38 @@ class _ClinicHeaderState extends State<VetHeader> {
 
 
     if (isNetworkImage) {
-      return Image.network(
-        imagePath,
+      return CachedNetworkImage(
+        imageUrl: imagePath,
         width: double.infinity,
         fit: BoxFit.cover,
-        // Add cache control headers
-        headers: const {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) {
-            return child;
-          }
-          return Container(
-            width: double.infinity,
-            color: Colors.grey[300],
-            child: Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-                color: AppColors.orange,
+        placeholder: (context, url) => Container(
+          width: double.infinity,
+          color: Colors.grey[300],
+          child: Center(
+            child: CircularProgressIndicator(
+              color: AppColors.orange,
+            ),
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          width: double.infinity,
+          color: Colors.grey[300],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.local_hospital,
+                size: 50,
+                color: Colors.grey,
               ),
-            ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: double.infinity,
-            color: Colors.grey[300],
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(
-                  Icons.local_hospital,
-                  size: 50,
-                  color: Colors.grey,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Image not available',
-                  style: TextStyle(color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          );
-        },
+              const SizedBox(height: 8),
+              Text(
+                'Image not available',
+                style: TextStyle(color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ),
       );
     } else {
       // Load local asset image

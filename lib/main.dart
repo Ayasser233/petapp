@@ -55,8 +55,11 @@ void main() async {
     debugPrint('⚠️ Facebook SDK init skipped: $e');
   }
 
+  // Initialize SharedPreferences once — registered as singleton in GetIt
+  final sharedPreferences = await SharedPreferences.getInstance();
+
   // Initialize dependencies
-  await setupServiceLocator();
+  await setupServiceLocator(sharedPreferences: sharedPreferences);
 
   // Initialize services
   await initServices();

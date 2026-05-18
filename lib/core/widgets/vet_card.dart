@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
@@ -303,47 +304,32 @@ class _VetCardState extends State<VetCard> {
         ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           child: isNetworkImage
-              ? Image.network(
-                  widget.primaryImage,
+              ? CachedNetworkImage(
+                  imageUrl: widget.primaryImage,
                   width: double.infinity,
                   height: widget.compact ? 120 : 150,
                   fit: BoxFit.cover,
-                  // Add cache control headers
-                  headers: const {
-                    'Cache-Control': 'no-cache, no-store, must-revalidate',
-                    'Pragma': 'no-cache',
-                    'Expires': '0',
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      width: double.infinity,
-                      height: widget.compact ? 120 : 150,
-                      color: Colors.grey[300],
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
-                          color: AppColors.orange,
-                          strokeWidth: 2,
-                        ),
+                  placeholder: (context, url) => Container(
+                    width: double.infinity,
+                    height: widget.compact ? 120 : 150,
+                    color: Colors.grey[300],
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.orange,
+                        strokeWidth: 2,
                       ),
-                    );
-                  },
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: double.infinity,
-                      height: widget.compact ? 120 : 150,
-                      color: Colors.grey[300],
-                      child: const Icon(
-                        Icons.local_hospital,
-                        size: 48,
-                        color: Colors.grey,
-                      ),
-                    );
-                  },
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    width: double.infinity,
+                    height: widget.compact ? 120 : 150,
+                    color: Colors.grey[300],
+                    child: const Icon(
+                      Icons.local_hospital,
+                      size: 48,
+                      color: Colors.grey,
+                    ),
+                  ),
                 )
               : Image.asset(
                   widget.primaryImage,
