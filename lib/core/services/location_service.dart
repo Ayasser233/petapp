@@ -350,7 +350,7 @@ class LocationService extends GetxService {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Allow PetApp to access your location to:',
+              'Allow Aleefy to access your location to:',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 12),
