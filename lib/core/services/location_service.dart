@@ -380,16 +380,6 @@ class LocationService extends GetxService {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () async {
-              await _markLocationPermissionRequested();
-              Get.back(result: false);
-            },
-            child: Text(
-              'Skip for Now',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ),
           ElevatedButton(
             onPressed: () {
               Get.back(result: true);
@@ -401,14 +391,14 @@ class LocationService extends GetxService {
               ),
             ),
             child: const Text(
-              'Allow Location',
+              'Continue',
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ],
       ),
       barrierDismissible: false,
-    ) ?? false;
+    ) ?? true;
   }
 
   /// Show settings dialog when permission is denied forever
