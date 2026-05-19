@@ -15,7 +15,7 @@ class SettingsScreen extends StatelessWidget {
 
   // Add the missing _buildSectionHeader method
   Widget _buildSectionHeader(
-      BuildContext context, String title, IconData icon) {
+      BuildContext context, String title, FaIconData icon) {
     final isDark = THelperFunctions.isDarkMode(context);
     final textColor = isDark ? Colors.white : Colors.black87;
 
@@ -306,7 +306,7 @@ class SettingsScreen extends StatelessWidget {
       required T value,
       required T groupValue,
       required void Function(T?)? onChanged,
-      required IconData icon}) {
+      required FaIconData icon}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
     final subTextColor = isDark ? Colors.white70 : Colors.black54;
@@ -398,7 +398,7 @@ class SettingsScreen extends StatelessWidget {
       required String subtitle,
       required bool value,
       required void Function(bool) onChanged,
-      required IconData icon}) {
+      required FaIconData icon}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
     final subTextColor = isDark ? Colors.white70 : Colors.black54;
@@ -461,7 +461,7 @@ class SettingsScreen extends StatelessWidget {
       required String title,
       required String subtitle,
       required VoidCallback onTap,
-      required IconData icon,
+      required FaIconData icon,
       bool showArrow = true,
       bool isDestructive = false}) {
     final isDark = Theme.of(context).brightness == Brightness.dark;

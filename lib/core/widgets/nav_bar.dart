@@ -75,7 +75,7 @@ class CommonBottomNavBar extends StatelessWidget {
     );
   }
   
-  BottomNavigationBarItem _buildNavItem(IconData inactiveIcon, IconData activeIcon, String label, int index) {
+  BottomNavigationBarItem _buildNavItem(FaIconData inactiveIcon, FaIconData activeIcon, String label, int index) {
     return BottomNavigationBarItem(
       icon: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
