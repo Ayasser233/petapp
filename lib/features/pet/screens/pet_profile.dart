@@ -34,7 +34,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _petController = sl<PetController>();
+    _petController = Get.find<PetController>();
   }
 
   @override
@@ -621,8 +621,11 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                       final success =
                           await _petController.deletePet(widget.pet.id);
                       if (success) {
-                        // Navigate to My Pets screen after successful deletion
-                        Get.offAllNamed('/my-pets');
+                        // Go back one level to My Pets screen.
+                        // Using Get.back() preserves the navigation stack on iOS
+                        // so the user can still navigate freely.
+                        // The pets RxList is already updated reactively.
+                        Get.back();
                         Get.snackbar(
                           'Success',
                           '${widget.pet.name} has been deleted.',

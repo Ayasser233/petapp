@@ -262,12 +262,12 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
       ),
       child: InkWell(
         onTap: () async {
-          final result = await Get.to(
+          // Deletion is handled entirely inside PetProfileScreen.
+          // The pets RxList is updated reactively there, so no extra
+          // action is needed here when returning.
+          await Get.to(
             () => PetProfileScreen(pet: pet),
           );
-          if (result == 'delete') {
-            _petController.deletePet(pet.id);
-          }
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
