@@ -30,11 +30,13 @@ class PetProfileScreen extends StatefulWidget {
 class _PetProfileScreenState extends State<PetProfileScreen> {
   late final PetController _petController;
   bool _isDeleting = false;
+  late PetModel _currentPet;
 
   @override
   void initState() {
     super.initState();
     _petController = Get.find<PetController>();
+    _currentPet = widget.pet;
   }
 
   @override
@@ -44,7 +46,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
     final isDark = THelperFunctions.isDarkMode(context);
 
     // Get pet age
-    final age = _calculateAge(widget.pet.dateOfBirth);
+    final age = _calculateAge(_currentPet.dateOfBirth);
 
     // Use app theme color instead of pet type-based colors
     const Color themeColor = AppColors.orange;
@@ -77,12 +79,17 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                 onPressed: () async {
                   final result = await Get.toNamed(
                     AppRoutes.updatePet,
-                    arguments: widget.pet,
+                    arguments: _currentPet,
                   );
                   if (result == true) {
-                    // Refresh pet data after update
-                    await _petController.fetchPets();
-                    Get.back(); // Go back to refresh the list
+                    // Find the updated pet from the controller and refresh the profile in-place
+                    final updatedPet = _petController.pets
+                        .firstWhereOrNull((p) => p.id == _currentPet.id);
+                    if (updatedPet != null && mounted) {
+                      setState(() {
+                        _currentPet = updatedPet;
+                      });
+                    }
                   }
                 },
               ),
@@ -121,7 +128,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          widget.pet.name,
+                          _currentPet.name,
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 28,
@@ -139,7 +146,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                widget.pet.species,
+                                _currentPet.species,
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 14,
@@ -185,7 +192,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                       _buildInfoCard(
                         context,
                         localizations.birthday,
-                        _formatDate(widget.pet.dateOfBirth),
+                        _formatDate(_currentPet.dateOfBirth),
                         Icons.cake,
                         themeColor,
                         isDark,
@@ -194,8 +201,8 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                       _buildInfoCard(
                         context,
                         localizations.species,
-                        widget.pet.species.toUpperCase(),
-                        widget.pet.species.toLowerCase() == 'dog'
+                        _currentPet.species.toUpperCase(),
+                        _currentPet.species.toLowerCase() == 'dog'
                             ? Icons.pets
                             : Icons.emoji_nature,
                         themeColor,
@@ -209,15 +216,15 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                   // Gender and Weight
                   Row(
                     children: [
-                      if (widget.pet.gender != null)
+                      if (_currentPet.gender != null)
                         Expanded(
                           child: _buildInfoCard(
                             context,
                             localizations.gender,
-                            widget.pet.gender == 'MALE'
+                            _currentPet.gender == 'MALE'
                                 ? localizations.male
                                 : localizations.female,
-                            widget.pet.gender == 'MALE'
+                            _currentPet.gender == 'MALE'
                                 ? Icons.male
                                 : Icons.female,
                             themeColor,
@@ -230,7 +237,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                   const SizedBox(height: 16),
 
                   // Spay/Neuter Status
-                  if (widget.pet.spayNeuterStatus != null)
+                  if (_currentPet.spayNeuterStatus != null)
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
@@ -248,7 +255,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                           ),
                           const SizedBox(width: 12),
                           Text(
-                            widget.pet.spayNeuterStatus!
+                            _currentPet.spayNeuterStatus!
                                 ? localizations.spayedNeutered
                                 : localizations.notSpayedNeutered,
                             style: TextStyle(
@@ -264,15 +271,15 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                   const SizedBox(height: 24),
 
                   // Allergies section
-                  if (widget.pet.allergies != null &&
-                      widget.pet.allergies!.isNotEmpty) ...[
+                  if (_currentPet.allergies != null &&
+                      _currentPet.allergies!.isNotEmpty) ...[
                     _buildSectionHeader('Allergies', Icons.warning_amber,
                         themeColor, textColor),
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 8,
                       runSpacing: 8,
-                      children: widget.pet.allergies!.map((allergy) {
+                      children: _currentPet.allergies!.map((allergy) {
                         return Chip(
                           label: Text(allergy),
                           backgroundColor:
@@ -292,8 +299,8 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                   const SizedBox(height: 8),
 
                   // Notes section
-                  if (widget.pet.notes != null &&
-                      widget.pet.notes!.isNotEmpty) ...[
+                  if (_currentPet.notes != null &&
+                      _currentPet.notes!.isNotEmpty) ...[
                     _buildSectionHeader(localizations.notes, Icons.note_alt,
                         themeColor, textColor),
                     const SizedBox(height: 8),
@@ -306,7 +313,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                         border: Border.all(color: cardBorderColor),
                       ),
                       child: Text(
-                        widget.pet.notes!,
+                        _currentPet.notes!,
                         style: TextStyle(
                           color: textColor,
                           height: 1.5,
@@ -350,23 +357,23 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Show primary weight field
-                        if (widget.pet.weight != null) ...[
+                        if (_currentPet.weight != null) ...[
                           _buildMedicalDetailRow(
                               localizations.weight,
-                              '${widget.pet.weight} kg',
+                              '${_currentPet.weight} kg',
                               Icons.monitor_weight,
                               textColor,
                               subTextColor),
                           const SizedBox(height: 12),
                         ],
                         // Show gender
-                        if (widget.pet.gender != null) ...[
+                        if (_currentPet.gender != null) ...[
                           _buildMedicalDetailRow(
                               localizations.gender,
-                              widget.pet.gender == 'MALE'
+                              _currentPet.gender == 'MALE'
                                   ? localizations.male
                                   : localizations.female,
-                              widget.pet.gender == 'MALE'
+                              _currentPet.gender == 'MALE'
                                   ? Icons.male
                                   : Icons.female,
                               textColor,
@@ -374,33 +381,33 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                           const SizedBox(height: 12),
                         ],
                         // Show primary spay/neuter status
-                        if (widget.pet.spayNeuterStatus != null) ...[
+                        if (_currentPet.spayNeuterStatus != null) ...[
                           _buildMedicalDetailRow(
                               localizations.spayedNeuteredQuestion,
-                              widget.pet.spayNeuterStatus! ? 'Yes' : 'No',
+                              _currentPet.spayNeuterStatus! ? 'Yes' : 'No',
                               Icons.medical_services,
                               textColor,
                               subTextColor),
                           const SizedBox(height: 12),
                         ],
                         // Show primary allergies
-                        if (widget.pet.allergies != null &&
-                            widget.pet.allergies!.isNotEmpty) ...[
+                        if (_currentPet.allergies != null &&
+                            _currentPet.allergies!.isNotEmpty) ...[
                           _buildMedicalDetailRow(
                               localizations.allergies,
-                              widget.pet.allergies!.join(', '),
+                              _currentPet.allergies!.join(', '),
                               Icons.warning_amber,
                               textColor,
                               subTextColor),
                           const SizedBox(height: 12),
                         ],
                         // Show last vet visit from medical history if available
-                        if (widget.pet.medicalHistory?.lastVetVisit !=
+                        if (_currentPet.medicalHistory?.lastVetVisit !=
                             null) ...[
                           _buildMedicalDetailRow(
                               localizations.lastVetVisit,
                               _formatDate(
-                                  widget.pet.medicalHistory!.lastVetVisit!),
+                                  _currentPet.medicalHistory!.lastVetVisit!),
                               Icons.event,
                               textColor,
                               subTextColor),
@@ -585,7 +592,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              localizations.areYouSureDeletePet.replaceAll('this pet', widget.pet.name),
+              localizations.areYouSureDeletePet.replaceAll('this pet', _currentPet.name),
               textAlign: TextAlign.center,
               style: TextStyle(color: textColor),
             ),
@@ -619,7 +626,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
 
                     try {
                       final success =
-                          await _petController.deletePet(widget.pet.id);
+                          await _petController.deletePet(_currentPet.id);
                       if (success) {
                         // Go back one level to My Pets screen.
                         // Using Get.back() preserves the navigation stack on iOS
@@ -628,7 +635,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                         Get.back();
                         Get.snackbar(
                           'Success',
-                          '${widget.pet.name} has been deleted.',
+                          '${_currentPet.name} has been deleted.',
                           snackPosition: SnackPosition.BOTTOM,
                           backgroundColor: Colors.green[100],
                           colorText: Colors.green[800],
@@ -680,7 +687,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
     bool isDark,
   ) {
     return BlocProvider(
-      create: (context) => sl<VaccinationCubit>()..getMedicalSheet(widget.pet.id),
+      create: (context) => sl<VaccinationCubit>()..getMedicalSheet(_currentPet.id),
       child: BlocBuilder<VaccinationCubit, VaccinationState>(
         builder: (context, state) {
           if (state is VaccinationLoading) {
@@ -841,13 +848,13 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                             final result = await Get.to(() => BlocProvider.value(
                                   value: cubit,
                                   child: AddVaccinationScreen(
-                                    petId: widget.pet.id,
-                                    petName: widget.pet.name,
-                                    petSpecies: widget.pet.species,
+                                    petId: _currentPet.id,
+                                    petName: _currentPet.name,
+                                    petSpecies: _currentPet.species,
                                   ),
                                 ));
                             if (result == true && context.mounted) {
-                              cubit.getMedicalSheet(widget.pet.id);
+                              cubit.getMedicalSheet(_currentPet.id);
                             }
                           },
                           icon: const Icon(Icons.add, size: 18),
@@ -869,8 +876,8 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                             onPressed: () {
                               Get.to(() => BlocProvider(
                                     create: (context) => sl<VaccinationCubit>()
-                                      ..getMedicalSheet(widget.pet.id),
-                                    child: PetVaccinationRecordScreen(pet: widget.pet),
+                                      ..getMedicalSheet(_currentPet.id),
+                                    child: PetVaccinationRecordScreen(pet: _currentPet),
                                   ));
                             },
                             icon: const Icon(Icons.medical_information, size: 18),
@@ -927,9 +934,9 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
                       final result = await Get.to(() => BlocProvider.value(
                             value: cubit,
                             child: AddVaccinationScreen(
-                              petId: widget.pet.id,
-                              petName: widget.pet.name,
-                              petSpecies: widget.pet.species,
+                              petId: _currentPet.id,
+                              petName: _currentPet.name,
+                              petSpecies: _currentPet.species,
                             ),
                           ));
                       if (result == true && mounted) {
@@ -1060,7 +1067,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
   Widget _buildPetImage() {
 
     // Determine image source
-    final String primaryImage = widget.pet.imageUrl ?? widget.pet.image;
+    final String primaryImage = _currentPet.imageUrl ?? _currentPet.image;
 
     // Check if it's a network image
     final isNetworkImage = primaryImage.startsWith('http://') ||
@@ -1118,7 +1125,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
       color: AppColors.orange.withValues(alpha: 0.2),
       child: Center(
         child: Icon(
-          widget.pet.species.toLowerCase() == 'dog'
+          _currentPet.species.toLowerCase() == 'dog'
               ? Icons.pets
               : Icons.pets,
           size: 100,
