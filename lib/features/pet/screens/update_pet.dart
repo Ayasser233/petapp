@@ -40,7 +40,7 @@ class _UpdatePetScreenState extends State<UpdatePetScreen> {
   late List<String> _allergies;
 
   final AuthService _authService = sl<AuthService>();
-  final PetController _petController = sl<PetController>();
+  final PetController _petController = Get.find<PetController>();
 
   List<String> _allowedSpecies = [];
 
