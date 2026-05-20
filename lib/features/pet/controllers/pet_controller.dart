@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/pet/models/pet_species_model.dart';
 import 'package:petapp/features/pet/data/repositories/pet_repository.dart';
@@ -194,8 +195,17 @@ class PetController extends GetxController {
     error.value = '';
 
     try {
+      // Capture old image URL before update so we can evict it from cache
+      final oldImageUrl = pets
+          .firstWhereOrNull((p) => p.id == id)
+          ?.imageUrl;
 
       final updatedPet = await _repository.updatePet(id, petData, imagePath: imagePath);
+
+      // Evict stale cached image so the new one loads fresh
+      if (oldImageUrl != null && oldImageUrl.isNotEmpty) {
+        await CachedNetworkImage.evictFromCache(oldImageUrl);
+      }
 
       // Update in local list
       final index = pets.indexWhere((pet) => pet.id == id);

@@ -100,8 +100,8 @@ class PetModel {
       }
     } else if (map['images'] != null) {
       if (map['images'] is List && (map['images'] as List).isNotEmpty) {
-        // If images is an array, take the first one
-        apiImageUrl = _convertImagePath((map['images'] as List).first.toString());
+        // Take the LAST image — server appends on update, so last = newest
+        apiImageUrl = _convertImagePath((map['images'] as List).last.toString());
       } else if (map['images'] is String) {
         apiImageUrl = _convertImagePath(map['images'].toString());
       }
