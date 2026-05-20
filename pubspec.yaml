@@ -76,6 +76,8 @@ dependencies:
   in_app_review: ^2.0.12
   facebook_app_events: ^0.27.2
   cached_network_image: ^3.4.1
+  flutter_image_compress: ^2.3.0
+
 
 
 
