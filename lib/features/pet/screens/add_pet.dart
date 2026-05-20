@@ -40,9 +40,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
   final List<String> _allergies = [];
 
   final AuthService _authService = sl<AuthService>();
-  // Must use Get.find to get the SAME PetController instance that
-  // my_pets.dart registered via Get.put — so the reactive RxList is shared.
-  final PetController _petController = Get.find<PetController>();
+  final PetController _petController = sl<PetController>();
 
   List<String> _allowedSpecies = [];
 
@@ -291,10 +289,11 @@ class _AddPetScreenState extends State<AddPetScreen> {
       );
 
       if (success) {
-        // Pet is already inserted reactively in PetController.createPet(),
-        // no need for an extra refreshPets() network call.
-        // Pass result: true so my_pets.dart can trigger fetchPets() as a safety net.
-        Get.back(result: true);
+        // Refresh the pets list to show the new pet
+        await _petController.refreshPets();
+
+        // Go back to My Pets screen after successful addition
+        Get.back();
         Get.snackbar(
           localizations.success,
           localizations.petAddedSuccessfully
