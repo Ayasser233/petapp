@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -28,6 +29,10 @@ import 'package:petapp/features/profile/controllers/profile_controller.dart';
 
 import 'firebase_options.dart';
 
+final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+final FirebaseAnalyticsObserver analyticsObserver =
+FirebaseAnalyticsObserver(analytics: analytics);
+
 // Add this function to reset app state
 Future<void> resetAppState() async {
   final prefs = await SharedPreferences.getInstance();
@@ -39,6 +44,14 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // await resetAppState();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+
+  await FirebaseAnalytics.instance.logEvent(
+    name: 'app_open_test',
+    parameters: {
+      'source': 'startup',
+    },
+  );
 
   final facebookAppEvents = FacebookAppEvents();
   try {
@@ -48,8 +61,11 @@ void main() async {
     debugPrint('⚠️ Facebook SDK init skipped: $e');
   }
 
+  // Initialize SharedPreferences once — registered as singleton in GetIt
+  final sharedPreferences = await SharedPreferences.getInstance();
+
   // Initialize dependencies
-  await setupServiceLocator();
+  await setupServiceLocator(sharedPreferences: sharedPreferences);
 
   // Initialize services
   await initServices();
@@ -162,6 +178,7 @@ class _MyAppState extends State<MyApp> {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Aleefy',
+      navigatorObservers: [analyticsObserver],
       themeMode: _settingsProvider.getThemeMode(),
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

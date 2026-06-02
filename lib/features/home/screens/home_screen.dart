@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
@@ -16,6 +17,8 @@ import 'package:petapp/features/store/controllers/cart_controller.dart';
 import 'package:petapp/features/store/controllers/store_controller.dart';
 import 'package:petapp/features/store/data/mock_products.dart';
 import 'package:petapp/features/store/widgets/product_card.dart';
+import 'package:petapp/core/services/global_discount_cache.dart';
+import 'package:petapp/features/home/widgets/home_global_discount_banner.dart';
 import 'package:petapp/features/vets/models/vet_model.dart';
 import 'package:petapp/features/vets/services/vet_service.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -37,6 +40,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoadingVets = true;
   bool _locationDialogShown = false;
   bool _isGuestUser = false;
+  /// App-level global discount fetched alongside the vets list.
+  Map<String, dynamic>? _globalDiscount;
 
   @override
   void initState() {
@@ -46,6 +51,14 @@ class _HomeScreenState extends State<HomeScreen> {
     // Ensure store controllers are available globally
     Get.lazyPut<CartController>(() => CartController(), fenix: true);
     Get.lazyPut<StoreController>(() => StoreController(), fenix: true);
+
+    // ── Show cached discount immediately (before any API call) ──
+    GlobalDiscountCache.load().then((cached) {
+      if (mounted && cached != null) {
+        setState(() => _globalDiscount = cached);
+      }
+    });
+
     _initializeHomeScreen();
 
     // Re-sort whenever GPS delivers (or updates) the position
@@ -97,6 +110,19 @@ class _HomeScreenState extends State<HomeScreen> {
         longitude: pos?.longitude,
       );
       final vets = response['vets'] as List<VetModel>;
+      // Capture app-level global discount returned alongside vets
+      final gd = response['globalDiscount'] as Map<String, dynamic>?;
+      if (mounted) {
+        if (gd != null) {
+          // Active discount — update UI and persist to cache
+          setState(() => _globalDiscount = gd);
+          GlobalDiscountCache.save(gd);
+        } else {
+          // Discount was removed from the dashboard — clear cache and hide banner
+          setState(() => _globalDiscount = null);
+          GlobalDiscountCache.clear();
+        }
+      }
       if (mounted) {
         _sortAndUpdateNearbyVets(vets);
       }
@@ -378,6 +404,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
 
                         const SizedBox(height: 24),
+
+                        // ── Global Discount Banner (app-wide, before rewards) ──
+                        if (_globalDiscount != null) ...[
+                          HomeGlobalDiscountBanner(
+                              discountData: _globalDiscount!),
+                          const SizedBox(height: 20),
+                        ],
 
                         // Rewards Card - Only show for authenticated users
                         if (!_isGuestUser) ...[
@@ -733,6 +766,71 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // Compact service item for horizontal layout
+  Widget _buildCompactServiceItem(
+      BuildContext context, String title, String icon, bool isDark,
+      {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 110,
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.lightblack : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            if (!isDark)
+              BoxShadow(
+                color: Colors.grey.withValues(alpha: 0.2),
+                blurRadius: 8,
+                spreadRadius: 1,
+                offset: const Offset(0, 2),
+              ),
+          ],
+          border: !isDark
+              ? Border.all(
+                  color: Colors.grey.withValues(alpha: 0.1), width: 1.0)
+              : null,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Image container
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: !isDark
+                  ? BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.orange.withValues(alpha: 0.1),
+                    )
+                  : null,
+              child: Image.asset(
+                icon,
+                width: 45,
+                height: 45,
+              ),
+            ),
+            const SizedBox(height: 6),
+            // Title text
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : Colors.black87,
+                      fontSize: 11,
+                    ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
   // Build nearby vet card
   Widget _buildNearbyCard(
     BuildContext context, {
@@ -922,41 +1020,32 @@ class _HomeScreenState extends State<HomeScreen> {
         imagePath.startsWith('www.');
 
     if (isNetworkImage) {
-      return Image.network(
-        imagePath,
+      return CachedNetworkImage(
+        imageUrl: imagePath,
         width: double.infinity,
         height: height,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Container(
-            width: double.infinity,
-            height: height,
-            color: Colors.grey[300],
-            child: Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-                color: AppColors.orange,
-                strokeWidth: 2,
-              ),
+        placeholder: (context, url) => Container(
+          width: double.infinity,
+          height: height,
+          color: Colors.grey[300],
+          child: const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.orange,
+              strokeWidth: 2,
             ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            width: double.infinity,
-            height: height,
-            color: Colors.grey[300],
-            child: const FaIcon(
-              FontAwesomeIcons.houseMedical,
-              size: 40,
-              color: Colors.grey,
-            ),
-          );
-        },
+          ),
+        ),
+        errorWidget: (context, url, error) => Container(
+          width: double.infinity,
+          height: height,
+          color: Colors.grey[300],
+          child: const FaIcon(
+            FontAwesomeIcons.houseMedical,
+            size: 40,
+            color: Colors.grey,
+          ),
+        ),
       );
     } else {
       return Image.asset(
@@ -1047,7 +1136,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Stack(
           children: [
             // Background paw print decorations
-            Positioned(
+            const Positioned(
               right: -10,
               top: -10,
               child: Opacity(
@@ -1056,7 +1145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.white),
               ),
             ),
-            Positioned(
+            const Positioned(
               right: 60,
               bottom: -5,
               child: Opacity(

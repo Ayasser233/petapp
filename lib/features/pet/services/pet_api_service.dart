@@ -4,13 +4,61 @@ import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/pet/models/pet_species_model.dart';
 import 'package:petapp/features/pet/utils/pet_constants.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'dart:io';
 import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
 
 class PetApiService {
   final ApiClient _apiClient;
 
   PetApiService({required ApiClient apiClient}) : _apiClient = apiClient;
+
+  /// Compress an image file before upload to avoid 413 errors.
+  /// Targets ~800px max dimension and 85% quality — well under typical server limits.
+  Future<String> _compressImage(String imagePath) async {
+    try {
+      final file = File(imagePath);
+      if (!await file.exists()) return imagePath;
+
+      final fileSize = await file.length();
+      // Skip compression if already small (< 500 KB)
+      if (fileSize < 500 * 1024) return imagePath;
+
+      final tempDir = await getTemporaryDirectory();
+      final ext = imagePath.toLowerCase().endsWith('.png') ? 'png' : 'jpg';
+      final targetPath =
+          '${tempDir.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.$ext';
+
+      final CompressFormat format =
+          ext == 'png' ? CompressFormat.png : CompressFormat.jpeg;
+
+      final XFile? result = await FlutterImageCompress.compressAndGetFile(
+        imagePath,
+        targetPath,
+        quality: 85,
+        minWidth: 800,
+        minHeight: 800,
+        format: format,
+      );
+
+      if (result == null) {
+        debugPrint('⚠️ Image compression failed, using original');
+        return imagePath;
+      }
+
+      final originalKB = (fileSize / 1024).toStringAsFixed(1);
+      final compressedKB =
+          ((await File(result.path).length()) / 1024).toStringAsFixed(1);
+      debugPrint('📦 Image compressed: ${originalKB}KB → ${compressedKB}KB');
+
+      return result.path;
+    } catch (e) {
+      debugPrint('⚠️ Image compression error: $e — using original');
+      return imagePath;
+    }
+  }
 
   /// Create a new pet - Limited to cats and dogs only
   Future<PetModel> createPet(Map<String, dynamic> petData, {String? imagePath}) async {
@@ -25,14 +73,17 @@ class PetApiService {
       if (imagePath != null && imagePath.isNotEmpty) {
         final formData = FormData();
 
+        // Compress image before upload to avoid 413 errors
+        final compressedPath = await _compressImage(imagePath);
+
         // Add the image file
-        final file = File(imagePath);
+        final file = File(compressedPath);
         if (await file.exists()) {
           formData.files.add(
             MapEntry(
               'images',
               await MultipartFile.fromFile(
-                imagePath,
+                compressedPath,
                 filename: imagePath.split('/').last,
               ),
             ),
@@ -232,14 +283,17 @@ class PetApiService {
       if (imagePath != null && imagePath.isNotEmpty) {
         final formData = FormData();
 
+        // Compress image before upload to avoid 413 errors
+        final compressedPath = await _compressImage(imagePath);
+
         // Add the image file
-        final file = File(imagePath);
+        final file = File(compressedPath);
         if (await file.exists()) {
           formData.files.add(
             MapEntry(
               'images',
               await MultipartFile.fromFile(
-                imagePath,
+                compressedPath,
                 filename: imagePath.split('/').last,
               ),
             ),

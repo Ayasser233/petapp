@@ -16,7 +16,7 @@ subprojects {
         if (project.hasProperty('android')) {
             project.android {
                 compileSdk 36
-                
+
                 defaultConfig {
                     minSdk 23  // Required for firebase-messaging 25.x
                 }

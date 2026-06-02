@@ -466,7 +466,7 @@ class ProfileScreen extends StatelessWidget {
 
   Widget _buildSheetOption({
     required BuildContext context,
-    required IconData icon,
+    required FaIconData icon,
     required Color iconColor,
     required String label,
     required String subtitle,
@@ -529,7 +529,7 @@ class ProfileScreen extends StatelessWidget {
   // ── Existing helpers (unchanged) ─────────────────────────────────────────
 
   Widget _buildProfileOption(
-      BuildContext context, String title, IconData icon, VoidCallback onTap,
+      BuildContext context, String title, FaIconData icon, VoidCallback onTap,
       {bool isDark = false, Color cardColor = Colors.white, Color? textColor}) {
     final defaultTextColor = isDark ? Colors.white : Colors.black87;
 
@@ -579,7 +579,7 @@ class ProfileScreen extends StatelessWidget {
   }
 
   Widget _buildSocialIcon(
-      IconData icon, BuildContext context, String label, String url) {
+      FaIconData icon, BuildContext context, String label, String url) {
     return InkWell(
       onTap: () async {
         try {
@@ -694,7 +694,7 @@ class ProfileScreen extends StatelessWidget {
 // ── Private data class for section tiles ─────────────────────────────────────
 
 class _SectionItem {
-  final IconData icon;
+  final FaIconData icon;
   final String label;
   final VoidCallback onTap;
   const _SectionItem({

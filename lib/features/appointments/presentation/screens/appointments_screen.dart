@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
+import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/screens/base_screen.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
@@ -189,7 +191,7 @@ class _AppointmentsScreenContentState
   Widget build(BuildContext context) {
     return BlocConsumer<AppointmentsCubit, AppointmentsState>(
       listener: (context, state) {
-        // Handle error states with snackbar
+        // Handle error states with snackbar (but not unauthorized — shown inline)
         if (state is AppointmentsError) {
           AppointmentDialogs.showErrorSnackBar(context, state.message);
         }
@@ -416,6 +418,10 @@ class _AppointmentsScreenContentState
       return const Center(child: CircularProgressIndicator(color: AppColors.orange));
     }
 
+    if (state is AppointmentsUnauthorized) {
+      return _buildLoginRequired();
+    }
+
     // Keep showing the list while loading more
     final List<AppointmentEntity> appointments;
     final bool isLoadingMore;
@@ -460,6 +466,58 @@ class _AppointmentsScreenContentState
           onScanQr: _onScanQrCode,
         );
       },
+    );
+  }
+
+  Widget _buildLoginRequired() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.lock_outline_rounded,
+              size: 72,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Login Required',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'Please log in to view your appointments.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 28),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Get.toNamed(AppRoutes.login),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Login',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

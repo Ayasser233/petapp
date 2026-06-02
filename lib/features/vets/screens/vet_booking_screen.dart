@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:petapp/core/errors/failures.dart';
+import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
+import 'package:petapp/features/home/widgets/home_global_discount_banner.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/appointments/domain/usecases/create_appointment_usecase.dart';
@@ -350,17 +353,55 @@ class VetBookingController extends GetxController {
       result.fold(
         // Error case
         (failure) {
-          Get.snackbar(
-            AppLocalizations.of(Get.context!).error,
-            failure.message,
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red.withValues(alpha: 0.8),
-            colorText: Colors.white,
-            margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-            icon:
-                const Icon(Icons.error_outline, color: Colors.white, size: 24),
-            duration: const Duration(seconds: 4),
-          );
+          if (failure is UnauthorizedFailure) {
+            Get.dialog(
+              AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                title: Row(
+                  children: [
+                    Icon(Icons.lock_outline_rounded,
+                        color: AppColors.orange, size: 28),
+                    const SizedBox(width: 10),
+                    const Text('Login Required'),
+                  ],
+                ),
+                content: const Text(
+                  'You need to be logged in to book an appointment.',
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Get.back(),
+                    child: const Text('Cancel'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () => Get.offAllNamed(AppRoutes.login),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.orange,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Login'),
+                  ),
+                ],
+              ),
+            );
+          } else {
+            Get.snackbar(
+              AppLocalizations.of(Get.context!).error,
+              failure.message,
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red.withValues(alpha: 0.8),
+              colorText: Colors.white,
+              margin: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
+              icon: const Icon(Icons.error_outline,
+                  color: Colors.white, size: 24),
+              duration: const Duration(seconds: 4),
+            );
+          }
         },
         // Success case
         (appointment) {
@@ -466,11 +507,26 @@ class VetBookingScreen extends StatelessWidget {
   /// Build booking view
   Widget _buildBookingView(
       BuildContext context, VetBookingController controller) {
+    // Extract globalDiscount from the vet arguments (same data passed to detail screen)
+    final args = Get.arguments as Map<String, dynamic>?;
+    final vet = args?['vet'] as Map<String, dynamic>?;
+    final rawGd = vet?['globalDiscount'];
+    final globalDiscount = (rawGd is Map<String, dynamic> &&
+            rawGd['isActive'] == true)
+        ? rawGd
+        : null;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Global discount banner (shown when active) ──────
+          if (globalDiscount != null) ...[
+            HomeGlobalDiscountBanner(discountData: globalDiscount),
+            const SizedBox(height: 20),
+          ],
+
           // Booking summary
           VetBookingSummary(controller: controller),
 

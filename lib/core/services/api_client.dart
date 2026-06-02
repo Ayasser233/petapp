@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io' show Platform;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -397,15 +398,27 @@ class ApiClient {
     }
   }
 
-  /// Save FCM notification token to the server
+  /// Resolves the current platform string for the notification token payload.
+  static String get _currentPlatform {
+    if (kIsWeb) return 'web';
+    if (Platform.isIOS) return 'ios';
+    return 'android';
+  }
+
+  /// Save FCM notification token to the server.
+  ///
+  /// Sends `{ "token": "<fcmToken>", "platform": "android"|"ios"|"web" }`.
   Future<Response> saveNotificationToken(String fcmToken) async {
     try {
       debugPrint('📱 Saving FCM token to server: ${fcmToken.substring(0, 20)}...');
-      final response = await _dio.patch(
+      final response = await _dio.post(
         ApiConstants.notificationTokenEndpoint,
-        data: {'notificationToken': fcmToken},
+        data: {
+          'token': fcmToken,
+          'platform': _currentPlatform,
+        },
       );
-      debugPrint('✅ FCM token saved successfully');
+      debugPrint('✅ FCM token saved successfully (platform: $_currentPlatform)');
       return response;
     } on DioException catch (e) {
       // Duplicate-key 500 is handled gracefully upstream — don't log as an error
@@ -511,7 +524,11 @@ class ApiClient {
       );
 
       if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
-        final data = response.data as Map<String, dynamic>;
+        final topLevel = response.data as Map<String, dynamic>;
+        // Tokens may be at the top level or nested inside a 'data' key
+        final data = (topLevel['data'] is Map<String, dynamic>)
+            ? topLevel['data'] as Map<String, dynamic>
+            : topLevel;
         final newAccessToken = data['accessToken'] ?? data['access_token'];
         final newRefreshToken = data['refreshToken'] ?? data['refresh_token'];
 

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/utils/app_colors.dart';
@@ -261,12 +262,12 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
       ),
       child: InkWell(
         onTap: () async {
-          final result = await Get.to(
+          // Deletion is handled entirely inside PetProfileScreen.
+          // The pets RxList is updated reactively there, so no extra
+          // action is needed here when returning.
+          await Get.to(
             () => PetProfileScreen(pet: pet),
           );
-          if (result == 'delete') {
-            _petController.deletePet(pet.id);
-          }
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
@@ -405,26 +406,23 @@ class _MyPetsScreenState extends State<MyPetsScreen> {
             networkUrl.startsWith('https://'));
 
     if (isNetwork) {
-      return Image.network(
-        networkUrl,
+      return CachedNetworkImage(
+        imageUrl: networkUrl,
         width: size,
         height: size,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, progress) {
-          if (progress == null) return child;
-          return Container(
-            width: size,
-            height: size,
-            color: Colors.grey[300],
-            child: const Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: AppColors.orange,
-              ),
+        placeholder: (context, url) => Container(
+          width: size,
+          height: size,
+          color: Colors.grey[300],
+          child: const Center(
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppColors.orange,
             ),
-          );
-        },
-        errorBuilder: (context, _, __) => _localAssetImage(pet, size),
+          ),
+        ),
+        errorWidget: (context, url, error) => _localAssetImage(pet, size),
       );
     }
     return _localAssetImage(pet, size);

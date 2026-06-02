@@ -16,14 +16,14 @@ class AppConstants {
 
   /// Default prefilled message sent when a customer opens WhatsApp support.
   static const String supportWhatsAppDefaultMessage =
-      'Hello Pet App support, I need help.';
+      'Hello Aleefy support, I need help.';
 
   /// Support e-mail address.
-  static const String supportEmail = 'support@aleefy.app';
+  static const String supportEmail = 'support@aleefy-app.com';
 
   /// Default subject line for support e-mails.
-  static const String supportEmailSubject = 'Pet App Support Request';
+  static const String supportEmailSubject = 'ALeefy Support Request';
 
   /// Default body for support e-mails.
-  static const String supportEmailBody = 'Hello Pet App support,\n\nI need help with:\n';
+  static const String supportEmailBody = 'Hello Aleefy support,\n\nI need help with:\n';
 }

@@ -32,7 +32,7 @@ class WhatsAppLauncherService {
     required BuildContext context,
     String? prefilledMessage,
   }) async {
-    final number = AppConstants.supportWhatsAppNumber;
+    const number = AppConstants.supportWhatsAppNumber;
     final message = Uri.encodeComponent(
       prefilledMessage ?? AppConstants.supportWhatsAppDefaultMessage,
     );
@@ -93,20 +93,26 @@ class WhatsAppLauncherService {
     String? subject,
     String? body,
   }) async {
-    final Uri emailUri = Uri(
-      scheme: 'mailto',
-      path: AppConstants.supportEmail,
-      queryParameters: {
-        'subject': subject ?? AppConstants.supportEmailSubject,
-        'body': body ?? AppConstants.supportEmailBody,
-      },
+    // Uri(queryParameters:{}) uses '+' for spaces (form-encoding).
+    // mailto: requires '%20', so encode manually and parse as a raw string.
+    final encodedSubject = Uri.encodeComponent(
+      subject ?? AppConstants.supportEmailSubject,
+    );
+    final encodedBody = Uri.encodeComponent(
+      body ?? AppConstants.supportEmailBody,
+    );
+
+    final emailUri = Uri.parse(
+      'mailto:${AppConstants.supportEmail}'
+      '?subject=$encodedSubject'
+      '&body=$encodedBody',
     );
 
     bool launched = false;
     try {
-      if (await canLaunchUrl(emailUri)) {
-        launched = await launchUrl(emailUri);
-      }
+      // Skip canLaunchUrl — it returns false for mailto: on many Android
+      // devices even when a mail app is installed. Call launchUrl directly.
+      launched = await launchUrl(emailUri);
     } catch (_) {
       launched = false;
     }

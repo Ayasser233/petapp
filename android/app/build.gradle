@@ -1,6 +1,5 @@
 plugins {
     id "com.android.application"
-    id "kotlin-android"
     id "dev.flutter.flutter-gradle-plugin"
     id "com.google.gms.google-services"
 }
@@ -48,10 +47,6 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-    
-    kotlinOptions {
-        jvmTarget = '21'
-    }
 
     defaultConfig {
         applicationId = "com.aleefy.petapp"
@@ -64,9 +59,9 @@ android {
 
         // Enable 16 KB page size support
         manifestPlaceholders = [
-            supportsFlexiblePageSizes: "true"
+                supportsFlexiblePageSizes: "true"
         ]
-        
+
         // Note: abiFilters removed to avoid conflict with bundle splits
         // ABI selection is handled in bundle configuration below
     }
@@ -93,11 +88,11 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            
+
             ndk {
                 debugSymbolLevel 'FULL'
             }
-            
+
             // Critical: Enable 16 KB page size support in native libraries
             externalNativeBuild {
                 cmake {
@@ -117,13 +112,13 @@ android {
             useLegacyPackaging = false
         }
     }
-    
+
     // Critical: Ensure native libraries are extracted for 16 KB support
     androidResources {
         noCompress 'tflite'
         noCompress 'lite'
     }
-    
+
     bundle {
         language {
             enableSplit = false

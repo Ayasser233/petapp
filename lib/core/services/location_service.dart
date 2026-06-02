@@ -319,7 +319,7 @@ class LocationService extends GetxService {
   Future<bool> showFirstTimeLocationDialog() async {
     if (!_isFirstLaunch.value) return false;
 
-    return await Get.dialog<bool>(
+    await Get.dialog<void>(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Row(
@@ -350,7 +350,7 @@ class LocationService extends GetxService {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Allow PetApp to access your location to:',
+              'Allow Aleefy to access your location to:',
               style: TextStyle(fontSize: 16),
             ),
             SizedBox(height: 12),
@@ -380,19 +380,9 @@ class LocationService extends GetxService {
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () async {
-              await _markLocationPermissionRequested();
-              Get.back(result: false);
-            },
-            child: Text(
-              'Skip for Now',
-              style: TextStyle(color: Colors.grey[600]),
-            ),
-          ),
           ElevatedButton(
             onPressed: () {
-              Get.back(result: true);
+              Get.back();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.orange,
@@ -401,14 +391,16 @@ class LocationService extends GetxService {
               ),
             ),
             child: const Text(
-              'Allow Location',
+              'Continue',
               style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ],
       ),
       barrierDismissible: false,
-    ) ?? false;
+    );
+
+    return true;
   }
 
   /// Show settings dialog when permission is denied forever

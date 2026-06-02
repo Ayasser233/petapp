@@ -8,54 +8,52 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 class SocialAuthService {
   static final SocialAuthService _instance = SocialAuthService._internal();
   factory SocialAuthService() => _instance;
-  SocialAuthService._internal() {
-    _initializeGoogleSignIn();
-  }
+  SocialAuthService._internal();
 
-  // IMPORTANT: For iOS, GoogleService-Info.plist handles the client ID automatically.
-  // For Android, we need to specify the serverClientId (Web Client ID) for backend verification.
-  // The serverClientId MUST match the OAuth 2.0 Web Client ID that your backend expects.
-  late final GoogleSignIn _googleSignIn;
+  bool _initialized = false;
 
-  void _initializeGoogleSignIn() {
-    if (defaultTargetPlatform == TargetPlatform.iOS) {
-      // On iOS, do NOT set serverClientId — doing so causes idToken to be null.
-      // The iOS client ID from GoogleService-Info.plist is used automatically.
-      _googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
+  /// Must be called once before any Google Sign-In operations.
+  /// Safe to call multiple times — subsequent calls are no-ops.
+  Future<void> initializeGoogleSignIn() async {
+    if (_initialized) return;
+    _initialized = true;
+
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      // Android: serverClientId makes idToken audience = web client ID ✓
+      await GoogleSignIn.instance.initialize(
+        serverClientId:
+            '1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91.apps.googleusercontent.com',
       );
     } else {
-      // Android: serverClientId makes the token aud = web client ID ✓
-      _googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-        serverClientId: '1017624066475-bmilqqjo3k1qfivseeg1i85vjehtgo91.apps.googleusercontent.com',
-      );
+      // iOS: client ID is read automatically from GoogleService-Info.plist
+      await GoogleSignIn.instance.initialize();
     }
   }
 
   /// Sign in with Google and return the ID token string.
   Future<String?> signInWithGoogle() async {
     try {
+      await initializeGoogleSignIn();
+
       debugPrint('🔐 Starting Google Sign-In...');
       debugPrint('📱 Platform: ${defaultTargetPlatform.name}');
 
-      await _googleSignIn.signOut();
+      // Sign out any previous session first
+      await GoogleSignIn.instance.signOut();
       debugPrint('🔄 Signed out previous session');
 
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-
-      if (googleUser == null) {
-        debugPrint('❌ Google Sign-In cancelled by user');
-        return null;
-      }
+      // v7: authenticate() replaces signIn(); pass scopes as scopeHint
+      final GoogleSignInAccount googleUser =
+          await GoogleSignIn.instance.authenticate(
+        scopeHint: ['email', 'profile'],
+      );
 
       debugPrint('✅ Google user signed in: ${googleUser.email}');
 
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
+      // v7: authentication is a synchronous getter — no await needed
+      final GoogleSignInAuthentication googleAuth = googleUser.authentication;
 
       final String? idToken = googleAuth.idToken;
-
       debugPrint('📋 idToken present: ${idToken != null}');
 
       if (idToken == null) {
@@ -77,13 +75,13 @@ class SocialAuthService {
       } catch (_) {}
 
       return idToken;
-    } on Exception catch (e) {
-      debugPrint('❌ Google Sign-In exception: $e');
-      await _googleSignIn.signOut().catchError((_) => null);
+    } on GoogleSignInException catch (e) {
+      debugPrint('❌ Google Sign-In exception [${e.code}]: ${e.description}');
+      await GoogleSignIn.instance.signOut().catchError((_) {});
       rethrow;
     } catch (e) {
       debugPrint('❌ Unexpected Google Sign-In error: $e');
-      await _googleSignIn.signOut().catchError((_) => null);
+      await GoogleSignIn.instance.signOut().catchError((_) {});
       throw Exception('Google Sign-In failed: $e');
     }
   }
@@ -91,13 +89,11 @@ class SocialAuthService {
   /// Sign in with Apple and return the identity token
   Future<Map<String, String>?> signInWithApple() async {
     try {
-
       // Check if Apple Sign In is available
       if (!await SignInWithApple.isAvailable()) {
         throw Exception('Apple Sign-In is not available on this device');
       }
 
-      // Request credential for the currently signed in Apple account
       final credential = await SignInWithApple.getAppleIDCredential(
         scopes: [
           AppleIDAuthorizationScopes.email,
@@ -105,8 +101,6 @@ class SocialAuthService {
         ],
       );
 
-
-      // Return both identity token and authorization code
       return {
         'identityToken': credential.identityToken!,
         'authorizationCode': credential.authorizationCode,
@@ -119,16 +113,22 @@ class SocialAuthService {
   /// Sign out from Google
   Future<void> signOutGoogle() async {
     try {
-      final googleSignIn = _googleSignIn;
-      await googleSignIn.signOut();
+      await GoogleSignIn.instance.signOut();
     } catch (e) {
       rethrow;
     }
   }
 
-  /// Check if user is currently signed in with Google
+  /// Check if a Google session can be restored silently.
+  /// In v7, isSignedIn() is removed — use attemptLightweightAuthentication().
   Future<bool> isSignedInWithGoogle() async {
-    final googleSignIn = _googleSignIn;
-    return googleSignIn.isSignedIn();
+    try {
+      await initializeGoogleSignIn();
+      final account =
+          await GoogleSignIn.instance.attemptLightweightAuthentication();
+      return account != null;
+    } catch (_) {
+      return false;
+    }
   }
 }

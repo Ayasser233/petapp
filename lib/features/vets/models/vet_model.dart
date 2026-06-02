@@ -92,6 +92,9 @@ class VetModel {
   final String? mapUrl; // Direct Google Maps link from API
   final String? profileImage; // Vet's profile/avatar image
 
+  /// App-wide global discount (same for all vets, set from the dashboard)
+  final Map<String, dynamic>? globalDiscount;
+
   /// Coordinates (restored)
   final double? latitude;
   final double? longitude;
@@ -126,6 +129,7 @@ class VetModel {
     this.emergencyPrice,
     this.mapUrl,
     this.profileImage,
+    this.globalDiscount,
     this.latitude,
     this.longitude,
   });
@@ -368,10 +372,12 @@ class VetModel {
     bool? hasEmergency,
     double? emergencyPrice,
     String? mapUrl,
+    Map<String, dynamic>? globalDiscount,
     double? latitude,
     double? longitude,
   }) {
     return VetModel(
+      // ...existing fields...
       id: id ?? this.id,
       name: name ?? this.name,
       category: category ?? this.category,
@@ -399,6 +405,7 @@ class VetModel {
       hasEmergency: hasEmergency ?? this.hasEmergency,
       emergencyPrice: emergencyPrice ?? this.emergencyPrice,
       mapUrl: mapUrl ?? this.mapUrl,
+      globalDiscount: globalDiscount ?? this.globalDiscount,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
     );
@@ -431,6 +438,7 @@ class VetModel {
       'hasEmergency': hasEmergency,
       'emergencyPrice': emergencyPrice,
       'mapUrl': mapUrl,
+      'globalDiscount': globalDiscount,
       'latitude': latitude,
       'longitude': longitude,
     };
@@ -473,6 +481,9 @@ class VetModel {
       hasEmergency: map['hasEmergency'] ?? false,
       emergencyPrice: _parseDouble(map['emergencyPrice']),
       mapUrl: map['mapUrl']?.toString(),
+      globalDiscount: map['globalDiscount'] is Map<String, dynamic>
+          ? map['globalDiscount'] as Map<String, dynamic>
+          : null,
       latitude: _parseDouble(map['latitude']) ?? _parseDouble(map['lat']),
       longitude: _parseDouble(map['longitude']) ?? _parseDouble(map['lng']),
     );
@@ -623,6 +634,9 @@ class VetModel {
           ? (json['emergencyPrice'] as int).toDouble()
           : json['emergencyPrice']?.toDouble(),
       mapUrl: json['mapUrl']?.toString(),
+      globalDiscount: json['globalDiscount'] is Map<String, dynamic>
+          ? json['globalDiscount'] as Map<String, dynamic>
+          : null,
       latitude: lat ?? _parseDouble(json['latitude']) ?? _parseDouble(json['lat']),
       longitude: lng ?? _parseDouble(json['longitude']) ?? _parseDouble(json['lng']),
     );

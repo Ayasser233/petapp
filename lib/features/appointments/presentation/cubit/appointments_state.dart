@@ -57,6 +57,11 @@ class AppointmentsError extends AppointmentsState {
   List<Object?> get props => [message];
 }
 
+/// Unauthorized state — user needs to log in
+class AppointmentsUnauthorized extends AppointmentsState {
+  const AppointmentsUnauthorized();
+}
+
 /// Loading more appointments (pagination)
 class AppointmentsLoadingMore extends AppointmentsState {
   final List<AppointmentEntity> currentAppointments;
