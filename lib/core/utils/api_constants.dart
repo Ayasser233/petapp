@@ -29,6 +29,7 @@ class ApiConstants {
   static const String registerEndpoint = '/auth/register';
   static const String loginEndpoint = '/auth/login';
   static const String logoutEndpoint = '/auth/logout';
+  static const String completeProfileEndpoint = '/auth/complete-profile';
   static const String profileEndpoint = '/auth/profile';
   static const String confirmEndpoint = '/auth/confirm';
   static const String resendOtpEndpoint = '/auth/resend-otp';
@@ -55,6 +56,8 @@ class ApiConstants {
   static String petRestoreEndpoint(String id) => '/pets/$id/restore';
   static String petHardDeleteEndpoint(String id) => '/pets/$id/hard';
   static String petAppointmentsEndpoint(String id) => '/pets/$id/appointments';
+  static String medicalRecordsEndpoint(String petId) => '/pets/$petId/medical-records';
+  static String shareLinkEndpoint(String petId) => '/pets/$petId/medical-records/share-link';
 
   // Symptoms Endpoints
   static const String symptomsEndpoint = '/api/symptoms';
@@ -67,15 +70,18 @@ class ApiConstants {
   static String vetScheduleEndpoint(String id) => '/vets/$id/schedule';
   static String vetReviewsEndpoint(String id) => '/appointments/reviews/$id';
 
-  // Appointment Endpoints
-  static const String appointmentsEndpoint = '/appointments';
-  static String appointmentDetailEndpoint(String id) => '/appointments/$id';
-  static String appointmentCancelEndpoint(String id) =>
-      '/appointments/$id/cancel';
-  static String appointmentCompleteEndpoint(String id) =>
-      '/appointments/$id/complete';
-  static String appointmentReviewEndpoint(String id) =>
-      '/appointments/$id/review';
+   // Appointment Endpoints
+   static const String appointmentsEndpoint = '/appointments';
+   static String appointmentDetailEndpoint(String id) => '/appointments/$id';
+   static String appointmentCancelEndpoint(String id) =>
+       '/appointments/$id/cancel';
+   static String appointmentCompleteEndpoint(String id) =>
+       '/appointments/$id/complete';
+   static String appointmentReviewEndpoint(String id) =>
+       '/appointments/$id/review';
+
+   // Discounts Endpoints
+   static const String globalDiscountUsageEndpoint = '/discounts/global/completed-usage';
 
   // Points Endpoints
   static const String pointsBalanceEndpoint = '/points/my/balance';

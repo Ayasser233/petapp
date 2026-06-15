@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/app_colors.dart';
@@ -12,6 +13,9 @@ import 'package:petapp/features/vaccination/presentation/cubit/vaccination_cubit
 import 'package:petapp/features/vaccination/presentation/cubit/vaccination_state.dart';
 import 'package:petapp/features/vaccination/presentation/screens/pet_vaccination_record_screen.dart';
 import 'package:petapp/features/vaccination/presentation/screens/add_vaccination_screen.dart';
+import 'package:petapp/features/medical_records/presentation/screens/medical_records_screen.dart';
+import 'package:petapp/features/medical_records/presentation/cubit/medical_records_cubit.dart';
+import 'package:petapp/features/medical_records/presentation/cubit/medical_records_state.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'dart:io';
 
@@ -42,29 +46,21 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context);
-    // Determine if dark theme is active
     final isDark = THelperFunctions.isDarkMode(context);
-
-    // Get pet age
-    final age = _calculateAge(_currentPet.dateOfBirth);
-
-    // Use app theme color instead of pet type-based colors
+    final age = _calculateAge(_currentPet.dateOfBirth, localizations);
     const Color themeColor = AppColors.orange;
 
-    // Define theme-dependent colors
     final Color backgroundColor = isDark ? Colors.grey[900]! : Colors.white;
     final Color textColor = isDark ? Colors.white : Colors.grey[800]!;
     final Color subTextColor = isDark ? Colors.grey[400]! : Colors.grey[600]!;
     final Color cardColor = isDark ? Colors.grey[850]! : Colors.white;
-    final Color cardBorderColor =
-        isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final Color cardBorderColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
     final Color notesBgColor = isDark ? Colors.grey[800]! : Colors.grey[100]!;
 
     return Scaffold(
       backgroundColor: backgroundColor,
       body: CustomScrollView(
         slivers: [
-          // App bar with pet image
           SliverAppBar(
             expandedHeight: 250,
             pinned: true,
@@ -77,97 +73,43 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
               IconButton(
                 icon: const Icon(Icons.edit, color: Colors.white),
                 onPressed: () async {
-                  final result = await Get.toNamed(
-                    AppRoutes.updatePet,
-                    arguments: _currentPet,
-                  );
+                  final result = await Get.toNamed(AppRoutes.updatePet, arguments: _currentPet);
                   if (result == true) {
-                    // Find the updated pet from the controller and refresh the profile in-place
-                    final updatedPet = _petController.pets
-                        .firstWhereOrNull((p) => p.id == _currentPet.id);
-                    if (updatedPet != null && mounted) {
-                      setState(() {
-                        _currentPet = updatedPet;
-                      });
-                    }
+                    final updatedPet = _petController.pets.firstWhereOrNull((p) => p.id == _currentPet.id);
+                    if (updatedPet != null && mounted) { setState(() => _currentPet = updatedPet); }
                   }
                 },
               ),
               IconButton(
                 icon: const Icon(Icons.delete_outline, color: Colors.white),
-                onPressed: () {
-                  _showDeleteConfirmation(context, isDark);
-                },
+                onPressed: () => _showDeleteConfirmation(context, isDark),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Pet image - prioritize API image URL, then local file, then asset
                   _buildPetImage(),
-                  // Gradient overlay
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.7),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Pet name at bottom
+                  Container(decoration: BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Colors.transparent, Colors.black.withValues(alpha: 0.7)]))),
                   Positioned(
-                    bottom: 16,
-                    left: 16,
-                    right: 16,
+                    bottom: 16, left: 16, right: 16,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          _currentPet.name,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                        Text(_currentPet.name, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
                         const SizedBox(height: 4),
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                _currentPet.species,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+                              child: Text(_currentPet.species, style: const TextStyle(color: Colors.white, fontSize: 14)),
                             ),
                             const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                age,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                ),
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(12)),
+                              child: Text(age, style: const TextStyle(color: Colors.white, fontSize: 14)),
                             ),
                           ],
                         ),
@@ -179,243 +121,86 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
             ),
           ),
 
-          // Pet details
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Pet info cards
                   Row(
                     children: [
-                      _buildInfoCard(
-                        context,
-                        localizations.birthday,
-                        _formatDate(_currentPet.dateOfBirth),
-                        Icons.cake,
-                        themeColor,
-                        isDark,
-                      ),
+                      _buildInfoCard(context, localizations.birthday, _formatDate(_currentPet.dateOfBirth, localizations), Icons.cake, themeColor, isDark),
                       const SizedBox(width: 16),
-                      _buildInfoCard(
-                        context,
-                        localizations.species,
-                        _currentPet.species.toUpperCase(),
-                        _currentPet.species.toLowerCase() == 'dog'
-                            ? Icons.pets
-                            : Icons.emoji_nature,
-                        themeColor,
-                        isDark,
-                      ),
+                      _buildInfoCard(context, localizations.species, _currentPet.species.toUpperCase(), _currentPet.species.toLowerCase() == 'dog' ? Icons.pets : Icons.emoji_nature, themeColor, isDark),
                     ],
                   ),
-
                   const SizedBox(height: 16),
-
-                  // Gender and Weight
                   Row(
                     children: [
                       if (_currentPet.gender != null)
-                        Expanded(
-                          child: _buildInfoCard(
-                            context,
-                            localizations.gender,
-                            _currentPet.gender == 'MALE'
-                                ? localizations.male
-                                : localizations.female,
-                            _currentPet.gender == 'MALE'
-                                ? Icons.male
-                                : Icons.female,
-                            themeColor,
-                            isDark,
-                          ),
-                        ),
+                        Expanded(child: _buildInfoCard(context, localizations.gender, _currentPet.gender == 'MALE' ? localizations.male : localizations.female, _currentPet.gender == 'MALE' ? Icons.male : Icons.female, themeColor, isDark)),
                     ],
                   ),
-
                   const SizedBox(height: 16),
-
-                  // Spay/Neuter Status
                   if (_currentPet.spayNeuterStatus != null)
                     Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: cardColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: cardBorderColor),
-                      ),
+                      width: double.infinity, padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(12), border: Border.all(color: cardBorderColor)),
                       child: Row(
                         children: [
-                          const Icon(
-                            Icons.medical_services,
-                            color: themeColor,
-                            size: 24,
-                          ),
+                          const Icon(Icons.medical_services, color: themeColor, size: 24),
                           const SizedBox(width: 12),
-                          Text(
-                            _currentPet.spayNeuterStatus!
-                                ? localizations.spayedNeutered
-                                : localizations.notSpayedNeutered,
-                            style: TextStyle(
-                              color: textColor,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+                          Text(_currentPet.spayNeuterStatus! ? localizations.spayedNeutered : localizations.notSpayedNeutered, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w500)),
                         ],
                       ),
                     ),
-
                   const SizedBox(height: 24),
-
-                  // Allergies section
-                  if (_currentPet.allergies != null &&
-                      _currentPet.allergies!.isNotEmpty) ...[
-                    _buildSectionHeader('Allergies', Icons.warning_amber,
-                        themeColor, textColor),
+                  if (_currentPet.allergies != null && _currentPet.allergies!.isNotEmpty) ...[
+                    _buildSectionHeader(localizations.allergies, Icons.warning_amber, themeColor, textColor),
                     const SizedBox(height: 8),
                     Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: _currentPet.allergies!.map((allergy) {
-                        return Chip(
-                          label: Text(allergy),
-                          backgroundColor:
-                              AppColors.orange.withValues(alpha: 0.2),
-                          labelStyle: TextStyle(color: textColor),
-                          avatar: const Icon(
-                            Icons.warning_amber,
-                            size: 18,
-                            color: AppColors.orange,
-                          ),
-                        );
-                      }).toList(),
+                      spacing: 8, runSpacing: 8,
+                      children: _currentPet.allergies!.map((allergy) => Chip(
+                        label: Text(allergy), backgroundColor: AppColors.orange.withValues(alpha: 0.2), labelStyle: TextStyle(color: textColor),
+                        avatar: const Icon(Icons.warning_amber, size: 18, color: AppColors.orange),
+                      )).toList(),
                     ),
                     const SizedBox(height: 24),
                   ],
-
-                  const SizedBox(height: 8),
-
-                  // Notes section
-                  if (_currentPet.notes != null &&
-                      _currentPet.notes!.isNotEmpty) ...[
-                    _buildSectionHeader(localizations.notes, Icons.note_alt,
-                        themeColor, textColor),
+                  if (_currentPet.notes != null && _currentPet.notes!.isNotEmpty) ...[
+                    _buildSectionHeader(localizations.notes, Icons.note_alt, themeColor, textColor),
                     const SizedBox(height: 8),
                     Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: notesBgColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: cardBorderColor),
-                      ),
-                      child: Text(
-                        _currentPet.notes!,
-                        style: TextStyle(
-                          color: textColor,
-                          height: 1.5,
-                        ),
-                      ),
+                      width: double.infinity, padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(color: notesBgColor, borderRadius: BorderRadius.circular(12), border: Border.all(color: cardBorderColor)),
+                      child: Text(_currentPet.notes!, style: TextStyle(color: textColor, height: 1.5)),
                     ),
                     const SizedBox(height: 24),
                   ],
-
-                  // Vaccinations section
-                  _buildSectionHeader('Vaccinations', Icons.medical_services,
-                      themeColor, textColor),
+                  _buildSectionHeader(localizations.vaccinations, Icons.medical_services, themeColor, textColor),
                   const SizedBox(height: 8),
-
-                  // Vaccination summary card with navigation
-                  _buildVaccinationSummaryCard(
-                    context,
-                    cardColor,
-                    textColor,
-                    subTextColor,
-                    cardBorderColor,
-                    isDark,
-                  ),
-
+                  _buildVaccinationSummaryCard(context, cardColor, textColor, subTextColor, cardBorderColor, isDark, localizations),
                   const SizedBox(height: 24),
-
-                  // Medical details section
-                  _buildSectionHeader('Medical Details',
-                      Icons.health_and_safety, themeColor, textColor),
+                  _buildSectionHeader(localizations.medicalRecords, Icons.history, themeColor, textColor),
                   const SizedBox(height: 8),
-
+                  _buildMedicalRecordsSummaryCard(context, cardColor, textColor, subTextColor, cardBorderColor, localizations),
+                  const SizedBox(height: 24),
+                  _buildSectionHeader(localizations.medicalDetails, Icons.health_and_safety, themeColor, textColor),
+                  const SizedBox(height: 8),
                   Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: cardColor,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: cardBorderColor),
-                    ),
+                    width: double.infinity, padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(12), border: Border.all(color: cardBorderColor)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Show primary weight field
-                        if (_currentPet.weight != null) ...[
-                          _buildMedicalDetailRow(
-                              localizations.weight,
-                              '${_currentPet.weight} kg',
-                              Icons.monitor_weight,
-                              textColor,
-                              subTextColor),
-                          const SizedBox(height: 12),
-                        ],
-                        // Show gender
-                        if (_currentPet.gender != null) ...[
-                          _buildMedicalDetailRow(
-                              localizations.gender,
-                              _currentPet.gender == 'MALE'
-                                  ? localizations.male
-                                  : localizations.female,
-                              _currentPet.gender == 'MALE'
-                                  ? Icons.male
-                                  : Icons.female,
-                              textColor,
-                              subTextColor),
-                          const SizedBox(height: 12),
-                        ],
-                        // Show primary spay/neuter status
-                        if (_currentPet.spayNeuterStatus != null) ...[
-                          _buildMedicalDetailRow(
-                              localizations.spayedNeuteredQuestion,
-                              _currentPet.spayNeuterStatus! ? 'Yes' : 'No',
-                              Icons.medical_services,
-                              textColor,
-                              subTextColor),
-                          const SizedBox(height: 12),
-                        ],
-                        // Show primary allergies
-                        if (_currentPet.allergies != null &&
-                            _currentPet.allergies!.isNotEmpty) ...[
-                          _buildMedicalDetailRow(
-                              localizations.allergies,
-                              _currentPet.allergies!.join(', '),
-                              Icons.warning_amber,
-                              textColor,
-                              subTextColor),
-                          const SizedBox(height: 12),
-                        ],
-                        // Show last vet visit from medical history if available
-                        if (_currentPet.medicalHistory?.lastVetVisit !=
-                            null) ...[
-                          _buildMedicalDetailRow(
-                              localizations.lastVetVisit,
-                              _formatDate(
-                                  _currentPet.medicalHistory!.lastVetVisit!),
-                              Icons.event,
-                              textColor,
-                              subTextColor),
-                        ],
+                        if (_currentPet.weight != null) ...[_buildMedicalDetailRow(localizations.weight, '${_currentPet.weight} ${localizations.kg}', Icons.monitor_weight, textColor, subTextColor), const SizedBox(height: 12)],
+                        if (_currentPet.gender != null) ...[_buildMedicalDetailRow(localizations.gender, _currentPet.gender == 'MALE' ? localizations.male : localizations.female, _currentPet.gender == 'MALE' ? Icons.male : Icons.female, textColor, subTextColor), const SizedBox(height: 12)],
+                        if (_currentPet.spayNeuterStatus != null) ...[_buildMedicalDetailRow(localizations.spayedNeuteredQuestion, _currentPet.spayNeuterStatus! ? localizations.yes : localizations.no, Icons.medical_services, textColor, subTextColor), const SizedBox(height: 12)],
+                        if (_currentPet.allergies != null && _currentPet.allergies!.isNotEmpty) ...[_buildMedicalDetailRow(localizations.allergies, _currentPet.allergies!.join(', '), Icons.warning_amber, textColor, subTextColor), const SizedBox(height: 12)],
+                        if (_currentPet.medicalHistory?.lastVetVisit != null) ...[_buildMedicalDetailRow(localizations.lastVetVisit, _formatDate(_currentPet.medicalHistory!.lastVetVisit!, localizations), Icons.event, textColor, subTextColor)],
                       ],
                     ),
                   ),
-
                 ],
               ),
             ),
@@ -425,533 +210,171 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
     );
   }
 
-  Widget _buildSectionHeader(
-      String title, IconData icon, Color color, Color textColor) {
-    return Row(
-      children: [
-        Icon(icon, color: color, size: 20),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: textColor,
-          ),
-        ),
-      ],
-    );
+  Widget _buildSectionHeader(String title, IconData icon, Color color, Color textColor) {
+    return Row(children: [Icon(icon, color: color, size: 20), const SizedBox(width: 8), Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: textColor))]);
   }
 
-  Widget _buildInfoCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-    Color color,
-    bool isDark,
-  ) {
+  Widget _buildInfoCard(BuildContext context, String title, String value, IconData icon, Color color, bool isDark) {
     final textColor = isDark ? Colors.white : Colors.grey[800];
     final subTextColor = isDark ? Colors.grey[400] : Colors.grey[600];
-
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.15 : 0.1),
-        borderRadius: BorderRadius.circular(12),
-      ),
+      padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: color.withValues(alpha: isDark ? 0.15 : 0.1), borderRadius: BorderRadius.circular(12)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Icon(icon, color: color, size: 16),
-              const SizedBox(width: 4),
-              Text(
-                title,
-                style: TextStyle(
-                  color: subTextColor,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
+          Row(children: [Icon(icon, color: color, size: 16), const SizedBox(width: 4), Text(title, style: TextStyle(color: subTextColor, fontSize: 14))]),
           const SizedBox(height: 8),
-          Text(
-            value,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: textColor,
-            ),
-          ),
+          Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: textColor)),
         ],
       ),
     );
   }
 
-  // Empty placeholder - all old visit-related methods have been removed
-
-  String _formatDate(String dateString) {
+  String _formatDate(String dateString, AppLocalizations l10n) {
     final date = DateTime.parse(dateString);
     final now = DateTime.now();
-
-    if (date.year == now.year) {
-      return '${_getMonthName(date.month)} ${date.day}';
-    } else {
-      return '${_getMonthName(date.month)} ${date.day}, ${date.year}';
-    }
+    if (date.year == now.year) { return DateFormat('MMM dd', l10n.locale.languageCode).format(date); }
+    else { return DateFormat('MMM dd, yyyy', l10n.locale.languageCode).format(date); }
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ];
-    return months[month - 1];
-  }
-
-  String _calculateAge(String birthdate) {
+  String _calculateAge(String birthdate, AppLocalizations l10n) {
     final birth = DateTime.parse(birthdate);
     final now = DateTime.now();
-
     int years = now.year - birth.year;
     int months = now.month - birth.month;
     int days = now.day - birth.day;
-
-    if (days < 0) {
-      months--;
-      final previousMonth = DateTime(now.year, now.month, 0);
-      days += previousMonth.day;
-    }
-
-    if (months < 0) {
-      years--;
-      months += 12;
-    }
-
-    // Build age string
-    List<String> ageParts = [];
-
-    if (years > 0) {
-      ageParts.add(years == 1 ? '1 year' : '$years years');
-    }
-
-    if (months > 0 && years < 2) {
-      ageParts.add(months == 1 ? '1 month' : '$months months');
-    }
-
-    if (days > 0 && years == 0 && months == 0) {
-      ageParts.add(days == 1 ? '1 day' : '$days days');
-    }
-
-    // Return formatted age (show max 2 parts to avoid clutter)
-    if (ageParts.isEmpty) {
-      return 'Newborn';
-    } else if (ageParts.length >= 2) {
-      return '${ageParts[0]}, ${ageParts[1]} old';
-    } else {
-      return '${ageParts[0]} old';
-    }
+    if (days < 0) { months--; final previousMonth = DateTime(now.year, now.month, 0); days += previousMonth.day; }
+    if (months < 0) { years--; months += 12; }
+    if (years > 0) return '$years ${years == 1 ? l10n.years.substring(0, l10n.years.length - 1) : l10n.years}';
+    if (months > 0) return '$months ${l10n.months}';
+    return '$days ${l10n.days}';
   }
 
   void _showDeleteConfirmation(BuildContext context, bool isDark) {
-    final localizations = AppLocalizations.of(context);
-    final dialogBgColor = isDark ? Colors.grey[850] : Colors.white;
-    final textColor = isDark ? Colors.white : Colors.black;
-    final subTextColor = isDark ? Colors.grey[400] : Colors.grey[600];
-
+    final l10n = AppLocalizations.of(context);
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: dialogBgColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Text(
-          localizations.confirmDelete,
-          style: TextStyle(color: textColor),
-        ),
+        backgroundColor: isDark ? Colors.grey[850] : Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(l10n.confirmDelete, style: TextStyle(color: isDark ? Colors.white : Colors.black)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.warning_amber_rounded,
-              color: Colors.red[isDark ? 300 : 400],
-              size: 48,
-            ),
+            Icon(Icons.warning_amber_rounded, color: Colors.red[isDark ? 300 : 400], size: 48),
             const SizedBox(height: 16),
-            Text(
-              localizations.areYouSureDeletePet.replaceAll('this pet', _currentPet.name),
-              textAlign: TextAlign.center,
-              style: TextStyle(color: textColor),
-            ),
+            Text(l10n.areYouSureDeletePet, textAlign: TextAlign.center, style: TextStyle(color: isDark ? Colors.white : Colors.black)),
             const SizedBox(height: 8),
-            Text(
-              localizations.thisActionCannotBeUndone,
-              style: TextStyle(
-                color: subTextColor,
-                fontSize: 12,
-              ),
-              textAlign: TextAlign.center,
-            ),
+            Text(l10n.thisActionCannotBeUndone, style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 12), textAlign: TextAlign.center),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: isDark ? Colors.grey[300] : Colors.grey[700],
-              ),
-            ),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.cancel, style: TextStyle(color: isDark ? Colors.grey[300] : Colors.grey[700]))),
           ElevatedButton.icon(
-            onPressed: _isDeleting
-                ? null
-                : () async {
-                    Navigator.pop(context); // Close dialog
-                    setState(() => _isDeleting = true);
-
-                    try {
-                      final success =
-                          await _petController.deletePet(_currentPet.id);
-                      if (success) {
-                        // Go back one level to My Pets screen.
-                        // Using Get.back() preserves the navigation stack on iOS
-                        // so the user can still navigate freely.
-                        // The pets RxList is already updated reactively.
-                        Get.back();
-                        Get.snackbar(
-                          'Success',
-                          '${_currentPet.name} has been deleted.',
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: Colors.green[100],
-                          colorText: Colors.green[800],
-                        );
-                      }
-                    } catch (e) {
-                      Get.snackbar(
-                        'Error',
-                        'Failed to delete pet. Please try again.',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red[100],
-                        colorText: Colors.red[800],
-                      );
-                    } finally {
-                      if (mounted) {
-                        setState(() => _isDeleting = false);
-                      }
-                    }
-                  },
-            icon: _isDeleting
-                ? const SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Icon(Icons.delete_outline, size: 16),
-            label: Text(_isDeleting
-                ? AppLocalizations.of(context).deleting
-                : AppLocalizations.of(context).delete),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
+            onPressed: _isDeleting ? null : () async {
+              Navigator.pop(context); setState(() => _isDeleting = true);
+              try {
+                final success = await _petController.deletePet(_currentPet.id);
+                if (success) { Get.back(); Get.snackbar(l10n.success, '${_currentPet.name} ${l10n.delete}'); }
+              } catch (e) { Get.snackbar(l10n.error, l10n.tryAgain); }
+              finally { if (mounted) setState(() => _isDeleting = false); }
+            },
+            icon: _isDeleting ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)) : const Icon(Icons.delete_outline, size: 16),
+            label: Text(_isDeleting ? l10n.deleting : l10n.delete),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildVaccinationSummaryCard(
-    BuildContext context,
-    Color cardColor,
-    Color textColor,
-    Color subTextColor,
-    Color borderColor,
-    bool isDark,
-  ) {
+  Widget _buildVaccinationSummaryCard(BuildContext context, Color cardColor, Color textColor, Color subTextColor, Color borderColor, bool isDark, AppLocalizations l10n) {
     return BlocProvider(
       create: (context) => sl<VaccinationCubit>()..getMedicalSheet(_currentPet.id),
       child: BlocBuilder<VaccinationCubit, VaccinationState>(
         builder: (context, state) {
-          if (state is VaccinationLoading) {
-            return Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: borderColor),
-              ),
-              child: const Center(
-                child: CircularProgressIndicator(color: AppColors.orange),
-              ),
-            );
-          }
-
+          if (state is VaccinationLoading) return Container(width: double.infinity, padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(12), border: Border.all(color: borderColor)), child: const Center(child: CircularProgressIndicator(color: AppColors.orange)));
           if (state is MedicalSheetLoaded) {
-            final medicalSheet = state.medicalSheet;
-            final hasRecords = medicalSheet.vaccinationSeries.isNotEmpty ||
-                medicalSheet.annualBoosters.isNotEmpty;
-
+            final ms = state.medicalSheet;
+            final hasRecords = ms.vaccinationSeries.isNotEmpty || ms.annualBoosters.isNotEmpty;
             return Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: cardColor,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: borderColor),
-              ),
+              width: double.infinity, padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(12), border: Border.all(color: borderColor)),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Summary statistics
                   if (hasRecords) ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildVaccinationStat(
-                          'Completed',
-                          medicalSheet.completedDosesCount.toString(),
-                          Icons.check_circle,
-                          Colors.green,
-                          textColor,
-                        ),
-                        _buildVaccinationStat(
-                          'Upcoming',
-                          medicalSheet.totalUpcomingDoses.toString(),
-                          Icons.schedule,
-                          Colors.blue,
-                          textColor,
-                        ),
-                        _buildVaccinationStat(
-                          'Overdue',
-                          medicalSheet.totalAnnualBoosters.toString(),
-                          Icons.warning,
-                          Colors.red,
-                          textColor,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 12),
-                    
-                    // Vaccine categories list
-                    Text(
-                      'Vaccines',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: textColor,
-                      ),
-                    ),
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [_buildVaccinationStat(l10n.completedStatus, ms.completedDosesCount.toString(), Icons.check_circle, Colors.green, textColor), _buildVaccinationStat(l10n.upcoming, ms.totalUpcomingDoses.toString(), Icons.schedule, Colors.blue, textColor), _buildVaccinationStat(l10n.overdue, ms.totalAnnualBoosters.toString(), Icons.warning, Colors.red, textColor)]),
+                    const SizedBox(height: 16), const Divider(), const SizedBox(height: 12),
+                    Text(l10n.vaccines, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: textColor)),
                     const SizedBox(height: 8),
-                    ...medicalSheet.vaccinationSeries.map((series) {
-                      final category = _getVaccineCategory(series.vaccineType);
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 6),
-                        child: Row(
-                          children: [
-                            Icon(
-                              series.isComplete
-                                  ? Icons.check_circle
-                                  : Icons.schedule,
-                              size: 16,
-                              color: series.isComplete
-                                  ? Colors.green
-                                  : AppColors.orange,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                category,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: textColor,
-                                ),
-                              ),
-                            ),
-                            Text(
-                              '${series.completedDoses}/${series.totalDoses}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: subTextColor,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                    const SizedBox(height: 16),
+                    ...ms.vaccinationSeries.map((series) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(children: [Icon(series.isComplete ? Icons.check_circle : Icons.schedule, size: 16, color: series.isComplete ? Colors.green : AppColors.orange), const SizedBox(width: 8), Expanded(child: Text(_getVaccineCategory(series.vaccineType, l10n), style: TextStyle(fontSize: 13, color: textColor))), Text('${series.completedDoses}/${series.totalDoses}', style: TextStyle(fontSize: 12, color: subTextColor, fontWeight: FontWeight.w500))]),
+                    )),
                   ] else ...[
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.vaccines,
-                          color: AppColors.orange,
-                          size: 40,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'No vaccinations yet',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: textColor,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Keep your pet healthy',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: subTextColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
+                    Row(children: [const Icon(Icons.vaccines, color: AppColors.orange, size: 40), const SizedBox(width: 16), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(l10n.noVaccinationRecords, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor)), const SizedBox(height: 4), Text(l10n.addYourPetsFirstVaccine, style: TextStyle(fontSize: 13, color: subTextColor))]))]),
                   ],
-
-                  // Action buttons
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () async {
-                            final cubit = context.read<VaccinationCubit>();
-                            final result = await Get.to(() => BlocProvider.value(
-                                  value: cubit,
-                                  child: AddVaccinationScreen(
-                                    petId: _currentPet.id,
-                                    petName: _currentPet.name,
-                                    petSpecies: _currentPet.species,
-                                  ),
-                                ));
-                            if (result == true && context.mounted) {
-                              cubit.getMedicalSheet(_currentPet.id);
-                            }
-                          },
-                          icon: const Icon(Icons.add, size: 18),
-                          label: const Text('Add Vaccine'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.orange,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
-                      if (hasRecords) ...[
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              Get.to(() => BlocProvider(
-                                    create: (context) => sl<VaccinationCubit>()
-                                      ..getMedicalSheet(_currentPet.id),
-                                    child: PetVaccinationRecordScreen(pet: _currentPet),
-                                  ));
-                            },
-                            icon: const Icon(Icons.medical_information, size: 18),
-                            label: const Text('View All'),
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.orange,
-                              side: const BorderSide(color: AppColors.orange),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                  const SizedBox(height: 16),
+                  Row(children: [
+                    Expanded(child: ElevatedButton.icon(onPressed: () async {
+                      final cubit = context.read<VaccinationCubit>();
+                      final result = await Get.to(() => BlocProvider.value(value: cubit, child: AddVaccinationScreen(petId: _currentPet.id, petName: _currentPet.name, petSpecies: _currentPet.species)));
+                      if (result == true && context.mounted) cubit.getMedicalSheet(_currentPet.id);
+                    }, icon: const Icon(Icons.add, size: 18), label: Text(l10n.addVaccine), style: ElevatedButton.styleFrom(backgroundColor: AppColors.orange, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))))),
+                    if (hasRecords) ...[const SizedBox(width: 12), Expanded(child: OutlinedButton.icon(onPressed: () => Get.to(() => BlocProvider(create: (context) => sl<VaccinationCubit>()..getMedicalSheet(_currentPet.id), child: PetVaccinationRecordScreen(pet: _currentPet))), icon: const Icon(Icons.medical_information, size: 18), label: Text(l10n.viewAll), style: OutlinedButton.styleFrom(foregroundColor: AppColors.orange, side: const BorderSide(color: AppColors.orange), padding: const EdgeInsets.symmetric(vertical: 12), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)))))]
+                  ]),
                 ],
               ),
             );
           }
+          return Container();
+        },
+      ),
+    );
+  }
 
-          // Error or initial state - show basic card with add button
+  Widget _buildVaccinationStat(String label, String value, IconData icon, Color iconColor, Color textColor) {
+    return Column(children: [Icon(icon, color: iconColor, size: 28), const SizedBox(height: 4), Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: iconColor)), Text(label, style: TextStyle(fontSize: 11, color: textColor.withValues(alpha: 0.7)))]);
+  }
+
+  String _getVaccineCategory(String vaccineType, AppLocalizations l10n) {
+    final type = vaccineType.toUpperCase();
+    if (type.contains('MONOVALENT')) return l10n.monovalent;
+    if (type.contains('BIVALENT')) return l10n.bivalent;
+    if (type.contains('TRIVALENT')) return l10n.trivalent;
+    if (type.contains('QUADRIVALENT')) return l10n.quadrivalent;
+    if (type.contains('PENTAVALENT')) return l10n.pentavalent;
+    if (type.contains('HEXAVALENT')) return l10n.hexavalent;
+    if (type.contains('HEPTAVALENT')) return l10n.heptavalent;
+    if (type.contains('OCTAVALENT')) return l10n.octavalent;
+    if (type.contains('WORMS')) return l10n.deworming;
+    if (type.contains('INSECTS')) return l10n.antiInsects;
+    if (type.contains('RABIES')) return l10n.rabies;
+    return l10n.vaccine;
+  }
+
+  Widget _buildMedicalRecordsSummaryCard(BuildContext context, Color cardColor, Color textColor, Color subTextColor, Color borderColor, AppLocalizations l10n) {
+    return BlocProvider(
+      create: (context) => sl<MedicalRecordsCubit>()..loadMedicalRecords(_currentPet.id, refresh: true),
+      child: BlocBuilder<MedicalRecordsCubit, MedicalRecordsState>(
+        builder: (context, state) {
           return Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: cardColor,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: borderColor),
-            ),
+            width: double.infinity, padding: const EdgeInsets.all(16), decoration: BoxDecoration(color: cardColor, borderRadius: BorderRadius.circular(12), border: Border.all(color: borderColor)),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
-                  Icons.vaccines,
-                  color: AppColors.orange,
-                  size: 40,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  'Vaccination Records',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final cubit = sl<VaccinationCubit>();
-                      final result = await Get.to(() => BlocProvider.value(
-                            value: cubit,
-                            child: AddVaccinationScreen(
-                              petId: _currentPet.id,
-                              petName: _currentPet.name,
-                              petSpecies: _currentPet.species,
-                            ),
-                          ));
-                      if (result == true && mounted) {
-                        setState(() {});
-                      }
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Add Vaccine'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.orange,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
+                if (state is MedicalRecordsLoaded && state.records.isNotEmpty) ...[
+                  Row(children: [
+                    Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: AppColors.orange.withValues(alpha: 0.1), shape: BoxShape.circle), child: const Icon(Icons.history, color: AppColors.orange, size: 20)),
+                    const SizedBox(width: 12),
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(l10n.latestRecord, style: TextStyle(fontSize: 12, color: subTextColor)), Text(state.records.first.eventType.name.capitalizeFirst!, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: textColor))])),
+                    Text(_formatDate(state.records.first.occurredAt.toIso8601String(), l10n), style: TextStyle(fontSize: 12, color: subTextColor)),
+                  ]),
+                  const SizedBox(height: 16),
+                ] else ...[
+                  Row(children: [Icon(Icons.history, color: AppColors.orange.withValues(alpha: 0.5), size: 32), const SizedBox(width: 12), Text(l10n.noMedicalRecordsYet, style: TextStyle(color: subTextColor))]),
+                  const SizedBox(height: 16),
+                ],
+                SizedBox(width: double.infinity, child: OutlinedButton(onPressed: () => Get.to(() => MedicalRecordsScreen(pet: _currentPet)), style: OutlinedButton.styleFrom(foregroundColor: AppColors.orange, side: const BorderSide(color: AppColors.orange), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))), child: Text(l10n.viewAllRecords))),
               ],
             ),
           );
@@ -960,178 +383,25 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
     );
   }
 
-  Widget _buildVaccinationStat(
-    String label,
-    String value,
-    IconData icon,
-    Color iconColor,
-    Color textColor,
-  ) {
-    return Column(
-      children: [
-        Icon(icon, color: iconColor, size: 28),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: iconColor,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 11,
-            color: textColor.withValues(alpha: 0.7),
-          ),
-        ),
-      ],
-    );
+  Widget _buildMedicalDetailRow(String label, String value, IconData icon, Color textColor, Color subTextColor) {
+    return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Icon(icon, size: 20, color: subTextColor), const SizedBox(width: 12), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(label, style: TextStyle(fontSize: 14, color: subTextColor)), const SizedBox(height: 2), Text(value, style: TextStyle(fontSize: 16, color: textColor))]))]);
   }
 
-  String _getVaccineCategory(String vaccineType) {
-    final type = vaccineType.toUpperCase();
-    
-    // For virus vaccines, show the specific type
-    if (type.contains('MONOVALENT')) {
-      return 'Monovalent';
-    } else if (type.contains('BIVALENT')) {
-      return 'Bivalent';
-    } else if (type.contains('TRIVALENT')) {
-      return 'Trivalent';
-    } else if (type.contains('QUADRIVALENT')) {
-      return 'Quadrivalent';
-    } else if (type.contains('PENTAVALENT')) {
-      return 'Pentavalent';
-    } else if (type.contains('HEXAVALENT')) {
-      return 'Hexavalent';
-    } else if (type.contains('HEPTAVALENT')) {
-      return 'Heptavalent';
-    } else if (type.contains('OCTAVALENT')) {
-      return 'Octavalent';
-    } else if (type.contains('WORMS')) {
-      return 'Worms';
-    } else if (type.contains('INSECTS')) {
-      return 'Insects';
-    } else if (type.contains('RABIES')) {
-      return 'Rabies';
-    }
-    
-    return 'Vaccine'; // fallback
-  }
-
-  Widget _buildMedicalDetailRow(
-    String label,
-    String value,
-    IconData icon,
-    Color textColor,
-    Color subTextColor,
-  ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(
-          icon,
-          size: 20,
-          color: subTextColor,
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: subTextColor,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: textColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  /// Build pet image widget that handles API URL, local file, or asset
   Widget _buildPetImage() {
-
-    // Determine image source
     final String primaryImage = _currentPet.imageUrl ?? _currentPet.image;
-
-    // Check if it's a network image
-    final isNetworkImage = primaryImage.startsWith('http://') ||
-        primaryImage.startsWith('https://') ||
-        primaryImage.startsWith('www.');
-
-    // Check if it's a local file (not network and not asset)
+    final isNetworkImage = primaryImage.startsWith('http://') || primaryImage.startsWith('https://') || primaryImage.startsWith('www.');
     final isLocalFile = !isNetworkImage && !primaryImage.startsWith('assets/');
-
     if (isNetworkImage) {
-      // Network image from API
-      return CachedNetworkImage(
-        imageUrl: primaryImage,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        placeholder: (context, url) => Container(
-          width: double.infinity,
-          color: AppColors.orange.withValues(alpha: 0.1),
-          child: Center(
-            child: CircularProgressIndicator(
-              color: AppColors.orange,
-              strokeWidth: 3,
-            ),
-          ),
-        ),
-        errorWidget: (context, url, error) => _buildFallbackImage(),
-      );
+      return CachedNetworkImage(imageUrl: primaryImage, width: double.infinity, fit: BoxFit.cover, placeholder: (context, url) => Container(width: double.infinity, color: AppColors.orange.withValues(alpha: 0.1), child: const Center(child: CircularProgressIndicator(color: AppColors.orange, strokeWidth: 3))), errorWidget: (context, url, error) => _buildFallbackImage());
     } else if (isLocalFile) {
-      // Local file from camera/gallery
-      return Image.file(
-        File(primaryImage),
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return _buildFallbackImage();
-        },
-      );
-    } else {
-      // Asset image
-      return Image.asset(
-        primaryImage,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return _buildFallbackImage();
-        },
-      );
+      return Image.file(File(primaryImage), width: double.infinity, fit: BoxFit.cover, errorBuilder: (context, error, stackTrace) => _buildFallbackImage());
+    }
+    else {
+      return Image.asset(primaryImage, width: double.infinity,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => _buildFallbackImage());
     }
   }
 
-  /// Build fallback image when all image loading fails
-  Widget _buildFallbackImage() {
-    return Container(
-      width: double.infinity,
-      color: AppColors.orange.withValues(alpha: 0.2),
-      child: Center(
-        child: Icon(
-          _currentPet.species.toLowerCase() == 'dog'
-              ? Icons.pets
-              : Icons.pets,
-          size: 100,
-          color: Colors.white.withValues(alpha: 0.5),
-        ),
-      ),
-    );
-  }
+  Widget _buildFallbackImage() => Container(width: double.infinity, color: AppColors.orange.withValues(alpha: 0.2), child: Center(child: Icon(_currentPet.species.toLowerCase() == 'dog' ? Icons.pets : Icons.pets, size: 100, color: Colors.white.withValues(alpha: 0.5))));
 }

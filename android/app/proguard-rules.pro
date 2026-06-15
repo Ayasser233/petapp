@@ -31,6 +31,7 @@
 -keep class * implements com.google.gson.JsonDeserializer
 
 # Firebase
+-keep class com.google.android.gms.measurement.** { *; }
 -keep class com.google.firebase.** { *; }
 -keep class com.google.android.gms.** { *; }
 -dontwarn com.google.firebase.**

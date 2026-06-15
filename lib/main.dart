@@ -24,6 +24,7 @@ import 'package:petapp/core/services/notification_service.dart';
 import 'package:petapp/core/themes/app_theme.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
+import 'package:petapp/features/vets/services/vet_service.dart';
 import 'package:petapp/features/profile/controllers/profile_controller.dart';
 
 
@@ -56,7 +57,6 @@ void main() async {
   final facebookAppEvents = FacebookAppEvents();
   try {
     await facebookAppEvents.setAutoLogAppEventsEnabled(true);
-    await facebookAppEvents.setAdvertiserTracking(enabled: true);
   } catch (e) {
     debugPrint('⚠️ Facebook SDK init skipped: $e');
   }
@@ -103,6 +103,9 @@ Future<void> initServices() async {
 
   // Register ApiClient with GetX (needed for ClinicService and other services)
   Get.put(sl<ApiClient>());
+
+  // Initialize VetService cache
+  await VetService.initCache();
 
   // Initialize AuthService
   await Get.putAsync(() async => await sl<AuthService>().init());

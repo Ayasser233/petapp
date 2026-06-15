@@ -32,7 +32,11 @@ class VetExplorerFilterSheet extends StatelessWidget {
         minChildSize: 0.5,
         expand: false,
         builder: (context, scrollController) {
-          return Column(
+          // Wrap content with a Material so ListTile/RadionListTile ink splashes
+          // are painted correctly (avoid DecoratedBox hiding ink effects).
+          return Material(
+            color: Colors.transparent,
+            child: Column(
             children: [
               // Handle
               Container(
@@ -62,7 +66,6 @@ class VetExplorerFilterSheet extends StatelessWidget {
                       const SizedBox(height: 24),
                       _buildSortFilter(context, textColor, subTextColor),
                       const SizedBox(height: 24),
-                      _buildDistanceFilter(context, textColor, subTextColor),
                       const SizedBox(height: 40),
                     ],
                   ),
@@ -72,7 +75,8 @@ class VetExplorerFilterSheet extends StatelessWidget {
               // Action buttons
               _buildActionButtons(context, isDark),
             ],
-          );
+          ),
+        );
         },
       ),
     );
@@ -453,65 +457,7 @@ class VetExplorerFilterSheet extends StatelessWidget {
     );
   }
 
-  /// Build distance filter
-  Widget _buildDistanceFilter(
-      BuildContext context, Color textColor, Color? subTextColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          AppLocalizations.of(context).maxDistance,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: textColor,
-              ),
-        ),
-        const SizedBox(height: 12),
-        Obx(() => Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      AppLocalizations.of(context)
-                          .distanceKm(controller.maxDistance.value.round()),
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: textColor,
-                          ),
-                    ),
-                    Text(
-                      AppLocalizations.of(context).anyDistance,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: subTextColor,
-                          ),
-                    ),
-                  ],
-                ),
-                SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    activeTrackColor: AppColors.orange,
-                    inactiveTrackColor: Colors.grey[300],
-                    thumbColor: AppColors.orange,
-                    overlayColor: AppColors.orange.withValues(alpha: 0.2),
-                    valueIndicatorColor: AppColors.orange,
-                  ),
-                  child: Slider(
-                    value: controller.maxDistance.value,
-                    min: 5.0,
-                    max: 100.0,
-                    divisions: 19,
-                    label: AppLocalizations.of(context)
-                        .distanceKm(controller.maxDistance.value.round()),
-                    onChanged: (double value) {
-                      controller.maxDistance.value = value;
-                    },
-                  ),
-                ),
-              ],
-            )),
-      ],
-    );
-  }
+  // Distance filter removed - maxDistance is no longer used.
 
   /// Build action buttons
   Widget _buildActionButtons(BuildContext context, bool isDark) {

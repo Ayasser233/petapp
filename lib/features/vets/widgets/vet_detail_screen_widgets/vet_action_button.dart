@@ -20,6 +20,38 @@ class VetActionButton extends StatelessWidget {
     final isDark = THelperFunctions.isDarkMode(context);
     final hasEmergency = vet['hasEmergency'] == true;
     final emergencyPrice = vet['emergencyPrice'];
+    final isEmergencyTime = THelperFunctions.isEmergencyTime();
+
+    // If it's emergency time and the vet has emergency services,
+    // only show the emergency booking button or adjust the labels.
+    if (isEmergencyTime && hasEmergency && emergencyPrice != null) {
+      return Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton.icon(
+            onPressed: () => _navigateToBooking(context, true),
+            icon: const Icon(Icons.emergency, size: 24),
+            label: Text(
+              AppLocalizations.of(context).emergency,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red.shade700,
+              foregroundColor: Colors.white,
+              elevation: isDark ? 4 : 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.all(16.0),

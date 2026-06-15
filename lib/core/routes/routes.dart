@@ -9,6 +9,7 @@ import 'package:petapp/features/auth/presentation/screens/password_config/enter_
 import 'package:petapp/features/auth/presentation/screens/password_config/change_password.dart';
 import 'package:petapp/features/auth/presentation/screens/signup/signup.dart';
 import 'package:petapp/features/auth/presentation/screens/signup/verifyemail.dart';
+import 'package:petapp/features/auth/presentation/screens/complete_profile/complete_profile_screen.dart';
 import 'package:petapp/features/location/screens/choose_location.dart';
 import 'package:petapp/features/location/screens/set_location.dart';
 import 'package:petapp/features/home/screens/home_screen.dart';
@@ -44,6 +45,7 @@ class AppRoutes {
   static const String signUp = '/signup';
   static const String login = '/login';
   static const String verifyEmail = '/verify-email';
+  static const String completeProfile = '/complete-profile';
   static const String forgotPassword = '/forgot-password';
   static const String enterVerificationCode = '/enter-verification-code';
   static const String createNewPassword = '/create-new-password';
@@ -87,6 +89,7 @@ class AppRoutes {
         GetPage(name: login, page: () => const LoginScreen()),
         GetPage(
             name: verifyEmail, page: () => const VerifyEmailScreen(email: '')),
+        GetPage(name: completeProfile, page: () => const CompleteProfileScreen()),
         GetPage(name: forgotPassword, page: () => const ForgotPasswordScreen()),
         GetPage(
             name: enterVerificationCode,

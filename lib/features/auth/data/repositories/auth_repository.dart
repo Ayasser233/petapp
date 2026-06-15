@@ -1,4 +1,5 @@
 import 'package:petapp/core/services/api_client.dart';
+import 'package:petapp/core/utils/api_constants.dart';
 import 'package:petapp/features/auth/data/models/user_model.dart';
 import 'package:petapp/features/auth/data/models/auth_request_models.dart';
 import 'package:petapp/features/auth/data/models/auth_response_models.dart';
@@ -122,6 +123,23 @@ class AuthRepository {
     try {
       final response = await _apiClient.appleLogin(identityToken, authorizationCode: authorizationCode);
       return AuthResponse.fromJson(response.data);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<UserModel> completeProfile(String name, String phone) async {
+    try {
+      final response = await _apiClient.post(
+        ApiConstants.completeProfileEndpoint,
+        data: {
+          'name': name,
+          'phone': phone,
+        },
+      );
+      // Backend might return the user in a 'data' object or directly
+      final userData = response.data['data'] ?? response.data;
+      return UserModel.fromJson(userData);
     } catch (e) {
       rethrow;
     }

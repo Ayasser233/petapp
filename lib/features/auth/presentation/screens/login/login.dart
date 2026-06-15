@@ -452,6 +452,12 @@ class _LoginFormState extends State<LoginForm> {
 
           // Navigate to home
           Get.offAllNamed(AppRoutes.home);
+        } else if (state is AuthNeedsProfileCompletion) {
+          debugPrint('📝 Redirecting to profile completion');
+          Get.toNamed(AppRoutes.completeProfile, arguments: {
+            'user': state.user,
+            'token': state.accessToken,
+          });
         } else if (state is AuthLoginUnverified) {
           debugPrint('✉️ Handling unverified email: ${state.email}');
 

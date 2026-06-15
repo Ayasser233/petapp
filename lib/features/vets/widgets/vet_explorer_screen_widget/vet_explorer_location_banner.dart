@@ -54,12 +54,7 @@ class VetExplorerLocationBanner extends StatelessWidget {
                   ],
                 ),
               ),
-              Obx(() => Text(
-                    AppLocalizations.of(context).withinDistance(controller.maxDistance.value.round()),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: isDark ? Colors.grey[400] : Colors.grey[600],
-                        ),
-                  )),
+              // No distance cap is shown (max distance feature removed)
             ],
           ),
         );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:petapp/core/widgets/vet_card.dart';
 import '../../models/vet_model.dart';
 import '../../screens/vet_explorer_screen.dart';
@@ -22,35 +23,45 @@ class VetExplorerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final locationService = Get.find<LocationService>();
 
-    // Calculate distance if location permission is granted
-    String? distance;
-    if (locationService.isPermissionGranted) {
-      distance = vet.distance != 'Calculating...' ? vet.distance : null;
-    }
+    return Obx(() {
+      final pos = locationService.currentPositionRx.value;
+      String? displayDistance =
+          vet.distance != 'Calculating...' ? vet.distance : null;
 
-    return VetCard(
-      id: vet.id,
-      name: vet.name,
-      category: vet.category,
-      location: vet.location,
-      distance: distance,
-      primaryImage: vet.primaryImage,
-      rating: vet.rating,
-      totalReviews: vet.reviews,
-      yearsExperience: vet.yearsExperience,
-      services: vet.services,
-      isOpen: vet.hasAvailableSlots, // Use API-based availability
-      openingStatus: vet.openingStatus,
-      phone: vet.phone,
-      onTap: () => controller.navigateToVetDetail(vet),
-      onCallPressed:
-          vet.phone != null ? () => _makePhoneCall(context, vet.phone!) : null,
-      showDistance: locationService.isPermissionGranted,
-      showActionButtons: true,
-      compact: false,
-      discount: vet.discount,
-      hasEmergency: vet.hasEmergency,
-    );
+      if (pos != null && vet.latitude != null && vet.longitude != null) {
+        final meters = Geolocator.distanceBetween(
+          pos.latitude,
+          pos.longitude,
+          vet.latitude!,
+          vet.longitude!,
+        );
+        displayDistance = locationService.formatDistance(meters);
+      }
+
+      return VetCard(
+        id: vet.id,
+        name: vet.name,
+        category: vet.category,
+        location: vet.location,
+        distance: displayDistance,
+        primaryImage: vet.primaryImage,
+        rating: vet.rating,
+        totalReviews: vet.reviews,
+        yearsExperience: vet.yearsExperience,
+        services: vet.services,
+        isOpen: vet.hasAvailableSlots, // Use API-based availability
+        openingStatus: vet.openingStatus,
+        phone: vet.phone,
+        onTap: () => controller.navigateToVetDetail(vet),
+        onCallPressed:
+            vet.phone != null ? () => _makePhoneCall(context, vet.phone!) : null,
+        showDistance: locationService.isPermissionGranted,
+        showActionButtons: true,
+        compact: false,
+        discount: vet.discount,
+        hasEmergency: vet.hasEmergency,
+      );
+    });
   }
 
   void _makePhoneCall(BuildContext context, String phoneNumber) async {
