@@ -23,9 +23,61 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => sl<AuthCubit>(),
-      child: Scaffold(
-        body: SingleChildScrollView(
-          child: Padding(
+      child: BlocListener<AuthCubit, AuthState>(
+        listener: (context, state) async {
+          debugPrint('🔔 LoginScreen listener state: ${state.runtimeType}');
+
+          if (state is AuthLoginSuccess || state is AuthGoogleLoginSuccess || state is AuthAppleLoginSuccess) {
+            final token = (state is AuthLoginSuccess)
+                ? state.accessToken
+                : (state is AuthGoogleLoginSuccess ? state.accessToken : (state as AuthAppleLoginSuccess).accessToken);
+
+            final tokenService = Get.find<TokenService>();
+            final authService = Get.find<AuthService>();
+
+            await tokenService.saveToken(token);
+            authService.setAuthenticated();
+            await authService.clearGuestMode();
+
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.setBool('isLoggedIn', true);
+
+            Get.offAllNamed(AppRoutes.home);
+          } else if (state is AuthNeedsProfileCompletion) {
+            debugPrint('📝 Redirecting to profile completion from LoginScreen');
+            // Use offNamed to replace Login with Complete Profile
+            Get.offNamed(AppRoutes.completeProfile, arguments: {
+              'user': state.user,
+              'token': state.accessToken,
+            });
+          } else if (state is AuthLoginUnverified) {
+            Get.snackbar(
+              AppLocalizations.of(context).emailNotVerified,
+              AppLocalizations.of(context).pleaseVerifyYourEmail,
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.orange.withValues(alpha: 0.1),
+              colorText: AppColors.orange,
+            );
+            Get.toNamed(AppRoutes.verifyEmail, arguments: state.email);
+          } else if (state is AuthFailure) {
+            final msg = state.message;
+            if (state.errorCode == 409 ||
+                msg.toLowerCase().contains('already exists') ||
+                msg.toLowerCase().contains('google') ||
+                msg.toLowerCase().contains('apple')) {
+              Get.snackbar(
+                AppLocalizations.of(context).error,
+                msg,
+                snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.red.withValues(alpha: 0.1),
+                colorText: Colors.red,
+              );
+            }
+          }
+        },
+        child: Scaffold(
+          body: SingleChildScrollView(
+            child: Padding(
             padding: const EdgeInsets.only(
                 top: 56.0, left: 24.0, right: 24.0, bottom: 24.0),
             child: Column(
@@ -58,6 +110,7 @@ class LoginScreen extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 }
@@ -428,351 +481,238 @@ class _LoginFormState extends State<LoginForm> {
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
 
-    return BlocListener<AuthCubit, AuthState>(
-      listener: (context, state) async {
-        debugPrint('🔔 Login state changed: ${state.runtimeType}');
-
-        if (state is AuthLoginSuccess) {
-          // Use TokenService directly
-          final tokenService = Get.find<TokenService>();
-          final authService = Get.find<AuthService>();
-
-          // Save token and mark as authenticated
-          await tokenService.saveToken(state.accessToken);
-
-          // Set authenticated status
-          authService.setAuthenticated();
-
-          // Clear guest mode if it was set
-          await authService.clearGuestMode();
-
-          // Set login flag
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('isLoggedIn', true);
-
-          // Navigate to home
-          Get.offAllNamed(AppRoutes.home);
-        } else if (state is AuthNeedsProfileCompletion) {
-          debugPrint('📝 Redirecting to profile completion');
-          Get.toNamed(AppRoutes.completeProfile, arguments: {
-            'user': state.user,
-            'token': state.accessToken,
-          });
-        } else if (state is AuthLoginUnverified) {
-          debugPrint('✉️ Handling unverified email: ${state.email}');
-
-          // Email not verified, navigate to verification screen
-          Get.snackbar(
-            AppLocalizations.of(context).emailNotVerified,
-            AppLocalizations.of(context).pleaseVerifyYourEmail,
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.orange.withValues(alpha: 0.1),
-            colorText: AppColors.orange,
-            duration: const Duration(seconds: 3),
-          );
-
-          // Navigate to verification screen with email
-          debugPrint('📧 Navigating to verify email with: ${state.email}');
-          Get.toNamed(AppRoutes.verifyEmail, arguments: state.email);
-        } else if (state is AuthGoogleLoginSuccess) {
-          // Handle Google login success
-          final tokenService = Get.find<TokenService>();
-          final authService = Get.find<AuthService>();
-
-          // Save token and mark as authenticated
-          await tokenService.saveToken(state.accessToken);
-
-          // Set authenticated status
-          authService.setAuthenticated();
-
-          // Clear guest mode if it was set
-          await authService.clearGuestMode();
-
-          // Set login flag
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('isLoggedIn', true);
-
-          // Navigate to home
-          Get.offAllNamed(AppRoutes.home);
-        } else if (state is AuthAppleLoginSuccess) {
-          // Handle Apple login success
-          final tokenService = Get.find<TokenService>();
-          final authService = Get.find<AuthService>();
-
-          // Save token and mark as authenticated
-          await tokenService.saveToken(state.accessToken);
-
-          // Set authenticated status
-          authService.setAuthenticated();
-
-          // Clear guest mode if it was set
-          await authService.clearGuestMode();
-
-          // Set login flag
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setBool('isLoggedIn', true);
-
-          // Navigate to home
-          Get.offAllNamed(AppRoutes.home);
-        } else if (state is AuthFailure) {
-          final msg = state.message.isNotEmpty
-              ? state.message
-              : AppLocalizations.of(context).wrongCredentials;
-
-          // For social (Google/Apple) login errors show a snackbar, otherwise
-          // show inline below the password field.
-          if (state.errorCode == 409 ||
-              msg.toLowerCase().contains('already exists') ||
-              msg.toLowerCase().contains('google') ||
-              msg.toLowerCase().contains('apple')) {
-            Get.snackbar(
-              AppLocalizations.of(context).error,
-              msg,
-              snackPosition: SnackPosition.BOTTOM,
-              backgroundColor: Colors.red.withValues(alpha: 0.1),
-              colorText: Colors.red,
-              duration: const Duration(seconds: 5),
-            );
-          } else {
-            setState(() {
-              _errorMessage = msg;
-            });
-          }
-        }
-      },
-      child: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: Column(
-            children: [
-              // Email field
-              TextFormField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Iconsax.user, color: AppColors.orange),
-                  suffixIcon: _emailController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, color: Colors.grey),
-                          onPressed: () {
-                            setState(() {
-                              _emailController.clear();
-                              // Uncheck remember me if email is cleared
-                              _rememberMe = false;
-                            });
-                          },
-                        )
-                      : null,
-                  hintText: AppLocalizations.of(context).email,
-                  hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[400],
-                      ),
-                  filled: true,
-                  fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedErrorBorder: focusedFieldStyle(),
-                  focusedBorder: focusedFieldStyle(),
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                  errorStyle: const TextStyle(height: 0.8),
+    return Form(
+      key: _formKey,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Column(
+          children: [
+            // Email field
+            TextFormField(
+              controller: _emailController,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Iconsax.user, color: AppColors.orange),
+                suffixIcon: _emailController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, color: Colors.grey),
+                        onPressed: () {
+                          setState(() {
+                            _emailController.clear();
+                            // Uncheck remember me if email is cleared
+                            _rememberMe = false;
+                          });
+                        },
+                      )
+                    : null,
+                hintText: AppLocalizations.of(context).email,
+                hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[400],
+                    ),
+                filled: true,
+                fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
                 ),
-                validator: ValidationUtils.validateEmail,
-                autovalidateMode: AutovalidateMode.disabled,
-                keyboardType: TextInputType.emailAddress,
-                style: Theme.of(context).textTheme.bodyMedium,
-                onChanged: (value) => setState(() {}),
-              ),
-              const SizedBox(height: 16.0),
-
-              // Password field
-              TextFormField(
-                controller: _passwordController,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Iconsax.lock, color: AppColors.orange),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscurePassword ? Iconsax.eye_slash : Iconsax.eye,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscurePassword = !_obscurePassword;
-                      });
-                    },
-                  ),
-                  hintText: AppLocalizations.of(context).password,
-                  hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Colors.grey[400],
-                      ),
-                  filled: true,
-                  fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  errorBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedErrorBorder: focusedFieldStyle(),
-                  focusedBorder: focusedFieldStyle(),
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-                  errorStyle: const TextStyle(height: 0.8),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
                 ),
-                validator: ValidationUtils.validatePassword,
-                autovalidateMode: AutovalidateMode.disabled,
-                obscureText: _obscurePassword,
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-
-              // Error message below password
-              if (_errorMessage != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      _errorMessage!,
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
                 ),
-
-              const SizedBox(height: 8),
-
-              // Remember me & forgot password row
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // remember me checkbox
-                  Row(
-                    children: [
-                      Theme(
-                        data: Theme.of(context).copyWith(
-                          checkboxTheme: CheckboxThemeData(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            fillColor: WidgetStateProperty.resolveWith<Color>(
-                              (Set<WidgetState> states) {
-                                if (states.contains(WidgetState.selected)) {
-                                  return AppColors.orange;
-                                }
-                                return Colors.transparent;
-                              },
-                            ),
-                          ),
-                        ),
-                        child: Checkbox(
-                          value: _rememberMe,
-                          onChanged: (value) {
-                            setState(() {
-                              _rememberMe = value ?? false;
-                            });
-                            // Save/clear email immediately when checkbox changes
-                            _saveUserEmail();
-                          },
-                          side: BorderSide(
-                            color: isDark ? Colors.grey : Colors.grey.shade400,
-                            width: 1.5,
-                          ),
-                        ),
-                      ),
-                      Text(
-                        AppLocalizations.of(context).rememberMe,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color:
-                                  isDark ? Colors.grey[300] : Colors.grey[700],
-                            ),
-                      ),
-                    ],
-                  ),
-
-                  // forgot password button
-                  TextButton(
-                    onPressed: () {
-                      Get.toNamed(AppRoutes.forgotPassword);
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.orange,
-                    ),
-                    child: Text(
-                      AppLocalizations.of(context).forgotPassword,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.orange,
-                          ),
-                    ),
-                  ),
-                ],
+                focusedErrorBorder: focusedFieldStyle(),
+                focusedBorder: focusedFieldStyle(),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                errorStyle: const TextStyle(height: 0.8),
               ),
-              const SizedBox(height: 32.0),
+              validator: ValidationUtils.validateEmail,
+              autovalidateMode: AutovalidateMode.disabled,
+              keyboardType: TextInputType.emailAddress,
+              style: Theme.of(context).textTheme.bodyMedium,
+              onChanged: (value) => setState(() {}),
+            ),
+            const SizedBox(height: 16.0),
 
-              // Sign In button with loading state from BlocBuilder
-              SizedBox(
-                width: double.infinity,
-                child: BlocBuilder<AuthCubit, AuthState>(
-                  builder: (context, state) {
-                    final bool isLoading = state is AuthLoading;
-
-                    return ElevatedButton(
-                      onPressed: isLoading ? null : _handleSignIn,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16.0),
-                        backgroundColor: AppColors.orange,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        elevation: 0,
-                        disabledBackgroundColor:
-                            AppColors.orange.withValues(alpha: 0.5),
-                      ),
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.0,
-                              ),
-                            )
-                          : Text(
-                              AppLocalizations.of(context).signIn,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelLarge
-                                  ?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                    );
+            // Password field
+            TextFormField(
+              controller: _passwordController,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Iconsax.lock, color: AppColors.orange),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Iconsax.eye_slash : Iconsax.eye,
+                    color: Colors.grey,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
                   },
                 ),
+                hintText: AppLocalizations.of(context).password,
+                hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[400],
+                    ),
+                filled: true,
+                fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                errorBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: BorderSide.none,
+                ),
+                focusedErrorBorder: focusedFieldStyle(),
+                focusedBorder: focusedFieldStyle(),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+                errorStyle: const TextStyle(height: 0.8),
               ),
-            ],
-          ),
+              validator: ValidationUtils.validatePassword,
+              autovalidateMode: AutovalidateMode.disabled,
+              obscureText: _obscurePassword,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+
+            // Error message below password
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    _errorMessage!,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+
+            const SizedBox(height: 8),
+
+            // Remember me & forgot password row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // remember me checkbox
+                Row(
+                  children: [
+                    Theme(
+                      data: Theme.of(context).copyWith(
+                        checkboxTheme: CheckboxThemeData(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          fillColor: WidgetStateProperty.resolveWith<Color>(
+                            (Set<WidgetState> states) {
+                              if (states.contains(WidgetState.selected)) {
+                                return AppColors.orange;
+                              }
+                              return Colors.transparent;
+                            },
+                          ),
+                        ),
+                      ),
+                      child: Checkbox(
+                        value: _rememberMe,
+                        onChanged: (value) {
+                          setState(() {
+                            _rememberMe = value ?? false;
+                          });
+                          // Save/clear email immediately when checkbox changes
+                          _saveUserEmail();
+                        },
+                        side: BorderSide(
+                          color: isDark ? Colors.grey : Colors.grey.shade400,
+                          width: 1.5,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      AppLocalizations.of(context).rememberMe,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color:
+                                isDark ? Colors.grey[300] : Colors.grey[700],
+                          ),
+                    ),
+                  ],
+                ),
+
+                // forgot password button
+                TextButton(
+                  onPressed: () {
+                    Get.toNamed(AppRoutes.forgotPassword);
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.orange,
+                  ),
+                  child: Text(
+                    AppLocalizations.of(context).forgotPassword,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.orange,
+                        ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32.0),
+
+            // Sign In button with loading state from BlocBuilder
+            SizedBox(
+              width: double.infinity,
+              child: BlocBuilder<AuthCubit, AuthState>(
+                builder: (context, state) {
+                  final bool isLoading = state is AuthLoading;
+
+                  return ElevatedButton(
+                    onPressed: isLoading ? null : _handleSignIn,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      backgroundColor: AppColors.orange,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      elevation: 0,
+                      disabledBackgroundColor:
+                          AppColors.orange.withValues(alpha: 0.5),
+                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.0,
+                            ),
+                          )
+                        : Text(
+                            AppLocalizations.of(context).signIn,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelLarge
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                          ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

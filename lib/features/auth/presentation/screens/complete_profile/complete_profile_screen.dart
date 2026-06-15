@@ -35,8 +35,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
     final args = Get.arguments as Map<String, dynamic>;
     _user = args['user'] as UserModel;
     _token = args['token'] as String;
-    
-    // Pre-fill name from social provider if available
+
     _nameController.text = _user.name;
     if (_nameController.text.toLowerCase() == 'user') {
       _nameController.clear();
@@ -50,11 +49,13 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
     super.dispose();
   }
 
-  void _handleSubmit() {
+  // ✅ Fix: استقبل ctx من BlocBuilder
+  void _handleSubmit(BuildContext ctx) {
     if (_formKey.currentState!.validate()) {
-      context.read<AuthCubit>().completeProfile(
+      final normalizePhone = ValidationUtils.normalizePhone(_phoneController.text.trim());
+      ctx.read<AuthCubit>().completeProfile(
         _nameController.text.trim(),
-        _phoneController.text.trim(),
+        normalizePhone!,
       );
     }
   }
@@ -77,16 +78,15 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
             if (state is AuthProfileUpdateSuccess) {
               final authService = Get.find<AuthService>();
               final tokenService = Get.find<TokenService>();
-              
-              // Save token (it was already saved by googleLogin but just to be sure)
+
               await tokenService.saveToken(_token);
               authService.setAuthenticated();
-              
+
               final prefs = await SharedPreferences.getInstance();
               await prefs.setBool('isLoggedIn', true);
 
               Get.offAllNamed(AppRoutes.home);
-              
+
               Get.snackbar(
                 l10n.success,
                 l10n.profileUpdatedSuccessfully,
@@ -114,49 +114,57 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                   Text(
                     l10n.justAFewMoreDetails,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     l10n.completeProfileSubtitle,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey,
-                        ),
+                      color: Colors.grey,
+                    ),
                   ),
                   const SizedBox(height: 32),
 
                   // Name Field
-                  Text(l10n.fullName, style: Theme.of(context).textTheme.titleSmall),
+                  Text(l10n.fullName,
+                      style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _nameController,
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Iconsax.user, color: AppColors.orange),
+                      prefixIcon:
+                      const Icon(Iconsax.user, color: AppColors.orange),
                       hintText: l10n.enterFullName,
                       filled: true,
-                      fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                      fillColor:
+                      isDark ? AppColors.lightblack : Colors.grey[100],
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
                       ),
                       focusedBorder: focusedFieldStyle(),
                     ),
-                    validator: (value) => value == null || value.isEmpty ? l10n.nameRequired : null,
+                    validator: (value) => value == null || value.isEmpty
+                        ? l10n.nameRequired
+                        : null,
                   ),
                   const SizedBox(height: 20),
 
                   // Phone Field
-                  Text(l10n.phoneNumber, style: Theme.of(context).textTheme.titleSmall),
+                  Text(l10n.phoneNumber,
+                      style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _phoneController,
                     keyboardType: TextInputType.phone,
                     decoration: InputDecoration(
-                      prefixIcon: const Icon(Iconsax.call, color: AppColors.orange),
+                      prefixIcon:
+                      const Icon(Iconsax.call, color: AppColors.orange),
                       hintText: '+20 123 456 7890',
                       filled: true,
-                      fillColor: isDark ? AppColors.lightblack : Colors.grey[100],
+                      fillColor:
+                      isDark ? AppColors.lightblack : Colors.grey[100],
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
                         borderSide: BorderSide.none,
@@ -171,10 +179,13 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: BlocBuilder<AuthCubit, AuthState>(
-                      builder: (context, state) {
+                      builder: (ctx, state) {
+                        // ✅ استخدم ctx مش context
                         final isLoading = state is AuthLoading;
                         return ElevatedButton(
-                          onPressed: isLoading ? null : _handleSubmit,
+                          onPressed:
+                          isLoading ? null : () => _handleSubmit(ctx),
+                          // ✅ مرر ctx هنا
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             backgroundColor: AppColors.orange,
@@ -184,18 +195,19 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                           ),
                           child: isLoading
                               ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                                )
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                                color: Colors.white, strokeWidth: 2),
+                          )
                               : Text(
-                                  l10n.submit,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
+                            l10n.submit,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                         );
                       },
                     ),

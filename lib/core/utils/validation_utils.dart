@@ -73,4 +73,18 @@ class ValidationUtils {
     }
     return null;
   }
+
+  static String? normalizePhone(String phone) {
+    phone = phone.replaceAll(RegExp(r'[\s\-]'), '');
+
+    if (phone.startsWith('+20')) {
+      return phone; // ✅ صح بالفعل
+    } else if (phone.startsWith('20')) {
+      return '+$phone'; // 201234567890 → +201234567890
+    } else if (phone.startsWith('0')) {
+      return '+20${phone.substring(1)}'; // 01234567890 → +201234567890
+    } else {
+      return '+20$phone'; // 1234567890 → +201234567890
+    }
+  }
 }
