@@ -141,4 +141,6 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.18.0'
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.activity:activity:1.13.0'
+    implementation platform('com.google.firebase:firebase-bom:34.14.1')
+    implementation 'com.google.firebase:firebase-analytics'
 }

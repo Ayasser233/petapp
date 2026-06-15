@@ -7,6 +7,9 @@ import 'package:petapp/core/services/connectivity_service.dart';
 import 'package:petapp/core/services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+import 'package:facebook_app_events/facebook_app_events.dart';
+
 class NetworkSplashScreen extends StatefulWidget {
   const NetworkSplashScreen({super.key});
 
@@ -35,9 +38,33 @@ class _NetworkSplashScreenState extends State<NetworkSplashScreen>
     super.dispose();
   }
 
+  // ← الـ function الجديدة
+  Future<void> _requestTrackingPermission() async {
+    try {
+      final status =
+      await AppTrackingTransparency.requestTrackingAuthorization();
+
+      final facebookAppEvents = FacebookAppEvents();
+
+      if (status == TrackingStatus.authorized) {
+        await facebookAppEvents.setAdvertiserIdCollectionEnabled(true);
+        debugPrint('✅ ATT Authorized');
+      } else {
+        await facebookAppEvents.setAdvertiserIdCollectionEnabled( false);
+        debugPrint('⚠️ ATT Denied - status: $status');
+      }
+    } catch (e) {
+      // على Android هيعدي من هنا عادي بدون error
+      debugPrint('ℹ️ ATT not applicable: $e');
+    }
+  }
+
   Future<void> _checkAndNavigate() async {
-    // Optional: Wait a moment to let the animation show
+    // استنى الـ animation
     await Future.delayed(const Duration(milliseconds: 2750));
+
+    // ← اطلب ATT permission هنا — بعد الـ animation وقبل الـ navigation
+    await _requestTrackingPermission();
 
     // Check connection
     _hasConnection = await _connectivityService.isConnected();
@@ -45,23 +72,22 @@ class _NetworkSplashScreenState extends State<NetworkSplashScreen>
     if (_hasConnection && !_hasNavigated) {
       _hasNavigated = true;
       final prefs = await SharedPreferences.getInstance();
-      final isOnboardingCompleted = prefs.getBool('isOnboardingCompleted') ?? false;
-      
-      // Check auth status instead of just isLoggedIn
+      final isOnboardingCompleted =
+          prefs.getBool('isOnboardingCompleted') ?? false;
+
       final authStatus = _authService.authStatus;
-      
+
       if (!isOnboardingCompleted) {
         Get.offAllNamed(AppRoutes.onboarding);
       } else if (authStatus == AuthStatus.authenticated) {
         Get.offAllNamed(AppRoutes.home);
       } else if (authStatus == AuthStatus.guest) {
-        // Guest users also go to home screen
         Get.offAllNamed(AppRoutes.home);
       } else {
         Get.offAllNamed(AppRoutes.login);
       }
     } else if (!_hasConnection) {
-      setState(() {}); // To update the animation state
+      setState(() {});
     }
   }
 
@@ -83,7 +109,7 @@ class _NetworkSplashScreenState extends State<NetworkSplashScreen>
           animate: true,
           controller: _controller,
           onLoaded: (composition) {
-            _controller.duration = composition.duration * 0.75; // 2x speed
+            _controller.duration = composition.duration * 0.75;
             _controller.forward();
           },
         ),

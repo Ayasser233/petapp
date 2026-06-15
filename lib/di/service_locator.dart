@@ -17,6 +17,16 @@ import 'package:petapp/features/profile/controllers/profile_controller.dart';
 import 'package:petapp/features/profile/data/repositories/profile_repository.dart';
 import 'package:petapp/features/profile/data/repositories/voucher_repository.dart';
 
+// Medical Records - Clean Architecture
+import 'package:petapp/features/medical_records/data/datasources/medical_record_remote_datasource.dart';
+import 'package:petapp/features/medical_records/data/repositories/medical_record_repository_impl.dart';
+import 'package:petapp/features/medical_records/domain/repositories/medical_record_repository.dart';
+import 'package:petapp/features/medical_records/domain/usecases/get_medical_records_usecase.dart';
+import 'package:petapp/features/medical_records/domain/usecases/create_medical_record_usecase.dart';
+import 'package:petapp/features/medical_records/domain/usecases/create_share_link_usecase.dart';
+import 'package:petapp/features/medical_records/presentation/cubit/medical_records_cubit.dart';
+import 'package:petapp/features/medical_records/presentation/cubit/log_medical_record_cubit.dart';
+
 // Appointments - Clean Architecture
 import 'package:petapp/features/appointments/data/datasources/appointment_remote_datasource.dart';
 import 'package:petapp/features/appointments/data/repositories/appointment_repository_impl.dart';
@@ -154,6 +164,22 @@ Future<void> setupServiceLocator({SharedPreferences? sharedPreferences}) async {
   sl.registerLazySingleton(() => DeleteVaccinationSeriesUsecase(sl()));
   sl.registerLazySingleton(() => GetMedicalSheetUsecase(sl()));
 
+  // Medical Records Feature - Clean Architecture
+  // Data sources
+  sl.registerLazySingleton<MedicalRecordRemoteDataSource>(
+    () => MedicalRecordRemoteDataSourceImpl(apiClient: sl()),
+  );
+
+  // Repositories
+  sl.registerLazySingleton<MedicalRecordRepository>(
+    () => MedicalRecordRepositoryImpl(remoteDataSource: sl()),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetMedicalRecordsUseCase(sl()));
+  sl.registerLazySingleton(() => CreateMedicalRecordUseCase(sl()));
+  sl.registerLazySingleton(() => CreateShareLinkUseCase(sl()));
+
   // Cubits
   sl.registerFactory(() => AuthCubit(
         authRepository: sl(),
@@ -175,5 +201,14 @@ Future<void> setupServiceLocator({SharedPreferences? sharedPreferences}) async {
         markAnnualBoosterCompleteUsecase: sl(),
         deleteVaccinationSeriesUsecase: sl(),
         getMedicalSheetUsecase: sl(),
+      ));
+
+  sl.registerFactory(() => MedicalRecordsCubit(
+        getMedicalRecordsUseCase: sl(),
+        createShareLinkUseCase: sl(),
+      ));
+
+  sl.registerFactory(() => LogMedicalRecordCubit(
+        createMedicalRecordUseCase: sl(),
       ));
 }

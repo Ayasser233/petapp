@@ -454,11 +454,23 @@ class VetModel {
       imagesList = [map['image'].toString()];
     }
 
+    // Extract coordinates if present in location object
+    double? lat;
+    double? lng;
+    if (map['location'] is Map) {
+      final loc = map['location'] as Map;
+      if (loc['coordinates'] is Map) {
+        final coords = loc['coordinates'] as Map;
+        lat = _parseDouble(coords['lat']) ?? _parseDouble(coords['latitude']);
+        lng = _parseDouble(coords['lng']) ?? _parseDouble(coords['longitude']);
+      }
+    }
+
     return VetModel(
       id: map['id'] ?? '',
       name: map['name'] ?? '',
       category: map['category'] ?? '',
-      location: map['location'] ?? '',
+      location: map['location'] is String ? map['location'] : (map['location']?['address'] ?? ''),
       distance: map['distance'] ?? '',
       images: imagesList,
       profileImage: map['profileImage']?.toString(),
@@ -484,8 +496,8 @@ class VetModel {
       globalDiscount: map['globalDiscount'] is Map<String, dynamic>
           ? map['globalDiscount'] as Map<String, dynamic>
           : null,
-      latitude: _parseDouble(map['latitude']) ?? _parseDouble(map['lat']),
-      longitude: _parseDouble(map['longitude']) ?? _parseDouble(map['lng']),
+      latitude: lat ?? _parseDouble(map['latitude']) ?? _parseDouble(map['lat']),
+      longitude: lng ?? _parseDouble(map['longitude']) ?? _parseDouble(map['lng']),
     );
   }
 
@@ -506,11 +518,11 @@ class VetModel {
         locationString = locationMap['address']?.toString() ??
             '${locationMap['city'] ?? ''}, ${locationMap['state'] ?? ''}'.trim();
 
-        // coordinates: {lat: "30...", lng: "31..."}
+        // coordinates: {lat: "30...", lng: "31..."} or {latitude: "30...", longitude: "31..."}
         final coordinates = locationMap['coordinates'];
         if (coordinates is Map) {
-          lat = _parseDouble(coordinates['lat']);
-          lng = _parseDouble(coordinates['lng']);
+          lat = _parseDouble(coordinates['lat']) ?? _parseDouble(coordinates['latitude']);
+          lng = _parseDouble(coordinates['lng']) ?? _parseDouble(coordinates['longitude']);
         }
       }
     }
@@ -562,7 +574,7 @@ class VetModel {
       location: locationString.isNotEmpty
           ? locationString
           : (json['address']?.toString() ?? ''),
-      distance: json['distance']?.toString() ?? 'Calculating...',
+      distance: json['distance']?.toString() ?? '',
       images: imagesList.isNotEmpty
           ? imagesList
           : const [],

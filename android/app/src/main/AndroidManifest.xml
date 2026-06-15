@@ -24,6 +24,9 @@
 
         <!-- Facebook SDK meta-data must be at application level, not activity level -->
         <meta-data
+            android:name="com.google.firebase.analytics.collection_enabled"
+            android:value="true" />
+        <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"
             />

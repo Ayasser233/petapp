@@ -808,6 +808,20 @@ class AppLocalizations {
   // Pet Profile screen strings
   String get petProfile =>
       _localizedValues[locale.languageCode]?['petProfile'] ?? 'Pet Profile';
+  String get submit =>
+      _localizedValues[locale.languageCode]?['submit'] ?? 'Submit';
+  String get completeProfile =>
+      _localizedValues[locale.languageCode]?['completeProfile'] ?? 'Complete Your Profile';
+  String get completeProfileSubtitle =>
+      _localizedValues[locale.languageCode]?['completeProfileSubtitle'] ?? 'We need a few more details to set up your account.';
+  String get justAFewMoreDetails =>
+      _localizedValues[locale.languageCode]?['justAFewMoreDetails'] ?? 'Just a few more details';
+  String get enterFullName =>
+      _localizedValues[locale.languageCode]?['enterFullName'] ?? 'Enter your full name';
+  String get nameRequired =>
+      _localizedValues[locale.languageCode]?['nameRequired'] ?? 'Name is required';
+  String get profileUpdatedSuccessfully =>
+      _localizedValues[locale.languageCode]?['profileUpdatedSuccessfully'] ?? 'Profile updated successfully!';
   String get editPet =>
       _localizedValues[locale.languageCode]?['editPet'] ?? 'Edit Pet';
   String get confirmDelete =>
@@ -940,6 +954,78 @@ class AppLocalizations {
   String get scanQrToComplete =>
       _localizedValues[locale.languageCode]?['scanQrToComplete'] ??
       'Scan QR to Complete';
+
+  // Medical Records Screen
+  String get medicalRecords =>
+      _localizedValues[locale.languageCode]?['medicalRecords'] ?? 'Medical Records';
+  String get medicalDetails =>
+      _localizedValues[locale.languageCode]?['medicalDetails'] ?? 'Medical Details';
+  String get latestRecord =>
+      _localizedValues[locale.languageCode]?['latestRecord'] ?? 'Latest Record';
+  String get viewAllRecords =>
+      _localizedValues[locale.languageCode]?['viewAllRecords'] ?? 'View All Records';
+  String get noMedicalRecordsYet =>
+      _localizedValues[locale.languageCode]?['noMedicalRecordsYet'] ?? 'No medical records yet';
+  String get logHealthEvent =>
+      _localizedValues[locale.languageCode]?['logHealthEvent'] ?? 'Add Medical Record';
+  String get selectRecordType =>
+      _localizedValues[locale.languageCode]?['selectRecordType'] ?? 'SELECT RECORD TYPE';
+  String get commonSymptoms =>
+      _localizedValues[locale.languageCode]?['commonSymptoms'] ?? 'COMMON SYMPTOMS';
+  String get customSymptom =>
+      _localizedValues[locale.languageCode]?['customSymptom'] ?? 'CUSTOM SYMPTOM';
+  String get nameType =>
+      _localizedValues[locale.languageCode]?['nameType'] ?? 'NAME / TYPE';
+  String get dateOfEvent =>
+      _localizedValues[locale.languageCode]?['dateOfEvent'] ?? 'DATE OF EVENT';
+  String get locationProvider =>
+      _localizedValues[locale.languageCode]?['locationProvider'] ?? 'LOCATION / PROVIDER';
+  String get eventDetails =>
+      _localizedValues[locale.languageCode]?['eventDetails'] ?? 'EVENT DETAILS';
+  String get attachments =>
+      _localizedValues[locale.languageCode]?['attachments'] ?? 'ATTACHMENTS';
+  String get saveRecord =>
+      _localizedValues[locale.languageCode]?['saveRecord'] ?? 'Save Record';
+  String get medicationName =>
+      _localizedValues[locale.languageCode]?['medicationName'] ?? 'MEDICATION NAME';
+  String get dosage =>
+      _localizedValues[locale.languageCode]?['dosage'] ?? 'DOSAGE';
+  String get vaccineTypeLabel =>
+      _localizedValues[locale.languageCode]?['vaccineTypeLabel'] ?? 'VACCINE TYPE';
+  String get category =>
+      _localizedValues[locale.languageCode]?['category'] ?? 'CATEGORY';
+  String get visitType =>
+      _localizedValues[locale.languageCode]?['visitType'] ?? 'VISIT TYPE';
+  String get testType =>
+      _localizedValues[locale.languageCode]?['testType'] ?? 'TEST TYPE';
+  String get procedureName =>
+      _localizedValues[locale.languageCode]?['procedureName'] ?? 'PROCEDURE NAME';
+  String get title =>
+      _localizedValues[locale.languageCode]?['title'] ?? 'TITLE';
+  String get uploadImages =>
+      _localizedValues[locale.languageCode]?['uploadImages'] ?? 'Upload images';
+  String get recordCreatedSuccessfully =>
+      _localizedValues[locale.languageCode]?['recordCreatedSuccessfully'] ?? 'Medical record created successfully';
+  String get inputRequired =>
+      _localizedValues[locale.languageCode]?['inputRequired'] ?? 'Input Required';
+  String get selectSymptomPrompt =>
+      _localizedValues[locale.languageCode]?['selectSymptomPrompt'] ?? 'Please select at least one symptom or enter a custom one.';
+  String get limitReached =>
+      _localizedValues[locale.languageCode]?['limitReached'] ?? 'Limit Reached';
+  String get attachLimitMsg =>
+      _localizedValues[locale.languageCode]?['attachLimitMsg'] ?? 'You can only attach up to 10 files.';
+  String get medication =>
+      _localizedValues[locale.languageCode]?['medication'] ?? 'Medication';
+  String get visit =>
+      _localizedValues[locale.languageCode]?['visit'] ?? 'Visit';
+  String get lab =>
+      _localizedValues[locale.languageCode]?['lab'] ?? 'Lab';
+  String get surgeryLabel =>
+      _localizedValues[locale.languageCode]?['surgeryLabel'] ?? 'Surgery';
+  String get event =>
+      _localizedValues[locale.languageCode]?['event'] ?? 'Event';
+  String get note =>
+      _localizedValues[locale.languageCode]?['note'] ?? 'Note';
 
   // Notification getters
   String get notificationsTitle =>
@@ -1204,6 +1290,8 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['discount'] ?? 'Discount';
   String get finalPrice =>
       _localizedValues[locale.languageCode]?['finalPrice'] ?? 'Final Price';
+  String get totalPrice =>
+      _localizedValues[locale.languageCode]?['totalPrice'] ?? 'Total Price';
   String get pts =>
       _localizedValues[locale.languageCode]?['pts'] ?? 'pts';
   String get totalSavings =>
@@ -2534,6 +2622,13 @@ class AppLocalizations {
       'petAddedSuccessfully': '{name} has been added successfully.',
       'failedToAddPet': 'Failed to add pet. Please try again.',
       'petProfile': 'Pet Profile',
+      'submit': 'Submit',
+      'completeProfile': 'Complete Your Profile',
+      'completeProfileSubtitle': 'We need a few more details to set up your account.',
+      'justAFewMoreDetails': 'Just a few more details',
+      'enterFullName': 'Enter your full name',
+      'nameRequired': 'Name is required',
+      'profileUpdatedSuccessfully': 'Profile updated successfully!',
       'editPet': 'Edit Pet',
       'confirmDelete': 'Confirm Delete',
       'areYouSureDeletePet': 'Are you sure you want to delete this pet?',
@@ -2875,6 +2970,7 @@ class AppLocalizations {
       'originalPrice': 'Original Price',
       'discount': 'Discount',
       'finalPrice': 'Final Price',
+      'totalPrice': 'Total Price',
       'pts': 'pts',
       'totalSavings': 'Total Savings',
       'vetDiscount': 'Vet Discount',
@@ -3763,6 +3859,43 @@ class AppLocalizations {
       'm ago': '@count min ago',
       'h ago': '@count hr ago',
       'd ago': '@count day ago',
+
+      // Medical Records
+      'medicalRecords': 'Medical Records',
+      'medicalDetails': 'Medical Details',
+      'latestRecord': 'Latest Record',
+      'viewAllRecords': 'View All Records',
+      'noMedicalRecordsYet': 'No medical records yet',
+      'logHealthEvent': 'Add Medical Record',
+      'selectRecordType': 'SELECT RECORD TYPE',
+      'commonSymptoms': 'COMMON SYMPTOMS',
+      'customSymptom': 'CUSTOM SYMPTOM',
+      'nameType': 'NAME / TYPE',
+      'dateOfEvent': 'DATE OF EVENT',
+      'locationProvider': 'LOCATION / PROVIDER',
+      'eventDetails': 'EVENT DETAILS',
+      'attachments': 'ATTACHMENTS',
+      'saveRecord': 'Save Record',
+      'medicationName': 'MEDICATION NAME',
+      'dosage': 'DOSAGE',
+      'vaccineTypeLabel': 'VACCINE TYPE',
+      'category': 'CATEGORY',
+      'visitType': 'VISIT TYPE',
+      'testType': 'TEST TYPE',
+      'procedureName': 'PROCEDURE NAME',
+      'title': 'TITLE',
+      'uploadImages': 'Upload images',
+      'recordCreatedSuccessfully': 'Medical record created successfully',
+      'inputRequired': 'Input Required',
+      'selectSymptomPrompt': 'Please select at least one symptom or enter a custom one.',
+      'limitReached': 'Limit Reached',
+      'attachLimitMsg': 'You can only attach up to 10 files.',
+      'medication': 'Medication',
+      'visit': 'Visit',
+      'lab': 'Lab',
+      'surgeryLabel': 'Surgery',
+      'event': 'Event',
+      'note': 'Note',
     },
     'ar': {
       'appTitle': 'أليفي',
@@ -4052,6 +4185,13 @@ class AppLocalizations {
       'petAddedSuccessfully': 'تمت إضافة {name} بنجاح.',
       'failedToAddPet': 'فشل إضافة الحيوان الأليف. يرجى المحاولة مرة أخرى.',
       'petProfile': 'ملف الحيوان الأليف',
+      'submit': 'إرسال',
+      'completeProfile': 'إكمال الملف الشخصي',
+      'completeProfileSubtitle': 'نحتاج إلى بعض التفاصيل الإضافية لإعداد حسابك.',
+      'justAFewMoreDetails': 'فقط بضع تفاصيل أخرى',
+      'enterFullName': 'أدخل اسمك الكامل',
+      'nameRequired': 'الاسم مطلوب',
+      'profileUpdatedSuccessfully': 'تم تحديث الملف الشخصي بنجاح!',
       'editPet': 'تعديل الحيوان الأليف',
       'confirmDelete': 'تأكيد الحذف',
       'areYouSureDeletePet': 'هل أنت متأكد أنك تريد حذف هذا الحيوان الأليف؟',
@@ -4415,6 +4555,7 @@ class AppLocalizations {
       'originalPrice': 'السعر الأصلي',
       'discount': 'الخصم',
       'finalPrice': 'السعر النهائي',
+      'totalPrice': 'إجمالي السعر',
       'pts': 'نقطة',
       'totalSavings': 'إجمالي التوفير',
       'vetDiscount': 'خصم العيادة',
@@ -6141,6 +6282,43 @@ class AppLocalizations {
       'm ago': 'منذ @count د',
       'h ago': 'منذ @count س',
       'd ago': 'منذ @count يوم',
+
+      // Medical Records
+      'medicalRecords': 'السجلات الطبية',
+      'medicalDetails': 'التفاصيل الطبية',
+      'latestRecord': 'آخر سجل',
+      'viewAllRecords': 'عرض جميع السجلات',
+      'noMedicalRecordsYet': 'لا توجد سجلات طبية بعد',
+      'logHealthEvent': 'إضافة سجل طبي',
+      'selectRecordType': 'اختر نوع السجل',
+      'commonSymptoms': 'الأعراض الشائعة',
+      'customSymptom': 'عرض مخصص',
+      'nameType': 'الاسم / النوع',
+      'dateOfEvent': 'تاريخ الحالة',
+      'locationProvider': 'الموقع / مقدم الخدمة',
+      'eventDetails': 'تفاصيل الحالة',
+      'attachments': 'المرفقات',
+      'saveRecord': 'حفظ السجل',
+      'medicationName': 'اسم الدواء',
+      'dosage': 'الجرعة',
+      'vaccineTypeLabel': 'نوع اللقاح',
+      'category': 'الفئة',
+      'visitType': 'نوع الزيارة',
+      'testType': 'نوع الفحص',
+      'procedureName': 'اسم الإجراء',
+      'title': 'العنوان',
+      'uploadImages': 'تحميل الصور',
+      'recordCreatedSuccessfully': 'تم إنشاء السجل الطبي بنجاح',
+      'inputRequired': 'مطلوب إدخال',
+      'selectSymptomPrompt': 'يرجى اختيار عرض واحد على الأقل أو إدخال عرض مخصص.',
+      'limitReached': 'تم الوصول للحد الأقصى',
+      'attachLimitMsg': 'يمكنك إرفاق ما يصل إلى 10 ملفات فقط.',
+      'medication': 'دواء',
+      'visit': 'زيارة',
+      'lab': 'مختبر',
+      'surgeryLabel': 'جراحة',
+      'event': 'حالة',
+      'note': 'ملاحظة',
     },
   };
 }

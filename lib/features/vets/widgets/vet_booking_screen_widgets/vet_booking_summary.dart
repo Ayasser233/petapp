@@ -5,6 +5,7 @@ import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import '../../models/vet_model.dart';
 import '../../screens/vet_booking_screen.dart';
+import '../vet_detail_screen_widgets/vet_global_discount_banner.dart';
 
 class VetBookingSummary extends StatelessWidget {
   final VetBookingController controller;
@@ -47,20 +48,40 @@ class VetBookingSummary extends StatelessWidget {
       originalPrice = double.tryParse(cleanPrice) ?? 0.0;
     }
 
-    // Calculate discount amount and final price
-    double discountAmount = 0.0;
-    double finalPrice = originalPrice;
-    if (discount != null && discount.isActive && originalPrice > 0) {
-      discountAmount = discount.calculateDiscount(originalPrice);
-      finalPrice = originalPrice - discountAmount;
+    // Check for an app-level/global discount (applied across vets). 
+    final rawGd = args?['vet']?['globalDiscount'];
+    final globalDiscount = GlobalDiscount.tryParse(rawGd);
+
+    // Calculate total discount and final price.
+    // If both globalDiscount and vet discount exist, they are added together.
+    double totalDiscountAmount = 0.0;
+    
+    final isEmergencyTime = THelperFunctions.isEmergencyTime();
+
+    if (originalPrice > 0 && !isEmergencyTime && !isEmergency) {
+      // 1. Calculate Vet Discount
+      if (discount != null && discount.isActive) {
+        totalDiscountAmount += discount.calculateDiscount(originalPrice);
+      }
+      
+      // 2. Calculate Global Discount (only if not used)
+      if (globalDiscount != null && !controller.globalDiscountAlreadyUsed.value) {
+        if (globalDiscount.type == 'percentage') {
+          totalDiscountAmount += originalPrice * (globalDiscount.value / 100);
+        } else {
+          totalDiscountAmount += globalDiscount.value;
+        }
+      }
     }
 
-    return Obx(() {
-      // Get points discount from controller
-      final pointsDiscount = controller.pointsDiscountAmount.value;
-      final finalPriceWithPoints = finalPrice - pointsDiscount;
+    double finalPrice = (originalPrice - totalDiscountAmount).clamp(0, double.infinity);
 
-      return Card(
+    // The outer widget itself doesn't directly read any Rx variables.
+    // points redemption section below uses its own `Obx`. Wrapping this
+    // entire card with `Obx` causes GetX to warn about improper usage, so we
+    // return a normal widget tree and keep the inner reactive parts scoped
+    // inside their own `Obx`.
+    return Card(
       color: cardColor,
       elevation: isDark ? 8 : 4,
       shape: RoundedRectangleBorder(
@@ -71,6 +92,17 @@ class VetBookingSummary extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Show a prominent global discount banner when available and not already used
+            Obx(() {
+              if (globalDiscount != null && !controller.globalDiscountAlreadyUsed.value) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: VetGlobalDiscountBanner(discount: globalDiscount),
+                );
+              }
+              return const SizedBox.shrink();
+            }),
+
             Text(
               AppLocalizations.of(context).bookingDetails,
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -99,13 +131,77 @@ class VetBookingSummary extends StatelessWidget {
             const SizedBox(height: 12),
             isEmergency
                 ? _buildEmergencyPriceRow(context, priceStr, textColor, subTextColor)
-                : _buildSummaryRow(
-                    context,
-                    Icons.attach_money,
-                    AppLocalizations.of(context).price,
-                    priceStr,
-                    textColor,
-                    subTextColor,
+                : Column(
+                    children: [
+                      // Price Breakdown
+                      if (totalDiscountAmount > 0) ...[
+                        _buildPriceRow(
+                          context,
+                          AppLocalizations.of(context).price,
+                          '${originalPrice.toStringAsFixed(0)} EGP',
+                          subTextColor,
+                        ),
+                        const SizedBox(height: 8),
+
+                        // 1. Vet Discount
+                        if (discount != null && discount.isActive)
+                          _buildPriceRow(
+                            context,
+                            AppLocalizations.of(context).vetDiscount,
+                            '- ${discount.calculateDiscount(originalPrice).toStringAsFixed(0)} EGP',
+                            Colors.green,
+                          ),
+
+                        // 2. Global Discount
+                        if (globalDiscount != null && !controller.globalDiscountAlreadyUsed.value)
+                          _buildPriceRow(
+                            context,
+                            'Aleefy Discount',
+                            '- ${(originalPrice * (globalDiscount.value / 100)).toStringAsFixed(0)} EGP',
+                            Colors.green,
+                          ),
+
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.0),
+                          child: Divider(height: 1),
+                        ),
+                      ],
+
+                      // Final Total Row
+                      Row(
+                        children: [
+                          Icon(Icons.attach_money, color: subTextColor, size: 20),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  AppLocalizations.of(context).totalPrice,
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: subTextColor,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      '${finalPrice.toStringAsFixed(0)} EGP',
+                                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                            color: AppColors.orange,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
 
             // Points redemption section
@@ -119,150 +215,14 @@ class VetBookingSummary extends StatelessWidget {
               subTextColor,
             ),
 
-            // Discount information
-            if (discount != null && discount.isActive && discountAmount > 0) ...[
-              const SizedBox(height: 16),
-              const Divider(),
-              const SizedBox(height: 12),
-
-              // Discount banner
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.red.shade50,
-                      Colors.orange.shade50,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.red.shade200,
-                    width: 1,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.local_offer,
-                          color: Colors.red.shade700,
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          discount.title,
-                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red.shade700,
-                              ),
-                        ),
-                        const Spacer(),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.red.shade700,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            discount.formattedDiscount,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11,
-                                ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    if (discount.description.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        discount.description,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[700],
-                            ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Price breakdown
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${AppLocalizations.of(context).originalPrice}:',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: subTextColor,
-                        ),
-                  ),
-                  Text(
-                    '${originalPrice.toStringAsFixed(0)} EGP',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: subTextColor,
-                          decoration: TextDecoration.lineThrough,
-                        ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${AppLocalizations.of(context).discount}:',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.green,
-                        ),
-                  ),
-                  Text(
-                    '- ${discountAmount.toStringAsFixed(0)} EGP',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.green,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              const Divider(),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '${AppLocalizations.of(context).finalPrice}:',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: textColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  Text(
-                    '${finalPriceWithPoints.toStringAsFixed(0)} EGP',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          color: AppColors.orange,
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                ],
-              ),
-            ],
+            // (Removed duplicate discount banner + breakdown — the prominent
+            // `VetGlobalDiscountBanner` is shown above and the inline price row
+            // already reflects the discounted amount. Keep points section only.)
           ],
         ),
       ),
     );
-    }); // Close Obx
+
   }
 
   /// Build points redemption section
@@ -532,6 +492,33 @@ class VetBookingSummary extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ],
+    );
+  }
+
+  /// Build price detail row
+  Widget _buildPriceRow(
+    BuildContext context,
+    String label,
+    String value,
+    Color? color,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: color ?? Colors.grey[600],
+              ),
+        ),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: color ?? Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
         ),
       ],
     );

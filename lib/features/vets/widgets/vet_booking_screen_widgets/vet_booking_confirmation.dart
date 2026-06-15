@@ -3,9 +3,11 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:petapp/core/utils/app_colors.dart';
+import 'package:get/get.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import '../../screens/vet_booking_screen.dart';
+import '../vet_detail_screen_widgets/vet_global_discount_banner.dart';
 
 class VetBookingConfirmation extends StatelessWidget {
   final VetBookingController controller;
@@ -62,6 +64,29 @@ class VetBookingConfirmation extends StatelessWidget {
     bool isDark,
     Color textColor,
   ) {
+    // Extract price and global discount from route arguments so the receipt
+    // reflects any global discount applied at checkout.
+    final args = Get.arguments as Map<String, dynamic>?;
+    final priceStr = args?['price'] ?? args?['vet']?['consultationFee'];
+    double originalPrice = 0.0;
+    if (priceStr != null) {
+      final cleanPrice = priceStr.toString().replaceAll(RegExp(r'[^\d.]'), '');
+      originalPrice = double.tryParse(cleanPrice) ?? 0.0;
+    }
+
+    final rawGd = args?['vet']?['globalDiscount'];
+    final globalDiscount = GlobalDiscount.tryParse(rawGd);
+    double globalDiscountAmount = 0.0;
+    double priceAfterGlobal = originalPrice;
+    if (globalDiscount != null && originalPrice > 0) {
+      priceAfterGlobal = globalDiscount.discountedPrice(originalPrice);
+      globalDiscountAmount = (originalPrice - priceAfterGlobal).clamp(0, double.infinity);
+    }
+
+    // Points discount (if user redeemed points)
+    final pointsDiscount = controller.pointsDiscountAmount.value;
+    final finalPrice = (priceAfterGlobal - pointsDiscount).clamp(0, double.infinity);
+
     return Card(
       elevation: isDark ? 8 : 4,
       color: isDark ? Colors.grey[900] : Colors.white,
@@ -95,6 +120,94 @@ class VetBookingConfirmation extends StatelessWidget {
             if (controller.selectedPets.isNotEmpty) ...[
               const Divider(),
               _buildPetsDetail(context, textColor),
+            ],
+            // Price breakdown (show when there is a price)
+            if (originalPrice > 0) ...[
+              const Divider(),
+              const SizedBox(height: 8),
+              // Original price / discounted (global) / points / final
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context).price,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey,
+                        ),
+                  ),
+                  Text(
+                    '${originalPrice.toStringAsFixed(0)} EGP',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: textColor,
+                          decoration: globalDiscount != null ? TextDecoration.lineThrough : null,
+                        ),
+                  ),
+                ],
+              ),
+              if (globalDiscount != null && globalDiscountAmount > 0) ...[
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context).discount,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.green,
+                          ),
+                    ),
+                    Text(
+                      '- ${globalDiscountAmount.toStringAsFixed(0)} EGP',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+              ],
+              if (pointsDiscount > 0) ...[
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      AppLocalizations.of(context).pointsDiscount,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.green,
+                          ),
+                    ),
+                    Text(
+                      '- ${pointsDiscount.toStringAsFixed(0)} EGP',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: 8),
+              const Divider(),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    AppLocalizations.of(context).finalPrice,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: textColor,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  Text(
+                    '${finalPrice.toStringAsFixed(0)} EGP',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          color: AppColors.orange,
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                ],
+              ),
             ],
           ],
         ),

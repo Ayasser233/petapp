@@ -1,3 +1,4 @@
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get/get.dart';
 import '../models/vet_model.dart';
 import '../models/vet_schedule_model.dart';
@@ -10,6 +11,8 @@ class VetService {
   static final VetService _instance = VetService._internal();
   factory VetService() => _instance;
   VetService._internal();
+
+  static const String _globalDiscountUsedKey = 'global_discount_already_used';
 
   // Use lazy getters instead of eager initialization
   ApiClient get _apiClient => Get.find<ApiClient>();
@@ -47,7 +50,6 @@ class VetService {
     String? query,
     String? category,
     String? sortBy = 'distance',
-    double? maxDistanceKm,
   }) async {
     try {
       List<VetModel> filteredVets = await getAllVets();
@@ -62,11 +64,7 @@ class VetService {
         filteredVets = _filterByCategory(filteredVets, category);
       }
 
-      // Distance-based filtering requires coordinates, which we no longer keep on the client.
-      // If you need this, implement it server-side.
-      if (maxDistanceKm != null) {
-        // no-op
-      }
+      // Distance-based filtering has been removed from client-side search.
 
       // Sorting is also handled in the UI layer (or by backend).
       return filteredVets;
@@ -88,11 +86,7 @@ class VetService {
     }
   }
 
-  /// Get vets within specified distance
-  Future<List<VetModel>> getVetsWithinDistance(double maxDistanceKm) async {
-    // Distance filtering requires coordinates; implement server-side if needed.
-    return getAllVets();
-  }
+  // getVetsWithinDistance removed - distance filtering is not supported client-side
 
   /// Get popular vets (high rating and reviews)
   Future<List<VetModel>> getPopularVets({int limit = 5}) async {
@@ -266,54 +260,10 @@ class VetService {
               .toList() ??
           [];
 
-      if (vets.isNotEmpty) {
-        // Fetch schedule slots for each vet to get accurate opening status
-        final vetsWithSchedule = await Future.wait(
-          vets.map((vet) async {
-            try {
-              final scheduleSlots = await getVetScheduleSlots(vet.id);
-              final openingInfo = await getVetOpeningInfo(vet.id);
-
-              // Resolve coordinates from mapUrl if lat/lng missing
-              double? resolvedLat = vet.latitude;
-              double? resolvedLng = vet.longitude;
-              if ((resolvedLat == null || resolvedLng == null) &&
-                  vet.mapUrl != null &&
-                  vet.mapUrl!.isNotEmpty) {
-                final coords =
-                    await VetModel.resolveMapUrlCoords(vet.mapUrl!);
-                if (coords != null) {
-                  resolvedLat = coords.$1;
-                  resolvedLng = coords.$2;
-                }
-              }
-
-              return vet.copyWith(
-                scheduleSlots: scheduleSlots,
-                isAvailable: openingInfo['isOpen'] as bool?,
-                openingDaysText: openingInfo['openingDays'] != null && (openingInfo['openingDays'] as List).isNotEmpty
-                    ? (openingInfo['openingDays'] as List<String>).join(', ')
-                    : null,
-                latitude: resolvedLat,
-                longitude: resolvedLng,
-              );
-            } catch (e) {
-              // Return vet without schedule info if fetch fails
-              return vet;
-            }
-          }),
-        );
-
-        return {
-          'vets': vetsWithSchedule,
-          'total': meta?['total'] ?? 0,
-          'page': meta?['page'] ?? page,
-          'limit': meta?['limit'] ?? limit,
-          'totalPages': meta?['lastPage'] ?? 1,
-          'globalDiscount': globalDiscount,
-        };
-      }
-
+      // Return the mapped vets immediately. Fetching schedules and opening
+      // info per clinic can be slow (many additional network calls). The
+      // controller will fetch schedule/opening info asynchronously in the
+      // background when needed so the UI can show results faster.
       return {
         'vets': vets,
         'total': meta?['total'] ?? 0,
@@ -577,11 +527,80 @@ class VetService {
       }
     }
 
-    return openingDays.isNotEmpty ? 'on ${openingDays.first}' : '';
-  }
-}
+     return openingDays.isNotEmpty ? 'on ${openingDays.first}' : '';
+   }
 
-/// Custom exception classes for better error handling
+   /// Mark global discount as used when user completes a booking with active global discount
+   Future<void> markGlobalDiscountAsUsed({String title = 'launch'}) async {
+     try {
+       // Optimistically update cache
+       _isDiscountUsedCached = true;
+       final prefs = await SharedPreferences.getInstance();
+       await prefs.setBool(_globalDiscountUsedKey, true);
+
+       await _apiClient.post(
+         '/discounts/global/completed-usage',
+         queryParameters: {'title': title},
+       );
+     } catch (e) {
+       // Silently fail - this is non-critical tracking
+       // The booking is complete regardless of whether this endpoint succeeds
+     }
+   }
+
+   /// Check if the current user has already used the global discount
+   Future<bool> hasUserUsedGlobalDiscount() async {
+     try {
+       final response = await _apiClient.get(
+         ApiConstants.globalDiscountUsageEndpoint,
+       );
+       // The response is {"success": true, "data": {"isUsed": true, ...}} if used
+       // If data is null or isUsed is false, the discount hasn't been used.
+       final data = response.data['data'];
+       bool isUsed = false;
+       if (data != null && data is Map<String, dynamic>) {
+         isUsed = data['isUsed'] == true;
+       }
+
+       // Update cache
+       _isDiscountUsedCached = isUsed;
+       final prefs = await SharedPreferences.getInstance();
+       await prefs.setBool(_globalDiscountUsedKey, isUsed);
+
+       return isUsed;
+     } catch (e) {
+       // If endpoint fails, return cached value if available
+       final prefs = await SharedPreferences.getInstance();
+       return prefs.getBool(_globalDiscountUsedKey) ?? false;
+     }
+   }
+
+   /// Get the cached global discount usage status synchronously
+   bool getCachedGlobalDiscountUsage() {
+     // This is a bit of a trick since SharedPreferences is async.
+     // However, we can use Get.find<SharedPreferences>() if it was registered,
+     // or just rely on the fact that we can store this in a static variable 
+     // once initialized.
+     return _isDiscountUsedCached;
+   }
+
+   static bool _isDiscountUsedCached = false;
+
+   /// Initialize the discount usage cache from SharedPreferences
+   static Future<void> initCache() async {
+     final prefs = await SharedPreferences.getInstance();
+     _isDiscountUsedCached = prefs.getBool(_globalDiscountUsedKey) ?? false;
+   }
+
+   /// Reactive getter for immediate UI updates
+   bool get isDiscountUsed => _isDiscountUsedCached;
+   
+   void updateDiscountCache(bool used) {
+     _isDiscountUsedCached = used;
+   }
+ }
+
+ /// Custom exception classes for better error handling
 class VetServiceException implements Exception {
   final String message;
   final String? code;
