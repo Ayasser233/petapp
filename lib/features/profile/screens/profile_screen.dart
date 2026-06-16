@@ -10,6 +10,8 @@ import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/features/profile/screens/account_details_screen.dart';
 import 'package:petapp/core/services/whatsapp_launcher_service.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:petapp/features/profile/controllers/profile_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -24,6 +26,7 @@ class ProfileScreen extends StatelessWidget {
     final backgroundColor = isDark ? Colors.black : const Color(0xFFF5F5F5);
     final localizations = AppLocalizations.of(context);
     final authService = Get.find<AuthService>();
+    final profileController = Get.find<ProfileController>();
     final isGuest = authService.authStatus == AuthStatus.guest;
 
     return BaseScreen(
@@ -42,7 +45,10 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 10),
+                // Profile Header
+                if (!isGuest) _buildProfileHeader(context, profileController, isDark),
+                
+                const SizedBox(height: 20),
 
                 // Guest user banner
                 if (isGuest) _buildGuestProfileBanner(context, isDark),
@@ -301,6 +307,49 @@ class ProfileScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildProfileHeader(BuildContext context, ProfileController controller, bool isDark) {
+    final textColor = isDark ? Colors.white : Colors.black87;
+    final subTextColor = isDark ? Colors.white70 : Colors.black54;
+
+    return Obx(() {
+      final user = controller.userProfile;
+      if (user == null) return const SizedBox.shrink();
+
+      return Column(
+        children: [
+          CircleAvatar(
+            radius: 50,
+            backgroundColor: AppColors.orange.withValues(alpha: 0.1),
+            child: CircleAvatar(
+              radius: 46,
+              backgroundColor: Colors.grey[200],
+              backgroundImage: user.profilePictureUrl != null
+                  ? CachedNetworkImageProvider(user.profilePictureUrl!)
+                  : const AssetImage('assets/images/profile.jpg') as ImageProvider,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            user.name,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            user.email,
+            style: TextStyle(
+              fontSize: 14,
+              color: subTextColor,
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   // ── Grouped section card ──────────────────────────────────────────────────

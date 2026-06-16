@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'dart:io';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
@@ -24,6 +27,9 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
   late TextEditingController _emailController;
   late TextEditingController _phoneController;
 
+  bool _isEditing = false;
+  String? _selectedImagePath;
+
   @override
   void initState() {
     super.initState();
@@ -39,8 +45,6 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
 
   void _initializeWithProfileData() {
     final profile = _profileController.userProfile;
-
-    // Debug: Print profile status
 
     if (profile != null) {
       _nameController.text = profile.name;
@@ -126,6 +130,34 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
   }
 
 
+  void _pickImage() async {
+    if (!_isEditing) return;
+
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      setState(() {
+        _selectedImagePath = image.path;
+      });
+    }
+  }
+
+  void _saveProfile() async {
+    final success = await _profileController.changeMyData(
+      fullName: _nameController.text.trim(),
+      photoPath: _selectedImagePath,
+    );
+
+    if (success) {
+      setState(() {
+        _isEditing = false;
+        _selectedImagePath = null;
+        _initializeWithProfileData();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = THelperFunctions.isDarkMode(context);
@@ -147,6 +179,17 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
         title: Text(localizations?.myAccount ?? 'My Account'),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          if (!_isEditing)
+            IconButton(
+              icon: const Icon(Icons.edit, color: AppColors.orange),
+              onPressed: () {
+                setState(() {
+                  _isEditing = true;
+                });
+              },
+            ),
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -156,18 +199,42 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
             children: [
               // Profile Picture Section
               Center(
-                child: Stack(
-                  children: [
-                    CircleAvatar(
-                      radius: 60,
-                      backgroundColor: AppColors.orange.withValues(alpha: 0.2),
-                      child: const CircleAvatar(
-                        radius: 56,
-                        backgroundImage:
-                            AssetImage('assets/images/profile.jpg'),
+                child: GestureDetector(
+                  onTap: _pickImage,
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 60,
+                        backgroundColor: AppColors.orange.withValues(alpha: 0.2),
+                        child: CircleAvatar(
+                          radius: 56,
+                          backgroundColor: Colors.grey[200],
+                          backgroundImage: _selectedImagePath != null
+                              ? FileImage(File(_selectedImagePath!))
+                              : (_profileController.userProfile?.profilePictureUrl != null
+                                  ? CachedNetworkImageProvider(_profileController.userProfile!.profilePictureUrl!)
+                                  : const AssetImage('assets/images/profile.jpg')) as ImageProvider,
+                        ),
                       ),
-                    ),
-                  ],
+                      if (_isEditing)
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: const BoxDecoration(
+                              color: AppColors.orange,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.camera_alt,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
 
@@ -202,12 +269,12 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Name
+                    // Full Name
                     _buildTextField(
-                      label: localizations?.name ?? "Name",
+                      label: localizations?.fullName ?? "Full Name",
                       controller: _nameController,
                       icon: Icons.person,
-                      enabled: false,
+                      enabled: _isEditing,
                       isDark: isDark,
                       cardColor: cardColor,
                     ),
@@ -306,6 +373,62 @@ class _AccountDetailsScreenState extends State<AccountDetailsScreen> {
                   ],
                 ),
               ),
+
+              const SizedBox(height: 24),
+
+              // Save Button
+              if (_isEditing)
+                SizedBox(
+                  width: double.infinity,
+                  child: Obx(() => ElevatedButton(
+                    onPressed: _profileController.isUpdating ? null : _saveProfile,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: _profileController.isUpdating
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : Text(
+                            localizations?.saveChanges ?? "Save Changes",
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                  )),
+                ),
+
+              if (_isEditing)
+                const SizedBox(height: 12),
+              
+              if (_isEditing)
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        _isEditing = false;
+                        _selectedImagePath = null;
+                        _initializeWithProfileData();
+                      });
+                    },
+                    child: Text(
+                      localizations?.cancel ?? "Cancel",
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  ),
+                ),
 
               const SizedBox(height: 24),
             ],

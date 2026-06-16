@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
@@ -598,8 +599,6 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> {
   }
 
   void _showFullScreenImage(String url, bool isPdf) {
-    if (isPdf) return; 
-
     showDialog(
       context: context,
       builder: (context) => Scaffold(
@@ -610,17 +609,23 @@ class _MedicalRecordsScreenState extends State<MedicalRecordsScreen> {
           elevation: 0,
         ),
         body: Center(
-          child: InteractiveViewer(
-            panEnabled: true,
-            minScale: 0.5,
-            maxScale: 4.0,
-            child: CachedNetworkImage(
-              imageUrl: url,
-              fit: BoxFit.contain,
-              placeholder: (context, url) => const CircularProgressIndicator(color: AppColors.orange),
-              errorWidget: (c, e, s) => const Icon(Icons.broken_image_outlined, color: Colors.white54, size: 64),
-            ),
-          ),
+          child: isPdf
+              ? SfPdfViewer.network(
+                  url,
+                  canShowScrollHead: true,
+                  canShowPaginationDialog: true,
+                )
+              : InteractiveViewer(
+                  panEnabled: true,
+                  minScale: 0.5,
+                  maxScale: 4.0,
+                  child: CachedNetworkImage(
+                    imageUrl: url,
+                    fit: BoxFit.contain,
+                    placeholder: (context, url) => const CircularProgressIndicator(color: AppColors.orange),
+                    errorWidget: (c, e, s) => const Icon(Icons.broken_image_outlined, color: Colors.white54, size: 64),
+                  ),
+                ),
         ),
       ),
     );
