@@ -373,6 +373,43 @@ class ApiClient {
     }
   }
 
+  Future<Response> changeProfileData({
+    required String firstName,
+    required String lastName,
+    String? photoPath,
+  }) async {
+    try {
+      final Map<String, dynamic> data = {
+        'firstName': firstName,
+        'lastName': lastName,
+      };
+
+      dynamic requestData;
+
+      if (photoPath != null && photoPath.isNotEmpty) {
+        requestData = FormData.fromMap({
+          ...data,
+          'photo': await MultipartFile.fromFile(
+            photoPath,
+            filename: photoPath.split('/').last,
+          ),
+        });
+      } else {
+        requestData = FormData.fromMap(data);
+      }
+
+      final response = await _dio.patch(
+        ApiConstants.changeMyDataEndpoint,
+        data: requestData,
+      );
+
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
   Future<Response> googleLogin(String idToken) async {
     try {
       debugPrint('🔐 Attempting Google login with token...');

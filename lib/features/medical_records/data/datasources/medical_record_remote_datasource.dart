@@ -127,7 +127,7 @@ class MedicalRecordRemoteDataSourceImpl implements MedicalRecordRemoteDataSource
 
   @override
   Future<Map<String, dynamic>> getShareLink(String petId) async {
-    final response = await apiClient.get(
+    final response = await apiClient.post(
       ApiConstants.shareLinkEndpoint(petId),
     );
 

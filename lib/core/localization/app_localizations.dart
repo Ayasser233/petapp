@@ -798,6 +798,9 @@ class AppLocalizations {
       'Spayed/Neutered?';
   String get savePet =>
       _localizedValues[locale.languageCode]?['savePet'] ?? 'Save Pet';
+  String get saveChanges =>
+      _localizedValues[locale.languageCode]?['saveChanges'] ?? 'Save Changes';
+
   String get petAddedSuccessfully =>
       _localizedValues[locale.languageCode]?['petAddedSuccessfully'] ??
       '{name} has been added successfully.';
@@ -2619,6 +2622,9 @@ class AppLocalizations {
       'addNotes': 'Any additional information about your pet',
       'spayedNeuteredQuestion': 'Spayed/Neutered?',
       'savePet': 'Save Pet',
+      'saveChanges': 'Save Changes',
+      'firstName': 'First Name',
+      'lastName': 'Last Name',
       'petAddedSuccessfully': '{name} has been added successfully.',
       'failedToAddPet': 'Failed to add pet. Please try again.',
       'petProfile': 'Pet Profile',
@@ -2824,8 +2830,6 @@ class AppLocalizations {
       'createAccount': 'Create Your Account',
       'accountCreationSubtitle': 'Fill in your details to create your account',
       'fullName': 'Full Name',
-      'firstName': 'First Name',
-      'lastName': 'Last Name',
       'phoneNumber': 'Phone Number',
       'alreadyHaveAccount': 'Already have an account?',
       'termsAndConditionsAgreement': 'By registering you agree to',
@@ -4182,6 +4186,7 @@ class AppLocalizations {
       'addNotes': 'أي معلومات إضافية عن حيوانك الأليف',
       'spayedNeuteredQuestion': 'مخصي/معقم؟',
       'savePet': 'حفظ الحيوان الأليف',
+      'saveChanges': 'حفظ التغييرات',
       'petAddedSuccessfully': 'تمت إضافة {name} بنجاح.',
       'failedToAddPet': 'فشل إضافة الحيوان الأليف. يرجى المحاولة مرة أخرى.',
       'petProfile': 'ملف الحيوان الأليف',

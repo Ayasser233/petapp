@@ -44,6 +44,7 @@ class ApiConstants {
   static String updateProfileEndpoint(String userId) => '/users/$userId';
   static const String googleLoginEndpoint = '/auth/google/login';
   static const String appleLoginEndpoint = '/auth/apple/login';
+  static const String changeMyDataEndpoint = '/users/profile';
   static const String notificationTokenEndpoint = '/push-tokens';
   static const String deleteAccountEndpoint = '/users/account'; // Soft delete user account
 
