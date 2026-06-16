@@ -13,6 +13,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:petapp/features/profile/controllers/profile_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:petapp/di/service_locator.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -26,7 +27,7 @@ class ProfileScreen extends StatelessWidget {
     final backgroundColor = isDark ? Colors.black : const Color(0xFFF5F5F5);
     final localizations = AppLocalizations.of(context);
     final authService = Get.find<AuthService>();
-    final profileController = Get.find<ProfileController>();
+    final profileController = sl<ProfileController>();
     final isGuest = authService.authStatus == AuthStatus.guest;
 
     return BaseScreen(
