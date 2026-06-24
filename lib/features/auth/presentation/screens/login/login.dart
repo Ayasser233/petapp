@@ -61,18 +61,13 @@ class LoginScreen extends StatelessWidget {
             Get.toNamed(AppRoutes.verifyEmail, arguments: state.email);
           } else if (state is AuthFailure) {
             final msg = state.message;
-            if (state.errorCode == 409 ||
-                msg.toLowerCase().contains('already exists') ||
-                msg.toLowerCase().contains('google') ||
-                msg.toLowerCase().contains('apple')) {
-              Get.snackbar(
-                AppLocalizations.of(context).error,
-                msg,
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.red.withValues(alpha: 0.1),
-                colorText: Colors.red,
-              );
-            }
+            Get.snackbar(
+              AppLocalizations.of(context).error,
+              msg,
+              snackPosition: SnackPosition.BOTTOM,
+              backgroundColor: Colors.red.withValues(alpha: 0.1),
+              colorText: Colors.red,
+            );
           }
         },
         child: Scaffold(

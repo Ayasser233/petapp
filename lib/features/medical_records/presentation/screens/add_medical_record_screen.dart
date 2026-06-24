@@ -13,6 +13,7 @@ import 'package:petapp/features/medical_records/presentation/cubit/log_medical_r
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/di/service_locator.dart';
 
+
 class AddMedicalRecordScreen extends StatefulWidget {
   final PetModel pet;
 
@@ -59,7 +60,7 @@ class _AddMedicalRecordScreenState extends State<AddMedicalRecordScreen> {
 
   Future<void> _pickFiles(AppLocalizations l10n) async {
     try {
-      final FilePickerResult? result = await FilePicker.platform.pickFiles(
+      final FilePickerResult? result = await FilePicker.pickFiles(
         allowMultiple: true,
         type: FileType.custom,
         allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
