@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
@@ -81,7 +82,7 @@ class LocationService extends GetxService {
       _isLocationEnabled.value = isEnabled;
       
       if (!isEnabled) {
-        throw Exception('Location services are disabled.');
+        return;
       }
 
       // Check permission status
@@ -89,11 +90,22 @@ class LocationService extends GetxService {
       
       // Get current location if permission is granted
       if (_isPermissionGranted.value) {
-        await getCurrentLocation();
+        // 1. Get last known position immediately for fast UI response
+        final lastPosition = await Geolocator.getLastKnownPosition();
+        if (lastPosition != null) {
+          _currentPosition.value = lastPosition;
+          // Trigger geocoding in background
+          _getAddressFromCoordinates(lastPosition.latitude, lastPosition.longitude);
+        }
+
+        // 2. Fetch fresh location in background - don't await it to avoid blocking onInit
+        getCurrentLocation().catchError((_) => null);
+        
+        // 3. Start listening for updates
         _startLocationUpdates();
       }
     } catch (e) {
-      throw Exception('Error initializing location service: $e');
+      // Silently fail during initialization
     } finally {
       _isLoading.value = false;
     }
@@ -151,28 +163,34 @@ class LocationService extends GetxService {
         throw Exception('Location permission not granted');
       }
 
-      _isLoading.value = true;
-
+      // Medium accuracy is much faster than High on many devices
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 15),
+        locationSettings: Platform.isAndroid
+            ? AndroidSettings(
+              accuracy: LocationAccuracy.medium,
+              timeLimit: const Duration(seconds: 5), // Update every 100 meters
+            )
+            : AppleSettings(
+              accuracy: LocationAccuracy.medium,
+              timeLimit: const Duration(seconds: 5), // Update every 100 meters
+            )
       );
 
       _currentPosition.value = position;
       
-      // Get address from coordinates
-      await _getAddressFromCoordinates(position.latitude, position.longitude);
+      // Get address from coordinates in background
+      _getAddressFromCoordinates(position.latitude, position.longitude);
       
       // Save last known location
-      await _saveLastKnownLocation(position);
+      _saveLastKnownLocation(position);
       
       return position;
     } catch (e) {
-      // Try to load last known location
-      await _loadLastKnownLocation();
-      throw Exception('Error getting current location: $e');
-    } finally {
-      _isLoading.value = false;
+      // Try to load last known location if we haven't already
+      if (_currentPosition.value == null) {
+        await _loadLastKnownLocation();
+      }
+      return _currentPosition.value;
     }
   }
 
@@ -281,14 +299,19 @@ class LocationService extends GetxService {
 
   /// Format distance for display
   String formatDistance(double distanceInMeters) {
+    final isArabic = Get.locale?.languageCode == 'ar';
+    
     if (distanceInMeters < 1000) {
-      return '${distanceInMeters.round()}m';
+      final value = distanceInMeters.round();
+      return isArabic ? '$value م' : '${value}m';
     } else {
       final distanceInKm = distanceInMeters / 1000;
       if (distanceInKm < 10) {
-        return '${distanceInKm.toStringAsFixed(1)}km';
+        final value = distanceInKm.toStringAsFixed(1);
+        return isArabic ? '$value كم' : '${value}km';
       } else {
-        return '${distanceInKm.round()}km';
+        final value = distanceInKm.round();
+        return isArabic ? '$value كم' : '${value}km';
       }
     }
   }
@@ -472,18 +495,5 @@ class LocationService extends GetxService {
     return formatDistance(distance);
   }
 
-  /// Check if clinic is within range
-  bool isClinicInRange(double clinicLat, double clinicLon, double maxDistanceKm) {
-    final currentPos = _currentPosition.value;
-    if (currentPos == null) return true; // Show all if no location
-    
-    final distance = calculateDistance(
-      currentPos.latitude,
-      currentPos.longitude,
-      clinicLat,
-      clinicLon,
-    );
-    
-    return distance / 1000 <= maxDistanceKm;
-  }
+  // isClinicInRange removed — distance range filtering is no longer applied
 }

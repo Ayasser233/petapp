@@ -1,3 +1,5 @@
+import 'package:petapp/core/utils/api_constants.dart';
+
 class UserModel {
   final String id;
   final String? firstName;
@@ -7,6 +9,7 @@ class UserModel {
   final String phone;
   final String? mobile;
   final String? username;
+  final String? profilePictureUrl;
   final bool emailVerified;
   final bool twoFactorEnabled;
   final String? role;
@@ -22,6 +25,7 @@ class UserModel {
     required this.phone,
     this.mobile,
     this.username,
+    this.profilePictureUrl,
     required this.emailVerified,
     required this.twoFactorEnabled,
     this.role,
@@ -50,6 +54,7 @@ class UserModel {
       phone: json['mobile']?.toString() ?? json['phone']?.toString() ?? '',
       mobile: json['mobile']?.toString(),
       username: json['username'],
+      profilePictureUrl: _convertImagePath(json['profilePictureUrl'] ?? json['photo'] ?? json['image']),
       emailVerified: json['emailVerified'] ??
           json['email_verified'] ??
           json['isVerified'] ??
@@ -80,6 +85,7 @@ class UserModel {
       'phone': phone,
       'mobile': mobile,
       'username': username,
+      'profilePictureUrl': profilePictureUrl,
       'emailVerified': emailVerified,
       'twoFactorEnabled': twoFactorEnabled,
       'role': role,
@@ -113,6 +119,7 @@ class UserModel {
       phone: phone ?? this.phone,
       mobile: mobile ?? this.mobile,
       username: username ?? this.username,
+      profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
       emailVerified: emailVerified ?? this.emailVerified,
       twoFactorEnabled: twoFactorEnabled ?? this.twoFactorEnabled,
       role: role ?? this.role,
@@ -123,4 +130,44 @@ class UserModel {
 
   // Add getter for backward compatibility
   bool get isVerified => emailVerified;
+
+  /// Helper method to convert relative image paths to full URLs
+  static String? _convertImagePath(dynamic path) {
+    if (path == null) return null;
+    String imagePath = path.toString();
+    if (imagePath.isEmpty) return null;
+
+    // If already a full URL or asset path, return as is
+    if (imagePath.startsWith('http://') ||
+        imagePath.startsWith('https://') ||
+        imagePath.startsWith('assets/')) {
+      return imagePath;
+    }
+
+    // If it's a relative API path, convert to full URL
+    if (imagePath.startsWith('/api/')) {
+      final baseUrl = ApiConstants.apiBaseUrl;
+      // Remove /api/v1 from baseUrl and the path since path already has it
+      final cleanBaseUrl = baseUrl.replaceAll('/api/v1', '');
+      return '$cleanBaseUrl$imagePath';
+    }
+
+    // If it starts with just /, assume it's relative to base URL
+    if (imagePath.startsWith('/')) {
+      return '${ApiConstants.apiBaseUrl}$imagePath';
+    }
+
+    // For paths like "users/abc.jpg" or "pets/abc.jpg" or "d5997f53104ccfa3b55e4.png"
+    // Images are served from MinIO storage
+    const minioBaseUrl = 'https://minio-api.aleefy-app.com/uploads';
+    String cleanPath = imagePath;
+
+    // Remove "uploads/" prefix if present (since we'll add it back)
+    if (cleanPath.startsWith('uploads/')) {
+      cleanPath = cleanPath.replaceFirst('uploads/', '');
+    }
+
+    // Build the URL with MinIO base URL
+    return '$minioBaseUrl/$cleanPath';
+  }
 }

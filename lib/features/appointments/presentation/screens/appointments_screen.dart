@@ -43,6 +43,11 @@ class _AppointmentsScreenContentState
   String? _selectedDateFilter;
   int? _selectedYear;
   late final ScrollController _scrollController;
+  // Cache the last loaded appointments so UI can continue showing them
+  // while appointment actions (cancel/complete/review) are in progress.
+  List<AppointmentEntity> _cachedAppointments = [];
+  bool _cachedHasNextPage = false;
+  int _cachedCurrentPage = 1;
 
   @override
   void initState() {
@@ -194,32 +199,45 @@ class _AppointmentsScreenContentState
         // Handle error states with snackbar (but not unauthorized — shown inline)
         if (state is AppointmentsError) {
           AppointmentDialogs.showErrorSnackBar(context, state.message);
+          return;
         }
-        // Handle success actions
-        if (state is AppointmentActionSuccess) {
-          if (state.action == 'cancel') {
-            AppointmentDialogs.showSuccessSnackBar(
-              context,
-              AppLocalizations.of(context).appointmentCancelledSuccessfully,
-            );
 
-            // Reload the current filter immediately after successful cancellation
-            final status =
-                _selectedFilter == 'All' ? null : _selectedFilter.toUpperCase();
-            context
-                .read<AppointmentsCubit>()
-                .getFilteredAppointments(status: status);
-          } else if (state.action == 'complete-qr') {
-            // Reload after QR completion
-            final status =
-                _selectedFilter == 'All' ? null : _selectedFilter.toUpperCase();
-            context
-                .read<AppointmentsCubit>()
-                .getFilteredAppointments(status: status);
+        // Handle success actions (cancel/complete/review/create etc.).
+        // Show an appropriate success snackbar and then reload the current
+        // filtered list so the UI reflects the server state.
+        if (state is AppointmentActionSuccess) {
+          String? messageKey;
+          switch (state.action) {
+            case 'cancel':
+              messageKey = AppLocalizations.of(context).appointmentCancelledSuccessfully;
+              break;
+            case 'complete-qr':
+              messageKey = AppLocalizations.of(context).appointmentCompletedSuccessfully;
+              break;
+            default:
+              messageKey = null;
           }
+
+          if (messageKey != null) {
+            AppointmentDialogs.showSuccessSnackBar(context, messageKey);
+          }
+
+          // Reload the current filter immediately after any successful action
+          final status = _selectedFilter == 'All' ? null : _selectedFilter.toUpperCase();
+          context.read<AppointmentsCubit>().getFilteredAppointments(status: status);
         }
       },
       builder: (context, state) {
+        // Update cache with the last known loaded appointments so transient
+        // action states do not clear the UI.
+        if (state is AppointmentsLoaded) {
+          _cachedAppointments = state.appointments;
+          _cachedHasNextPage = state.hasNextPage;
+          _cachedCurrentPage = state.currentPage;
+        } else if (state is AppointmentsLoadingMore) {
+          _cachedAppointments = state.currentAppointments;
+          _cachedCurrentPage = state.currentPage;
+        }
         return BaseScreen(
           navBarIndex: 1,
           appBar: AppBar(
@@ -415,6 +433,11 @@ class _AppointmentsScreenContentState
 
   Widget _buildContent(AppointmentsState state) {
     if (state is AppointmentsLoading) {
+      // If we have a cached list, keep showing it while the loading spinner
+      // is shown (avoids empty flicker). Otherwise show a full-screen loader.
+      if (_cachedAppointments.isNotEmpty) {
+        return _buildListView(_cachedAppointments, isLoadingMore: false);
+      }
       return const Center(child: CircularProgressIndicator(color: AppColors.orange));
     }
 
@@ -433,6 +456,13 @@ class _AppointmentsScreenContentState
       appointments = state.currentAppointments;
       isLoadingMore = true;
     } else if (state is AppointmentActionLoading) {
+      // An action is in progress (cancel/complete/review). Keep showing
+      // the cached appointments list to avoid forcing the user to navigate
+      // away and back to see updated status. Show a small centered loader
+      // above the list by returning the list (so it remains visible).
+      if (_cachedAppointments.isNotEmpty) {
+        return _buildListView(_cachedAppointments, isLoadingMore: false);
+      }
       return const Center(child: CircularProgressIndicator(color: AppColors.orange));
     } else {
       return _buildEmptyState();
@@ -448,6 +478,37 @@ class _AppointmentsScreenContentState
       itemBuilder: (context, index) {
         if (index == appointments.length) {
           // Loading more indicator at the bottom
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: CircularProgressIndicator(color: AppColors.orange),
+            ),
+          );
+        }
+        final appointment = appointments[index];
+        return AppointmentCard(
+          appointment: appointment,
+          onTap: () => _onAppointmentTap(appointment),
+          onCancel: _onCancelAppointment,
+          onReschedule: _onRescheduleAppointment,
+          onReview: _onReviewAppointment,
+          onBookAgain: _onBookAgainAppointment,
+          onScanQr: _onScanQrCode,
+        );
+      },
+    );
+  }
+
+  /// Helper to build the appointments list view from a concrete list.
+  Widget _buildListView(List<AppointmentEntity> appointments,
+      {required bool isLoadingMore}) {
+    if (appointments.isEmpty) return _buildEmptyState();
+
+    return ListView.builder(
+      controller: _scrollController,
+      itemCount: appointments.length + (isLoadingMore ? 1 : 0),
+      itemBuilder: (context, index) {
+        if (index == appointments.length) {
           return const Padding(
             padding: EdgeInsets.symmetric(vertical: 16),
             child: Center(

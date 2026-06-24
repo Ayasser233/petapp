@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:easy_debounce/easy_debounce.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
@@ -31,7 +32,6 @@ class VetExplorerController extends GetxController {
   final RxString selectedRegion = ''.obs;
   final RxString selectedService = ''.obs;
   final RxString sortOption = ''.obs;
-  final RxDouble maxDistance = 50.0.obs;
 
   // API pagination properties
   final RxInt currentPage = 1.obs;
@@ -62,7 +62,10 @@ class VetExplorerController extends GetxController {
     loadData();
 
     // Listen to search changes with debounce
-    debounce(searchQuery, (_) => applyFilters(),
+    // If user types a query we should search server-side (reset pages and fetch)
+    // to cover clinics that are not yet loaded locally. If query is empty we
+    // fall back to local filters for faster UX.
+    debounce(searchQuery, (_) => _onSearchChanged(),
         time: const Duration(milliseconds: 500));
 
     // Add scroll listener for pagination
@@ -90,6 +93,96 @@ class VetExplorerController extends GetxController {
         applyFilters();
       }
     });
+  }
+
+  /// Fetch schedule slots and opening info for the provided vets in the
+  /// background. Updates `allVets` in-place when each vet's extra info
+  /// becomes available and re-applies filters.
+  void _fetchSchedulesForVets(List<VetModel> vets) {
+    for (final vet in vets) {
+      _vetService.getVetScheduleSlots(vet.id).then((slots) async {
+        try {
+          final openingInfo = await _vetService.getVetOpeningInfo(vet.id);
+
+          // Resolve coordinates from mapUrl if lat/lng missing (fallback)
+          double? resolvedLat = vet.latitude;
+          double? resolvedLng = vet.longitude;
+          String? updatedDistance = vet.distance;
+
+          if ((resolvedLat == null || resolvedLng == null) &&
+              vet.mapUrl != null && vet.mapUrl!.isNotEmpty) {
+            final coords = await VetModel.resolveMapUrlCoords(vet.mapUrl!);
+            if (coords != null) {
+              resolvedLat = coords.$1;
+              resolvedLng = coords.$2;
+
+              // Recalculate distance immediately if coordinates resolved
+              final pos = _locationService.currentPosition;
+              if (pos != null) {
+                final meters = Geolocator.distanceBetween(
+                    pos.latitude, pos.longitude, resolvedLat, resolvedLng);
+                updatedDistance = _locationService.formatDistance(meters);
+              }
+            }
+          }
+
+          final updated = vet.copyWith(
+            scheduleSlots: slots,
+            isAvailable: openingInfo['isOpen'] as bool?,
+            openingDaysText: openingInfo['openingDays'] != null &&
+                    (openingInfo['openingDays'] as List).isNotEmpty
+                ? (openingInfo['openingDays'] as List<String>).join(', ')
+                : null,
+            latitude: resolvedLat,
+            longitude: resolvedLng,
+            distance: updatedDistance,
+          );
+
+          final idx = allVets.indexWhere((e) => e.id == vet.id);
+          if (idx != -1) {
+            allVets[idx] = updated;
+            // Debounced applyFilters to prevent rapid-fire UI updates
+            _debouncedApplyFilters();
+          }
+        } catch (_) {}
+      }).catchError((_) {});
+    }
+  }
+
+  // Debounce applyFilters for background updates
+  final _filterDebouncer = const Duration(milliseconds: 300);
+
+  void _debouncedApplyFilters() {
+    // Simple manual debouncing for GetX
+    EasyDebounce.debounce(
+      'vet-filter-debounce',
+      _filterDebouncer,
+      () => applyFilters(),
+    );
+  }
+
+  /// Called when the search query changes (debounced)
+  Future<void> _onSearchChanged() async {
+    final q = searchQuery.value.trim();
+    if (q.isEmpty) {
+      // No query -> just apply local filters on loaded data
+      applyFilters();
+      return;
+    }
+
+    // Query present -> perform server-side search across pages
+    try {
+      // Reset pagination and load page 1 with search param
+      currentPage.value = 1;
+      // Debug
+      try {
+        print('DEBUG: VetExplorerController._onSearchChanged - performing server search for "$q"');
+      } catch (_) {}
+      await loadData();
+    } catch (e) {
+      // Fallback to local filters if network/search fails
+      applyFilters();
+    }
   }
   
   /// Handle scroll events for pagination
@@ -187,6 +280,20 @@ class VetExplorerController extends GetxController {
       // Only show full-screen spinner on fresh loads, not when paginating
       if (!isLoadingMore.value) isLoading.value = true;
 
+      // ── Step 1: Wait for Location if Permission Granted ───────────────────
+      // If we have permission but no position yet, wait briefly for GPS lock.
+      // This ensures distances are available for the very first render.
+      if (_locationService.isPermissionGranted &&
+          _locationService.currentPosition == null) {
+        try {
+          // Wait up to 1.5s for a fresh position
+          await _locationService.refreshLocation()
+              .timeout(const Duration(milliseconds: 1500));
+        } catch (_) {
+          // Timeout or error: proceed with API call using old or null position
+        }
+      }
+
       // Determine if filtering by emergency (from category tab)
       final bool? filterEmergency = selectedCategory.value == 'emergency' ? true : null;
 
@@ -208,8 +315,9 @@ class VetExplorerController extends GetxController {
 
       final vets = response['vets'] as List<VetModel>;
 
-
-      // Update vets with calculated distances
+      // ── Step 2: Synchronous Distance Pre-calculation ─────────────────────
+      // We calculate distances for the NEWLY fetched batch before assigning
+      // to the UI observables. This prevents the "calculating..." flicker.
       final vetsWithDistances = await _updateVetsWithDistances(vets);
 
       if (currentPage.value == 1) {
@@ -218,13 +326,16 @@ class VetExplorerController extends GetxController {
         allVets.addAll(vetsWithDistances);
       }
 
+      // Fire-and-forget: fetch schedules/opening info for the newly loaded
+      // vets in the background. Note: distances are already done above.
+      _fetchSchedulesForVets(vetsWithDistances);
 
       totalVets.value = response['total'] as int;
       totalPages.value = response['totalPages'] as int;
       currentPage.value = response['page'] as int;
       hasMorePages.value = currentPage.value < totalPages.value;
 
-      // Extract available categories and services from API data (vets loaded from API)
+      // Extract available categories and services from API data
       _extractCategoriesFromVets();
       _extractServicesFromVets();
 
@@ -325,14 +436,44 @@ class VetExplorerController extends GetxController {
     regionHierarchy.value = hierarchy;
   }
 
-  /// Update vets with calculated distances from current location
+  /// Update vets with calculated distances from current location.
+  /// Also attempts to resolve missing coordinates from mapUrl in parallel
+  /// to ensure distances are ready for the initial load.
   Future<List<VetModel>> _updateVetsWithDistances(List<VetModel> vets) async {
     try {
       if (!_locationService.isPermissionGranted) return vets;
       final pos = _locationService.currentPosition;
       if (pos == null) return vets;
 
-      return vets.map((vet) {
+      // ── Step 1: Parallel Coordinate Resolution ────────────────────────────
+      // Identify vets missing lat/lng and attempt resolution in parallel
+      final resolveFutures = <Future<void>>[];
+      final resolvedVets = List<VetModel>.from(vets);
+
+      for (int i = 0; i < resolvedVets.length; i++) {
+        final v = resolvedVets[i];
+        if ((v.latitude == null || v.longitude == null) &&
+            v.mapUrl != null && v.mapUrl!.isNotEmpty) {
+          resolveFutures.add(
+            VetModel.resolveMapUrlCoords(v.mapUrl!).then((coords) {
+              if (coords != null) {
+                resolvedVets[i] = v.copyWith(
+                  latitude: coords.$1,
+                  longitude: coords.$2,
+                );
+              }
+            }),
+          );
+        }
+      }
+
+      if (resolveFutures.isNotEmpty) {
+        // Wait for all resolutions with a strict 2s timeout
+        await Future.wait(resolveFutures).timeout(const Duration(seconds: 2));
+      }
+
+      // ── Step 2: Synchronous Distance Calculation ─────────────────────────
+      return resolvedVets.map((vet) {
         final lat = vet.latitude;
         final lng = vet.longitude;
         if (lat == null || lng == null) return vet;
@@ -340,9 +481,7 @@ class VetExplorerController extends GetxController {
         final meters = Geolocator.distanceBetween(
             pos.latitude, pos.longitude, lat, lng);
 
-        final formatted = meters < 1000
-            ? '${meters.round()} م'
-            : '${(meters / 1000).toStringAsFixed(1)} كم';
+        final formatted = _locationService.formatDistance(meters);
 
         return vet.copyWith(distance: formatted);
       }).toList();
@@ -490,31 +629,8 @@ class VetExplorerController extends GetxController {
       }
     }
 
-    // ── Distance cap ─────────────────────────────────────────────────────────
-    // Applied when:
-    //  • region = nearbyAutoDetect  → always cap to maxDistance
-    //  • region = allRegions        → cap only when location is known AND
-    //                                 user moved the slider below its maximum
-    final bool applyDistanceCap = selectedRegion.value == 'nearbyAutoDetect' ||
-        (selectedRegion.value == 'allRegions' &&
-            maxDistance.value < 100.0 &&
-            _locationService.isPermissionGranted);
-
-    if (applyDistanceCap &&
-        _locationService.isPermissionGranted &&
-        _locationService.currentPosition != null) {
-      final pos = _locationService.currentPosition!;
-      final maxMeters = maxDistance.value * 1000;
-
-      vets = vets.where((vet) {
-        final lat = vet.latitude;
-        final lng = vet.longitude;
-        if (lat == null || lng == null) return true; // keep if coords unknown
-        final meters =
-            Geolocator.distanceBetween(pos.latitude, pos.longitude, lat, lng);
-        return meters <= maxMeters;
-      }).toList();
-    }
+    // Distance-based filtering has been removed per request: do not apply
+    // any range/distance cap here. Keep all clinics regardless of meters away.
 
     return vets;
   }
@@ -633,12 +749,10 @@ class VetExplorerController extends GetxController {
     String? region,
     String? service,
     String? sort,
-    double? distance,
   }) {
     if (region != null) selectedRegion.value = region;
     if (service != null) selectedService.value = service;
     if (sort != null) sortOption.value = sort;
-    if (distance != null) maxDistance.value = distance;
     applyFilters(); // fire-and-forget is fine here
   }
 

@@ -14,6 +14,7 @@ import '../widgets/vet_detail_screen_widgets/vet_global_discount_banner.dart';
 import '../widgets/vet_detail_screen_widgets/vet_action_button.dart';
 import '../widgets/vet_detail_screen_widgets/vet_reviews.dart';
 import '../models/review_model.dart';
+import '../models/vet_model.dart';
 import '../services/vet_service.dart';
 import '../../../core/services/facebook_event_service.dart';
 
@@ -34,6 +35,7 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
   List<ReviewModel> _reviews = [];
   bool _isLoadingReviews = false;
   int _totalReviews = 0;
+  bool _globalDiscountAlreadyUsed = false;
 
   /// A copy of the vet map enriched with the real calculated distance.
   late Map<String, dynamic> _vet;
@@ -42,12 +44,30 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
   void initState() {
     super.initState();
     _vet = Map<String, dynamic>.from(widget.vet);
+
+    // ── Get cached discount usage immediately ──
+    _globalDiscountAlreadyUsed = _vetService.getCachedGlobalDiscountUsage();
+
     _loadReviews();
     _calcDistance();
+    _checkDiscountUsage();
     FacebookEventService.logViewContent(
       contentId: widget.vet['id']?.toString() ?? '',
       contentType: 'vet',
     );
+  }
+
+  Future<void> _checkDiscountUsage() async {
+    try {
+      final used = await _vetService.hasUserUsedGlobalDiscount();
+      if (mounted) {
+        setState(() {
+          _globalDiscountAlreadyUsed = used;
+        });
+      }
+    } catch (_) {
+      // Best effort - keep cached value
+    }
   }
 
   /// Compute the distance between the user and this vet using lat/lng,
@@ -137,6 +157,40 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
     final globalDiscount = GlobalDiscount.tryParse(
         _vet['globalDiscount'] as Map<String, dynamic>?);
 
+    // Calculate merged discount
+    double totalDiscountedPrice = consultationFee != null
+        ? (consultationFee is num ? consultationFee.toDouble() : double.tryParse(consultationFee.toString()) ?? 0.0)
+        : 75.0;
+
+    final isEmergencyTime = THelperFunctions.isEmergencyTime();
+
+    if (totalDiscountedPrice > 0 && !isEmergencyTime) {
+      double totalDiscountAmount = 0;
+
+      // 1. Vet-specific discount
+      final vetDiscountData = _vet['discount'];
+      if (vetDiscountData != null) {
+        final vd = VetDiscount.fromJson(vetDiscountData is Map<String, dynamic> ? vetDiscountData : {});
+        if (vd.isActive) {
+          totalDiscountAmount += vd.calculateDiscount(totalDiscountedPrice);
+        }
+      }
+
+      // 2. Global discount (only if not used)
+      if (globalDiscount != null && !_globalDiscountAlreadyUsed) {
+        if (globalDiscount.type == 'percentage') {
+          totalDiscountAmount += totalDiscountedPrice * (globalDiscount.value / 100);
+        } else {
+          totalDiscountAmount += globalDiscount.value;
+        }
+      }
+      
+      totalDiscountedPrice = (totalDiscountedPrice - totalDiscountAmount).clamp(0, double.infinity);
+    } else if (isEmergencyTime) {
+      // If it's emergency time, use emergency price and NO discounts
+      totalDiscountedPrice = emergencyPrice ?? totalDiscountedPrice;
+    }
+
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: _buildAppBar(context, isDark, textColor),
@@ -149,8 +203,8 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
               VetHeader(vet: _vet),
               const SizedBox(height: 12),
               VetAvailabilityStatus(vet: _vet),
-              // ── Global discount banner (only when active) ─────────
-              if (globalDiscount != null) ...[
+              // ── Global discount banner (only when active and NOT used) ─────────
+              if (globalDiscount != null && !_globalDiscountAlreadyUsed) ...[
                 const SizedBox(height: 16),
                 VetGlobalDiscountBanner(discount: globalDiscount),
               ],
@@ -173,7 +227,8 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
                 price: consultationPrice,
                 emergencyPrice: emergencyPrice,
                 hasEmergency: hasEmergency,
-                globalDiscount: globalDiscount,
+                discountedPrice: totalDiscountedPrice,
+                vet: _vet,
               ),
               const SizedBox(height: 24),
               // Reviews Section

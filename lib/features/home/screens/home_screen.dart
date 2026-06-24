@@ -42,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isGuestUser = false;
   /// App-level global discount fetched alongside the vets list.
   Map<String, dynamic>? _globalDiscount;
+  bool _globalDiscountAlreadyUsed = false;
 
   @override
   void initState() {
@@ -52,6 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
     Get.lazyPut<CartController>(() => CartController(), fenix: true);
     Get.lazyPut<StoreController>(() => StoreController(), fenix: true);
 
+    // ── Get cached discount usage immediately ──
+    _globalDiscountAlreadyUsed = _vetService.getCachedGlobalDiscountUsage();
+
     // ── Show cached discount immediately (before any API call) ──
     GlobalDiscountCache.load().then((cached) {
       if (mounted && cached != null) {
@@ -60,13 +64,32 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     _initializeHomeScreen();
+    _checkDiscountUsage();
 
-    // Re-sort whenever GPS delivers (or updates) the position
-    _locationService.currentPositionRx.listen((_) {
-      if (mounted && nearbyVets.isNotEmpty) {
-        _sortAndUpdateNearbyVets(nearbyVets);
+    // Re-sort and RE-LOAD whenever GPS delivers the first position
+    // This ensures server-side distance calculation is triggered with real coordinates
+    _locationService.currentPositionRx.listen((pos) {
+      if (mounted) {
+        if (pos != null && nearbyVets.isEmpty) {
+          _loadNearbyVets();
+        } else if (mounted && nearbyVets.isNotEmpty) {
+          _sortAndUpdateNearbyVets(nearbyVets);
+        }
       }
     });
+  }
+
+  Future<void> _checkDiscountUsage() async {
+    try {
+      final used = await _vetService.hasUserUsedGlobalDiscount();
+      if (mounted) {
+        setState(() {
+          _globalDiscountAlreadyUsed = used;
+        });
+      }
+    } catch (_) {
+      // Best effort - keep cached value
+    }
   }
 
   /// Initialize home screen with location and vets
@@ -145,11 +168,15 @@ class _HomeScreenState extends State<HomeScreen> {
       final withDist = vets.map((vet) {
         final lat = vet.latitude;
         final lng = vet.longitude;
-        if (lat == null || lng == null) return (vet: vet, meters: double.maxFinite);
+        
+        // If we don't have coordinates, we can't calculate distance here, 
+        // so we use the server's distance or infinity for sorting
+        if (lat == null || lng == null) {
+          return (vet: vet, meters: double.maxFinite);
+        }
+
         final meters = Geolocator.distanceBetween(pos.latitude, pos.longitude, lat, lng);
-        final formatted = meters < 1000
-            ? '${meters.round()} م'
-            : '${(meters / 1000).toStringAsFixed(1)} كم';
+        final formatted = _locationService.formatDistance(meters);
         return (vet: vet.copyWith(distance: formatted), meters: meters);
       }).toList();
 
@@ -406,7 +433,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 24),
 
                         // ── Global Discount Banner (app-wide, before rewards) ──
-                        if (_globalDiscount != null) ...[
+                        if (_globalDiscount != null && !_globalDiscountAlreadyUsed) ...[
                           HomeGlobalDiscountBanner(
                               discountData: _globalDiscount!),
                           const SizedBox(height: 20),
@@ -904,10 +931,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 // Distance badge
-                if (vet.distance.isNotEmpty &&
-                    vet.distance != 'unknown' &&
-                    _locationService.isPermissionGranted)
-                  Positioned(
+                Obx(() {
+                  final pos = _locationService.currentPositionRx.value;
+                  String displayDistance = vet.distance;
+
+                  if (pos != null && vet.latitude != null && vet.longitude != null) {
+                    final meters = Geolocator.distanceBetween(
+                      pos.latitude,
+                      pos.longitude,
+                      vet.latitude!,
+                      vet.longitude!,
+                    );
+                    displayDistance = _locationService.formatDistance(meters);
+                  }
+
+                  if (displayDistance.isEmpty || 
+                      displayDistance == 'unknown' || 
+                      !_locationService.isPermissionGranted) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Positioned(
                     bottom: 8,
                     right: 8,
                     child: Container(
@@ -927,7 +971,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            vet.distance,
+                            displayDistance,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 11,
@@ -937,7 +981,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-                  ),
+                  );
+                }),
               ],
             ),
             // Info Section

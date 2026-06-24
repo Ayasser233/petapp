@@ -363,6 +363,48 @@ class ProfileController extends GetxController {
     );
   }
 
+  /// Change user data (fullName, photo) using /users/profile
+  Future<bool> changeMyData({
+    required String fullName,
+    String? photoPath,
+  }) async {
+    try {
+      _isUpdating.value = true;
+
+      // Validate name
+      if (fullName.trim().isEmpty) {
+        _showValidationErrors({'name': 'Name is required'});
+        return false;
+      }
+
+      // Split fullName into firstName and lastName for the API
+      final nameParts = fullName.trim().split(' ');
+      final firstName = nameParts.isNotEmpty ? nameParts.first : '';
+      final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+
+      final updatedProfile = await _profileRepository.changeMyData(
+        firstName: firstName,
+        lastName: lastName,
+        photoPath: photoPath,
+      );
+
+      _userProfile.value = updatedProfile;
+
+      Get.snackbar(
+        'Success',
+        'Profile updated successfully',
+        backgroundColor: Get.theme.primaryColor,
+        colorText: Get.theme.colorScheme.onPrimary,
+      );
+
+      return true;
+    } catch (e) {
+      return false;
+    } finally {
+      _isUpdating.value = false;
+    }
+  }
+
   /// Validate profile data without updating (for form validation)
   Map<String, String> validateProfileFields({
     String? firstName,

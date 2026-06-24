@@ -394,17 +394,26 @@ class AuthCubit extends Cubit<AuthState> {
       await _tokenService.saveRefreshToken(response.refreshToken);
 
       debugPrint('✅ Google login successful, tokens saved');
-      debugPrint('👤 User: ${user.email}');
-      
-      emit(AuthGoogleLoginSuccess(
-        accessToken: response.accessToken,
-        user: user,
-      ));
+      debugPrint('👤 User: ${user.email}, Phone: ${user.phone}');
+
+      // Check if profile needs completion (no name or no phone)
+      if (user.phone.isEmpty || user.name.isEmpty || user.name.toLowerCase() == 'user') {
+        debugPrint('⚠️ Profile incomplete, emitting AuthNeedsProfileCompletion');
+        emit(AuthNeedsProfileCompletion(
+          accessToken: response.accessToken,
+          user: user,
+        ));
+      } else {
+        emit(AuthGoogleLoginSuccess(
+          accessToken: response.accessToken,
+          user: user,
+        ));
+      }
     } on DioException catch (e) {
       debugPrint('❌ Google login failed: ${e.message}');
       debugPrint('📊 Status code: ${e.response?.statusCode}');
       debugPrint('📄 Response data: ${e.response?.data}');
-      
+
       // Provide more context for specific errors
       String errorMessage = _formatDioError(e);
       if (e.response?.statusCode == 422) {
@@ -414,7 +423,7 @@ class AuthCubit extends Cubit<AuthState> {
         }
         debugPrint('⚠️  Backend validation error: $errorMessage');
       }
-      
+
       emit(AuthFailure(
         message: errorMessage,
         errorCode: e.response?.statusCode,
@@ -437,10 +446,20 @@ class AuthCubit extends Cubit<AuthState> {
       await _tokenService.saveRefreshToken(response.refreshToken);
 
       debugPrint('✅ Apple login successful, tokens saved');
-      emit(AuthAppleLoginSuccess(
-        accessToken: response.accessToken,
-        user: user,
-      ));
+      debugPrint('👤 User: ${user.email}, Phone: ${user.phone}');
+
+      // Check if profile needs completion
+      if (user.phone.isEmpty || user.name.isEmpty || user.name.toLowerCase() == 'user') {
+        emit(AuthNeedsProfileCompletion(
+          accessToken: response.accessToken,
+          user: user,
+        ));
+      } else {
+        emit(AuthAppleLoginSuccess(
+          accessToken: response.accessToken,
+          user: user,
+        ));
+      }
     } on DioException catch (e) {
       debugPrint('❌ Apple login failed: ${e.message}');
       debugPrint('📊 Status code: ${e.response?.statusCode}');
@@ -462,6 +481,22 @@ class AuthCubit extends Cubit<AuthState> {
     } catch (e) {
       debugPrint('❌ Apple login unexpected error: $e');
       emit(const AuthFailure(message: 'An unexpected error occurred during Apple sign-in'));
+    }
+  }
+
+  Future<void> completeProfile(String name, String phone) async {
+    emit(AuthLoading());
+    try {
+      final user = await _authRepository.completeProfile(name, phone);
+      emit(AuthProfileUpdateSuccess(userProfile: user));
+    } on DioException catch (e) {
+      emit(AuthFailure(
+        message: _formatDioError(e),
+        errorCode: e.response?.statusCode,
+        fieldErrors: _extractFieldErrors(e),
+      ));
+    } catch (e) {
+      emit(const AuthFailure(message: 'An unexpected error occurred during profile completion'));
     }
   }
 }

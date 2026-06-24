@@ -121,6 +121,40 @@ class ProfileRepository {
     });
   }
 
+  /// Change user data (firstName, lastName, photo) using /users/profile
+  Future<UserModel> changeMyData({
+    required String firstName,
+    required String lastName,
+    String? photoPath,
+  }) async {
+    // Check authentication
+    final authService = Get.find<AuthService>();
+    if (authService.authStatus != AuthStatus.authenticated) {
+      throw Exception('Authentication required to update profile');
+    }
+
+    try {
+      final response = await _apiClient.changeProfileData(
+        firstName: firstName,
+        lastName: lastName,
+        photoPath: photoPath,
+      );
+
+      final body = response.data;
+      final userData = (body is Map && body['data'] is Map)
+          ? body['data'] as Map<String, dynamic>
+          : (body is Map && body['user'] is Map)
+              ? body['user'] as Map<String, dynamic>
+              : (body is Map<String, dynamic> ? body : <String, dynamic>{});
+
+      return UserModel.fromJson(userData);
+    } catch (error) {
+      await _handleAuthError(error);
+      ErrorHandlerService.instance.handleError(error);
+      rethrow;
+    }
+  }
+
   /// Update multiple profile fields at once
   Future<UserModel> updateMultipleFields({
     String? firstName,

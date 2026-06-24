@@ -5,7 +5,6 @@ import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
-import 'package:petapp/features/home/widgets/home_global_discount_banner.dart';
 import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/pet/models/pet_model.dart';
 import 'package:petapp/features/appointments/domain/usecases/create_appointment_usecase.dart';
@@ -54,6 +53,10 @@ class VetBookingController extends GetxController {
   final RxBool isPointsValid = false.obs;
   final Rxn<Map<String, dynamic>> pointsDetails = Rxn<Map<String, dynamic>>();
 
+  // Global discount state
+  final RxBool globalDiscountAlreadyUsed =
+      VetService().getCachedGlobalDiscountUsage().obs;
+
   // Pet controller
   late final PetController petController;
 
@@ -73,6 +76,18 @@ class VetBookingController extends GetxController {
     _getVetIdFromArguments();
     _fetchTimeSlots();
     _fetchUserPointsBalance();
+    _checkGlobalDiscountUsage();
+  }
+
+
+  /// Check if the current user has already used the global discount
+  Future<void> _checkGlobalDiscountUsage() async {
+    try {
+      final used = await _vetService.hasUserUsedGlobalDiscount();
+      globalDiscountAlreadyUsed.value = used;
+    } catch (e) {
+      // Silently fail - use existing value (initialized from cache)
+    }
   }
 
   /// Fetch user's points balance
@@ -408,6 +423,12 @@ class VetBookingController extends GetxController {
           // Store the appointment ID as booking reference
           bookingReference.value = appointment.id;
 
+          // Mark global discount as used if one was active
+          final rawGd = args?['vet']?['globalDiscount'];
+          if (rawGd is Map<String, dynamic> && rawGd['isActive'] == true) {
+            _vetService.markGlobalDiscountAsUsed();
+          }
+
           _showSuccessMessage();
 
           // Mark this as a meaningful positive action for review prompting
@@ -507,25 +528,13 @@ class VetBookingScreen extends StatelessWidget {
   /// Build booking view
   Widget _buildBookingView(
       BuildContext context, VetBookingController controller) {
-    // Extract globalDiscount from the vet arguments (same data passed to detail screen)
-    final args = Get.arguments as Map<String, dynamic>?;
-    final vet = args?['vet'] as Map<String, dynamic>?;
-    final rawGd = vet?['globalDiscount'];
-    final globalDiscount = (rawGd is Map<String, dynamic> &&
-            rawGd['isActive'] == true)
-        ? rawGd
-        : null;
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Global discount banner (shown when active) ──────
-          if (globalDiscount != null) ...[
-            HomeGlobalDiscountBanner(discountData: globalDiscount),
-            const SizedBox(height: 20),
-          ],
+          // Global discount banner is now shown inside the booking summary card
+          // (removed duplicate banner from here to avoid duplication)
 
           // Booking summary
           VetBookingSummary(controller: controller),

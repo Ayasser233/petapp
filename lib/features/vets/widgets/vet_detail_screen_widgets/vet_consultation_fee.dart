@@ -2,21 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/utils/helper_functions.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
-import 'vet_global_discount_banner.dart';
 
 class VetConsultationFee extends StatelessWidget {
   final String price;
   final double? emergencyPrice;
   final bool hasEmergency;
-  /// Pass the parsed [GlobalDiscount] to show discounted pricing.
-  final GlobalDiscount? globalDiscount;
+  /// The final discounted price to display. If null, shows the [price] as is.
+  final double? discountedPrice;
+  final Map<String, dynamic>? vet;
 
   const VetConsultationFee({
     super.key,
     required this.price,
     this.emergencyPrice,
     this.hasEmergency = false,
-    this.globalDiscount,
+    this.discountedPrice,
+    this.vet,
   });
 
   @override
@@ -25,22 +26,22 @@ class VetConsultationFee extends StatelessWidget {
     final textColor = isDark ? Colors.white : Colors.black;
     final subTextColor = isDark ? Colors.grey[400] : Colors.grey[700];
 
-    // Extract numeric value from price string (e.g., "75.00 EGP" -> 75)
+    // Extract numeric value from price string
     final priceValue = price.replaceAll(RegExp(r'[^0-9.]'), '').trim();
     final originalFee = double.tryParse(priceValue) ?? 0;
 
-    // Compute discounted fee when a global discount exists
-    final hasGlobalDiscount = globalDiscount != null;
-    final discountedFee =
-        hasGlobalDiscount ? globalDiscount!.discountedPrice(originalFee) : null;
+    final isEmergencyTime = THelperFunctions.isEmergencyTime();
+    final hasDiscount = discountedPrice != null && discountedPrice! < originalFee && !isEmergencyTime;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.orange.withValues(alpha: isDark ? 0.15 : 0.1),
+        color: isEmergencyTime 
+          ? Colors.red.withValues(alpha: isDark ? 0.15 : 0.08)
+          : AppColors.orange.withValues(alpha: isDark ? 0.15 : 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: AppColors.orange.withValues(alpha: 0.3),
+          color: isEmergencyTime ? Colors.red.withValues(alpha: 0.3) : AppColors.orange.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -53,16 +54,20 @@ class VetConsultationFee extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppLocalizations.of(context).consultationFee,
+                      isEmergencyTime 
+                        ? AppLocalizations.of(context).emergencyFee
+                        : AppLocalizations.of(context).consultationFee,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: textColor,
+                            color: isEmergencyTime ? Colors.red : textColor,
                             fontWeight: FontWeight.bold,
                           ),
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      AppLocalizations.of(context).initialExaminationFee,
+                      isEmergencyTime
+                        ? 'Active during emergency hours (10PM - 7AM)'
+                        : AppLocalizations.of(context).initialExaminationFee,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: subTextColor,
                           ),
@@ -73,90 +78,41 @@ class VetConsultationFee extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              // Price column: shows original (struck-through) + discounted
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  if (hasGlobalDiscount) ...[
-                    // Original price — struck through
+                  if (hasDiscount) ...[
                     Text(
                       price,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             color: Colors.grey,
                             decoration: TextDecoration.lineThrough,
-                            decorationColor: Colors.grey,
                           ),
                     ),
                     const SizedBox(height: 2),
-                    // Discounted price
                     Text(
-                      '${discountedFee!.toStringAsFixed(0)} EGP',
+                      '${discountedPrice!.toStringAsFixed(0)} EGP',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                             color: const Color(0xFF2E7D32),
                             fontWeight: FontWeight.bold,
                           ),
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ] else
-                    // Normal price — no discount
                     Text(
-                      price,
+                      isEmergencyTime && discountedPrice != null
+                        ? '${discountedPrice!.toStringAsFixed(0)} EGP'
+                        : price,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: AppColors.orange,
+                            color: isEmergencyTime ? Colors.red : AppColors.orange,
                             fontWeight: FontWeight.bold,
                           ),
-                      overflow: TextOverflow.ellipsis,
                     ),
                 ],
               ),
             ],
           ),
 
-          // ── "You save X EGP" savings chip ──────────────────────
-          if (hasGlobalDiscount) ...[
-            const SizedBox(height: 10),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2E7D32).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: const Color(0xFF2E7D32).withValues(alpha: 0.3),
-                ),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.savings_rounded,
-                      color: Color(0xFF2E7D32), size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: const Color(0xFF2E7D32),
-                              fontWeight: FontWeight.w600,
-                            ),
-                        children: [
-                          const TextSpan(text: 'You save '),
-                          TextSpan(
-                            text:
-                                '${(originalFee - discountedFee!).toStringAsFixed(0)} EGP',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const TextSpan(
-                              text: ' with Aleefy\'s exclusive discount'),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+          // (Removed "You save with Aleefy's exclusive discount" banner)
 
           // ── Emergency Fee Row ───────────────────────────────────
           if (hasEmergency && emergencyPrice != null) ...[
@@ -215,13 +171,13 @@ class VetConsultationFee extends StatelessWidget {
                       ),
                       const TextSpan(text: ' '),
                       TextSpan(
-                        // Points are based on the discounted price when applicable
-                        text: hasGlobalDiscount
-                            ? discountedFee!.toStringAsFixed(0)
+                        // Points are based on the final price (which is the emergency fee during emergency time)
+                        text: discountedPrice != null
+                            ? discountedPrice!.toStringAsFixed(0)
                             : (priceValue.isNotEmpty ? priceValue : '75'),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                          color: isEmergencyTime ? Colors.red : Colors.green,
                         ),
                       ),
                       const TextSpan(text: ' '),

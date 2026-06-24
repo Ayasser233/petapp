@@ -137,6 +137,20 @@ class AuthAppleLoginSuccess extends AuthState {
   List<Object?> get props => [accessToken, user];
 }
 
+// User logged in with social but needs to complete name/phone
+class AuthNeedsProfileCompletion extends AuthState {
+  final String accessToken;
+  final UserModel user;
+
+  const AuthNeedsProfileCompletion({
+    required this.accessToken,
+    required this.user,
+  });
+
+  @override
+  List<Object?> get props => [accessToken, user];
+}
+
 // Logout was successful
 class AuthLogoutSuccess extends AuthState {}
 

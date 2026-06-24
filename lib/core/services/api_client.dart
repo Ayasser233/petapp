@@ -80,6 +80,11 @@ class ApiClient {
       onError: (DioException error, handler) async {
         // Handle 401 Unauthorized - Token expired
         if (error.response?.statusCode == 401) {
+          // If this is a logout request, don't try to refresh the token
+          if (error.requestOptions.path.contains(ApiConstants.logoutEndpoint)) {
+            return handler.next(error);
+          }
+
           // Try to refresh the token
           final newToken = await _refreshAccessToken();
 
@@ -305,7 +310,7 @@ class ApiClient {
   Future<Response> refreshToken(String refreshToken) async {
     try {
       final response = await _dio.post(ApiConstants.refreshTokenEndpoint,
-          data: {'refreshToken': refreshToken});
+          data: {'refresh_token': refreshToken});
       await _handleTokenResponse(response);
       return response;
     } catch (e) {
@@ -321,6 +326,18 @@ class ApiClient {
       return response;
     } catch (e) {
       await tokenService.clearAllTokens(); // Clear tokens even if logout fails
+      
+      // If the error is 401 (Unauthorized), the session is already invalid on the server.
+      // We can fail silently in this case to avoid cluttering logs during logout.
+      if (e is DioException && e.response?.statusCode == 401) {
+        debugPrint('Logout: Session already invalid (401), proceeding with local cleanup.');
+        return Response(
+          requestOptions: e.requestOptions,
+          statusCode: 401,
+          data: e.response?.data,
+        );
+      }
+
       ErrorHandlerService.instance.handleError(e);
       rethrow;
     }
@@ -348,6 +365,43 @@ class ApiClient {
       final endpoint = ApiConstants.updateProfileEndpoint(userId);
 
       final response = await _dio.patch(endpoint, data: userData);
+
+      return response;
+    } catch (e) {
+      ErrorHandlerService.instance.handleError(e);
+      rethrow;
+    }
+  }
+
+  Future<Response> changeProfileData({
+    required String firstName,
+    required String lastName,
+    String? photoPath,
+  }) async {
+    try {
+      final Map<String, dynamic> data = {
+        'firstName': firstName,
+        'lastName': lastName,
+      };
+
+      dynamic requestData;
+
+      if (photoPath != null && photoPath.isNotEmpty) {
+        requestData = FormData.fromMap({
+          ...data,
+          'photo': await MultipartFile.fromFile(
+            photoPath,
+            filename: photoPath.split('/').last,
+          ),
+        });
+      } else {
+        requestData = FormData.fromMap(data);
+      }
+
+      final response = await _dio.patch(
+        ApiConstants.changeMyDataEndpoint,
+        data: requestData,
+      );
 
       return response;
     } catch (e) {
@@ -520,35 +574,24 @@ class ApiClient {
 
       final response = await refreshDio.post(
         ApiConstants.refreshTokenEndpoint,
-        data: {'refreshToken': refreshTokenValue},
+        data: {'refresh_token': refreshTokenValue},
       );
 
       if (response.statusCode == 200 && response.data is Map<String, dynamic>) {
-        final topLevel = response.data as Map<String, dynamic>;
-        // Tokens may be at the top level or nested inside a 'data' key
-        final data = (topLevel['data'] is Map<String, dynamic>)
-            ? topLevel['data'] as Map<String, dynamic>
-            : topLevel;
-        final newAccessToken = data['accessToken'] ?? data['access_token'];
-        final newRefreshToken = data['refreshToken'] ?? data['refresh_token'];
-
-        if (newAccessToken != null) {
-          await tokenService.saveToken(newAccessToken.toString());
-
-          if (newRefreshToken != null) {
-            await tokenService.saveRefreshToken(newRefreshToken.toString());
-          }
-
+        await _handleTokenResponse(response);
+        
+        final newToken = await tokenService.getToken();
+        if (newToken != null) {
           debugPrint('✅ Token refreshed successfully');
 
           // Resolve all pending requests with the new token
           for (var callback in _pendingRequests) {
-            callback(newAccessToken.toString());
+            callback(newToken);
           }
           _pendingRequests.clear();
 
           _isRefreshing = false;
-          return newAccessToken.toString();
+          return newToken;
         }
       }
 

@@ -150,9 +150,7 @@ class AuthService extends GetxService {
           _apiClient ??= Get.find<ApiClient>();
           await _apiClient!.logout();
         } catch (apiError) {
-          // Continue with local logout even if API call fails
-          print(
-              '⚠️ Logout API call failed, continuing with local logout: $apiError');
+          // Silent local cleanup is fine here
         }
       }
 
