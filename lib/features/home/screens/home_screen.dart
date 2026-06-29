@@ -15,7 +15,6 @@ import 'package:petapp/core/widgets/rewards_card.dart';
 import 'package:petapp/di/service_locator.dart';
 import 'package:petapp/features/store/controllers/cart_controller.dart';
 import 'package:petapp/features/store/controllers/store_controller.dart';
-import 'package:petapp/features/store/data/mock_products.dart';
 import 'package:petapp/features/store/widgets/product_card.dart';
 import 'package:petapp/core/services/global_discount_cache.dart';
 import 'package:petapp/features/home/widgets/home_global_discount_banner.dart';
@@ -793,71 +792,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Compact service item for horizontal layout
-  Widget _buildCompactServiceItem(
-      BuildContext context, String title, String icon, bool isDark,
-      {VoidCallback? onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 110,
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        decoration: BoxDecoration(
-          color: isDark ? AppColors.lightblack : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            if (!isDark)
-              BoxShadow(
-                color: Colors.grey.withValues(alpha: 0.2),
-                blurRadius: 8,
-                spreadRadius: 1,
-                offset: const Offset(0, 2),
-              ),
-          ],
-          border: !isDark
-              ? Border.all(
-                  color: Colors.grey.withValues(alpha: 0.1), width: 1.0)
-              : null,
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Image container
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: !isDark
-                  ? BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.orange.withValues(alpha: 0.1),
-                    )
-                  : null,
-              child: Image.asset(
-                icon,
-                width: 45,
-                height: 45,
-              ),
-            ),
-            const SizedBox(height: 6),
-            // Title text
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Text(
-                title,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white : Colors.black87,
-                      fontSize: 11,
-                    ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
   // Build nearby vet card
   Widget _buildNearbyCard(
     BuildContext context, {
@@ -1320,36 +1254,33 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildAleefyPicks(BuildContext context, bool isDark) {
     final cartCtrl = Get.find<CartController>();
     final storeCtrl = Get.find<StoreController>();
-    final picks = MockProducts.all.take(5).toList();
 
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      itemCount: picks.length,
-      itemBuilder: (ctx, i) {
-        final product = picks[i];
-        return Obx(() {
-          // find live state from storeCtrl (for favorite toggle)
-          final liveProduct = storeCtrl.filteredProducts
-              .cast<dynamic>()
-              .firstWhere(
-                (p) => p.id == product.id,
-                orElse: () => product,
-              );
+    return Obx(() {
+      final picks = storeCtrl.products.take(5).toList();
+      if (picks.isEmpty) {
+        return const SizedBox(
+          height: 200,
+          child: Center(child: CircularProgressIndicator(color: AppColors.orange)),
+        );
+      }
+      return ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: picks.length,
+        itemBuilder: (ctx, i) {
+          final product = picks[i];
           return Padding(
             padding: EdgeInsets.only(right: i == picks.length - 1 ? 0 : 12),
-            child: ProductCard(
-              product: liveProduct,
-              isFavorite: liveProduct.isFavorite,
+            child: Obx(() => ProductCard(
+              product: product,
               isInCart: cartCtrl.isInCart(product.id),
-              onAddToCart: () => cartCtrl.addProduct(product),
-              onFavoriteToggle: () => storeCtrl.toggleFavorite(product.id),
-              onTap: () => Get.toNamed(AppRoutes.store),
+              onAddToCart: () => Get.toNamed(AppRoutes.productDetail, arguments: product.id),
+              onTap: () => Get.toNamed(AppRoutes.productDetail, arguments: product.id),
               width: 165,
-            ),
+            )),
           );
-        });
-      },
-    );
+        },
+      );
+    });
   }
 
   /// Load user rewards data from Points API

@@ -2296,6 +2296,192 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['additionalPetInfo'] ??
       'Any additional information about your pet';
 
+  // ── Store feature strings ────────────────────────────────────────────────
+  String get aleefyStore =>
+      _localizedValues[locale.languageCode]?['aleefyStore'] ?? 'Aleefy Store';
+  String get noProductsFound =>
+      _localizedValues[locale.languageCode]?['noProductsFound'] ?? 'No products found';
+  String get failedToLoadProducts =>
+      _localizedValues[locale.languageCode]?['failedToLoadProducts'] ?? 'Failed to load products';
+  String get myCart =>
+      _localizedValues[locale.languageCode]?['myCart'] ?? 'My Cart';
+  String get cartEmpty =>
+      _localizedValues[locale.languageCode]?['cartEmpty'] ?? 'Cart empty ...';
+  String get cartEmptyMessage =>
+      _localizedValues[locale.languageCode]?['cartEmptyMessage'] ?? 'Add products from the store to get started';
+  String get browseStore =>
+      _localizedValues[locale.languageCode]?['browseStore'] ?? 'Browse Store';
+  String get delivery =>
+      _localizedValues[locale.languageCode]?['delivery'] ?? 'Delivery';
+  String get selectDeliveryMethod =>
+      _localizedValues[locale.languageCode]?['selectDeliveryMethod'] ?? 'Select delivery method';
+  String get shipping =>
+      _localizedValues[locale.languageCode]?['shipping'] ?? 'Shipping';
+  String get deliveredToAddress =>
+      _localizedValues[locale.languageCode]?['deliveredToAddress'] ?? 'Delivered to your address';
+  String get pickUp =>
+      _localizedValues[locale.languageCode]?['pickUp'] ?? 'Pick Up';
+  String get pickUpFromStore =>
+      _localizedValues[locale.languageCode]?['pickUpFromStore'] ?? 'Pick up your order from the store';
+  String get noDeliveryAddress =>
+      _localizedValues[locale.languageCode]?['noDeliveryAddress'] ?? 'No delivery address yet';
+  String get addFirstAddressMessage =>
+      _localizedValues[locale.languageCode]?['addFirstAddressMessage'] ?? "Add your first address so we know where to deliver your pet's goodies";
+  String get addAddress =>
+      _localizedValues[locale.languageCode]?['addAddress'] ?? 'Add Address';
+  String get addAnotherAddress =>
+      _localizedValues[locale.languageCode]?['addAnotherAddress'] ?? 'Add another address?';
+  String get saveAddress =>
+      _localizedValues[locale.languageCode]?['saveAddress'] ?? 'Save Address';
+  String get country =>
+      _localizedValues[locale.languageCode]?['country'] ?? 'Country';
+  String get city =>
+      _localizedValues[locale.languageCode]?['city'] ?? 'City';
+  String get addressLine1 =>
+      _localizedValues[locale.languageCode]?['addressLine1'] ?? 'Address Line 1';
+  String get addressLine2Optional =>
+      _localizedValues[locale.languageCode]?['addressLine2Optional'] ?? 'Address Line 2 (optional)';
+  String get postalCodeOptional =>
+      _localizedValues[locale.languageCode]?['postalCodeOptional'] ?? 'Postal Code (optional)';
+  String get fieldRequired =>
+      _localizedValues[locale.languageCode]?['fieldRequired'] ?? 'This field is required';
+  String get scheduleOrder =>
+      _localizedValues[locale.languageCode]?['scheduleOrder'] ?? 'Schedule Order';
+  String get whenDelivered =>
+      _localizedValues[locale.languageCode]?['whenDelivered'] ?? 'When would you like your order delivered?';
+  String get schedule =>
+      _localizedValues[locale.languageCode]?['schedule'] ?? 'Schedule';
+  String get availableHours =>
+      _localizedValues[locale.languageCode]?['availableHours'] ?? 'Available Hours';
+  String get availableDate =>
+      _localizedValues[locale.languageCode]?['availableDate'] ?? 'Available Date';
+  String get noSlotsToday =>
+      _localizedValues[locale.languageCode]?['noSlotsToday'] ?? 'No slots available for today.';
+  String get checkout =>
+      _localizedValues[locale.languageCode]?['checkout'] ?? 'Checkout';
+  String get deliverTo =>
+      _localizedValues[locale.languageCode]?['deliverTo'] ?? 'Deliver to';
+  String get deliveryTime =>
+      _localizedValues[locale.languageCode]?['deliveryTime'] ?? 'Delivery time';
+  String get cashOnDelivery =>
+      _localizedValues[locale.languageCode]?['cashOnDelivery'] ?? 'Cash On Delivery';
+  String get vodafoneCash =>
+      _localizedValues[locale.languageCode]?['vodafoneCash'] ?? 'Vodafone Cash';
+  String get instaPay =>
+      _localizedValues[locale.languageCode]?['instaPay'] ?? 'InstaPay';
+  String get subtotal =>
+      _localizedValues[locale.languageCode]?['subtotal'] ?? 'Subtotal';
+  String get shippingFee =>
+      _localizedValues[locale.languageCode]?['shippingFee'] ?? 'Shipping Fee';
+  String get totalAmount =>
+      _localizedValues[locale.languageCode]?['totalAmount'] ?? 'Total Amount';
+  String get inclusiveOfVat =>
+      _localizedValues[locale.languageCode]?['inclusiveOfVat'] ?? 'Inclusive Of VAT';
+  String get promoCodeHint =>
+      _localizedValues[locale.languageCode]?['promoCodeHint'] ?? 'Do you have a promo code?';
+  String get orderNotes =>
+      _localizedValues[locale.languageCode]?['orderNotes'] ?? 'Order Notes';
+  String get payNow =>
+      _localizedValues[locale.languageCode]?['payNow'] ?? 'Pay Now';
+  String get orderPlaced =>
+      _localizedValues[locale.languageCode]?['orderPlaced'] ?? 'Order Placed!';
+  String get pricesChanged =>
+      _localizedValues[locale.languageCode]?['pricesChanged'] ?? 'Some prices changed since you added items to cart.';
+  String get uploadPaymentProof =>
+      _localizedValues[locale.languageCode]?['uploadPaymentProof'] ?? 'Upload Payment Proof';
+  String get trackOrder =>
+      _localizedValues[locale.languageCode]?['trackOrder'] ?? 'Track Order';
+  String get backToHome =>
+      _localizedValues[locale.languageCode]?['backToHome'] ?? 'Back to Home';
+  String get myOrders =>
+      _localizedValues[locale.languageCode]?['myOrders'] ?? 'My Orders';
+  String get noOrdersYet =>
+      _localizedValues[locale.languageCode]?['noOrdersYet'] ?? 'No orders yet';
+  String get orderDetail =>
+      _localizedValues[locale.languageCode]?['orderDetail'] ?? 'Order Detail';
+  String get shippingAddress =>
+      _localizedValues[locale.languageCode]?['shippingAddress'] ?? 'Shipping Address';
+  String get track =>
+      _localizedValues[locale.languageCode]?['track'] ?? 'Track';
+  String get uploadProof =>
+      _localizedValues[locale.languageCode]?['uploadProof'] ?? 'Upload Proof';
+  String get confirmDelivery =>
+      _localizedValues[locale.languageCode]?['confirmDelivery'] ?? 'Confirm Delivery';
+  String get orderNotFound =>
+      _localizedValues[locale.languageCode]?['orderNotFound'] ?? 'Order not found';
+  String get orderTracking =>
+      _localizedValues[locale.languageCode]?['orderTracking'] ?? 'Order Tracking';
+  String get noTrackingInfo =>
+      _localizedValues[locale.languageCode]?['noTrackingInfo'] ?? 'No tracking information yet.';
+  String get paymentProof =>
+      _localizedValues[locale.languageCode]?['paymentProof'] ?? 'Payment Proof';
+  String get uploadPaymentScreenshots =>
+      _localizedValues[locale.languageCode]?['uploadPaymentScreenshots'] ?? 'Upload your payment screenshot(s)';
+  String get oneToFiveImages =>
+      _localizedValues[locale.languageCode]?['oneToFiveImages'] ?? '1 to 5 images';
+  String get maxFiveImages =>
+      _localizedValues[locale.languageCode]?['maxFiveImages'] ?? 'You can upload up to 5 images.';
+  String get submitProof =>
+      _localizedValues[locale.languageCode]?['submitProof'] ?? 'Submit Proof';
+  String get options =>
+      _localizedValues[locale.languageCode]?['options'] ?? 'Options';
+  String get relatedProducts =>
+      _localizedValues[locale.languageCode]?['relatedProducts'] ?? 'Related Products';
+  String get inStock =>
+      _localizedValues[locale.languageCode]?['inStock'] ?? 'In Stock';
+  String get outOfStock =>
+      _localizedValues[locale.languageCode]?['outOfStock'] ?? 'Out of Stock';
+  String get addToCart =>
+      _localizedValues[locale.languageCode]?['addToCart'] ?? 'Add to Cart';
+  String get addedToCart =>
+      _localizedValues[locale.languageCode]?['addedToCart'] ?? 'Added to Cart ✓';
+  String get readMore =>
+      _localizedValues[locale.languageCode]?['readMore'] ?? 'Read more';
+  String get showLess =>
+      _localizedValues[locale.languageCode]?['showLess'] ?? 'Show less';
+  String get productNotFound =>
+      _localizedValues[locale.languageCode]?['productNotFound'] ?? 'Product not found';
+  String get yourRating =>
+      _localizedValues[locale.languageCode]?['yourRating'] ?? 'Your Rating';
+  String get reviewTitle =>
+      _localizedValues[locale.languageCode]?['reviewTitle'] ?? 'Review Title';
+  String get reviewTitleHint =>
+      _localizedValues[locale.languageCode]?['reviewTitleHint'] ?? 'e.g. Great product!';
+  String get reviewBodyOptional =>
+      _localizedValues[locale.languageCode]?['reviewBodyOptional'] ?? 'Review Body (optional)';
+  String get orderStatusPending =>
+      _localizedValues[locale.languageCode]?['orderStatusPending'] ?? 'Pending';
+  String get orderStatusConfirmed =>
+      _localizedValues[locale.languageCode]?['orderStatusConfirmed'] ?? 'Confirmed';
+  String get orderStatusProcessing =>
+      _localizedValues[locale.languageCode]?['orderStatusProcessing'] ?? 'Processing';
+  String get orderStatusShipped =>
+      _localizedValues[locale.languageCode]?['orderStatusShipped'] ?? 'Shipped';
+  String get orderStatusDelivered =>
+      _localizedValues[locale.languageCode]?['orderStatusDelivered'] ?? 'Delivered';
+  String get orderStatusCancelled =>
+      _localizedValues[locale.languageCode]?['orderStatusCancelled'] ?? 'Cancelled';
+  String get paymentStatusPaid =>
+      _localizedValues[locale.languageCode]?['paymentStatusPaid'] ?? 'Paid';
+  String get paymentStatusFailed =>
+      _localizedValues[locale.languageCode]?['paymentStatusFailed'] ?? 'Failed';
+  String get paymentStatusRefunded =>
+      _localizedValues[locale.languageCode]?['paymentStatusRefunded'] ?? 'Refunded';
+  String subtotalItems(int count) =>
+      (_localizedValues[locale.languageCode]?['subtotalItems'] ?? 'Subtotal ({count} Items)')
+          .replaceAll('{count}', count.toString());
+  String get writeAReview =>
+      _localizedValues[locale.languageCode]?['writeAReview'] ?? 'Write a Review';
+  String get shareExperienceHint =>
+      _localizedValues[locale.languageCode]?['shareExperienceHint'] ?? 'Share your experience...';
+  String get qty =>
+      _localizedValues[locale.languageCode]?['qty'] ?? 'Qty';
+  String get total =>
+      _localizedValues[locale.languageCode]?['total'] ?? 'Total';
+  String get notesHint =>
+      _localizedValues[locale.languageCode]?['notesHint'] ?? 'Notes';
+  // ── End store strings ─────────────────────────────────────────────────────
+
   String? getSymptomName(String symptomName) {
     try {
       return _localizedValues[locale.languageCode]?[symptomName];
@@ -3900,6 +4086,99 @@ class AppLocalizations {
       'surgeryLabel': 'Surgery',
       'event': 'Event',
       'note': 'Note',
+      // Store
+      'aleefyStore': 'Aleefy Store',
+      'noProductsFound': 'No products found',
+      'failedToLoadProducts': 'Failed to load products',
+      'myCart': 'My Cart',
+      'cartEmpty': 'Cart empty ...',
+      'cartEmptyMessage': 'Add products from the store to get started',
+      'browseStore': 'Browse Store',
+      'selectDeliveryMethod': 'Select delivery method',
+      'delivery': 'Delivery',
+      'shipping': 'Shipping',
+      'deliveredToAddress': 'Delivered to your address',
+      'pickUp': 'Pick Up',
+      'pickUpFromStore': 'Pick up your order from the store',
+      'noDeliveryAddress': 'No delivery address yet',
+      'addFirstAddressMessage': "Add your first address so we know where to deliver your pet's goodies",
+      'addAddress': 'Add Address',
+      'addAnotherAddress': 'Add another address?',
+      'saveAddress': 'Save Address',
+      'country': 'Country',
+      'city': 'City',
+      'addressLine1': 'Address Line 1',
+      'addressLine2Optional': 'Address Line 2 (optional)',
+      'postalCodeOptional': 'Postal Code (optional)',
+      'fieldRequired': 'This field is required',
+      'scheduleOrder': 'Schedule Order',
+      'whenDelivered': 'When would you like your order delivered?',
+      'schedule': 'Schedule',
+      'availableHours': 'Available Hours',
+      'availableDate': 'Available Date',
+      'noSlotsToday': 'No slots available for today.',
+      'checkout': 'Checkout',
+      'deliverTo': 'Deliver to',
+      'deliveryTime': 'Delivery time',
+      'cashOnDelivery': 'Cash On Delivery',
+      'vodafoneCash': 'Vodafone Cash',
+      'instaPay': 'InstaPay',
+      'subtotal': 'Subtotal',
+      'shippingFee': 'Shipping Fee',
+      'totalAmount': 'Total Amount',
+      'inclusiveOfVat': 'Inclusive Of VAT',
+      'promoCodeHint': 'Do you have a promo code?',
+      'orderNotes': 'Order Notes',
+      'payNow': 'Pay Now',
+      'orderPlaced': 'Order Placed!',
+      'pricesChanged': 'Some prices changed since you added items to cart.',
+      'uploadPaymentProof': 'Upload Payment Proof',
+      'trackOrder': 'Track Order',
+      'backToHome': 'Back to Home',
+      'myOrders': 'My Orders',
+      'noOrdersYet': 'No orders yet',
+      'orderDetail': 'Order Detail',
+      'shippingAddress': 'Shipping Address',
+      'track': 'Track',
+      'uploadProof': 'Upload Proof',
+      'confirmDelivery': 'Confirm Delivery',
+      'orderNotFound': 'Order not found',
+      'orderTracking': 'Order Tracking',
+      'noTrackingInfo': 'No tracking information yet.',
+      'paymentProof': 'Payment Proof',
+      'uploadPaymentScreenshots': 'Upload your payment screenshot(s)',
+      'oneToFiveImages': '1 to 5 images',
+      'maxFiveImages': 'You can upload up to 5 images.',
+      'submitProof': 'Submit Proof',
+      'options': 'Options',
+      'relatedProducts': 'Related Products',
+      'inStock': 'In Stock',
+      'outOfStock': 'Out of Stock',
+      'addToCart': 'Add to Cart',
+      'addedToCart': 'Added to Cart ✓',
+      'readMore': 'Read more',
+      'showLess': 'Show less',
+      'productNotFound': 'Product not found',
+      'yourRating': 'Your Rating',
+      'reviewTitle': 'Review Title',
+      'reviewTitleHint': 'e.g. Great product!',
+      'reviewBodyOptional': 'Review Body (optional)',
+      'orderStatusPending': 'Pending',
+      'orderStatusConfirmed': 'Confirmed',
+      'orderStatusProcessing': 'Processing',
+      'orderStatusShipped': 'Shipped',
+      'orderStatusDelivered': 'Delivered',
+      'orderStatusCancelled': 'Cancelled',
+      'paymentStatusPaid': 'Paid',
+      'paymentStatusFailed': 'Failed',
+      'paymentStatusRefunded': 'Refunded',
+      'subtotalItems': 'Subtotal ({count} Items)',
+      'writeAReview': 'Write a Review',
+      'shareExperienceHint': 'Share your experience...',
+      'qty': 'Qty',
+      'total': 'Total',
+      'all': 'All',
+      'notesHint': 'Notes',
     },
     'ar': {
       'appTitle': 'أليفي',
@@ -6324,6 +6603,98 @@ class AppLocalizations {
       'surgeryLabel': 'جراحة',
       'event': 'حالة',
       'note': 'ملاحظة',
+      // Store
+      'aleefyStore': 'متجر أليفي',
+      'noProductsFound': 'لم يتم العثور على منتجات',
+      'failedToLoadProducts': 'فشل تحميل المنتجات',
+      'myCart': 'سلتي',
+      'cartEmpty': 'السلة فارغة ...',
+      'cartEmptyMessage': 'أضف منتجات من المتجر للبدء',
+      'browseStore': 'تصفح المتجر',
+      'selectDeliveryMethod': 'اختر طريقة التوصيل',
+      'delivery': 'التوصيل',
+      'shipping': 'شحن',
+      'deliveredToAddress': 'سيتم التوصيل إلى عنوانك',
+      'pickUp': 'استلام',
+      'pickUpFromStore': 'استلم طلبك من المتجر',
+      'noDeliveryAddress': 'لا يوجد عنوان توصيل بعد',
+      'addFirstAddressMessage': 'أضف عنوانك الأول حتى نعرف أين نوصل طلبك',
+      'addAddress': 'إضافة عنوان',
+      'addAnotherAddress': 'إضافة عنوان آخر؟',
+      'saveAddress': 'حفظ العنوان',
+      'country': 'الدولة',
+      'city': 'المدينة',
+      'addressLine1': 'العنوان السطر الأول',
+      'addressLine2Optional': 'العنوان السطر الثاني (اختياري)',
+      'postalCodeOptional': 'الرمز البريدي (اختياري)',
+      'fieldRequired': 'هذا الحقل مطلوب',
+      'scheduleOrder': 'جدولة الطلب',
+      'whenDelivered': 'متى تريد توصيل طلبك؟',
+      'schedule': 'جدولة',
+      'availableHours': 'الأوقات المتاحة',
+      'availableDate': 'التاريخ المتاح',
+      'noSlotsToday': 'لا توجد أوقات متاحة اليوم.',
+      'checkout': 'الدفع',
+      'deliverTo': 'التوصيل إلى',
+      'deliveryTime': 'وقت التوصيل',
+      'cashOnDelivery': 'الدفع عند الاستلام',
+      'vodafoneCash': 'فودافون كاش',
+      'instaPay': 'إنستاباي',
+      'subtotal': 'المجموع الفرعي',
+      'shippingFee': 'رسوم الشحن',
+      'totalAmount': 'المبلغ الإجمالي',
+      'inclusiveOfVat': 'شامل ضريبة القيمة المضافة',
+      'promoCodeHint': 'هل لديك كود خصم؟',
+      'orderNotes': 'ملاحظات الطلب',
+      'payNow': 'ادفع الآن',
+      'orderPlaced': 'تم تقديم الطلب!',
+      'pricesChanged': 'تغيرت بعض الأسعار منذ إضافتها إلى السلة.',
+      'uploadPaymentProof': 'رفع إثبات الدفع',
+      'trackOrder': 'تتبع الطلب',
+      'backToHome': 'العودة للرئيسية',
+      'myOrders': 'طلباتي',
+      'noOrdersYet': 'لا توجد طلبات بعد',
+      'orderDetail': 'تفاصيل الطلب',
+      'shippingAddress': 'عنوان الشحن',
+      'track': 'تتبع',
+      'uploadProof': 'رفع الإثبات',
+      'confirmDelivery': 'تأكيد الاستلام',
+      'orderNotFound': 'الطلب غير موجود',
+      'orderTracking': 'تتبع الطلب',
+      'noTrackingInfo': 'لا تتوفر معلومات تتبع حتى الآن.',
+      'paymentProof': 'إثبات الدفع',
+      'uploadPaymentScreenshots': 'ارفع صورة/صور الدفع',
+      'oneToFiveImages': 'من 1 إلى 5 صور',
+      'maxFiveImages': 'يمكنك رفع ما يصل إلى 5 صور.',
+      'submitProof': 'إرسال الإثبات',
+      'options': 'الخيارات',
+      'relatedProducts': 'منتجات مشابهة',
+      'inStock': 'متوفر',
+      'outOfStock': 'غير متوفر',
+      'addToCart': 'أضف للسلة',
+      'addedToCart': 'تمت الإضافة ✓',
+      'readMore': 'اقرأ المزيد',
+      'showLess': 'عرض أقل',
+      'productNotFound': 'المنتج غير موجود',
+      'yourRating': 'تقييمك',
+      'reviewTitle': 'عنوان المراجعة',
+      'reviewTitleHint': 'مثال: منتج رائع!',
+      'reviewBodyOptional': 'تفاصيل المراجعة (اختياري)',
+      'orderStatusPending': 'قيد الانتظار',
+      'orderStatusConfirmed': 'مؤكد',
+      'orderStatusProcessing': 'جاري المعالجة',
+      'orderStatusShipped': 'تم الشحن',
+      'orderStatusDelivered': 'تم التوصيل',
+      'orderStatusCancelled': 'ملغي',
+      'paymentStatusPaid': 'مدفوع',
+      'paymentStatusFailed': 'فشل',
+      'paymentStatusRefunded': 'مسترد',
+      'subtotalItems': 'المجموع الفرعي ({count} عناصر)',
+      'writeAReview': 'كتابة مراجعة',
+      'shareExperienceHint': 'شاركنا تجربتك...',
+      'qty': 'الكمية',
+      'total': 'المجموع',
+      'notesHint': 'ملاحظات',
     },
   };
 }

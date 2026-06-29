@@ -102,6 +102,34 @@ class ApiConstants {
   static String vaccinationMedicalSheetEndpoint(String petId) =>
       '/vaccination/schedules/pet/$petId/medical-sheet';
 
+  // Store — Products
+  static const String productsEndpoint = '/products';
+  static const String productCategoriesEndpoint = '/products/categories';
+  static const String productNewArrivalsEndpoint = '/products/new-arrivals';
+  static const String productBestSellingEndpoint = '/products/best-selling';
+  static const String productTopRatedEndpoint = '/products/top-rated';
+  static const String productMostPurchasedEndpoint = '/products/me/most-purchased';
+  static String productDetailEndpoint(String id) => '/products/$id';
+  static String productRelatedEndpoint(String id) => '/products/$id/related';
+  static String productBoughtTogetherEndpoint(String id) => '/products/$id/bought-together';
+  static String productReviewsEndpoint(String productId) => '/products/$productId/reviews';
+
+  // Store — Cart
+  static const String cartEndpoint = '/cart';
+  static const String cartItemsEndpoint = '/cart/items';
+  static String cartItemEndpoint(String variantId) => '/cart/items/$variantId';
+
+  // Store — Checkout
+  static const String shippingOptionsEndpoint = '/checkout/shipping-options';
+  static const String checkoutInitiateEndpoint = '/checkout/initiate';
+
+  // Store — Orders
+  static const String ordersEndpoint = '/orders';
+  static String orderDetailEndpoint(String id) => '/orders/$id';
+  static String orderTrackingEndpoint(String id) => '/orders/$id/tracking';
+  static String orderConfirmDeliveryEndpoint(String id) => '/orders/$id/confirm-delivery';
+  static String orderPaymentProofEndpoint(String id) => '/orders/$id/payment-proof';
+
   // Media Endpoints
   static const String uploadsEndpoint = '/api/uploads';
   static const String petModelsEndpoint = '/api/models';

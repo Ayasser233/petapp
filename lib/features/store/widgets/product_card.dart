@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:petapp/core/utils/app_colors.dart';
-import 'package:petapp/features/store/models/product_model.dart';
+import 'package:petapp/features/store/models/product_summary_model.dart';
 
-/// Reusable product card — used in StoreScreen grid and Home "Aleefy Picks"
+/// Reusable product card — used in StoreScreen grid
 class ProductCard extends StatelessWidget {
-  final ProductModel product;
-  final bool isFavorite;
+  final ProductSummaryModel product;
   final bool isInCart;
   final VoidCallback onAddToCart;
-  final VoidCallback onFavoriteToggle;
   final VoidCallback? onTap;
   final double? width;
 
   const ProductCard({
     super.key,
     required this.product,
-    required this.isFavorite,
     required this.isInCart,
     required this.onAddToCart,
-    required this.onFavoriteToggle,
     this.onTap,
     this.width,
   });
@@ -45,35 +41,12 @@ class ProductCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Image area with favorite icon
             Stack(
               children: [
                 ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(14)),
-                  child: _buildProductImage(context),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
+                  child: _buildImage(),
                 ),
-                // Favorite button
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: GestureDetector(
-                    onTap: onFavoriteToggle,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: isFavorite ? Colors.red : Colors.grey,
-                        size: 16,
-                      ),
-                    ),
-                  ),
-                ),
-                // Add to cart button — bottom-right
                 Positioned(
                   bottom: 8,
                   right: 8,
@@ -102,14 +75,13 @@ class ProductCard extends StatelessWidget {
                 ),
               ],
             ),
-            // Info
             Padding(
               padding: const EdgeInsets.fromLTRB(10, 8, 10, 10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    product.name,
+                    product.title ?? '',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           fontSize: 13,
@@ -117,52 +89,41 @@ class ProductCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    product.description,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey.shade600,
-                          fontSize: 11,
+                  if (product.vendor != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      product.vendor!,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: AppColors.orange,
+                            fontSize: 10,
+                          ),
+                    ),
+                  ],
+                  if (product.averageRating != null) ...[
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                        const SizedBox(width: 2),
+                        Text(
+                          '${product.averageRating!.toStringAsFixed(1)}',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Colors.grey.shade600, fontSize: 11),
                         ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 5),
-                  // Rating
-                  Row(
-                    children: [
-                      const Icon(Icons.star_rounded,
-                          color: Colors.amber, size: 14),
-                      const SizedBox(width: 2),
-                      Text(
-                        '${product.rating.toStringAsFixed(1)} (${product.reviewCount})',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Colors.grey.shade600,
-                              fontSize: 11,
-                            ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 5),
                   Text(
-                    '${product.price.toStringAsFixed(0)} EGP',
+                    product.minPrice != null
+                        ? '${product.minPrice!.toStringAsFixed(0)} EGP'
+                        : '',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: isDark ? Colors.white : Colors.black87,
                           fontSize: 14,
                         ),
                   ),
-                  if (product.brand.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        product.brand,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: AppColors.orange,
-                              fontSize: 10,
-                            ),
-                      ),
-                    ),
                 ],
               ),
             ),
@@ -172,9 +133,16 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-  Widget _buildProductImage(BuildContext context) {
+  Widget _buildImage() {
+    if (product.imageUrl == null || product.imageUrl!.isEmpty) {
+      return Container(
+        height: 160,
+        color: AppColors.storeCardBg,
+        child: const Center(child: Icon(Icons.pets, size: 48, color: AppColors.lightorange)),
+      );
+    }
     return Image.network(
-      product.image,
+      product.imageUrl!,
       width: double.infinity,
       height: 160,
       fit: BoxFit.cover,
@@ -184,19 +152,15 @@ class ProductCard extends StatelessWidget {
           height: 160,
           color: AppColors.storeCardBg,
           child: const Center(
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              valueColor: AlwaysStoppedAnimation(AppColors.orange),
-            ),
+            child: CircularProgressIndicator(strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation(AppColors.orange)),
           ),
         );
       },
-      errorBuilder: (ctx, err, _) => Container(
+      errorBuilder: (ctx, _, __) => Container(
         height: 160,
         color: AppColors.storeCardBg,
-        child: const Center(
-          child: Icon(Icons.pets, size: 48, color: AppColors.lightorange),
-        ),
+        child: const Center(child: Icon(Icons.pets, size: 48, color: AppColors.lightorange)),
       ),
     );
   }

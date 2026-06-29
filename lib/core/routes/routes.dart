@@ -43,8 +43,20 @@ import 'package:petapp/features/store/screens/store_screen.dart';
 import 'package:petapp/features/store/screens/cart_screen.dart';
 import 'package:petapp/features/store/screens/delivery_screen.dart';
 import 'package:petapp/features/store/screens/checkout_screen.dart';
+import 'package:petapp/features/store/screens/product_detail_screen.dart';
+import 'package:petapp/features/store/screens/schedule_order_screen.dart';
+import 'package:petapp/features/store/screens/add_address_screen.dart';
+import 'package:petapp/features/store/screens/order_confirmation_screen.dart';
+import 'package:petapp/features/store/screens/orders_screen.dart';
+import 'package:petapp/features/store/screens/order_detail_screen.dart';
+import 'package:petapp/features/store/screens/order_tracking_screen.dart';
+import 'package:petapp/features/store/screens/payment_proof_screen.dart';
+import 'package:petapp/features/store/screens/review_form_screen.dart';
 import 'package:petapp/features/store/controllers/cart_controller.dart';
 import 'package:petapp/features/store/controllers/store_controller.dart';
+import 'package:petapp/features/store/controllers/checkout_controller.dart';
+import 'package:petapp/features/store/controllers/order_controller.dart';
+import 'package:petapp/features/store/controllers/review_controller.dart';
 class AppRoutes {
   static const String onboarding = '/onboarding';
   static const String networkSplash = '/network-splash';
@@ -91,6 +103,15 @@ class AppRoutes {
   static const String cart = '/cart';
   static const String delivery = '/delivery';
   static const String checkout = '/checkout';
+  static const String productDetail = '/product-detail';
+  static const String scheduleOrder = '/schedule-order';
+  static const String addAddress = '/add-address';
+  static const String orderConfirmation = '/order-confirmation';
+  static const String orders = '/orders';
+  static const String orderDetail = '/order-detail';
+  static const String orderTracking = '/order-tracking';
+  static const String paymentProof = '/payment-proof';
+  static const String reviewForm = '/review-form';
 
   static List<GetPage> get getPages => [
         GetPage(name: networkSplash, page: () => const NetworkSplashScreen()),
@@ -217,6 +238,7 @@ class AppRoutes {
           binding: BindingsBuilder(() {
             Get.lazyPut<StoreController>(() => StoreController(), fenix: true);
             Get.lazyPut<CartController>(() => CartController(), fenix: true);
+            Get.lazyPut<CheckoutController>(() => CheckoutController(), fenix: true);
           }),
         ),
         GetPage(
@@ -233,6 +255,27 @@ class AppRoutes {
           page: () => const DeliveryScreen(),
           transition: Transition.rightToLeft,
           transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<CheckoutController>(() => CheckoutController(), fenix: true);
+          }),
+        ),
+        GetPage(
+          name: scheduleOrder,
+          page: () => const ScheduleOrderScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<CheckoutController>(() => CheckoutController(), fenix: true);
+          }),
+        ),
+        GetPage(
+          name: addAddress,
+          page: () => const AddAddressScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<CheckoutController>(() => CheckoutController(), fenix: true);
+          }),
         ),
         GetPage(
           name: checkout,
@@ -241,7 +284,73 @@ class AppRoutes {
           transitionDuration: const Duration(milliseconds: 250),
           binding: BindingsBuilder(() {
             Get.lazyPut<CartController>(() => CartController(), fenix: true);
+            Get.lazyPut<CheckoutController>(() => CheckoutController(), fenix: true);
           }),
+        ),
+        GetPage(
+          name: productDetail,
+          page: () => const ProductDetailScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<CartController>(() => CartController(), fenix: true);
+            Get.lazyPut<ReviewController>(() => ReviewController(), fenix: true);
+          }),
+        ),
+        GetPage(
+          name: orderConfirmation,
+          page: () => const OrderConfirmationScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+        ),
+        GetPage(
+          name: orders,
+          page: () => const OrdersScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<OrderController>(() => OrderController(), fenix: true);
+          }),
+          middlewares: [AuthMiddleware()],
+        ),
+        GetPage(
+          name: orderDetail,
+          page: () => const OrderDetailScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<OrderController>(() => OrderController(), fenix: true);
+          }),
+          middlewares: [AuthMiddleware()],
+        ),
+        GetPage(
+          name: orderTracking,
+          page: () => const OrderTrackingScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<OrderController>(() => OrderController(), fenix: true);
+          }),
+        ),
+        GetPage(
+          name: paymentProof,
+          page: () => const PaymentProofScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<OrderController>(() => OrderController(), fenix: true);
+          }),
+          middlewares: [AuthMiddleware()],
+        ),
+        GetPage(
+          name: reviewForm,
+          page: () => const ReviewFormScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<ReviewController>(() => ReviewController(), fenix: true);
+          }),
+          middlewares: [AuthMiddleware()],
         ),
       ];
 }

@@ -1,54 +1,124 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:petapp/features/store/models/cart_item_model.dart';
-import 'package:petapp/features/store/models/product_model.dart';
+import 'package:petapp/core/utils/app_colors.dart';
+import 'package:petapp/features/store/data/repositories/cart_repository.dart';
+import 'package:petapp/features/store/models/cart_model.dart';
 
 class CartController extends GetxController {
-  final RxList<CartItemModel> _items = <CartItemModel>[].obs;
+  final CartRepository _repo = CartRepository();
 
-  List<CartItemModel> get items => _items;
-  bool get isEmpty => _items.isEmpty;
-  int get itemCount => _items.fold(0, (sum, e) => sum + e.quantity);
+  final Rx<CartModel> _cart = CartModel.empty().obs;
+  final RxBool isLoading = false.obs;
 
-  double get subtotal => _items.fold(0.0, (sum, e) => sum + e.totalPrice);
-  double get discount => 0.0;
-  double get total => subtotal - discount;
+  CartModel get cart => _cart.value;
+  List<CartItemApiModel> get items => _cart.value.items;
+  bool get isEmpty => _cart.value.isEmpty;
+  int get itemCount => _cart.value.itemCount;
+  double get subtotal => _cart.value.subtotal;
 
-  void addProduct(ProductModel product) {
-    final idx = _items.indexWhere((e) => e.product.id == product.id);
-    if (idx >= 0) {
-      _items[idx] = _items[idx].copyWith(quantity: _items[idx].quantity + 1);
+  @override
+  void onInit() {
+    super.onInit();
+    fetchCart();
+  }
+
+  Future<void> fetchCart() async {
+    isLoading.value = true;
+    try {
+      _cart.value = await _repo.getCart();
+    } catch (_) {
+      _cart.value = CartModel.empty();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> addItem({required String variantId, String? productId, int quantity = 1}) async {
+    try {
+      _cart.value = await _repo.addItem(variantId: variantId, productId: productId, quantity: quantity);
+    } on Exception catch (e) {
+      final msg = e.toString();
+      if (msg.contains('stockInsufficient')) {
+        Get.snackbar('Out of Stock', 'Not enough stock available.',
+            backgroundColor: Colors.red.shade100,
+            colorText: Colors.red.shade800,
+            snackPosition: SnackPosition.BOTTOM);
+      } else if (msg.contains('variantNotFound')) {
+        Get.snackbar('Error', 'Product variant not found.',
+            backgroundColor: Colors.red.shade100,
+            colorText: Colors.red.shade800,
+            snackPosition: SnackPosition.BOTTOM);
+      } else {
+        rethrow;
+      }
+    }
+  }
+
+  Future<void> updateItem(String variantId, int quantity) async {
+    try {
+      _cart.value = await _repo.updateItem(variantId, quantity: quantity);
+    } on Exception catch (e) {
+      final msg = e.toString();
+      if (msg.contains('stockInsufficient')) {
+        Get.snackbar('Out of Stock', 'Not enough stock available.',
+            backgroundColor: Colors.red.shade100,
+            colorText: Colors.red.shade800,
+            snackPosition: SnackPosition.BOTTOM);
+      } else {
+        rethrow;
+      }
+    }
+  }
+
+  Future<void> removeItem(String variantId) async {
+    try {
+      _cart.value = await _repo.removeItem(variantId);
+    } catch (_) {}
+  }
+
+  Future<void> increment(String variantId) async {
+    final item = items.firstWhereOrNull((e) => e.variantId == variantId);
+    if (item == null) return;
+    await updateItem(variantId, item.quantity + 1);
+  }
+
+  Future<void> decrement(String variantId) async {
+    final item = items.firstWhereOrNull((e) => e.variantId == variantId);
+    if (item == null) return;
+    if (item.quantity <= 1) {
+      await removeItem(variantId);
     } else {
-      _items.add(CartItemModel(product: product, quantity: 1));
+      await updateItem(variantId, item.quantity - 1);
     }
   }
 
-  void removeProduct(String productId) {
-    _items.removeWhere((e) => e.product.id == productId);
-  }
-
-  void increment(String productId) {
-    final idx = _items.indexWhere((e) => e.product.id == productId);
-    if (idx >= 0) {
-      _items[idx] = _items[idx].copyWith(quantity: _items[idx].quantity + 1);
+  Future<void> clear() async {
+    try {
+      _cart.value = await _repo.clearCart();
+    } catch (_) {
+      _cart.value = CartModel.empty();
     }
   }
 
-  void decrement(String productId) {
-    final idx = _items.indexWhere((e) => e.product.id == productId);
-    if (idx < 0) return;
-    if (_items[idx].quantity <= 1) {
-      _items.removeAt(idx);
-    } else {
-      _items[idx] = _items[idx].copyWith(quantity: _items[idx].quantity - 1);
-    }
+  bool isInCart(String variantId) => items.any((e) => e.variantId == variantId);
+  int quantityOf(String variantId) => items.firstWhereOrNull((e) => e.variantId == variantId)?.quantity ?? 0;
+
+  Widget buildBadge() {
+    return Obx(() {
+      if (itemCount == 0) return const SizedBox.shrink();
+      return Positioned(
+        top: 6,
+        right: 6,
+        child: Container(
+          width: 16,
+          height: 16,
+          decoration: const BoxDecoration(color: AppColors.orange, shape: BoxShape.circle),
+          child: Center(
+            child: Text('$itemCount',
+                style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+          ),
+        ),
+      );
+    });
   }
-
-  int quantityOf(String productId) {
-    final item = _items.firstWhereOrNull((e) => e.product.id == productId);
-    return item?.quantity ?? 0;
-  }
-
-  bool isInCart(String productId) => _items.any((e) => e.product.id == productId);
-
-  void clear() => _items.clear();
 }
