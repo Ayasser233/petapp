@@ -55,10 +55,7 @@ class VetBookingSummary extends StatelessWidget {
     // Calculate total discount and final price.
     // If both globalDiscount and vet discount exist, they are added together.
     double totalDiscountAmount = 0.0;
-    
-    final isEmergencyTime = THelperFunctions.isEmergencyTime();
-
-    if (originalPrice > 0 && !isEmergencyTime && !isEmergency) {
+    if (originalPrice > 0 && !isEmergency) {
       // 1. Calculate Vet Discount
       if (discount != null && discount.isActive) {
         totalDiscountAmount += discount.calculateDiscount(originalPrice);

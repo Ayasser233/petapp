@@ -163,8 +163,9 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
         : 75.0;
 
     final isEmergencyTime = THelperFunctions.isEmergencyTime();
+    final bool useEmergencyPrice = isEmergencyTime && hasEmergency;
 
-    if (totalDiscountedPrice > 0 && !isEmergencyTime) {
+    if (totalDiscountedPrice > 0 && !useEmergencyPrice) {
       double totalDiscountAmount = 0;
 
       // 1. Vet-specific discount
@@ -186,8 +187,8 @@ class _VetDetailScreenState extends State<VetDetailScreen> {
       }
       
       totalDiscountedPrice = (totalDiscountedPrice - totalDiscountAmount).clamp(0, double.infinity);
-    } else if (isEmergencyTime) {
-      // If it's emergency time, use emergency price and NO discounts
+    } else if (useEmergencyPrice) {
+      // If it's emergency time AND the vet has emergency service, use emergency price and NO discounts
       totalDiscountedPrice = emergencyPrice ?? totalDiscountedPrice;
     }
 

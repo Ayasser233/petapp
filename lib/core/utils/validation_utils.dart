@@ -10,9 +10,9 @@ class ValidationUtils {
     r'^[0-9٠-٩]{10,11}$',
   );
 
-  // Name validation regex (at least 2 characters, letters and spaces only)
+  // Name validation regex (at least 2 characters, letters and spaces only, supports Arabic)
   static final RegExp _nameRegex = RegExp(
-    r'^[a-zA-Z\s]{2,}$',
+    r'^[a-zA-Z\s\u0600-\u06FF]{2,}$',
   );
 
   // Password validation regex (at least 6 chars, with at least one number)
@@ -41,6 +41,24 @@ class ValidationUtils {
     // Validate the phone number format (10-11 digits)
     if (!_phoneRegex.hasMatch(value)) {
       return 'Please enter a valid phone number (10-11 digits)';
+    }
+
+    return null;
+  }
+
+  // Validate full name (at least two words)
+  static String? validateFullName(String? value, String requiredMsg, String invalidMsg) {
+    if (value == null || value.trim().isEmpty) {
+      return requiredMsg;
+    }
+    
+    final nameParts = value.trim().split(RegExp(r'\s+'));
+    if (nameParts.length < 2 || nameParts.any((part) => part.length < 2)) {
+      return invalidMsg;
+    }
+
+    if (!_nameRegex.hasMatch(value)) {
+      return requiredMsg;
     }
 
     return null;

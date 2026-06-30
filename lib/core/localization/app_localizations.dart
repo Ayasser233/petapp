@@ -308,6 +308,12 @@ class AppLocalizations {
   String get signInWithApple =>
       _localizedValues[locale.languageCode]?['signInWithApple'] ??
       'Sign in with Apple';
+  String get signUpWithGoogle =>
+      _localizedValues[locale.languageCode]?['signUpWithGoogle'] ??
+      'Sign up with Google';
+  String get signUpWithApple =>
+      _localizedValues[locale.languageCode]?['signUpWithApple'] ??
+      'Sign up with Apple';
   String get dontHaveAccount =>
       _localizedValues[locale.languageCode]?['dontHaveAccount'] ??
       'Don\'t have an account?';
@@ -823,6 +829,8 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['enterFullName'] ?? 'Enter your full name';
   String get nameRequired =>
       _localizedValues[locale.languageCode]?['nameRequired'] ?? 'Name is required';
+  String get fullNameRequired =>
+      _localizedValues[locale.languageCode]?['fullNameRequired'] ?? 'Please enter your full name (first and last name)';
   String get profileUpdatedSuccessfully =>
       _localizedValues[locale.languageCode]?['profileUpdatedSuccessfully'] ?? 'Profile updated successfully!';
   String get editPet =>
@@ -2521,6 +2529,8 @@ class AppLocalizations {
 
       'signInWithGoogle': 'Sign in with Google',
       'signInWithApple': 'Sign in with Apple',
+      'signUpWithGoogle': 'Sign up with Google',
+      'signUpWithApple': 'Sign up with Apple',
       'dontHaveAccount': 'Don\'t have an account?',
       'wrongCredentials': 'Wrong email or password',
       'emailNotVerified': 'Email Not Verified',
@@ -2634,6 +2644,7 @@ class AppLocalizations {
       'justAFewMoreDetails': 'Just a few more details',
       'enterFullName': 'Enter your full name',
       'nameRequired': 'Name is required',
+      'fullNameRequired': 'Please enter your full name (first and last name)',
       'profileUpdatedSuccessfully': 'Profile updated successfully!',
       'editPet': 'Edit Pet',
       'confirmDelete': 'Confirm Delete',
@@ -4036,6 +4047,8 @@ class AppLocalizations {
 
       'signInWithGoogle': 'تسجيل الدخول باستخدام Google',
       'signInWithApple': 'تسجيل الدخول باستخدام Apple',
+      'signUpWithGoogle': 'التسجيل باستخدام Google',
+      'signUpWithApple': 'التسجيل باستخدام Apple',
       'dontHaveAccount': 'ليس لديك حساب؟',
       'wrongCredentials': 'بريد إلكتروني أو كلمة مرور خاطئة',
       'emailNotVerified': 'البريد الإلكتروني غير مؤكد',
@@ -4196,6 +4209,7 @@ class AppLocalizations {
       'justAFewMoreDetails': 'فقط بضع تفاصيل أخرى',
       'enterFullName': 'أدخل اسمك الكامل',
       'nameRequired': 'الاسم مطلوب',
+      'fullNameRequired': 'يرجى إدخال اسمك الكامل (الاسم الأول واسم العائلة)',
       'profileUpdatedSuccessfully': 'تم تحديث الملف الشخصي بنجاح!',
       'editPet': 'تعديل الحيوان الأليف',
       'confirmDelete': 'تأكيد الحذف',
