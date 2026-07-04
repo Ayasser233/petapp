@@ -11,7 +11,7 @@ allprojects {
 }
 
 subprojects {
-    // Force all plugins to use compileSdk 36 (fixes connectivity_plus and others)
+    // Force all plugins to use compileSdk 36
     afterEvaluate { project ->
         if (project.hasProperty('android')) {
             project.android {
@@ -21,6 +21,19 @@ subprojects {
                     minSdk 23  // Required for firebase-messaging 25.x
                 }
             }
+        }
+    }
+    
+    // Fix for Facebook SDK resolution issues and API compatibility
+    project.configurations.all {
+        resolutionStrategy {
+            force 'com.facebook.android:facebook-android-sdk:16.3.0'
+            force 'com.facebook.android:facebook-core:16.3.0'
+            force 'com.facebook.android:facebook-common:16.3.0'
+            force 'com.facebook.android:facebook-login:16.3.0'
+            force 'com.facebook.android:facebook-share:16.3.0'
+            force 'com.facebook.android:facebook-applinks:16.3.0'
+            force 'com.facebook.android:facebook-gamingservices:16.3.0'
         }
     }
 }

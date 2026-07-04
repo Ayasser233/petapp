@@ -178,7 +178,8 @@ class SkipLoginButton extends StatelessWidget {
 }
 
 class SocialBtns extends StatelessWidget {
-  const SocialBtns({super.key});
+  final bool isSignUp;
+  const SocialBtns({super.key, this.isSignUp = false});
 
   Future<void> _handleGoogleSignIn(BuildContext context) async {
     try {
@@ -286,6 +287,7 @@ class SocialBtns extends StatelessWidget {
   Widget build(BuildContext context) {
     // Check if running on iOS using defaultTargetPlatform
     final isIOS = defaultTargetPlatform == TargetPlatform.iOS;
+    final localizations = AppLocalizations.of(context);
     
     return Column(
       children: [
@@ -307,7 +309,7 @@ class SocialBtns extends StatelessWidget {
                 Image.asset('assets/icons/google.png', width: 20, height: 20),
                 const SizedBox(width: 8),
                 Text(
-                  AppLocalizations.of(context).signInWithGoogle,
+                  isSignUp ? localizations.signUpWithGoogle : localizations.signInWithGoogle,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
               ],
@@ -338,7 +340,7 @@ class SocialBtns extends StatelessWidget {
                           : Colors.black),
                   const SizedBox(width: 8),
                   Text(
-                    AppLocalizations.of(context).signInWithApple,
+                    isSignUp ? localizations.signUpWithApple : localizations.signInWithApple,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],

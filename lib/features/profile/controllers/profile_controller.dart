@@ -372,8 +372,13 @@ class ProfileController extends GetxController {
       _isUpdating.value = true;
 
       // Validate name
-      if (fullName.trim().isEmpty) {
-        _showValidationErrors({'name': 'Name is required'});
+      final nameError = ValidationUtils.validateFullName(
+        fullName,
+        'Name is required',
+        'Please enter your full name (first and last name)',
+      );
+      if (nameError != null) {
+        _showValidationErrors({'name': nameError});
         return false;
       }
 

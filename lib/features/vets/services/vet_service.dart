@@ -530,17 +530,23 @@ class VetService {
      return openingDays.isNotEmpty ? 'on ${openingDays.first}' : '';
    }
 
-   /// Mark global discount as used when user completes a booking with active global discount
-   Future<void> markGlobalDiscountAsUsed({String title = 'launch'}) async {
+   /// Mark global discount as used when user completes a booking with active global discount.
+   /// `title` is optional and can be sent by callers when they need request-level tracking.
+   Future<void> markGlobalDiscountAsUsed({String? title}) async {
      try {
        // Optimistically update cache
        _isDiscountUsedCached = true;
        final prefs = await SharedPreferences.getInstance();
        await prefs.setBool(_globalDiscountUsedKey, true);
 
+       final queryParams = <String, dynamic>{};
+       if (title != null && title.trim().isNotEmpty) {
+         queryParams['title'] = title.trim();
+       }
+
        await _apiClient.post(
-         '/discounts/global/completed-usage',
-         queryParameters: {'title': title},
+         ApiConstants.globalDiscountUsageEndpoint,
+         queryParameters: queryParams,
        );
      } catch (e) {
        // Silently fail - this is non-critical tracking
@@ -551,7 +557,7 @@ class VetService {
    /// Check if the current user has already used the global discount
    Future<bool> hasUserUsedGlobalDiscount() async {
      try {
-       final response = await _apiClient.get(
+       final response = await _apiClient.post(
          ApiConstants.globalDiscountUsageEndpoint,
        );
        // The response is {"success": true, "data": {"isUsed": true, ...}} if used

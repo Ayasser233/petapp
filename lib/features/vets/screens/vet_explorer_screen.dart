@@ -54,6 +54,9 @@ class VetExplorerController extends GetxController {
       <String, List<String>>{}.obs;
   final RxList<String> regions = <String>[].obs;
 
+  // Track if we've preloaded emergency vets on initial all-category load
+  bool _hasPreloadedEmergencyVets = false;
+
   @override
   void onInit() {
     super.onInit();
@@ -174,6 +177,7 @@ class VetExplorerController extends GetxController {
     try {
       // Reset pagination and load page 1 with search param
       currentPage.value = 1;
+      _hasPreloadedEmergencyVets = false;
       // Debug
       try {
         print('DEBUG: VetExplorerController._onSearchChanged - performing server search for "$q"');
@@ -274,6 +278,48 @@ class VetExplorerController extends GetxController {
     await loadDataFromApi();
   }
 
+  Future<List<VetModel>> _fetchAllEmergencyVets({
+    String? search,
+    double? minPrice,
+    double? maxPrice,
+    int? minExperience,
+    double? latitude,
+    double? longitude,
+  }) async {
+    final firstPage = await _vetService.getVets(
+      page: 1,
+      limit: 10,
+      search: search,
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      minExperience: minExperience,
+      hasEmergency: true,
+      latitude: latitude,
+      longitude: longitude,
+    );
+
+    final emergencyVets =
+        List<VetModel>.from(firstPage['vets'] as List<VetModel>);
+    final emergencyLastPage = firstPage['totalPages'] as int;
+
+    for (int page = 2; page <= emergencyLastPage; page++) {
+      final extraPage = await _vetService.getVets(
+        page: page,
+        limit: 10,
+        search: search,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        minExperience: minExperience,
+        hasEmergency: true,
+        latitude: latitude,
+        longitude: longitude,
+      );
+      emergencyVets.addAll(extraPage['vets'] as List<VetModel>);
+    }
+
+    return emergencyVets;
+  }
+
   /// Load data from API
   Future<void> loadDataFromApi() async {
     try {
@@ -314,16 +360,48 @@ class VetExplorerController extends GetxController {
       );
 
       final vets = response['vets'] as List<VetModel>;
+      final responseTotalPages = response['totalPages'] as int;
+
+      // During emergency hours in All Category on first load:
+      // Preload ALL emergency vets upfront so they appear immediately on top.
+      // Don't preload on pagination (page > 1) or if already preloaded.
+      List<VetModel> fetchedVets = vets;
+      final shouldPreloadEmergencyList =
+          currentPage.value == 1 &&
+          !_hasPreloadedEmergencyVets &&
+          selectedCategory.value == 'allCategory' &&
+          THelperFunctions.isEmergencyTime();
+
+      if (shouldPreloadEmergencyList) {
+        final emergencyVets = await _fetchAllEmergencyVets(
+          search: searchQuery.value.isNotEmpty ? searchQuery.value : null,
+          minPrice: minPrice.value > 0 ? minPrice.value : null,
+          maxPrice: maxPrice.value < 5000 ? maxPrice.value : null,
+          minExperience: minExperience.value > 0 ? minExperience.value : null,
+          latitude: pos?.latitude,
+          longitude: pos?.longitude,
+        );
+
+        // Show: [all emergency vets] + [first page of non-emergency vets for pagination]
+        final nonEmergencyVets =
+            vets.where((vet) => !vet.hasEmergency).toList();
+        fetchedVets = [...emergencyVets, ...nonEmergencyVets];
+        // Mark that we've preloaded emergency vets so we don't re-fetch on pagination
+        _hasPreloadedEmergencyVets = true;
+      }
 
       // ── Step 2: Synchronous Distance Pre-calculation ─────────────────────
       // We calculate distances for the NEWLY fetched batch before assigning
       // to the UI observables. This prevents the "calculating..." flicker.
-      final vetsWithDistances = await _updateVetsWithDistances(vets);
+      final vetsWithDistances = await _updateVetsWithDistances(fetchedVets);
 
       if (currentPage.value == 1) {
         allVets.value = vetsWithDistances;
       } else {
-        allVets.addAll(vetsWithDistances);
+        final existingIds = allVets.map((v) => v.id).toSet();
+        final uniqueNew =
+            vetsWithDistances.where((v) => !existingIds.contains(v.id)).toList();
+        allVets.addAll(uniqueNew);
       }
 
       // Fire-and-forget: fetch schedules/opening info for the newly loaded
@@ -331,7 +409,7 @@ class VetExplorerController extends GetxController {
       _fetchSchedulesForVets(vetsWithDistances);
 
       totalVets.value = response['total'] as int;
-      totalPages.value = response['totalPages'] as int;
+      totalPages.value = responseTotalPages;
       currentPage.value = response['page'] as int;
       hasMorePages.value = currentPage.value < totalPages.value;
 
@@ -365,6 +443,8 @@ class VetExplorerController extends GetxController {
     try {
       isLoadingMore.value = true;
       currentPage.value++;
+      // During pagination, don't preload emergency vets (only happens on page 1)
+      _hasPreloadedEmergencyVets = true;
       await loadDataFromApi();
     } catch (e) {
       // Revert page increment on error
@@ -657,9 +737,9 @@ class VetExplorerController extends GetxController {
       }
 
       // Supports Arabic units (كم / م) AND Latin units (km / m)
-      // e.g. "1.3 كم", "500 م", "2.5km", "300m"
+      // e.g. "1.3 كم", "500 الم", "2.5km", "300m"
       final match = RegExp(
-        r'([0-9]+(?:[.,][0-9]+)?)\s*(كم|km|م|m)',
+        r'([0-9]+(?:[.,][0-9]+)?)\s*(كم|km|الم|m)',
         caseSensitive: false,
       ).firstMatch(raw.replaceAll(',', '.'));
       if (match == null) return double.maxFinite;
@@ -738,6 +818,7 @@ class VetExplorerController extends GetxController {
     if (category == 'emergency' ||
         (previousCategory == 'emergency' && category != 'emergency')) {
       currentPage.value = 1;
+      _hasPreloadedEmergencyVets = false;
       await loadData();
     } else {
       applyFilters();
@@ -778,6 +859,7 @@ class VetExplorerController extends GetxController {
   /// Refresh data including location
   Future<void> refreshData() async {
     currentPage.value = 1;
+    _hasPreloadedEmergencyVets = false;
     // Refresh location first so distances are up-to-date immediately after reload
     await _locationService.refreshLocation();
     await loadData();
@@ -801,6 +883,8 @@ class VetExplorerController extends GetxController {
     selectedService.value = 'allServices';
     sortOption.value = 'nearby';
     searchController.clear();
+    currentPage.value = 1;
+    _hasPreloadedEmergencyVets = false;
     applyFilters();
   }
 }

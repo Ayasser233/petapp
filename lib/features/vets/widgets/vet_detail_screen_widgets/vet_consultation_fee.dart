@@ -31,17 +31,19 @@ class VetConsultationFee extends StatelessWidget {
     final originalFee = double.tryParse(priceValue) ?? 0;
 
     final isEmergencyTime = THelperFunctions.isEmergencyTime();
-    final hasDiscount = discountedPrice != null && discountedPrice! < originalFee && !isEmergencyTime;
+    // Only use emergency display mode if it's emergency time AND the vet offers emergency service
+    final showAsEmergency = isEmergencyTime && hasEmergency;
+    final hasDiscount = discountedPrice != null && discountedPrice! < originalFee && !showAsEmergency;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isEmergencyTime 
+        color: showAsEmergency 
           ? Colors.red.withValues(alpha: isDark ? 0.15 : 0.08)
           : AppColors.orange.withValues(alpha: isDark ? 0.15 : 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isEmergencyTime ? Colors.red.withValues(alpha: 0.3) : AppColors.orange.withValues(alpha: 0.3),
+          color: showAsEmergency ? Colors.red.withValues(alpha: 0.3) : AppColors.orange.withValues(alpha: 0.3),
         ),
       ),
       child: Column(
@@ -54,18 +56,18 @@ class VetConsultationFee extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isEmergencyTime 
+                      showAsEmergency 
                         ? AppLocalizations.of(context).emergencyFee
                         : AppLocalizations.of(context).consultationFee,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: isEmergencyTime ? Colors.red : textColor,
+                            color: showAsEmergency ? Colors.red : textColor,
                             fontWeight: FontWeight.bold,
                           ),
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      isEmergencyTime
+                      showAsEmergency
                         ? 'Active during emergency hours (10PM - 7AM)'
                         : AppLocalizations.of(context).initialExaminationFee,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -99,11 +101,11 @@ class VetConsultationFee extends StatelessWidget {
                     ),
                   ] else
                     Text(
-                      isEmergencyTime && discountedPrice != null
+                      showAsEmergency && discountedPrice != null
                         ? '${discountedPrice!.toStringAsFixed(0)} EGP'
                         : price,
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: isEmergencyTime ? Colors.red : AppColors.orange,
+                            color: showAsEmergency ? Colors.red : AppColors.orange,
                             fontWeight: FontWeight.bold,
                           ),
                     ),
@@ -115,7 +117,7 @@ class VetConsultationFee extends StatelessWidget {
           // (Removed "You save with Aleefy's exclusive discount" banner)
 
           // ── Emergency Fee Row ───────────────────────────────────
-          if (hasEmergency && emergencyPrice != null) ...[
+          if (hasEmergency && emergencyPrice != null && !showAsEmergency) ...[
             const SizedBox(height: 12),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -177,7 +179,7 @@ class VetConsultationFee extends StatelessWidget {
                             : (priceValue.isNotEmpty ? priceValue : '75'),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: isEmergencyTime ? Colors.red : Colors.green,
+                          color: showAsEmergency ? Colors.red : Colors.green,
                         ),
                       ),
                       const TextSpan(text: ' '),

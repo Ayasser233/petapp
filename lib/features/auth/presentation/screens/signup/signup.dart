@@ -48,7 +48,7 @@ class SignUpScreen extends StatelessWidget {
                 const SizedBox(height: 16.0),
                 DividerForm(dividerText: AppLocalizations.of(context).orContinueWith),
                 const SizedBox(height: 12.0),
-                const SocialBtns(),
+                const SocialBtns(isSignUp: true),
 
                 const SizedBox(height: 16.0),
 
@@ -248,6 +248,12 @@ class _SignUpFormState extends State<SignUpForm> {
 
           // Navigate to home
           Get.offAllNamed(AppRoutes.home);
+        } else if (state is AuthNeedsProfileCompletion) {
+          debugPrint('📝 Redirecting to profile completion from SignUpScreen');
+          Get.offNamed(AppRoutes.completeProfile, arguments: {
+            'user': state.user,
+            'token': state.accessToken,
+          });
         } else if (state is AuthFailure) {
           // Handle field-specific errors if available
           if (state.fieldErrors != null && state.fieldErrors!.isNotEmpty) {

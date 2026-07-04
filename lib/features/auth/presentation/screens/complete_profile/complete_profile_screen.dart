@@ -145,9 +145,8 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                       ),
                       focusedBorder: focusedFieldStyle(),
                     ),
-                    validator: (value) => value == null || value.isEmpty
-                        ? l10n.nameRequired
-                        : null,
+                    validator: (value) => ValidationUtils.validateFullName(
+                        value, l10n.nameRequired, l10n.fullNameRequired),
                   ),
                   const SizedBox(height: 20),
 
