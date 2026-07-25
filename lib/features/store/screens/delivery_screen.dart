@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
+import 'package:petapp/features/store/controllers/address_controller.dart';
 import 'package:petapp/features/store/controllers/checkout_controller.dart';
 import 'package:petapp/features/store/models/shipping_address_model.dart';
 
@@ -21,8 +22,15 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   @override
   Widget build(BuildContext context) {
     final checkoutCtrl = Get.find<CheckoutController>();
+    final addrCtrl = Get.find<AddressController>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context);
+
+    // Pre-select default address if none selected yet
+    if (checkoutCtrl.selectedAddress.value == null &&
+        addrCtrl.defaultAddress != null) {
+      checkoutCtrl.selectAddress(addrCtrl.defaultAddress!);
+    }
 
     return Scaffold(
       backgroundColor: isDark ? Colors.black : Colors.white,
@@ -65,11 +73,11 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
             const SizedBox(height: 28),
             if (_selected == DeliveryMethod.shipping) ...[
               Obx(() {
-                final addresses = checkoutCtrl.savedAddresses;
+                final addresses = addrCtrl.addresses;
                 if (addresses.isEmpty) {
                   return _buildNoAddress(context);
                 }
-                return _buildAddressList(context, checkoutCtrl, addresses, isDark);
+                return _buildAddressList(context, checkoutCtrl, addrCtrl, addresses, isDark);
               }),
             ],
             const Spacer(),
@@ -191,7 +199,7 @@ class _DeliveryScreenState extends State<DeliveryScreen> {
   }
 
   Widget _buildAddressList(BuildContext context, CheckoutController ctrl,
-      List<ShippingAddressModel> addresses, bool isDark) {
+      AddressController addrCtrl, List<ShippingAddressModel> addresses, bool isDark) {
     final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

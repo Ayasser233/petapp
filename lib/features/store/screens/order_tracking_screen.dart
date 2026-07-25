@@ -20,7 +20,9 @@ class _OrderTrackingScreenState extends State<OrderTrackingScreen> {
     super.initState();
     _ctrl = Get.find<OrderController>();
     final orderId = Get.arguments as String;
-    _ctrl.loadTracking(orderId);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ctrl.loadTracking(orderId);
+    });
   }
 
   @override

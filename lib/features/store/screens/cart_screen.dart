@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:petapp/core/widgets/auth_network_image.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
@@ -106,8 +107,12 @@ class CartScreen extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(10),
             child: imageUrl != null
-                ? Image.network(imageUrl, width: 80, height: 90, fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => _imagePlaceholder())
+                ? AuthNetworkImage(
+                    url: imageUrl,
+                    width: 80,
+                    height: 90,
+                    fit: BoxFit.cover,
+                  )
                 : _imagePlaceholder(),
           ),
           const SizedBox(width: 12),

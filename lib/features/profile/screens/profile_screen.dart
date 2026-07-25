@@ -91,6 +91,25 @@ class ProfileScreen extends StatelessWidget {
                           ? _showLoginRequiredDialog(context)
                           : Get.toNamed(AppRoutes.pointsHistory),
                     ),
+                    _SectionItem(
+                      icon: FontAwesomeIcons.bagShopping,
+                      label: localizations.myOrders,
+                      onTap: () => isGuest
+                          ? _showLoginRequiredDialog(context)
+                          : Get.toNamed(AppRoutes.orders),
+                    ),
+                    _SectionItem(
+                      icon: FontAwesomeIcons.solidHeart,
+                      label: localizations.myFavorites,
+                      onTap: () => Get.toNamed(AppRoutes.favorites),
+                    ),
+                    _SectionItem(
+                      icon: FontAwesomeIcons.locationDot,
+                      label: localizations.myAddresses,
+                      onTap: () => isGuest
+                          ? _showLoginRequiredDialog(context)
+                          : Get.toNamed(AppRoutes.myAddresses),
+                    ),
                   ],
                 ),
 

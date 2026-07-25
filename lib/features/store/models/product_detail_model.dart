@@ -1,3 +1,5 @@
+import 'package:petapp/core/utils/api_constants.dart';
+
 class ProductVariantModel {
   final String id;
   final String? title;
@@ -68,7 +70,7 @@ class ProductImageModel {
   factory ProductImageModel.fromJson(Map<String, dynamic> json) {
     return ProductImageModel(
       id: json['id'] as String,
-      src: json['src'] as String,
+      src: ApiConstants.fixImageUrl(json['src'] as String) ?? '',
       alt: json['alt'] as String?,
       position: json['position'] as int? ?? 0,
       variantIds: (json['variant_ids'] as List<dynamic>?)

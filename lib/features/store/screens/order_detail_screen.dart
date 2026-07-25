@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:petapp/core/widgets/auth_network_image.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
@@ -23,7 +24,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     super.initState();
     _orderId = Get.arguments as String;
     _ctrl = Get.find<OrderController>();
-    _ctrl.loadOrderDetail(_orderId);
+    // Defer until after the first frame so reactive `.value` changes
+    // don't fire while Flutter is still building the widget tree.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ctrl.loadOrderDetail(_orderId);
+    });
   }
 
   @override
@@ -82,8 +87,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: img != null
-                          ? Image.network(img, width: 64, height: 64, fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => _imgPh())
+                          ? AuthNetworkImage(
+                              url: img,
+                              width: 64,
+                              height: 64,
+                              fit: BoxFit.cover,
+                              errorWidget: () => _imgPh(),
+                            )
                           : _imgPh(),
                     ),
                     const SizedBox(width: 12),

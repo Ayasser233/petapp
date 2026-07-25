@@ -2488,6 +2488,23 @@ class AppLocalizations {
       _localizedValues[locale.languageCode]?['total'] ?? 'Total';
   String get notesHint =>
       _localizedValues[locale.languageCode]?['notesHint'] ?? 'Notes';
+  String get myFavorites =>
+      _localizedValues[locale.languageCode]?['myFavorites'] ?? 'My Favorites';
+  String get myAddresses =>
+      _localizedValues[locale.languageCode]?['myAddresses'] ?? 'My Addresses';
+  String get noSavedAddresses =>
+      _localizedValues[locale.languageCode]?['noSavedAddresses'] ?? 'No saved addresses';
+  String get deleteAddress =>
+      _localizedValues[locale.languageCode]?['deleteAddress'] ?? 'Delete Address';
+  String get setAsDefault =>
+      _localizedValues[locale.languageCode]?['setAsDefault'] ?? 'Set as Default';
+  String get defaultLabel =>
+      _localizedValues[locale.languageCode]?['defaultLabel'] ?? 'Default';
+  String get noFavoriteProducts =>
+      _localizedValues[locale.languageCode]?['noFavoriteProducts'] ?? 'No favorite products yet';
+  String get favoriteProductsDesc =>
+      _localizedValues[locale.languageCode]?['favoriteProductsDesc'] ??
+      'Tap the heart icon on any product to save it here';
   // ── End store strings ─────────────────────────────────────────────────────
 
   String? getSymptomName(String symptomName) {
@@ -4190,6 +4207,14 @@ class AppLocalizations {
       'total': 'Total',
       'all': 'All',
       'notesHint': 'Notes',
+      'myFavorites': 'My Favorites',
+      'myAddresses': 'My Addresses',
+      'noSavedAddresses': 'No saved addresses',
+      'deleteAddress': 'Delete Address',
+      'setAsDefault': 'Set as Default',
+      'defaultLabel': 'Default',
+      'noFavoriteProducts': 'No favorite products yet',
+      'favoriteProductsDesc': 'Tap the heart icon on any product to save it here',
     },
     'ar': {
       'appTitle': 'أليفي',
@@ -6709,6 +6734,14 @@ class AppLocalizations {
       'qty': 'الكمية',
       'total': 'المجموع',
       'notesHint': 'ملاحظات',
+      'myFavorites': 'المفضلة',
+      'myAddresses': 'عناويني',
+      'noSavedAddresses': 'لا توجد عناوين محفوظة',
+      'deleteAddress': 'حذف العنوان',
+      'setAsDefault': 'تعيين كافتراضي',
+      'defaultLabel': 'افتراضي',
+      'noFavoriteProducts': 'لا توجد منتجات مفضلة بعد',
+      'favoriteProductsDesc': 'اضغط على أيقونة القلب في أي منتج لحفظه هنا',
     },
   };
 }

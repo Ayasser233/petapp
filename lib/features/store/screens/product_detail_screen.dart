@@ -1,9 +1,12 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:petapp/core/widgets/auth_network_image.dart';
 import 'package:get/get.dart';
 import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/features/store/controllers/cart_controller.dart';
+import 'package:petapp/features/store/controllers/favorites_controller.dart';
 import 'package:petapp/features/store/controllers/review_controller.dart';
 import 'package:petapp/features/store/data/repositories/product_repository.dart';
 import 'package:petapp/features/store/models/product_detail_model.dart';
@@ -35,9 +38,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     super.initState();
     _productId = Get.arguments as String;
     _load();
-    try {
-      Get.find<ReviewController>().loadReviews(_productId);
-    } catch (_) {}
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        Get.find<ReviewController>().loadReviews(_productId);
+      } catch (_) {}
+    });
   }
 
   @override
@@ -114,10 +119,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           controller: _pageCtrl,
                           itemCount: p.images.length,
                           onPageChanged: (i) => setState(() => _imageIndex = i),
-                          itemBuilder: (context, i) => Image.network(
-                            p.images[i].src,
+                          itemBuilder: (context, i) => AuthNetworkImage(
+                            url: p.images[i].src,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            placeholder: () => Container(
+                              color: AppColors.storeCardBg,
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation(AppColors.orange)),
+                              ),
+                            ),
+                            errorWidget: () => Container(
                               color: AppColors.storeCardBg,
                               child: const Center(child: Icon(Icons.pets, size: 80, color: AppColors.lightorange)),
                             ),
@@ -269,6 +284,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           return Obx(() => ProductCard(
                                 product: rp,
                                 isInCart: cartCtrl.isInCart(rp.id),
+                                isFavorite: Get.find<FavoritesController>().isFavorite(rp.id),
+                                onFavorite: () => Get.find<FavoritesController>().toggleFavorite(rp),
                                 width: 140,
                                 onAddToCart: () => Get.toNamed(AppRoutes.productDetail, arguments: rp.id),
                                 onTap: () => Get.toNamed(AppRoutes.productDetail, arguments: rp.id),

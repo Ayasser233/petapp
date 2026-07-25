@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:petapp/core/services/api_client.dart';
 import 'package:petapp/core/utils/api_constants.dart';
 import 'package:petapp/features/store/models/product_summary_model.dart';
@@ -57,6 +59,12 @@ class ProductRepository {
   Future<ProductDetailModel> getProductDetail(String id) async {
     final res = await _client.get(ApiConstants.productDetailEndpoint(id));
     final data = res.data['data'] as Map<String, dynamic>;
+    if (kDebugMode) {
+      debugPrint('═══════════════════════════════════════════');
+      debugPrint('[ProductRepo] DETAIL raw JSON:');
+      debugPrint(const JsonEncoder.withIndent('  ').convert(data));
+      debugPrint('═══════════════════════════════════════════');
+    }
     return ProductDetailModel.fromJson(data);
   }
 
@@ -79,10 +87,22 @@ class ProductRepository {
   ({List<ProductSummaryModel> items, int total, bool hasNext}) _parseList(dynamic responseData) {
     final data = responseData['data'];
     final meta = responseData['meta'] as Map<String, dynamic>?;
-    final items = (data as List<dynamic>?)
-            ?.map((e) => ProductSummaryModel.fromJson(e as Map<String, dynamic>))
-            .toList() ??
-        [];
+    final rawList = data as List<dynamic>? ?? [];
+
+    if (kDebugMode && rawList.isNotEmpty) {
+      final first = rawList.first as Map<String, dynamic>;
+      debugPrint('═══════════════════════════════════════════');
+      debugPrint('[ProductRepo] LIST — first product full raw JSON:');
+      debugPrint(const JsonEncoder.withIndent('  ').convert(first));
+      debugPrint('───────────────────────────────────────────');
+      final parsed = ProductSummaryModel.fromJson(first);
+      debugPrint('[ProductRepo] Parsed imageUrl → "${parsed.imageUrl}"');
+      debugPrint('═══════════════════════════════════════════');
+    }
+
+    final items = rawList
+            .map((e) => ProductSummaryModel.fromJson(e as Map<String, dynamic>))
+            .toList();
     final total = meta?['total'] as int? ?? items.length;
     final hasNext = meta?['hasNextPage'] as bool? ?? false;
     return (items: items, total: total, hasNext: hasNext);

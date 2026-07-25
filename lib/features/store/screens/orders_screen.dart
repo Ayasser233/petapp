@@ -24,7 +24,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
   void initState() {
     super.initState();
     _ctrl = Get.find<OrderController>();
-    _ctrl.loadOrders(reset: true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _ctrl.loadOrders(reset: true);
+    });
   }
 
   @override

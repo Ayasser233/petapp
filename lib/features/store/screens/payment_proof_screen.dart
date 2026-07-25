@@ -115,23 +115,48 @@ class _PaymentProofScreenState extends State<PaymentProofScreen> {
       ),
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 36),
-        child: Obx(() => ElevatedButton(
-              onPressed: (_images.isEmpty || _ctrl.isActing.value)
-                  ? null
-                  : () => _ctrl.uploadPaymentProof(_orderId, _images),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.orange,
-                disabledBackgroundColor: Colors.grey.shade300,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                elevation: 0,
-              ),
-              child: _ctrl.isActing.value
-                  ? const SizedBox(height: 20, width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : Text(l10n.submitProof, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-            )),
+        child: Obx(() {
+          final isUploading = _ctrl.isActing.value;
+          final canSubmit = _images.isNotEmpty && !isUploading;
+          return ElevatedButton(
+            onPressed: canSubmit
+                ? () => _ctrl.uploadPaymentProof(_orderId, _images)
+                : null,
+            style: ElevatedButton.styleFrom(
+              // Keep orange even while uploading (pending state)
+              backgroundColor: AppColors.orange,
+              disabledBackgroundColor: isUploading
+                  ? AppColors.orange.withValues(alpha: 0.85)
+                  : Colors.grey.shade300,
+              foregroundColor: Colors.white,
+              disabledForegroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              elevation: 0,
+            ),
+            child: isUploading
+                ? const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white),
+                      ),
+                      SizedBox(width: 10),
+                      Text(
+                        'Uploading...',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ],
+                  )
+                : Text(l10n.submitProof,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 16)),
+          );
+        }),
       ),
     );
   }

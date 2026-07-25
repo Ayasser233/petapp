@@ -4,6 +4,7 @@ import 'package:petapp/core/localization/app_localizations.dart';
 import 'package:petapp/core/utils/app_colors.dart';
 import 'package:petapp/core/routes/routes.dart';
 import 'package:petapp/features/store/controllers/cart_controller.dart';
+import 'package:petapp/features/store/controllers/favorites_controller.dart';
 import 'package:petapp/features/store/controllers/store_controller.dart';
 import 'package:petapp/features/store/widgets/category_chip.dart';
 import 'package:petapp/features/store/widgets/product_card.dart';
@@ -15,6 +16,7 @@ class StoreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final StoreController storeCtrl = Get.find<StoreController>();
     final CartController cartCtrl = Get.find<CartController>();
+    final FavoritesController favCtrl = Get.find<FavoritesController>();
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context);
 
@@ -92,7 +94,7 @@ class StoreScreen extends StatelessWidget {
           const SizedBox(height: 14),
           // Categories
           Obx(() => SizedBox(
-                height: 38,
+                height: 92,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -147,8 +149,8 @@ class StoreScreen extends StatelessWidget {
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
-                    childAspectRatio: 0.58,
+                    mainAxisSpacing: 14,
+                    childAspectRatio: 0.54,
                   ),
                   itemCount: storeCtrl.products.length + (storeCtrl.isLoadingMore.value ? 1 : 0),
                   itemBuilder: (context, i) {
@@ -159,6 +161,8 @@ class StoreScreen extends StatelessWidget {
                     return Obx(() => ProductCard(
                           product: product,
                           isInCart: cartCtrl.isInCart(product.id),
+                          isFavorite: favCtrl.isFavorite(product.id),
+                          onFavorite: () => favCtrl.toggleFavorite(product),
                           onAddToCart: () {
                             // Navigate to detail to pick variant
                             Get.toNamed(AppRoutes.productDetail, arguments: product.id);

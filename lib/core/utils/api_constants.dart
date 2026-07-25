@@ -16,6 +16,27 @@ class ApiConstants {
   static const String devApiBaseUrl = 'https://api-dev.aleefy-app.com/api/v1';
   static const String fallbackApiBaseUrl = 'https://api.aleefy-app.com/api/v1';
 
+  // Media / CDN
+  /// MinIO object storage — where product images are actually served from.
+  static const String mediaBaseUrl = 'https://minio-api.aleefy-app.com/uploads';
+
+  /// Rewrites any image URL that incorrectly points at the API server to the
+  /// real MinIO CDN.  Safe to call with `null` or already-correct URLs.
+  ///
+  /// Example:
+  ///   https://api.aleefy-app.com/products/abc.jpg
+  ///   → https://minio-api.aleefy-app.com/uploads/products/abc.jpg
+  static String? fixImageUrl(String? url) {
+    if (url == null || url.isEmpty) return url;
+    // Already pointing at MinIO — nothing to do
+    if (url.contains('minio-api.aleefy-app.com')) return url;
+    // Replace the API origin with the MinIO origin + /uploads prefix
+    return url.replaceFirst(
+      RegExp(r'https?://api\.aleefy-app\.com'),
+      '$mediaBaseUrl',
+    );
+  }
+
   // Timeouts
   static const Duration connectionTimeout = Duration(seconds: 30);
   static const Duration receiveTimeout = Duration(seconds: 30);

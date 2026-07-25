@@ -16,6 +16,8 @@ import 'package:petapp/features/pet/controllers/pet_controller.dart';
 import 'package:petapp/features/profile/controllers/profile_controller.dart';
 import 'package:petapp/features/profile/data/repositories/profile_repository.dart';
 import 'package:petapp/features/profile/data/repositories/voucher_repository.dart';
+import 'package:petapp/features/store/controllers/favorites_controller.dart';
+import 'package:petapp/features/store/controllers/address_controller.dart';
 
 // Medical Records - Clean Architecture
 import 'package:petapp/features/medical_records/data/datasources/medical_record_remote_datasource.dart';
@@ -124,6 +126,10 @@ Future<void> setupServiceLocator({SharedPreferences? sharedPreferences}) async {
   sl.registerLazySingleton<VetService>(() => vetService);
   // Also register with GetX for Get.find() support
   getx.Get.put<VetService>(vetService);
+
+  // Store: global controllers (favorites + addresses persist across sessions)
+  getx.Get.put<FavoritesController>(FavoritesController(), permanent: true);
+  getx.Get.put<AddressController>(AddressController(), permanent: true);
 
   // Appointments Feature - Clean Architecture
   // Data sources

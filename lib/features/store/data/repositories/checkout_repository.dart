@@ -29,7 +29,7 @@ class CheckoutRepository {
       data: {
         'paymentMethod': paymentMethod,
         'shippingMethodId': shippingMethodId,
-        'shippingAddress': shippingAddress.toJson(),
+        'shippingAddress': shippingAddress.toCheckoutJson(),
         if (customerEmail != null && customerEmail.isNotEmpty)
           'customerEmail': customerEmail,
         if (customerNote != null && customerNote.isNotEmpty)

@@ -52,6 +52,8 @@ import 'package:petapp/features/store/screens/order_detail_screen.dart';
 import 'package:petapp/features/store/screens/order_tracking_screen.dart';
 import 'package:petapp/features/store/screens/payment_proof_screen.dart';
 import 'package:petapp/features/store/screens/review_form_screen.dart';
+import 'package:petapp/features/store/screens/my_addresses_screen.dart';
+import 'package:petapp/features/store/controllers/address_controller.dart';
 import 'package:petapp/features/store/controllers/cart_controller.dart';
 import 'package:petapp/features/store/controllers/store_controller.dart';
 import 'package:petapp/features/store/controllers/checkout_controller.dart';
@@ -112,6 +114,7 @@ class AppRoutes {
   static const String orderTracking = '/order-tracking';
   static const String paymentProof = '/payment-proof';
   static const String reviewForm = '/review-form';
+  static const String myAddresses = '/my-addresses';
 
   static List<GetPage> get getPages => [
         GetPage(name: networkSplash, page: () => const NetworkSplashScreen()),
@@ -257,6 +260,7 @@ class AppRoutes {
           transitionDuration: const Duration(milliseconds: 250),
           binding: BindingsBuilder(() {
             Get.lazyPut<CheckoutController>(() => CheckoutController(), fenix: true);
+            Get.lazyPut<AddressController>(() => AddressController(), fenix: true);
           }),
         ),
         GetPage(
@@ -274,6 +278,7 @@ class AppRoutes {
           transition: Transition.rightToLeft,
           transitionDuration: const Duration(milliseconds: 250),
           binding: BindingsBuilder(() {
+            Get.lazyPut<AddressController>(() => AddressController(), fenix: true);
             Get.lazyPut<CheckoutController>(() => CheckoutController(), fenix: true);
           }),
         ),
@@ -349,6 +354,16 @@ class AppRoutes {
           transitionDuration: const Duration(milliseconds: 250),
           binding: BindingsBuilder(() {
             Get.lazyPut<ReviewController>(() => ReviewController(), fenix: true);
+          }),
+          middlewares: [AuthMiddleware()],
+        ),
+        GetPage(
+          name: myAddresses,
+          page: () => const MyAddressesScreen(),
+          transition: Transition.rightToLeft,
+          transitionDuration: const Duration(milliseconds: 250),
+          binding: BindingsBuilder(() {
+            Get.lazyPut<AddressController>(() => AddressController(), fenix: true);
           }),
           middlewares: [AuthMiddleware()],
         ),
